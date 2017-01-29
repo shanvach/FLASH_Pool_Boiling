@@ -46,7 +46,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    end if
 
    ht_Twall_low  = 1.0
-   ht_Twall_high = 1.0
+   ht_Twall_high = 0.0
    ht_Tsat       = 0.0
 
    beta = sqrt(3/acos(-1.0))*(ht_St)*(mph_rho2/mph_rho1)
@@ -78,7 +78,7 @@ subroutine Heat_AD_init(blockCount,blockList)
      !call MPI_Allreduce(maxdfun_local, maxdfun_global, 1, FLASH_REAL,&
      !                MPI_MAX, MPI_COMM_WORLD, ierr)
 
-!goto 100
+goto 100
 
      do k=1,blkLimitsGC(HIGH,KAXIS)
       do j=1,blkLimitsGC(HIGH,JAXIS)
@@ -121,11 +121,7 @@ subroutine Heat_AD_init(blockCount,blockList)
        end do
      end do
 
-!100 continue
-
-     !solnData(TEMP_VAR,:,:,:) = 0.0
-     solnData(THCO_VAR,:,:,:) = 0.0
-     solnData(CPRS_VAR,:,:,:) = 0.0
+100 continue
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
