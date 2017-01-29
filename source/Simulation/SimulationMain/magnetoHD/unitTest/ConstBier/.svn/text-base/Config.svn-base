@@ -1,0 +1,25 @@
+# Configuration file for Biermann Battery Test
+REQUIRES Driver
+REQUESTS physics/Eos/EosMain/multiTemp/Gamma
+
+VARIABLE BIER
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+D sim_ptot Pressure throughout the domain
+PARAMETER sim_ptot REAL 1.0
+
+D sim_nele1 Electron number density at y = ymin
+PARAMETER sim_nele1 REAL 1.0
+
+D sim_nele2 Electron number density at y = ymax
+PARAMETER sim_nele2 REAL 1.0
+
+D sim_pele1 Electron pressure at x = xmin
+PARAMETER sim_pele1 REAL 1.0
+
+D sim_pele2 Electron pressure at x = xmax
+PARAMETER sim_pele2 REAL 1.0

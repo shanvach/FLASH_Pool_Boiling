@@ -1,0 +1,6 @@
+iProcs = 2
+jProcs = 2
+kProcs = 1
+
+sim_jprocs = 4
+sim_kprocs = 1

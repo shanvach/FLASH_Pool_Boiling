@@ -1,0 +1,25 @@
+#!/bin/csh
+
+echo "pro doadvectconverge, levs, derror" > doadvectconverge.pro
+echo "" >> doadvectconverge.pro
+
+#set files=(advect[0-9]*)
+set files=(advect[4-6])
+set chkpt="advect_0deg_4lev_hdf_chk_0002"
+set nfiles=$#files
+
+echo "  levs   = findgen(${nfiles})" >> doadvectconverge.pro
+echo "  derror = findgen(${nfiles})" >> doadvectconverge.pro
+echo "  n = 0 " >> doadvectconverge.pro
+echo ""         >> doadvectconverge.pro
+
+foreach i ($files)
+	set lev=`echo $i | sed -e 's/advect//'`
+    echo "     levs[n] = ${lev}"                                >>doadvectconverge.pro
+	echo "     advecterror, '${i}/${chkpt}', dens, compdens, dd, derr">>doadvectconverge.pro
+    echo "     derror[n] = derr"    >>doadvectconverge.pro
+    echo "     n = n + 1 "       >>doadvectconverge.pro
+    echo ""                      >> doadvectconverge.pro
+end
+
+echo "end" >> doadvectconverge.pro

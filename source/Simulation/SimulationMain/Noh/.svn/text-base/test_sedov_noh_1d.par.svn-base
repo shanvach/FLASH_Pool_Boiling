@@ -1,0 +1,114 @@
+#	Runtime parameters for the Noh problem.
+#	Parameters for initial model
+
+use_steepening = .TRUE.
+convertToConsvdInMeshInterp = .TRUE.
+
+igodu = 1
+
+smlrho = 1.0e-10
+smallp = 1.0e-10
+smalle = 1.0e-10
+
+cvisc = 0.1
+
+sim_rhoInit = 1.0
+sim_pInit   = 0.0
+sim_uInit   = 1.0
+
+sim_gamma = 1.6666667
+
+#	Computational volume parameters
+#		Grid dimensionality and geometry
+
+#geometry = cartesian
+#geometry = cylindrical
+geometry = spherical
+#		Size of computational volume
+
+xmin		= 0.0
+xmax		= 2.0
+# ymin		= -2.0
+# ymax		= 2.0
+
+#		Boundary conditions
+
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+
+# yl_boundary_type = "outflow"
+# yr_boundary_type = "outflow"
+
+
+#	Simulation (grid, time, I/O) parameters
+
+cfl		= 0.8
+basenm          = "noh_"
+log_file        = "noh.log"
+restart         = .false.
+
+#	checkpoint file output parameters
+# checkpointFileIntervalTime = 0.005
+
+checkpointFileIntervalTime = 0.01
+
+checkpointFileIntervalStep = 0
+# One might use this instead to get a reasonably smooth movie:
+# checkpointFileIntervalStep = 50
+checkpointFileNumber = 0
+
+#	plotfile output parameters
+plotfileIntervalTime = 0.5
+plotfileIntervalStep = 0
+plotfileNumber = 0
+
+nend            = 10000000
+tmax = 0.6
+
+run_comment     = "Noh problem"
+#eintSwitch     = 1.e-3
+eintSwitch      = 0.0
+
+plot_var_1 = "dens"
+plot_var_2 = "pres"
+plot_var_3 = "velx"
+
+#    AMR refinement parameters  
+lrefine_max     = 1
+lrefine_min     = 1
+
+refine_var_1    = "dens"
+refine_var_2    = "pres"
+
+nblockx = 1000
+# nblocky = 2
+# nblockz = 1
+
+# These parameters are used only for the uniform grid
+
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+#FIXEDBLOCKSIZE mode ::
+# When using fixed blocksize, iGridSize etc are redundant in
+# runtime parameters. These quantities are calculated as 
+# iGridSize = NXB*iprocs
+# jGridSize = NYB*jprocs
+# kGridSize = NZB*kprocs
+#NONFIXEDBLOCKSIZE mode ::
+# iGridSize etc must be specified. They constitute the global
+# number of grid points in the physical domain without taking 
+# the guard cell into account. The local blocksize is calculated
+# as iGridSize/iprocs  etc.
+
+## Some other things one might want to try: 
+##irenorm = 1
+##use_cma_advection = .TRUE.
+###flux_correct = .FALSE.

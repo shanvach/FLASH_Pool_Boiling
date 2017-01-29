@@ -1,0 +1,44 @@
+useParticles= .true.
+
+#Number of particles to create within the solid body
+sb_ptNumX = 2
+sb_ptNumY = 2
+sb_ptNumZ = 2
+
+#Location of the single solid body
+#In 2D UG the solid body will cover two of the four procs
+#sb_xmax = 0.7
+#sb_xmin = 0.4
+#sb_ymax = 0.4
+#sb_ymin = 0.2
+#sb_zmax = 0.7
+#sb_zmin = 0.4
+
+#Physical domain
+xmin = 0.
+xmax = 1.
+ymin = 0.
+ymax = 1.
+zmin = 0.
+zmax = 1.
+
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+basenm = "solidBodyUnitTest_"
+
+iGridSize = 16
+jGridSize = 16
+kGridSize = 1
+
+iProcs = 2
+jProcs = 2
+kProcs = 1
+
+#Added for PARAMESH setup
+lrefine_min = 1
+lrefine_max = 4

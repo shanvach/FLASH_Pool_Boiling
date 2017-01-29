@@ -1,0 +1,11 @@
+# Config file for the heat module
+
+# available submodules are
+
+# heat/stat+gauss
+
+REQUIRES Driver
+
+DEFAULT StatPlusGauss
+
+

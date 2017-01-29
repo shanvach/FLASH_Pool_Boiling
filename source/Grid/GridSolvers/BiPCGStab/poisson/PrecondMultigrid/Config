@@ -1,0 +1,5 @@
+# Config routine for BiPCGStab HG Multigrid preconditioner.
+
+REQUIRES Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+
+

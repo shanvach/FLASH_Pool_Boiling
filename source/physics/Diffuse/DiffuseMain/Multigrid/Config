@@ -1,0 +1,10 @@
+REQUIRES physics/materialProperties/Conductivity/ConductivityMain/Constant OR physics/materialProperties/Conductivity/ConductivityMain/Constant-diff
+REQUIRES Grid/GridSolvers/Multigrid_forDiffuseAdvanceByHgFFT OR Grid/GridSolvers/Multigrid_forDiffuseAdvanceByHgADI
+
+# We use TEMP_VAR and DENS_VAR, normally supplied by a Hydro implementation.
+REQUESTS physics/Hydro
+
+VARIABLE DTMP                  # delta T, the temperature difference between 2 time steps (to be computed)
+VARIABLE WTMP                  # Laplace of Temperature (src)
+VARIABLE COND                  # Conductivity in Cell (i)
+

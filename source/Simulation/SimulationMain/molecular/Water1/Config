@@ -1,0 +1,20 @@
+REQUIRES Particles/ParticlesMain/active/massive
+
+
+PARTICLEPROP ang1     REAL
+PARTICLEPROP ang2     REAL
+PARTICLEPROP ang3     REAL
+PARTICLEPROP angB     REAL
+
+
+PARTICLEPROP type REAL
+
+PARTICLETYPE h2o INITMETHOD CellMass MAPMETHOD weighted ADVMETHOD euler_mas
+PARTICLETYPE d2o INITMETHOD CellMass MAPMETHOD weighted ADVMETHOD euler_mas
+
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+REQUESTS Particles/ParticlesInitialization/WithDensity/CellMassBins
+
+#Changed default:
+PARAMETER eachProcWritesOwnAbortLog       BOOLEAN TRUE
+

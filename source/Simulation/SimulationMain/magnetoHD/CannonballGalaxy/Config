@@ -1,0 +1,60 @@
+# Configuration file for the CannonballGalaxy problem.
+
+REQUIRES Driver/DriverMain
+REQUIRES Grid
+REQUIRES Grid/GridBoundaryConditions/OneRow/Flash2HSE
+REQUIRES physics/Hydro
+REQUIRES physics/Gravity/GravityMain/PlanePar
+REQUIRES physics/Eos
+REQUIRES physics/sourceTerms/Cool/CoolMain/MeKaL
+REQUIRES IO
+REQUIRES flashUtilities/interpolation/oneDim
+
+PARAMETER profile1	                    STRING	"profile1.dat"
+PARAMETER profile2	                    STRING	"profile2.dat"
+PARAMETER vInit				    REAL	 0.0
+PARAMETER testSingleGalaxy 		    BOOLEAN 	 FALSE
+PARAMETER testAtmosphere 		    BOOLEAN 	 FALSE
+PARAMETER nsubzones                  	    INTEGER 	 3
+PARAMETER RefinementDensityCutoff           REAL         1.0E-29
+PARAMETER b				    REAL	 500.0
+PARAMETER d                                 REAL         3000.0
+PARAMETER rMetal			    REAL	 100.0
+PARAMETER plasmaBeta			    REAL	 100.
+PARAMETER RefiningRadius		    REAL	 200.0
+PARAMETER deRefiningRadius                  REAL         200.0
+PARAMETER useMeKaLCooling		    BOOLEAN	 TRUE
+PARAMETER pressureNormalize		    BOOLEAN	 TRUE
+PARAMETER Bmag				    REAL	 1.0e-9
+PARAMETER lMin				    REAL	 43.0
+PARAMETER lMax				    REAL	 500.0
+
+MASS_SCALAR galx
+
+VARIABLE gpot
+VARIABLE gpol
+
+PPDEFINE FLASH_GRAVITY_TIMEDEP
+
+PARTICLETYPE passive INITMETHOD with_density MAPMETHOD weighted ADVMETHOD rungekutta
+
+REQUIRES Particles/ParticlesMain/passive
+REQUIRES Grid/GridParticles
+REQUIRES IO/IOParticles
+REQUESTS Particles/ParticlesInitialization/WithDensity
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+
+PARTICLEPROP pdens      REAL
+PARTICLEPROP ptemp      REAL
+PARTICLEPROP pgalx      REAL
+PARTICLEPROP pmagp	REAL
+
+PARTICLEMAP  TO ptemp  FROM VARIABLE            temp
+PARTICLEMAP  TO pdens  FROM VARIABLE            dens
+PARTICLEMAP  TO pgalx  FROM MASS_SCALAR         galx
+PARTICLEMAP  TO pmagp  FROM VARIABLE		magp
+
+PARAMETER particle_attribute_1 STRING "pdens"
+PARAMETER particle_attribute_2 STRING "ptemp"
+PARAMETER particle_attribute_3 STRING "pgalx"
+PARAMETER particle_attribute_4 STRING "pmagp"

@@ -1,0 +1,69 @@
+Setup line is
+./setup unitTest/SolidBody/Single -auto +nofbs -noc -debug -objdir=solid_body
+
+This unit test creates 1 solid body that is distributed over 2 of 4
+processors. The exchange routine (named Grid_updateSolidBodyForces)
+sends the appropriate particles to the processor that contains the LEAF
+block which covers the particle.  The receiving processor then
+sets the particles' PROC_PART_PROP element to its processor ID.  The
+updated particles sends back to the master allowing the
+processor ID check in Grid_solidBodyUnitTest test to succeed.
+
+
+The debug output below shows that global PE 1 is the solid body
+master.  It becomes the master because its LEAF blocks have the most
+overlap with the single solid body.  Global PE 2 and 3 have no overlap
+and so are not part of this solid body communicator.  Global PE 1
+creates particles within the solid body space.
+
+[cdaley@code solid_body]$ more solidBodyUnitTest[0-3]*
+::::::::::::::
+solidBodyUnitTest0.log
+::::::::::::::
+Body       1, overlap  2.000000E-02, in communicator       T
+::::::::::::::
+solidBodyUnitTest1.log
+::::::::::::::
+Body       1, overlap  4.000000E-02, in communicator       T
+Create particle        1 at position   4.750000E-01  2.500000E-01  0.000000E+00
+Create particle        2 at position   4.750000E-01  3.500000E-01  0.000000E+00
+Create particle        3 at position   6.250000E-01  2.500000E-01  0.000000E+00
+Create particle        4 at position   6.250000E-01  3.500000E-01  0.000000E+00
+::::::::::::::
+solidBodyUnitTest2.log
+::::::::::::::
+Body       1, overlap  0.000000E+00, in communicator       F
+::::::::::::::
+solidBodyUnitTest3.log
+::::::::::::::
+Body       1, overlap  0.000000E+00, in communicator       F
+
+
+The unit test output below shows that the test succeeds.
+
+[mohapatra@code solid_body]$ more unitTest_000*
+::::::::::::::
+unitTest_0000
+::::::::::::::
+P0
+All results conformed with expected values.
+::::::::::::::
+unitTest_0001
+::::::::::::::
+P1
+All results conformed with expected values.
+::::::::::::::
+unitTest_0002
+::::::::::::::
+P2
+All results conformed with expected values.
+::::::::::::::
+unitTest_0003
+::::::::::::::
+P3
+All results conformed with expected values.
+
+
+Note that the exchange is not needed in a single processor unit test.
+Set iprocs = jprocs = 1 in the flash.par.
+

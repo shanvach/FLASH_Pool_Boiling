@@ -1,0 +1,34 @@
+#       Configuration file for Laminar Channel Problem.
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+REQUIRES physics/IncompNS/IncompNSMain/stats
+REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D/Slices
+USESETUPVARS Grid
+
+
+# Poisson Solver
+IF Grid=='UG'
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+#HomBcTrigSolver
+#DirectSolver/Generic_Direct
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+#   REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+#   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve
+   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+DATAFILES ylist.slc
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2
+
+
+

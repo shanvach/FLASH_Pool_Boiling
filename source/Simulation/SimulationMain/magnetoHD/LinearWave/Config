@@ -1,0 +1,25 @@
+#       Configuration file for Linearized wave MHD problem
+#	Crockett et al., JCP 203 (2005) 422-448
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   tiny	    Threshold value used for numerical zero
+D   nx	            advection angle = atan(rx/ry)
+D   ny
+D   dens0           Strength of initial density
+D   B0              Strength of initial mag
+D   pres0           Strength of initial pres
+D   steady          Dynamics of the problem
+D   choice          alfven, fast, or slow
+D   delperturb	    initial strength of perturbation
+
+PARAMETER tiny         REAL     1.e-16
+PARAMETER nx	       REAL     1.
+PARAMETER ny           REAL     2.
+PARAMETER dens0	       REAL     1.0
+PARAMETER B0           REAL     1.0
+PARAMETER pres0        REAL     1.0
+PARAMETER steady       BOOLEAN  FALSE
+PARAMETER choice       STRING   "alfven" #alfven,fast,slow
+PARAMETER delperturb   REAL     1.e-5

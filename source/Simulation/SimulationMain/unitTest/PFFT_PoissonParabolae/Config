@@ -1,0 +1,45 @@
+
+REQUIRES Driver
+REQUIRES Grid/GridMain
+
+
+USESETUPVARS Grid
+
+IF Grid=='UG'
+   REQUESTS Grid/GridSolvers/Pfft/DirectSolver
+   #REQUESTS Grid/GridSolvers/Pfft/SecondOrder_FD3p
+   #DirectSolver is more general and includes functionality of SecondOrder_FD3p.
+ELSE
+   REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+ENDIF
+
+
+REQUESTS IO/IOMain/hdf5/
+
+
+# Wavenumbers in x, y and z for the solution.
+
+#D   waven_x  wavenumber in the solution in x direction
+PARAMETER waven_x         REAL     2.
+
+#D   waven_y  wavenumber in the solution in y direction
+PARAMETER waven_y         REAL     1.
+
+#D   waven_z  wavenumber in the solution in z direction
+PARAMETER waven_z         REAL     0.
+
+#D   alpha_x  Phase angle for the solution in x (in rads)
+PARAMETER alpha_x         REAL     0.
+
+#D   alpha_y  Phase angle for the solution in y (in rads)
+PARAMETER alpha_y         REAL     0.3141592653589793
+
+
+VARIABLE dens TYPE: PER_VOLUME
+VARIABLE pfft TYPE: PER_VOLUME
+VARIABLE diff TYPE: PER_VOLUME
+VARIABLE asol TYPE: PER_VOLUME
+
+
+# Number of layers of Guardcells:
+GUARDCELLS 4

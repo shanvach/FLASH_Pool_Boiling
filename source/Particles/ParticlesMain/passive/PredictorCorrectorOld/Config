@@ -1,0 +1,17 @@
+# Configuration for old "PredictorCorrector" integration of passive particles
+# [source/Particles/ParticlesMain/active/massive/PredictorCorrectorOld]
+
+D velPredX  predicted x-velocity; an intermediate result and should not be used
+D velPredY  predicted y-velocity; an intermediate result and should not be used
+D velPredZ  predicted z-velocity; an intermediate result and should not be used
+D posPredX  predicted x-position; an intermediate result and should not be used
+D posPredY  predicted y-position; an intermediate result and should not be used
+D posPredZ  predicted z-position; an intermediate result and should not be used
+
+PARTICLEPROP velPredX REAL       # predicted updated x-velocity
+PARTICLEPROP velPredY REAL       # predicted updated y-velocity
+PARTICLEPROP velPredZ REAL       # predicted updated z-velocity
+PARTICLEPROP posPredX REAL           # predicted updated x-coordinate
+PARTICLEPROP posPredY REAL           # predicted updated y-coordinate
+PARTICLEPROP posPredZ REAL           # predicted updated z-coordinate
+

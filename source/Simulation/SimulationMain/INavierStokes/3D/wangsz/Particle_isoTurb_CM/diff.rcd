@@ -1,0 +1,29 @@
+Only in .: CM
+Only in .: diff.rcd
+Only in .: Driver_initFlash.F90
+Common subdirectories: ./export_stats and ../Particle_isoTurb/export_stats
+Common subdirectories: ./ISOTURB_files and ../Particle_isoTurb/ISOTURB_files
+diff ./Makefile ../Particle_isoTurb/Makefile
+1,2c1
+< Simulation += Simulation_data.o Simulation_init.o Simulation_initBlock.o outtotecplot.o interpvars_face.o ins_turbstats.o ins_turbstats_z.o ins_exportslices_z.o ins_substractmeanvel.o ins_substractmeanvel_z.o \
+<               sm_gatherMassCent.o sm_assemble_repulForce_rigid.o sm_set_cm_para.o 
+---
+> Simulation += Simulation_data.o Simulation_init.o Simulation_initBlock.o outtotecplot.o interpvars_face.o ins_turbstats.o ins_turbstats_z.o ins_exportslices_z.o ins_substractmeanvel.o ins_substractmeanvel_z.o 
+Only in .: Particle_isoTurb_CM.sh
+Only in ../Particle_isoTurb/: Particle_isoTurb.sh
+diff ./Simulation_initBlock.F90 ../Particle_isoTurb/Simulation_initBlock.F90
+93c93
+<   real, parameter :: ao = 0.04
+---
+>   real, parameter :: ao = 0.02
+Only in .: sm_assemble_repulForce_rigid.F90
+Only in .: sm_gatherMassCent.F90
+Only in .: sm_integ_advance.F90
+Only in .: sm_ioRead_rigid.F90
+Only in .: sm_ioWriteStates_rigid.F90
+Only in .: sm_pc_compute_qddn.F90
+Only in .: sm_set_cm_para.F90
+Only in .: sm_surf_assembleFluidForce_toPoint.F90
+Only in .: SolidMechanics_data.F90
+Only in .: SolidMechanics_init.F90
+Common subdirectories: ./.svn and ../Particle_isoTurb/.svn

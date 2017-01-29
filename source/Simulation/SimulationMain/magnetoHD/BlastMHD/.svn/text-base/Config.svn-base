@@ -1,0 +1,31 @@
+#       Configuration file for MHD Blast problem
+#	James Stone, http://www.astro.princeton.edu/~jstone
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   tiny	    Threshold value used for numerical zero
+D   radius          Initial radius of circle
+D   beta_inner      Initial beta plasma inside a circle   # pres=beta/2*|B|^2
+D   beta_outer      Initial beta plasma outside a circle
+D   velx_init       Initial x-velocity
+D   vely_init       Initial y-velocity
+D   velz_init       Initial z-velocity
+D   magx_init       Initial x-magnetic fields
+D   magy_init       Initial y-magnetic fields
+D   magz_init       Initial z-magnetic fields
+
+
+PARAMETER tiny         REAL     1.e-16
+
+PARAMETER radius       REAL     0.1
+PARAMETER beta_inner   REAL     20.
+PARAMETER beta_outer   REAL     0.2
+
+PARAMETER velx_init    REAL     0.
+PARAMETER vely_init    REAL     0.
+PARAMETER velz_init    REAL     0.
+PARAMETER magx_init    REAL     0.70710678118655  #1/sqrt(2)
+PARAMETER magy_init    REAL     0.70710678118655  #1/sqrt(2)
+PARAMETER magz_init    REAL     0.
+

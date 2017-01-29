@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/TaylorGreenVortex_pm4_mc -2d -auto -nxb=16 -nyb=16 -opt -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver -objdir=TAYLOR_GREEN_AMR -site=splash.seas.gwu.edu

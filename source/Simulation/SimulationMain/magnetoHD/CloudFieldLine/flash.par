@@ -1,0 +1,134 @@
+#	Runtime parameters for the MHD Cloud-Field line interaction problem.
+
+#	Specific heats ratio
+gamma		= 2.0
+
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#	Size of computational volume
+xmin		= 0.
+xmax		= 1.
+ymin		= 0.
+ymax		= 1.
+
+
+#	Boundary conditions
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow" #"user"
+yr_boundary_type = "outflow" #"user"
+
+
+#	Parameters for initial model
+#	Density, pressure, velocity and magnetic field
+#	initial values on either side of the interface
+d_left		= 1.
+p_left		= 1. #167.345
+u_left		= 12. #0.
+v_left		= 0.
+w_left		= 0.
+#bx_left		= 0.
+#by_left		= 2.1826182
+#bz_left		=-2.1826182
+
+d_right		= 1.
+p_right		= 1.
+u_right		= 0. #-11.2536
+v_right		= 0.
+w_right		= 0.
+#bx_right	= 0.
+#by_right	= 0.56418958
+#bz_right	= 0.56418958
+
+lposn		= 0.1
+cloudRadius	= 0.15
+cloudXCtr	= 0.3
+cloudYCtr	= 0.5
+cloudZCtr	= 0.0
+cloudDensity	= 10.
+
+
+#	Simulation (grid, time, I/O) parameters
+run_comment	= "2d Cloud-Field interaction MHD problem"
+log_file        = "CloudField.log"
+basenm          = "CloudField_"
+restart         = .false.
+#checkPointFileNumber=52
+#plotFileNumber  = 1
+nend            = 1000000
+tmax            = 1.0
+cfl		= 0.8
+plot_var_1	= "dens"
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 0.01
+checkpointFileIntervalStep = 10
+
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 1
+lrefine_max     = 6
+nrefs		= 2
+refine_var_1	= "dens"
+eintSwitch      = 1.e-6
+
+
+#	DivB control switch
+killdivb	= .true.
+
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT STAGGERED MESH MHD SOLVER  ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. MAGNETIC(B) AND ELECTRIC(E) FIELDS:
+E_modification	= .true.           # High order algorithm for E-field construction
+energyFix	= .true.           # Update magnetic energy using staggered B-fields
+ForceHydroLimit	= .false.          # Pure Hydro Limit (B=0)
+prolMethod      = "injection_prol" # Prolongation method (injecton_prol, balsara_prol)
+
+
+#	III. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, HLLD, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+entropy         = .false.     # Entropy fix for the Roe solver
+
+
+#	IV. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+#	The parameters below are only necessary for the Uniform Grid
+
+iGridSize	= 200	#defined as nxb * iprocs
+jGridSize	= 200	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+iProcs		= 2	#num procs in i direction
+jProcs		= 2	#num procs in j direction
+kProcs		= 1	#num procs in k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

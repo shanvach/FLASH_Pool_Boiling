@@ -1,0 +1,52 @@
+REQUIRES Driver
+REQUIRES flashUtilities/contourSurface
+REQUIRES Grid/GridMain
+#the next line is the path where Config file might
+#be gathering some resources to operate with PM
+#REQUIRES Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+REQUIRES Grid/GridSolvers/Pfft
+REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
+
+#VARIABLE DENS TYPE: PER_VOLUME
+#VARIABLE FLAM TYPE: PER_VOLUME
+#VARIABLE FLSM TYPE: PER_VOLUME
+#VARIABLE AUXV TYPE: PER_VOLUME
+#VARIABLE GAUS TYPE: PER_VOLUME
+
+#MASS_SCALAR DENS
+MASS_SCALAR FLAM
+#MASS_SCALAR AUXV
+MASS_SCALAR GAUS
+MASS_SCALAR FLSM
+
+# the smoothed flame scalar
+#VARIABLE FS TYPE: PER_VOLUME
+
+# If n_smoothings <= 1, only one smoothing length is used, given
+# by the parameter smooth_radius.  If n_smoothings > 1, then the
+# interval between smooth_radius and smooth_radius_lim is divided
+# up into (n_smoothings-1) equal intervals, and each of the n_smoothings
+# smoothing lengths in that interval will be sampled.  Obviously,
+# both smooth_radius and smooth_radius_lim should be positive.
+#
+# Number of smoothing lengths
+PARAMETER smooth_step_max INTEGER 1
+# Smoothing length limit
+PARAMETER smooth_step_min INTEGER 0
+# Smoothing length step
+PARAMETER smooth_step_delta REAL 1.0E0
+
+
+# Size of buffer region to add to top
+# and bottom of fully refined region
+# in units of Domain width
+PARAMETER bufFact REAL 1.0
+
+# Write plotfiles?
+PARAMETER  writeflsmdata BOOLEAN  TRUE
+
+# 3 Isolevels to get area of
+PARAMETER isolevel_1 REAL 0.1
+PARAMETER isolevel_2 REAL 0.5
+PARAMETER isolevel_3 REAL 0.9
+

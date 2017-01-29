@@ -1,0 +1,206 @@
+Saved here for future massaging into Users Guide and / or FAQ  - KW
+
+From klaus@flash.uchicago.edu Thu Jul 10 17:35:26 2008
+Date: Thu, 10 Jul 2008 17:35:25 -0500 (CDT)
+From: Klaus Weide <klaus@flash.uchicago.edu>
+To: turcotte <turcotte@apollo.ubishops.ca>
+Cc: flash-users@flash.uchicago.edu
+Subject: Re: [FLASH-USERS] multigrid in 2-D
+
+On Mon, 7 Jul 2008, turcotte wrote:
+
+> Hello all,
+> 
+> I have been trying to use the multigrid solver for gravity in 2-D
+> and have have had difficulty making it work well.
+> 
+> I have a cartsian grid set up with a small "star" with the rest of the
+> domain
+> filled with low density "circumstellar" matter. I eventually have
+> inflowing
+> matter from one edge of the domain.
+> 
+> If I define grav_boundary_type as "isolated" the code crashes in
+> gr_isoMpoleInit  because it is trying to use the multipole solver that
+> does
+> not work in 2-D cartesian.
+> 
+> If I define grav_boundary_type as "periodic" the code crashes and I get
+> the
+> following error message:
+> gr_hgMapBcType: An unexpected gr_hgBndConditions was requested for the
+> WORK arr
+> ay:           1         -32
+> 
+> Now I have managed to make it work if I use grav_boundary_type =
+> "periodic"
+> and if I short-circuit gr_hgMapBcType by adding
+>  bcTypeToApply = GRIDBC_MG_EXTRAPOLATE
+>  return
+> at the top of the routine before anything else is executed.
+> No crashes and the code seems to be doing the right thing eventually (the
+> potential looks right) but the potential is not ok during the first
+> several time steps. There are strong features in the gravitational
+> potential at
+> the boundaries that vary strongly with time.
+> 
+> Apart from the problems at the start of the run it seems that there should
+> be a
+> better way of doing things!
+> 
+> Thank you for any ideas!
+> And belated thanks for all who have helped in the past!
+> Sylvain
+
+
+Hi Sylvain,
+
+
+It seems you have run into a limitation I will describe below.
+
+Short summary: parameter combinations like
+
+(I.)
+   geometry           = "cartesian"
+   xl_boundary_type   = "periodic"
+   ...
+   grav_boundary_type = "isolated"
+
+or
+
+(II.)
+   geometry           = "cartesian"
+   xl_boundary_type   = "outflow"   (or similar)
+   ...
+   grav_boundary_type = "periodic"
+
+are not expected to work.
+
+I will try to give some explanation, then come back to
+your concrete problem at the end.
+
+With the Paramesh 3 (or 4) Grid implementation:
+
+FLASH provides some implementation of boundary conditions (BCs)
+for three different purposes:
+ (1) For Hydro, and variants like MHD.
+ (2) For certain additional physics solvers -
+     here, the multigrid Poisson solver used for Gravity.
+ (3) For Particles.
+
+I will not discuss (3) here since that is a somewhat separate topic,
+as it deals with the updating of particle properties rather than of
+mesh-represented solution variables.  As for (2), this uses really
+the same mechanisms as (1). In some sense, there isn't a mechanism
+for gravitational BCs that is separate from that for Hydro BCs.
+There only is one Grid mechanism for BCs. To go into more detail:
+
+FLASH implements boundary conditions by filling guard cells of
+boundary blocks in certain special ways, whenever it's time to fill
+guard cells.  (FLASH currently only supports BCs that can be expressed
+this way.) Guard cells are filled at certain synchronization points,
+when Grid_fillGuardcells (or its underlying PARAMESH implementation)
+is called, based on the needs of the algorithm of a solver.
+
+"Boundary blocks" are blocks that have some guard cells that
+lie outside the physical domain.
+
+FLASH relies entirely on PARAMESH to keep track of things like
+- which are the neighbors of a block in any given direction,
+- which blocks are boundary blocks,
+- which cell regions in boundary blocks require calls to
+  BC routines in order to have guard cells filled,
+- which BC type to apply in any direction in any given
+  boundary block.
+
+PARAMESH weaves separate blocks into a mesh with the help
+of a few arrays of per-block metainformation. (these are
+local in the sense that each processor stores only metainformation on blocks
+that reside on it, although
+metainformation on blocks of neighboring processors may
+be cached.) Primarily, this is the "surr_blks" array.
+For each possible direction, including diagonals, it
+indicates what's there in that direction from the
+block's center:
+ (a) another block at the same refinement level,
+     indicated by a (procNo, localID) pair;
+ (b) inside the domain but no block at the same refinement
+     level, indicated by -1 (there must then be block at a
+     lower refinement level in that direction, which can
+     be identified by following "parent" and other meta-
+     information);
+ (c) no block whatsoever, since there is an external
+     boundary in that direction, indicated by a negative
+     value <= PARAMESH_PHYSICAL_BOUNDARY.
+
+Now here is the important part: PERIODIC boundaries are not
+represented by a special indicator in surr_blks as in case (c), but by
+directly identifying the wrapped-around neighbor.  So in this case the
+presence of a domain boundary is not apparent in the neighbor
+metainformation, it looks like case (a) or (b).  The "surr_blks"
+representation is at the core of the PARAMESH Grid representation.
+
+This is a natural and efficient way of representing the topological
+relations between blocks in a periodic domain.  Unfortunately it does
+not allow for treating a given domain boundary as periodic in one
+context and non-periodic in another.  At least not if in each of these
+contexts we want guard cells being filled by PARAMESH, but according
+to different ideas about the mesh's topology.
+
+So the bottom line:
+- The [xyz][lr]_boundary_type runtime parameters determine
+  the topology of the mesh that PARAMESH constructs (and updates).
+- The grav_boundary_type runtime parameter must not contradict
+  that topology.  (Certainly at least when the Multigrid gravity
+  solver is used, since that needs guard cell filling done by
+  PARAMESH internally.)
+
+Could this limitation be overcome? Not without a lot of messing
+around with the code, I think.  Some possibilities come to
+my mind, such as
+- enhance PARAMESH so it can hold (and manage) more than one
+  view of the mesh's topology;
+- somehow create two alternative views of the mesh topology,
+  and swap them around under PARAMESH's feet as needed without
+  PARAMESH needing to be aware of it;
+- duplicate a significant part of PARAMESH functionality in
+  FLASH, in order to effect exchange of guard cells among
+  blocks that PARAMESH does not consider neighbors, and/or
+  too fill guard cells according to some BC method where
+  PARAMESH wants them filled from neighboring blocks
+  (depending on which of the cases (I.) or (II.) way above
+  are of interest).
+
+
+None of this sounds too attractive, certainly not easy.
+
+Finally, back to the original problem. It seems you tried your hand at
+making case (II.) work. Calling gr_hgMapBcType resulted in an error
+because in a mesh consistent with grav_boundary_type=="periodic"
+(i.e., a 3D torus) there would not actually be any boundary blocks as
+far as PARAMESH is concerned, so gr_hgMapBcType should never be called
+at all from within the multigrid solver.  By short-circuiting
+gr_hgMapBcType, you trick PARAMESH into doing something to the
+boundary block guard cells, but that is not the right thing: the right
+thing consistent with grav_boundary_type== "periodic" would be filling
+of those guard cells with data from neighboring (wrapped) blocks.
+
+I don't know what would be the meaning of any eventual "solution"
+gotten this way; even if your potential eventually looks right, that
+may be deceiving.
+
+Anyway, it seems you didn't really want to mix periodic with
+non-periodic BCs originally, and I don't know if that would actually
+be physically meaningful. You were just looking for a way to work
+around a limitation of the multigrid solver (doesn't work in 2D
+Cartesian).  So perhaps the best way forward is to make the auxiliary
+multipole solver used for isolated gravity boundary conditions work
+in 2D Cartesian.
+
+
+Please excuse the length of this reply, in part this is because I was
+trying to work these things out for myself; maybe the details can help
+some others, too.
+
+
+Klaus

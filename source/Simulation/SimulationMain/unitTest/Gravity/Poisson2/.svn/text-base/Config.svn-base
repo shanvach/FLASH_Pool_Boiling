@@ -1,0 +1,21 @@
+#		Configuration file for Huang & Greengard Poisson test
+#		(Huang, J., & Greengard, L. 2000, SIAM J. Sci. Comput.,
+#               21, 1551)
+
+
+REQUIRES Driver
+REQUIRES physics/Gravity/GravityMain/Poisson
+REQUIRES Grid
+
+# variable to store density obtained from potential
+VARIABLE apot
+VARIABLE fact
+
+PARAMETER discRadius REAL 1.0
+PARAMETER density REAL 10.0
+
+D convertToConsvdInMeshInterp indicates if appropriate variables are
+D & converted to conserved form during propagation within the interpolation
+D & routines invoked by Paramesh. No variables should be converted back
+D & and forth in this test.
+PARAMETER convertToConsvdInMeshInterp BOOLEAN FALSE

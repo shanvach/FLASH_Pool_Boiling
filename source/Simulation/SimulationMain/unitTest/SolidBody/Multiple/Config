@@ -1,0 +1,18 @@
+REQUIRES Driver
+
+PARTICLETYPE passive INITMETHOD lattice MAPMETHOD quadratic ADVMETHOD PT_ADVMETH_NONE
+REQUIRES Particles
+REQUESTS Particles/ParticlesInitialization/Lattice
+REQUESTS Particles/ParticlesMapping/Quadratic
+REQUIRES Particles/ParticlesMain/unitTest
+REQUIRES RuntimeParameters
+
+REQUIRES Grid/GridMain
+IF Grid == 'UG'
+   REQUIRES Grid/GridMain/UG
+ELSE
+   REQUIRES Grid/GridMain/paramesh
+ENDIF
+
+REQUIRES Grid/GridStructures
+REQUIRES Grid/GridStructures/unitTest

@@ -1,0 +1,98 @@
+# Coniguration file for the 1D Radiative Shock
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUESTS physics/Eos/EosMain/multiTemp/Multigamma
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/materialProperties/Opacity
+REQUIRES physics/RadTrans/RadTransMain/MGD
+REQUIRES physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUIRES physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+LINKIF Simulation_initSpecies.F90.custom Multispecies
+
+DATAFILES opacity_input.txt
+DATAFILES xenon-imx-001.cnr
+DATAFILES xenon-imx-012.cnr
+DATAFILES polyimide-imx-003.cnr
+
+# You NEED this line for entropy advection to work:
+MASS_SCALAR sele EOSMAP: SELE
+
+# Needed for piston-in-tube boundary:
+PPDEFINE NBOUNDARIES 8
+D gr_pmrpNboundaries sets value for PARAMESH runtime parameter nboundaries
+PARAMETER gr_pmrpNboundaries INTEGER 8 [8 ... ]
+
+SPECIES XE
+SPECIES POLI
+SPECIES VACU
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+D sim_reflectDist Size of the reflecting boundary
+PARAMETER sim_reflectDist REAL 287.5e-04
+
+D sim_nbuffer Number of buffer cells between the Xenon and Plastic
+PARAMETER sim_nbuffer INTEGER 0 [0 to 4]
+
+D sim_velx Initial fluid velocity
+PARAMETER sim_vely  REAL 1.0
+
+D sim_rhoXe Initial Xenon density
+PARAMETER sim_rhoXe   REAL 1.0
+
+D sim_teleXe Initial Xenon electron temperature
+PARAMETER sim_teleXe  REAL 1.0
+
+D sim_tionXe Initial Xenon ion temperature
+PARAMETER sim_tionXe  REAL 1.0
+
+D sim_tradXe Initial Xenon radiation temperature
+PARAMETER sim_tradXe  REAL 1.0
+
+D sim_abarXe Xenon atomic weight
+PARAMETER sim_abarXe  REAL 1.0
+
+D sim_zbarXe Xenon average ionization
+PARAMETER sim_zbarXe  REAL 1.0
+
+
+D sim_rhoCh Initial Plastic density
+PARAMETER sim_rhoCh   REAL 1.0
+
+D sim_teleCh Initial Plastic electron temperature
+PARAMETER sim_teleCh  REAL 1.0
+
+D sim_tionCh Initial Plastic ion temperature
+PARAMETER sim_tionCh  REAL 1.0
+
+D sim_tradCh Initial Plastic radiation temperature
+PARAMETER sim_tradCh  REAL 1.0
+
+D sim_abarCh Plastic atomic weight
+PARAMETER sim_abarCh  REAL 1.0
+
+D sim_zbarCh Plastic average ionization
+PARAMETER sim_zbarCh  REAL 1.0
+
+
+D sim_rhoVa Initial Vacuum density
+PARAMETER sim_rhoVa   REAL 1.0
+
+D sim_teleVa Initial Vacuum electron temperature
+PARAMETER sim_teleVa  REAL 1.0
+
+D sim_tionVa Initial Vacuum ion temperature
+PARAMETER sim_tionVa  REAL 1.0
+
+D sim_tradVa Initial Vacuum radiation temperature
+PARAMETER sim_tradVa  REAL 1.0
+
+D sim_abarVa Vacuum atomic weight
+PARAMETER sim_abarVa  REAL 1.0
+
+D sim_zbarVa Vacuum average ionization
+PARAMETER sim_zbarVa  REAL 1.0

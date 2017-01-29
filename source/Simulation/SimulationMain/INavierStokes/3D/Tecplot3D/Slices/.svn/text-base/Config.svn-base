@@ -1,0 +1,12 @@
+# Runtime Parameters to define how many slices are defined in X,Y,Z directions
+
+PARAMETER tecplot_nslicesx  INTEGER     0    # Slices to write out in the X direction.
+PARAMETER tecplot_nslicesy  INTEGER     0    # Slices to write out in the Y direction.
+PARAMETER tecplot_nslicesz  INTEGER     0    # Slices to write out in the Z direction.
+
+
+# If tecplot_nslicesx ,y or z is non zero, provide a text file xlist.slc, ylist.slc, zlist.slc
+# with the list of locations corresponding to each slice.
+PARAMETER tecplot_slicesx_from_file BOOLEAN false  # if true provide xlist.slc with nslicesx positions.
+PARAMETER tecplot_slicesy_from_file BOOLEAN false  # if true provide ylist.slc with nslicesy positions.
+PARAMETER tecplot_slicesz_from_file BOOLEAN false  # if true provide zlist.slc with nslicesz positions.

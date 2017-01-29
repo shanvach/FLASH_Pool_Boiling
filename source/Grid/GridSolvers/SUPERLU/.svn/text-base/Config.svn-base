@@ -1,0 +1,14 @@
+# Configuration settings and vars for Distributed SUPERLU:
+USESETUPVARS Grid
+REQUIRES Grid/GridSolvers/SUPERLU/superlu_routines
+
+# Paremeters needed by SUPERLU solver
+# PARAMETER superlu_residual_norm REAL 
+
+
+# Work variables needed by SUPERLU solver
+# VARIABLE LUYI    # Contains vector yi.
+
+
+# Flux variable
+# FLUX flxbc

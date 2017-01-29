@@ -1,0 +1,64 @@
+The Problem
+===========
+
+The intrinsic function ERFC is not part of earlier FORTRAN standards.
+It may or may not be available in your FORTRAN (F90,F95,...) compiler.
+
+ERFC is used in gr_bhEwaldField.F90. By default, the expanded code in
+that source file has a statement:
+
+     intrinsic erfc
+
+This is expected to give a compilation error if and only if ERFC is
+not available as an intrinsic function.
+
+Note that the values returned byERFC are used in a simulation only if
+ * boundaries are periodic in at least one direction;
+ * gr_bhUseEwaldDecomp is TRUE; and
+ * the Ewald fields is not just read from the file given by
+   gr_bhEwaldFName (see also gr_bhEwaldAlwaysGenerate).
+
+(If those conditions are not true for your use of the BHTree solver,
+you may not care whether you have a working implementation of ERFC;
+but you still need to be able to compile the BHTree code!)
+
+The Workaround
+==============
+
+Provide an implementation of ERFC yourself.  Or use one that is
+already available in some math library.
+
+Let's say your replacement function for ERFC is called '"my_erfc" and
+invoked like this:
+    double_var =  my_erfc(1.5d0) ! sample call, returns a double precision real
+
+  * Define USER_ERFC for compiling FLASH. Two simple ways to do this are:
+    Variant (1): Add
+                      -defines=USER_ERFC=my_erfc
+                 to the setup command line.
+    Variant (2): Add
+                      PPDEFINE USER_ERFC my_erfc
+                 to your simulation's Config file. (Re-setup if necessary!)
+
+
+    The expanded code from gr_bhEwaldField.F90 will then have the statement:
+
+       real, external :: my_erfc
+
+    Since FLASH is always compiled in a way that promotes "real" to double
+    precision, my_erfc should expect one double precision argument and
+    return a doube precision value.
+
+  * If you provide the implementation yourself, arrange for it to be
+    compiled and linked it when FLASH is built.
+    A simple way to do this:
+    - Put my_erfc.F90 into your Simulation directory.
+    - Add my_erfc.o to the Makefile in your simulation Directory.
+    - (Re-setup if necessary!)
+
+    (Your own implementation might be based on erfcc from "Numerical Recipies",
+    for example.)
+
+  * If relying on an external library, you may have to arrange for that
+    library to be linked in; for example, add -lmy_math_lib to CONFIG_LIB
+    in the appropriate Makefile.h.

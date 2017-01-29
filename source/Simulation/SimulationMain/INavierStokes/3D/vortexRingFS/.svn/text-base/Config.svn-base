@@ -1,0 +1,29 @@
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens_VortexRing
+
+USESETUPVARS Grid
+
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+## kpd - This is for the HYPRE implementation
+  VARIABLE aaJunk  #kpd  for IfactorB
+
+
+PARAMETER quadrant          BOOLEAN  FALSE
+
+# Number of guardcells at each boundary
+GUARDCELLS 3
+
+

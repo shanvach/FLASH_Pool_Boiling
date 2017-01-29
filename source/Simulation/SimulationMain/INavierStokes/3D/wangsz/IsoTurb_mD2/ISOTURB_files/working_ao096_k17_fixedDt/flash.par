@@ -1,0 +1,164 @@
+# 	Runtime parameters for the Cylinder Array problem.
+gr_pmRpDivergenceFree = 1
+gr_pmRpNfieldDivf = 2
+gr_pmRpConsvFluxes = .TRUE.
+gr_pmRpConsvFluxDensities = .FALSE.
+
+# Inverse of Reynolds Number
+invRe           = 0.005
+
+# Subgrid Scale model flag (0 no sgs model, 1 sgs model)
+isgs            = 0
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+#  Parameters for forced turbulence
+sim_fbao          =   0.96
+sim_turbkin_expect =  17
+
+#       Size of computational volume
+xmin = -3.141592653589793
+xmax =  3.141592653589793
+ymin = -3.141592653589793
+ymax =  3.141592653589793
+zmin = -3.141592653589793
+zmax =  3.141592653589793
+
+
+#       Boundary conditions
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+#      Poisson Solver Boundary Conditions
+xl_mg_boundary_type = "periodic"
+xr_mg_boundary_type = "periodic"
+yl_mg_boundary_type = "periodic"
+yr_mg_boundary_type = "periodic"
+zl_mg_boundary_type = "periodic"
+zr_mg_boundary_type = "periodic"
+
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "Isotropic Turbulence Problem"
+log_file	= "INS_ISOTURB.log"
+basenm		= "INS_ISOTURB_"
+restart         = .false.
+#restart         = .true.
+#checkPointFileNumber = 20
+#plotFileNumber  = 200
+#particleFileNumber = 200
+nend            = 20000000
+tmax            = 100. 
+cflflg          = 0
+cfl             = 0.25
+sigma		= 0.25
+dtspec          = 0.00025
+dtinit          = 0.00025
+tstep_change_factor = 1.05
+
+#Integration Scheme:
+intschm            = 2
+
+#Plot Variables for Visit
+plot_var_1	= "pres"
+plot_var_2      = "velx"
+plot_var_3      = "vely"
+plot_var_4      = "velz"
+plot_var_5      = "omgx"
+plot_var_6      = "omgy"
+plot_var_7      = "omgz"
+  
+pfft_setupOnce  = .false.
+convertToConsvdInMeshInterp = .false.
+
+checkpointFileIntervalTime = 100.0
+checkpointFileIntervalStep = 2000
+
+plotFileIntervalTime = 100.0
+plotFileIntervalStep = 1000
+
+# Export Stats vs z timesteps:
+nstatsz = 100
+
+# Export Slice info for statistics:
+stats_slicesz_from_file=.false.
+stats_nslicesz = 16
+
+# Tecplot Slices export info:
+tecplot_nslicesx = 1
+tecplot_nslicesy = 1
+#tecplot_nslicesz = 5
+tecplot_slicesy_from_file = .false.
+
+#summaryOutputOnly=.true.
+
+
+##	AMR parameters
+nblockx	= 18
+nblocky	= 2
+nblockz	= 2
+lrefine_min	= 1
+lrefine_max     = 1
+nrefs           = 10000000
+#refine_var_1      = "pres"
+#refine_cutoff_1   = .1
+#derefine_cutoff_1 = -.1
+enableMaskedGCFill=.true.
+##	Flux Conservation for AMR
+flux_correct    = .true.
+
+# Multigrid Convergence tolerance
+# Rickers Multigrid HG:
+mg_maxResidualNorm = 1.e-10
+
+# Martin and Cartwright Multigrid:
+mgrid_npresmooth = 1
+mgrid_npossmooth = 4
+mgrid_print_norm = .true.
+mgrid_max_residual_norm = 1.e-10
+mgrid_max_vcycles = 300
+
+# BiPCGStab Parameters:
+bipcgs_max_residual_norm = 1.e-10
+bipcgs_max_cycles = 4
+bipcgs_print_norm = .true.
+
+## Force Direct solve in this level:
+#maxDirectSolveLevel=2
+
+## Pfft Parameters:
+## Use Central Finite Difference discretization operator:
+gr_pfftDiffOpDiscretize = 2
+gr_mgDiffOpDiscretize   = 2
+
+# Timers vars:
+eachProcWritesSummary = .false.
+
+#-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
+#       The parameters below are only necessary for the Uniform Grid
+#iGridSize      = 8     #defined as nxb * iprocs
+#jGridSize      = 8     #defined as nyb * jprocs
+#kGridSize      = 1     #defined as nzb * kprocs
+iProcs          = 1     #number of procs in the i direction
+jProcs          = 8     #number of procs in the j direction
+kProcs          = 8     #number of procs in the k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#       When using fixed blocksize, iGridSize etc are redundant in
+#       runtime parameters. These quantities are calculated as 
+#       iGridSize = NXB*iprocs
+#       jGridSize = NYB*jprocs
+#       kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#       iGridSize etc must be specified. They constitute the global
+#       number of grid points in the physical domain without taking 
+#       the guard cell into account. The local blocksize is calculated
+#       as iGridSize/iprocs  etc.
+ 

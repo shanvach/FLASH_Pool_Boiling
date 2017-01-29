@@ -1,0 +1,22 @@
+# Config file for the RayTraceGradient test
+
+REQUIRES Driver
+REQUIRES Grid
+#REQUIRES physics/Hydro
+REQUIRES physics/sourceTerms/EnergyDeposition/EnergyDepositionMain/Laser
+
+# Declare vaiables since we are not using Hydro
+VARIABLE   DENS
+VARIABLE   EINT 
+VARIABLE   TELE
+VARIABLE   EELE
+VARIABLE   NELE
+
+VARIABLE   GRDI
+VARIABLE   GRDJ
+VARIABLE   GRDK
+
+PARAMETER  sim_gradient	REAL	0.0
+PARAMETER  sim_temp		REAL	0.0
+PARAMETER  sim_ncrit		REAL	0.0
+

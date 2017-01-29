@@ -1,0 +1,388 @@
+run_comment = "Reduced Materials CRASH simulation"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+
+#############################
+#                           #
+#     OUTPUT PARAMETERS     #
+#                           #
+#############################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 10
+
+### Plot Options ###
+plotFileNumber = 0
+plot_var_1     = "dens"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 0
+
+
+#############################
+#                           #
+#      LASER PARAMETERS     #
+#                           #
+#############################
+useEnergyDeposition = .true.
+ed_maxRayCount      = 4000
+ed_gradorder        = 2
+
+# Setup pulses:
+ed_numPulses = 4
+
+ed_numSections_1 = 2
+ed_time_1_1  = 0.0
+ed_time_1_2  = 1.0e-09
+ed_power_1_1 = 1.108e+12
+ed_power_1_2 = 1.108e+12
+
+ed_numSections_2 = 4
+ed_time_2_1  = 0.0e+00
+ed_time_2_2  = 0.1e-09
+ed_time_2_3  = 1.0e-09
+ed_time_2_4  = 1.1e-09
+ed_power_2_1 = 0.0
+ed_power_2_2 = 1.108000e+012
+ed_power_2_3 = 1.108000e+012
+ed_power_2_4 = 0.0
+
+ed_numSections_3 = 2
+ed_time_3_1  = 0.0
+ed_time_3_2  = 1.0e-09
+ed_power_3_1 = 2.454369e+10
+ed_power_3_2 = 2.454369e+10
+
+ed_numSections_4 = 4
+ed_time_4_1  = 0.0e+00
+ed_time_4_2  = 0.1e-09
+ed_time_4_3  = 1.0e-09
+ed_time_4_4  = 1.1e-09
+ed_power_4_1 = 0.0
+ed_power_4_2 = 2.454369e+10
+ed_power_4_3 = 2.454369e+10
+ed_power_4_4 = 0.0
+
+
+# Setup the laser beam:
+ed_numBeams = 1
+
+# Setup first beam:
+ed_lensX_1              = +3.125e-03    # lens X coordinate                          
+ed_lensY_1		= -0.100e+00    # lens Y coordinate			     
+ed_targetX_1		= +3.125e-03    # target X coordinate			     
+ed_targetY_1		= +1.000e-01    # target Y coordinate			     
+ed_semiaxis1_1		= +3.125e-03    # target 1st semiaxis length		     
+ed_pulseNumber_1	=  4            # pulse ID number			     
+ed_wavelength_1		=  +0.351e-00   # wavelength in microns	        	     
+ed_crossSectionID_1	=  5            # cross section function ID		     
+ed_decayExponent_1	=  +0.000e+00   # gaussian decay exponent		     
+ed_decayRadius1_1	= +1.000e+00    # gaussian decay x-radius		     
+ed_lensEqualsTarget_1	= .true.        # is lens are = target area size ?	     
+ed_numRays_1		= 64            # number of rays wanted		             
+
+
+#################################
+#                               #
+#     CONDUCTION PARAMETERS     #
+#                               #
+#################################
+
+### Conduction parameters ###
+useDiffuse       = .true.
+useConductivity  = .true.
+diff_useEleCond  = .true.
+diff_eleFlMode   = "fl_harmonic"
+diff_eleFlCoef   = 0.06
+diff_thetaimplct = 1.0
+
+### Diffusion boundary conditions for Split Diffusion Solver ###
+diff_eleXlBoundaryType = "outflow"
+diff_eleXrBoundaryType = "outflow"
+diff_eleYlBoundaryType = "outflow"
+diff_eleYrBoundaryType = "outflow"
+diff_eleZlBoundaryType = "outflow"
+diff_eleZrBoundaryType = "outflow"
+
+
+###################################
+#                                 #
+#     MATERIAL/EOS PARAMETERS     #
+#                                 #
+###################################
+eosModeInit = "dens_temp_gather"
+eosMode     = "dens_ie_gather"
+smallt      = 0.1
+smallx      = 1e-99
+
+### SET MATERIAL PROPERTIES ###
+ms_xeA          = 131.293
+ms_xeZ          = 54.0
+eos_xeEosType   = "eos_tab"
+eos_xeSubType   = "ionmix4"
+eos_xeTableFile = "xe-imx-027.cn4"
+
+eos_beEosType   = "eos_tab"
+ms_beA          = 9.012182
+ms_beZ          = 4.0
+ms_beZMin       = 0.075
+eos_beEosType   = "eos_tab"
+eos_beSubType   = "ionmix4"
+eos_beTableFile = "be-imx-009.cn4"
+
+eos_vacuEosType   = "eos_tab"
+ms_vacuA     	  = 4.002602
+ms_vacuZ     	  = 2.0
+eos_vacuEosType   = "eos_tab"
+eos_vacuSubType   = "ionmix4"
+eos_vacuTableFile = "he-imx-008.cn4"
+
+# Polyimide, Acrylic, and Gold all use the Polyimide properties:
+eos_poliEosType   = "eos_tab"
+ms_poliA     	  = 9.8032
+ms_poliZ     	  = 5.0256
+eos_poliEosType   = "eos_tab"
+eos_poliSubType   = "ionmix4"
+eos_poliTableFile = "polyimide-imx-013.cn4"
+
+eos_goldEosType   = "eos_tab"
+ms_goldA   	  = 9.8032
+ms_goldZ   	  = 5.0256
+eos_goldEosType   = "eos_tab"
+eos_goldSubType   = "ionmix4"
+eos_goldTableFile = "polyimide-imx-013.cn4"
+
+eos_acryEosType   = "eos_tab"
+ms_acryA   	  = 9.8032
+ms_acryZ   	  = 5.0256
+eos_acryEosType   = "eos_tab"
+eos_acrySubType   = "ionmix4"
+eos_acryTableFile = "polyimide-imx-013.cn4"
+
+##########################
+#                        #
+#     MGD PARAMETERS     #
+#                        #
+##########################
+rt_useMGD        = .true.
+rt_mgdFlMode     = "fl_harmonic"
+rt_mgdFlCoef     = 1.0
+
+### DEFINE GROUP STRUCTURE ###
+rt_mgdNumGroups  = 30
+rt_mgdBounds_1   =  1.0000000000e-01
+rt_mgdBounds_2   =  1.5848931925e-01
+rt_mgdBounds_3   =  2.5118864315e-01
+rt_mgdBounds_4   =  3.9810717055e-01
+rt_mgdBounds_5   =  6.3095734448e-01
+rt_mgdBounds_6   =  1.0000000000e+00
+rt_mgdBounds_7   =  1.5848931925e+00
+rt_mgdBounds_8   =  2.5118864315e+00
+rt_mgdBounds_9   =  3.9810717055e+00
+rt_mgdBounds_10  =  6.3095734448e+00
+rt_mgdBounds_11  =  1.0000000000e+01
+rt_mgdBounds_12  =  1.5848931925e+01
+rt_mgdBounds_13  =  2.5118864315e+01
+rt_mgdBounds_14  =  3.9810717055e+01
+rt_mgdBounds_15  =  6.3095734448e+01
+rt_mgdBounds_16  =  1.0000000000e+02
+rt_mgdBounds_17  =  1.5848931925e+02
+rt_mgdBounds_18  =  2.5118864315e+02
+rt_mgdBounds_19  =  3.9810717055e+02
+rt_mgdBounds_20  =  6.3095734448e+02
+rt_mgdBounds_21  =  1.0000000000e+03
+rt_mgdBounds_22  =  1.5848931925e+03
+rt_mgdBounds_23  =  2.5118864315e+03
+rt_mgdBounds_24  =  3.9810717055e+03
+rt_mgdBounds_25  =  6.3095734448e+03
+rt_mgdBounds_26  =  1.0000000000e+04
+rt_mgdBounds_27  =  1.5848931925e+04
+rt_mgdBounds_28  =  2.5118864315e+04
+rt_mgdBounds_29  =  3.9810717055e+04
+rt_mgdBounds_30  =  6.3095734448e+04
+rt_mgdBounds_31  =  1.0000000000e+05
+
+### SET BOUNDARY CONDITIONS ###
+rt_mgdXlBoundaryType = "outflow"
+rt_mgdXrBoundaryType = "outflow"
+rt_mgdYlBoundaryType = "vacuum"
+rt_mgdYrBoundaryType = "outflow"
+rt_mgdZlBoundaryType = "outflow"
+rt_mgdZrBoundaryType = "outflow"
+
+
+##############################
+#                            #
+#     OPACITY PARAMETERS     #
+#                            #
+##############################
+useOpacity     = .true.
+
+### ACRYLIC ###
+op_acryAbsorb 	= "op_tabpa"
+op_acryEmiss  	= "op_tabpe"
+op_acryTrans  	= "op_tabro"
+op_acryFileType = "ionmix4"
+op_acryFileName = "polyimide-imx-013.cn4"
+
+### BERYLLIUM ###
+op_beAbsorb 	= "op_tabpa"
+op_beEmiss  	= "op_tabpe"
+op_beTrans  	= "op_tabro"
+op_beFileType = "ionmix4"
+op_beFileName = "be-imx-009.cn4"
+
+### GOLD ###
+op_goldAbsorb 	= "op_tabpa"
+op_goldEmiss  	= "op_tabpe"
+op_goldTrans  	= "op_tabro"
+op_goldFileType = "ionmix4"
+op_goldFileName = "polyimide-imx-013.cn4"
+
+### POLYIMIDE ###
+op_poliAbsorb 	= "op_tabpa"
+op_poliEmiss  	= "op_tabpe"
+op_poliTrans  	= "op_tabro"
+op_poliFileType = "ionmix4"
+op_poliFileName = "polyimide-imx-013.cn4"
+
+### VACUUM ###
+op_vacuAbsorb 	= "op_tabpa"
+op_vacuEmiss  	= "op_tabpe"
+op_vacuTrans  	= "op_tabro"
+op_vacuFileType = "ionmix4"
+op_vacuFileName = "he-imx-008.cn4"
+
+### XENON ###
+op_xeAbsorb 	= "op_tabpa"
+op_xeEmiss  	= "op_tabpe"
+op_xeTrans  	= "op_tabro"
+op_xeFileType   = "ionmix4"
+op_xeFileName   = "xe-imx-027.cn4"
+
+
+############################
+#                          #
+#     HYDRO PARAMETERS     #
+#                          #
+############################
+useHydro         = .true.
+order            = 2        # Interpolation order (first/second/third/fifth order)
+slopeLimiter     = "minmod" # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta = 1.       # Slope parameter for the "limited" slope by Toro
+charLimiting     = .true.   # Characteristic limiting vs. Primitive limiting
+use_avisc        = .true.   # use artificial viscosity (originally for PPM)
+cvisc            = 0.1      # coefficient for artificial viscosity
+use_flattening   = .false.  # use flattening (dissipative) (originally for PPM)
+use_steepening   = .false.  # use contact steepening (originally for PPM)
+use_upwindTVD    = .false.  # use upwind biased TVD slope for PPM (need nguard=6)
+RiemannSolver    = "hybrid" # Roe, HLL, HLLC, LLF, Marquina, hybrid
+entropy          = .false.  # Entropy fix for the Roe solver
+shockDetect      = .false.  # Shock Detect for numerical stability
+hy_eosModeAfter  = "dens_ie_gather"
+
+### Boundary conditions ###
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+
+##############################
+#                            #
+#     INITIAL CONDITIONS     #
+#                            #
+##############################
+sim_vacThickness = 1000.0e-04
+sim_acrylicRadius = 2000.0e-04
+sim_goldRadius = 2000.0e-04
+sim_slabRadius = 2000.0e-04
+
+sim_rhoXe  = 0.0065
+sim_teleXe = 50.0
+sim_tionXe = 50.0
+sim_tradXe = 50.0
+
+sim_rhoBe  = 1.81
+sim_teleBe = 50.0
+sim_tionBe = 50.0
+sim_tradBe = 50.0
+
+sim_rhoVa  = 1.0e-06
+sim_teleVa = 50.0
+sim_tionVa = 50.0
+sim_tradVa = 50.0
+
+sim_rhoCh  = 1.41
+sim_teleCh = 50.0
+sim_tionCh = 50.0
+sim_tradCh = 50.0
+
+# This simulation modified the gold and Acrylic so that they are
+# exactly the same as the polyimide.
+
+sim_rhoAu  = 1.41
+sim_teleAu = 50.0
+sim_tionAu = 50.0
+sim_tradAu = 50.0
+
+sim_rhoAc  = 1.41
+sim_teleAc = 50.0
+sim_tionAc = 50.0
+sim_tradAc = 50.0
+
+
+###########################
+#                         #
+#     TIME PARAMETERS     #
+#                         #
+###########################
+tstep_change_factor = 1.10
+cfl            	    = 0.5
+dt_diff_factor 	    = 1.0e+100 # Disable diffusion dt
+rt_dtFactor    	    = 0.02
+hx_dtFactor    	    = 5000.0
+tmax           	    = 1.0e-09
+dtmin          	    = 1.0e-16
+dtinit         	    = 1.0e-15
+dtmax          	    = 1.0e-11
+nend           	    = 100
+
+# wall_clock_time_limit = 39600 # 39600 s = 11 hours
+# wall_clock_time_limit = 3300 # 3300 s = 55 m
+
+
+###########################
+#                         #
+#     MESH PARAMETERS     #
+#                         #
+###########################
+geometry = cylindrical
+
+# Domain size:
+xmin = 0.0
+xmax = 62.5e-04
+ymin = 0.0
+ymax = 1250.0e-04
+
+# Total number of blocks:
+nblockx = 1
+nblocky = 20
+nblockz = 1
+
+lrefine_max = 3
+lrefine_min = 1
+refine_var_1 = "dens"
+
+
+############################
+#                          #
+#     OTHER PARAMETERS     #
+#                          #
+############################
+gr_hypreRelTol = 1.0e-07
+useHeatexchange = .true.

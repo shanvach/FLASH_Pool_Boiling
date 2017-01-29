@@ -1,0 +1,47 @@
+useParticles= .true.
+pt_numX = 2
+pt_numY = 2
+#pt_numZ = 2 
+pt_maxPerProc=100
+pt_maxPerBlock=100
+sim_vx_amb = 1.0
+sim_seed = 1.0
+sim_vz_pert=1.0
+sim_vy_pert=1.0
+sim_vx_pert=1.0
+
+
+dtinit = 1.0e-3
+dtmin = 1.0e-3
+dtmax = 1.0e-1
+nend = 20
+
+xmin		= 0.
+xmax		= 1.
+ymin		= 0.
+ymax		= 1.
+#zmin		= 0.
+#zmax		= 1.
+
+#		Boundary conditions
+
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+basenm		= "partUnitTest_"
+
+lrefine_min = 2
+lrefine_max = 2
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1

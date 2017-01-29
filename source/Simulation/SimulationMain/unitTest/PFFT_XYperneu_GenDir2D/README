@@ -1,0 +1,24 @@
+# Setup Line Used:
+# For Uniform Grid, 128^3 cells on the whole domain, 4 processors:
+./setup unitTest/PFFT_XYperZneu_GenDir  -3d -auto +ug -nxb=128 -nyb=64 -nzb=64 -debug -objdir=XYPERZ_GENDIR -site=archimedes.uchicago.edu -parfile=/home/mvanella/bin/FLASH/TRUNK_NEW/source/Simulation/SimulationMain/unitTest/PFFT_XYperZneu_GenDir/flash_ug_3d_4P.par
+
+# For multigrid:
+./setup unitTest/PFFT_XYperZneu_GenDir -auto -3d -debug -nxb=8 -nyb=8 -nzb=8 -maxblocks=2000 -gridinterpolation=native  -parfile=/home/mvanella/bin/FLASH/TRUNK_NEW/source/Simulation/SimulationMain/unitTest/PFFT_XYperZneu_GenDir/flash_pm_3d.par PfftSolver=Generic_Direct +grid Grid=PM4DEV ParameshLibraryMode=True -objdir=XYPERZ_GENDIR_MULTI -site=archimedes.uchicago.edu -noclobber
+
+# In the simulation directory XYPERZ_GENDIR* make the directory IOData (tecplot files are dumped there)
+
+# Result with Uniform Grid:
+# Harmonic source:
+
+# Grid 64^3:
+ Mean Anl, Num=  3.55271367880050093E-015  1.42108547152020037E-014
+ L2 error =   2.84107613150263170E-004
+ Linf error =   8.01913715799296156E-004
+
+# Grid 128^3
+ Mean Anl, Num= -8.52651282912120223E-014  1.35003119794419035E-013
+ L2 error =   7.10012317298148142E-005
+ Linf error =   2.00756488492159768E-004
+
+
+

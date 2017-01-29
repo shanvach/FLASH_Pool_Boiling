@@ -1,0 +1,6 @@
+#There is a hacked version of Grid_markRefineDerefine for 
+#Paramesh and a hacked version of gr_markRefineDerefine for Chombo.
+#They allow us to refine just the right half of the domain
+
+LINKIF Grid_markRefineDerefine.F90 Grid/GridMain/paramesh
+LINKIF gr_markRefineDerefine.F90 Grid/GridMain/Chombo/AMR

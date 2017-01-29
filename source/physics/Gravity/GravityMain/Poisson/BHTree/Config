@@ -1,0 +1,16 @@
+REQUIRES Grid/GridSolvers/BHTree
+
+# for compatibility with other Poisson solvers
+# available options are: isolated, periodic and mixed
+PARAMETER   grav_boundary_type      STRING      "mixed" ["isolated","periodic","mixed"]
+
+# if grav_boundary_type == "mixed", boundaries can be set
+# independently for each direction; available options are:
+# isolated and periodic
+D   grav_boundary_type_x Gravity boundary type for the X direction, used if grav_boundary_type == "mixed"
+D   grav_boundary_type_y Gravity boundary type for the Y direction, used if grav_boundary_type == "mixed"
+D   grav_boundary_type_z Gravity boundary type for the Z direction, used if grav_boundary_type == "mixed"
+PARAMETER   grav_boundary_type_x    STRING      "isolated" ["isolated","periodic"]
+PARAMETER   grav_boundary_type_y    STRING      "isolated" ["isolated","periodic"]
+PARAMETER   grav_boundary_type_z    STRING      "isolated" ["isolated","periodic"]
+

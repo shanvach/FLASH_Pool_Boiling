@@ -1,0 +1,114 @@
+!!****if* source/flashUtilities/parallelpatterns/overlapSendRecv/ut_mpiOverlapSendRecv
+!!
+!! NAME 
+!!
+!! ut_mpiOverlapSendRecv
+!!
+!! SYNOPSIS
+!!
+!! ut_mpiOverlapSendRecv()
+!!
+!! DESCRIPTION 
+!!
+!! Pattern for overlapping sends and receive until certain criteria are met.  
+!!
+!! ARGUMENTS
+!!
+!! NOTES
+!! 
+!! The option is available to synchronise all processors before & after we
+!! exchange the data.  This is useful whenever we make use of MPI_Iprobe(), 
+!! as without synchronisation there can be a race condition and the 
+!! possibility of intercepting a message originating from another unit.  An 
+!! alternative option to synchronisation is to carefully select unique MPI 
+!! tags throughout the entire application.
+!!
+!!***
+
+subroutine ut_mpiOverlapSendRecv &
+     (fnArgPossibleSendAction, fnArgPossibleRecvAction, &
+     fnArgEnsureMsgDelivery, commonState, sendState, recvState, &
+     secondsTillAbort, useBarriers)
+
+  interface
+     subroutine fnArgPossibleSendAction(commonState, sendState, sendMore)
+       CPP_COMMONSTATE_DEFINITION
+       CPP_SENDSTATE_DEFINITION
+       implicit none
+       type(common_state), pointer :: commonState
+       type(send_state), pointer :: sendState
+       logical, intent(OUT) :: sendMore
+     end subroutine fnArgPossibleSendAction
+  end interface
+  interface
+     subroutine fnArgPossibleRecvAction(commonState, recvState, recvMore)
+       CPP_COMMONSTATE_DEFINITION
+       CPP_RECVSTATE_DEFINITION
+       implicit none
+       type(common_state), pointer :: commonState
+       type(recv_state), pointer :: recvState
+       logical, intent(OUT) :: recvMore
+     end subroutine fnArgPossibleRecvAction
+  end interface
+  interface
+     subroutine fnArgEnsureMsgDelivery(commonState, sendState, recvState)
+       CPP_COMMONSTATE_DEFINITION
+       CPP_SENDSTATE_DEFINITION
+       CPP_RECVSTATE_DEFINITION
+       implicit none
+       type(common_state), pointer :: commonState
+       type(send_state), pointer :: sendState
+       type(recv_state), pointer :: recvState
+     end subroutine fnArgEnsureMsgDelivery
+  end interface
+  type(common_state), pointer :: commonState
+  type(send_state), pointer :: sendState
+  type(recv_state), pointer :: recvState
+  real, intent(IN) :: secondsTillAbort
+  logical, intent(IN) :: useBarriers
+
+
+  double precision :: t0, t1
+  integer :: ierr
+  logical :: recvMore, sendMore, communicateMore
+
+  if (useBarriers .eqv. .true.) then
+     !*** Important: see warning above subroutine.
+     call MPI_Barrier(commonState % mpiComm, ierr)
+  end if
+
+  sendMore = .true.; recvMore = .true.; communicateMore = .true.
+  t0 = MPI_Wtime()
+
+  !Stay in the communication loop until the sendMore and recvMore 
+  !logical flags are both set to .false..
+  do while (communicateMore .eqv. .true.)
+
+     t1 = MPI_Wtime()
+     if ((t1 - t0) > secondsTillAbort) then
+        call Driver_abortFlash("[ut_mpiOverlapSendRecv]: Exceeded " //&
+             "max communication time... apparent deadlock!")
+     end if
+
+     !Handle a possible receive action and update recvMore.
+     if (recvMore .eqv. .true.) then
+        call fnArgPossibleRecvAction(commonState, recvState, recvMore)
+     end if
+
+     !Handle a possible send action and update sendMore.
+     if (sendMore .eqv. .true.) then
+        call fnArgPossibleSendAction(commonState, sendState, sendMore)
+     end if
+
+     communicateMore = (sendMore .or. recvMore) 
+
+  end do   !Loop until we account for all messages involving myPE.
+
+  call fnArgEnsureMsgDelivery(commonState, sendState, recvState)
+
+  if (useBarriers .eqv. .true.) then
+     !*** Important: see warning above subroutine.
+     call MPI_Barrier(commonState % mpiComm, ierr)
+  end if
+
+end subroutine ut_mpiOverlapSendRecv

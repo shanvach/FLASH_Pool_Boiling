@@ -1,0 +1,148 @@
+
+!! Do before refinement
+   
+     	!! Calculate current blocks GlobalID numbers
+	!! KDA: Where would we short this? It would have to be in GridParticles_data  or maybe just grid data...
+     	!!KDA, does this need to be for all blocks or just leaf blocks and their parents?
+	!!I think only leaf blocks because particles sit
+	GlobalIDnumber(1:NDIM,1:localNumberBlocks)=
+		CornerID(1:NDIM,1:localNumberBlocks)*100+refineLevel(1:localNumberBlocks) * nodetype factor	
+										!multiply by -1 if nodetype is not a leaf!
+
+
+
+!!KDA - in general here it seems like we should only have to operate on 'old' leaf blocks and those
+!!KDA - one level of refinement up and one level of refinement down
+
+
+!! After GridUpdateRefinement we have a new set of blocks, and their number is
+!! newLocalNumBlocks
+
+BlocksUnfilledInd = 0     !! This number is incremented by 1 every time
+                          !! a new block is found that can not be filled locally
+
+OldBlockProcessed(:) = 0  !! An old block is considered fully processed when
+                          !! its entry is this array is 2^NDIM. If the block
+			  !! got refined, then this entry is incremented by 1
+			  !! for each child found
+
+!!KDA OldBlockProcessed should be dimensioned by oldLocalNumBlocks
+
+!!KDA consider looping only over leaf blocks.
+do newblockID = 1,newLocalNumBlocks !! now we have a new list of blocks
+
+   !!KDA seems like there needs to be another loop in here, maybe this is implicit
+   !!in the routine?  
+   !!What if multiple match?  Then I should take the one at the finest level correct?
+   foundID = findMatchingBlockID(myCornerID,GlobalIDnumber/100)
+            !! Find out if this new block's corner ID is either
+            !! identical, or falls within any of the old blocks, or any
+            !! of the old blocks fall within it
+            !! if found, return the block number in 
+            !! foundCornerID, else return an integer constant NOTFOUND
+ 
+   if(foundID /= NOTFOUND) then !KDA it means the block has stayed on the same proc right?
+
+            foundRefLevel = mod(GlobalId(foundID),100) !! find the refinementlevel
+                                                       !! of the old block
+
+
+     if (refLevel(newBlockID) == foundRefLevel
+             !! if the old block is not refined or derefined
+             !! then all particle in old block are processed and the new block is filled
+	     !! KDA might as well do a check here to see if newBlockID = foundBlockID in which case
+	     !! nothing needs to be done.
+
+	   !!KDA I guess this will need to turn into another loop if particles are
+           !!KDA not sorted by blk no -- we'll see 
+           Particles(BLK_PART_PROP,foundIDBegin:foundIDEnd)=newBlockID
+	   OldBlockProcessed(foundID)=2**NDIM  
+
+     elseif(refLevel(newBlockID) > foundRefLevel)  !refinement
+           !! newBlockID is a child of foundID. The new block is filled but the
+           !! oldBlock is partially processed, so increment count by 1
+	   !!KDA this next line again, may turn into a subroutine of it's own
+           Particles(BLK_PART_PROP,ThisChidBegin:ThisChidEnd)=newBlockID
+	   OldBlockProcessed(foundID)=OldBlockProcessed(foundID)+1
+
+      else !derefinement
+
+           !! newBlockID is a parent of foundID, old block is completely processed
+	   !! KDA - again particles need to be sorted
+	   Particles(BLK_PART_PROP,foundIDBegin:foundIDEnd)=newBlockID
+	   OldBlockProcessed(foundID)=2**NDIM
+
+	   !! find if any of the other children of new block are also available locally
+	   !! KDA first need to find out if this block is a leaf block or not
+	   n = 1
+	   do j = 1,2*NDIM-1
+              !! Find the corner ID's of all the children and if they 
+              !! are in the old blocks list move their particles
+	      !! KDA, again should we restrict this to just leaf blocks, parent and child?
+	      !! KDA, where do we get next corner ID from?
+	      foundID = findMatchingBlockID(NextCornerID,GlobalID/100)
+              if(foundID /= NOTFOUND) then
+	          n = n+1 !! keeping track of number of chidren found
+                   !! for each child found, the corresponding oldBlock is 
+		   !! completely processed
+        	   Particles(BLK_PART_PROP,foundIDBegin:foundIDEnd)=newBlockID
+		   OldBlockProcessed(foundID)=2**NDIM
+              end if
+            end do
+         !! If all children of new block are not local, the new block is marked 
+         !! unfilled
+         if(n<2**NDIM) then  !! This new block was partially filled so count it as unfilled
+            BlocksUnfilledInd=BlocksUnfilled+1
+	    BlocksUnfilled(BlocksUnfilledInd)=MyCornerID*100+refLevel(newBlockID)
+        end if
+   else     !! This new block could not be filled locally at all, count it as unfilled
+      BlocksUnfilledInd=BlocksUnfilled+1
+      BlocksUnfilled(BlocksUnfilledInd)=MyCornerID*100+refLevel(newBlockID) !!KDA, also, might be easier if we store 									    !!local blockID too....
+   end if
+  end do
+
+
+  !! At this point all the particles that could be kept locally have been
+  !! processed. A list of new blocks that may have particles on other
+  !! processors is created. !!KDA (this is BlocksUnfilled)
+  !! A list of old blocks indicates whether 
+  !! they have particles that need to be sent to other processors !!KDA, oldBlockProcessed array
+
+
+
+  !! Gather unique globalID's of all blocks that need remote
+  !! processor particle data
+
+   call MPI_ALLGather(BlocksUnfilled)
+   !!KDA why do we need to do an all-gather here.  At this point isn't it just like
+   !!the move particles?  Find all particles going to the same proc put them in a bin and move them.
+
+
+  !! Determine interprocessor communication pattern and exchange data   
+
+  !! For each of old blocks not processed, find the globalID of destination block
+  !! KDA So this is the big painful search to find where the block has moved.  Isn't 
+  !! it complicated by the fact that you don't know if that particular old block has
+  !! refined or derefined? this is a global search.
+  j = 1
+   do i = 1,localNumBlocks
+     if(OldBlockProcessor(i)/=2**NDIM) then
+       numSendProcs=numProcs+1
+       call findDestination(globalListOfBlocks,proc(j),globalID)
+       call move(Particles(:,iBegin:iEnd),globalID,Buf(proc(j)))
+     end if
+   end do
+  
+   call MPI_ALLGather(procsList) !! All processors exchange info about who they have data
+                                 !! for
+
+   do i = 1,BlocksUnfilledInd  !! for each of the unfilled blocks, 
+      findSource(globalListOfBlocks,proc,globalID)
+      postReceive
+   end do
+   do i = 1,numSendProcs
+      send(buf(proc),proc)
+   end
+
+   call moveParticlesToRightPlaceAndSort
+   

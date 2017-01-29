@@ -1,0 +1,175 @@
+Now I am using this file to compile issues that still remain
+unresolved in various chapters of the user's guide. (The original file
+is still intact at the bottom) I also want people
+to start marking chapters they have read.
+
+
+UsersGuide Sections  [%%DEFER]
+---------------------------------------------------------
+Getting Started
+   Intro : Anshu -- There is still reference to going further with
+                     FLASH, and a chapter. I think they should be removed.
+   Quickstart : Anshu -- read, the picture of xflash needs updating. 
+   Setup [Murali]
+     -- Finished except for explanations for the following.
+        + nonpermanentguardcells
+        + tau 
+        + Particles_mapPropToStr.F90 
+        + Simulation_mapVarToStr.F90
+        + Simulation_mapStrToVar.F90
+        These one line explanations are better given by somebody 
+        who uses these features.
+   Creating Problems [Katie] Lynn will modify for Sod
+Code Architecture
+   Architecture [Anshu] --- second iteration
+   Flash.h [Murali] -- first draft
+Infrastructure Units
+   Grid [Anshu + Dan + Katie] second iteration.
+      Robodoc update of API functions at all level, except the SavedVar functions,
+      sendOutput (ask Katie), and single cell volume function.
+   IO [Katie] -- reasonable shape
+   RuntimeParameters [Lynn]   Initial text done.
+   Multispecies [Lynn]        Initial text done.
+   PhysicalConstants [Lynn]   Initial text done.
+Physics Units 
+   Hydro [Dan] -- reasonable shape
+   Eos [Anshu]  --- reasonable shape
+   SourceTerms [%%% Anshu + Lynn]
+   Gravity [%%% Lynn]
+   Particles [%%% Lynn]
+   MHD [%%% ?? Dongwook]
+   Cosmology [%%% ??]
+   Solvers [%%% ??]
+Monitor Units
+   Logfile [Katie] -- reasonable shape
+   Profiler [Dan] -- reasonable shape
+Driver unit  
+   Driver [Katie + Dan]  -- working on it
+Simulation Units [Lynn + Anshu + Dan]
+   DEV -- we need a section on required Simulation files!
+   Sod    [Lynn]  Initial text done
+   Sedov  [Lynn]  Initial text done
+   Advect [Lynn]  Initial text done
+   Blast2 [Dan] --- still to do
+   unitTest/Grid [Anshu] -- included in Grid.tex
+   unitTest/Eos [Anshu] -- include in EOS.tex
+Tools
+   sfocu [Dan]  -- reasonable shape
+   fidlr3 [RENAME Dan] -- reasonable shape
+   Test Suite [Noel]  -- first draft
+   References [Klaus]
+
+
+Here is a list of the units that will be released for the PREALPHA version of 
+FLASH3 in April.  Following is a list of the Users Guide chapters and the people 
+responsible for the text.  If you are responsible for a portion of the Users'
+Guide, then you are ALSO responsible for ensuring the code Robodocs are up to 
+date for that section.  You can, of course, delegate responsibility as long as
+you make sure the job is done.  NOTE CHANGED RESPONSIBILITIES below.
+
+Units to be released
+--------------------------
+Driver     --- Robodoc documentation upto date
+RuntimeParameters -- Robodoc and initial latex up to date RP_stampIgnored
+MultiSpecies      -- Robodoc and initial latex up to date
+PhysicalConstants -- Robodoc and initial latex up to date
+Logfile
+Profiler
+TestSuite
+Fidlr (to be renamed) -- has been renamed
+Grid:  Paramesh{2,3} and UG --API Robodoc upto date except for saved data bits
+Hydro
+Eos:  Gamma and MultiGamma  --- Robodoc and initial latex up to date
+                                Multigamma needs testing
+IO:  HDF5 for parallel and serial, for UG and Paramesh
+Simulations:  Sod, Sedov, 2Blast, Advect, unitTests:Grid/Eos -- Robodoc uptodate
+    For Sod, Sedov, Advect: latex and Robodocs are up to date
+ 
+Significant items that will NOT be released contrary to previous beliefs
+------------------------------------------------------------------------
+Particles and GridParticles and IOParticles and fidlr/Particles
+SourceTerms
+IO:  pnetCDF
+-nofbs  Non Fixed Block Sizes
+Other simulations
+Other sections of the User's Guide, marked below with %%%
+
+UsersGuide Sections [Responsible Person] [%%DEFER]
+---------------------------------------------------------
+Getting Started
+   Intro [Anshu]  ---- first draft
+   Quickstart [Murali] -- first draft
+   Setup [Murali]
+     -- Finished except for explanations for the following.
+        + nonpermanentguardcells
+        + tau 
+        + Particles_mapPropToStr.F90 
+        + Simulation_mapVarToStr.F90
+        + Simulation_mapStrToVar.F90
+        These one line explanations are better given by somebody 
+        who uses these features.
+   Creating Problems [Katie] Lynn will modify for Sod
+Code Architecture
+   Architecture [Anshu] --- second iteration
+   Flash.h [Murali] -- first draft
+Infrastructure Units
+   Grid [Anshu + Dan + Katie] second iteration.
+      Robodoc update of API functions at all level, except the SavedVar functions,
+      sendOutput (ask Katie), and single cell volume function.
+   IO [Katie] -- reasonable shape
+   RuntimeParameters [Lynn]   Initial text done.
+   Multispecies [Lynn]        Initial text done.
+   PhysicalConstants [Lynn]   text done - KW
+Physics Units 
+   Hydro [Dan] -- reasonable shape
+   Eos [Anshu]  --- reasonable shape
+   SourceTerms [%%% Anshu + Lynn]
+   Gravity [%%% Lynn]
+   Particles [%%% Lynn]
+   MHD [%%% ?? Dongwook]
+   Cosmology [%%% ??]
+   Solvers [%%% ??]
+Monitor Units
+   Logfile [Katie] -- reasonable shape
+   Profiler [Dan] -- reasonable shape
+Driver unit  
+   Driver [Katie + Dan]  -- working on it
+Simulation Units [Lynn + Anshu + Dan]
+   DEV -- we need a section on required Simulation files!
+   Sod    [Lynn]  Initial text done
+   Sedov  [Lynn]  Initial text done
+   Advect [Lynn]  Initial text done
+   Blast2 [Dan] --- still to do
+   unitTest/Grid [Anshu] -- included in Grid.tex
+   unitTest/Eos [Anshu] -- include in EOS.tex
+Tools
+   sfocu [Dan]  -- reasonable shape
+   fidlr3 [RENAME Dan] -- reasonable shape
+   Test Suite [Noel]  -- first draft
+Going Further with Flash [%%%]
+    porting Flash [%%Dan]
+    troubleshooting [%%Dan]
+    adding solvers [??]
+    References [Klaus]   -- ok
+
+
+
+
+To Do list for release
+
+  -- Restart --- UG/PAramesh Serial/Parallel include in the test suite
+
+
+  -- Fidlr   --- chk on more than 1 procs 
+             --- Definitely test in last week before release
+             --- make is self consistent, the buttons should
+                 have sensible behavior
+
+  -- Some testing with debug flag
+     specify in the documentation that -test option is for user's to
+     try their own combinations.
+     Add a test to verify the "valid parameter range feature"
+
+  -- Somebody needs to document what the fluxes are in hydro in the Config file
+     Some of these are obvious, but others are definitely not, rho, u, p, ut, utt, e, eint
+

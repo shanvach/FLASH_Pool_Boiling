@@ -1,0 +1,54 @@
+#       Configuration file for the advection problem
+
+REQUIRES Driver
+REQUIRES physics/Eos/EosMain/Gamma
+REQUIRES physics/Hydro
+
+
+D               rhoin           Density inside pulse
+D               rhoin           Density outside pulse
+D               pressure        Pressure
+D               velocity        Fluid velocity
+D               posn            Position of the pulse center at x-axis (y=z=0)
+D               width           Width of the pulse along x-axis
+D               phase           phase shift between density and tracers
+D               xangle          Angle made by diaphragm normal w/x-axis (deg)
+D               yangle          Angle made by diaphragm normal w/y-axis (deg)
+D               posn            Point of intersection between the pulse mid-
+D &                                plane and the x-axis
+D               planar          Define whether the shape is planar or multi-d.
+D               pulse_fctn      Which pulse shape function to use:
+D &                                1 = constant
+D &                                2 = square wave
+D &                                3 = Gaussian
+D &                                4 = sinusoidal
+D &                                5 = triangular
+
+PARAMETER rhoin          REAL    1.e0
+PARAMETER rhoout         REAL    1.e-5
+PARAMETER msin           REAL    1.e0
+PARAMETER msout          REAL    -1.e0
+PARAMETER pressure       REAL    1.e0
+PARAMETER velocity       REAL    10.e0
+PARAMETER width          REAL    0.1e0
+PARAMETER phase          REAL    0.e0
+PARAMETER xangle         REAL    0.e0
+PARAMETER yangle         REAL    90.e0
+PARAMETER zangle         REAL    90.e0
+PARAMETER posn           REAL    0.25e0
+PARAMETER planar         BOOLEAN TRUE
+PARAMETER pulse_fctn     INTEGER 1
+PARAMETER pulse_fctn_ms1 INTEGER 1
+PARAMETER pulse_fctn_ms2 INTEGER 2
+PARAMETER pulse_fctn_ms3 INTEGER 3
+PARAMETER pulse_fctn_ms4 INTEGER 4
+PARAMETER pulse_fctn_ms5 INTEGER 5
+
+# Mass scalars contain reaction progress variables
+
+MASS_SCALAR ms1 
+MASS_SCALAR ms2 
+MASS_SCALAR ms3 
+MASS_SCALAR ms4 
+MASS_SCALAR ms5
+

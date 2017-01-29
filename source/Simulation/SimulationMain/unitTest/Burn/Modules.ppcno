@@ -1,0 +1,10 @@
+#     Modules file constructed for burntest by setup -auto
+
+INCLUDE materials/eos/helmholtz
+INCLUDE source_terms/burn/ppcno
+INCLUDE materials/composition/ppcno
+INCLUDE hydro
+INCLUDE driver/time_dep
+INCLUDE io
+INCLUDE mesh
+INCLUDE util/wrapping

@@ -1,0 +1,48 @@
+#       Configuration file for Lid Driven Cavity Problem
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+USESETUPVARS Grid
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+
+# Solid Mechanics
+REQUIRES Driver/DriverMain/SolidMechanics_rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Elements/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rbc
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/Verlet/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/SurfaceInteraction/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Kinematics/
+
+# DATA FILES
+DATAFILES sm_body.1.h5
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+
+IF Grid=='UG'
+#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+
+# ----------------------------------------------
+# Number of guardcells at each boundary
+GUARDCELLS 2
+
+

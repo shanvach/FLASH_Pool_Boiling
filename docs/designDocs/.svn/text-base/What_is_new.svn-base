@@ -1,0 +1,66 @@
+
+New units 
+
+MHD -- two implementations:
+       1. imported from FLASH2 (8wave directionally split)
+       2. 2D unsplit staggered mesh
+
+Sourceterms 
+   Burn -- Aprox13 network
+
+   Stir
+ 
+Gravity -- four implementations
+         1. Constant
+         2. PlanePar
+	 3. PointMass
+         4. Poisson -- with multipole solver
+ 
+
+Particles -- Lagrangian tracers, for Uniform grid only
+
+
+New implementations of Units
+
+EOS : Fully ionized plasma eos of arbitrary degeneracy (helmholtz)
+
+Driver  :  New timestepping method for staggered mesh
+
+IO :  - pnetcdf implementations for all meshes
+      - direct IO (every processor writes its own) for UG
+      - Particles IO for UG
+
+New Test Problems
+ 
+     1. Several new unit tests
+        -- Gravity/Poisson
+        -- Particles
+        -- Burn
+        -- IO
+     2. Isentropic vortex
+     3. Cellular detonation
+     4. dust collapse   
+
+Enhancements to existing code
+
+General : All API's have defined F90 interfaces
+
+Grid : - Full support for face variables
+       - more robust boundary handling 
+       - enhanced data get/put interfaces
+       - support for some curvilinear coordinates 
+
+IO : Full support for non-fixed blocksizes
+
+Setup script : 
+
+
+
+Enhancements that are available, but not guaranteed to be correct :
+
+  - transparent handing of non-conservation variables from 
+    its attribute in the definition
+  - More generalized handling of non-cartesian coordinate systems
+  - masked guardcell fill in Paramesh3
+  - ability to handle internal boundaries and obstacles in PM3
+  - non-default interpolation methods in AMR

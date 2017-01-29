@@ -1,0 +1,8 @@
+#! /bin/bash
+set -e
+set -o noclobber
+h5dump -y -o part_props -d '/particle names' "$1" > /dev/null
+set +o noclobber
+perl -ne '{s/"//g;s/^ *//;s/([^ ]+) *, *$/\1/;if (not m/^(blk|tag|pos[xyz])$/) {print;}}' part_props > part_props2
+perl CustConfig.pl < part_props2
+

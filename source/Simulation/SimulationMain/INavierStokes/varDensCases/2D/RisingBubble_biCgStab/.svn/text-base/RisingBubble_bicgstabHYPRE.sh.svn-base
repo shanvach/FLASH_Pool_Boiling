@@ -1,0 +1,1 @@
+./setup INavierStokes/varDensCases/2D/RisingBubble_biCgStab/  -2d -auto -debug -nxb=16 -nyb=16 -maxblocks=1000 -gridinterpolation=native +pm4dev -objdir=RISINGBUBBLE_BICGSTAB_HYPRE -site=SEAS10926.gwu.edu 

@@ -1,0 +1,52 @@
+LIBRARY SAMRAI
+
+PPDEFINE FLASH_GRID_SAMRAI
+
+D __doc__ The Samrai Unit is not yet implemented!!!!!
+D & !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+PARAMETER iguard INTEGER 4
+PARAMETER jguard INTEGER 4
+PARAMETER kguard INTEGER 4
+
+PARAMETER priority_dir1 INTEGER 1
+PARAMETER priority_dir2 INTEGER 2
+
+PARAMETER iGridSize INTEGER 32
+PARAMETER jGridSize INTEGER 32
+PARAMETER kGridSize INTEGER 32
+
+
+PARAMETER iProcs INTEGER 1
+PARAMETER jProcs INTEGER 1
+PARAMETER kProcs INTEGER 1
+
+PARAMETER flux_correct BOOLEAN true
+
+PARAMETER refine_ratio INTEGER 2
+
+PARAMETER imaxPatchSize INTEGER 64
+PARAMETER jmaxPatchSize INTEGER 64
+PARAMETER kmaxPatchSize INTEGER 64
+
+
+PARAMETER iminPatchSize INTEGER 1
+PARAMETER jminPatchSize INTEGER 1
+PARAMETER kminPatchSize INTEGER 1
+
+PARAMETER effTolerance REAL  0.8
+PARAMETER combineEfficiency REAL  0.9
+
+PARAMETER maxPatches INTEGER 10000
+
+CONFLICTS IO/IOMain/hdf5/parallel/PM
+CONFLICTS IO/IOMain/hdf5/serial/PM
+CONFLICTS IO/IOMain/hdf5/parallel/UG
+CONFLICTS IO/IOMain/hdf5/serial/UG
+CONFLICTS IO/IOMain/pnetcdf/PM
+CONFLICTS IO/IOMain/pnetcdf/UG
+
+#right now Samrai requires io to be included
+#only because the package looks for hdf5 
+#we can fix this later
+REQUIRES IO/IOMain/hdf5/parallel/Samrai

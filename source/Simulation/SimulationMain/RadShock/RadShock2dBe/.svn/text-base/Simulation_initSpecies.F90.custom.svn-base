@@ -1,0 +1,61 @@
+!!****if* source/Simulation/SimulationMain/TwoGamma/Simulation_initSpecies
+!!
+!! NAME
+!!
+!!  Simulation_initSpecies
+!!
+!!
+!! SYNOPSIS
+!!  Simulation_initSpecies()
+!!
+!! DESCRIPTION
+!!
+!!  This routine will initialize the species and species values needed for
+!!  the TwoGamma setup, which advects two fluids with different Gamma values
+!!
+!!***
+
+subroutine Simulation_initSpecies()
+  use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+  use Multispecies_interface, ONLY : Multispecies_setProperty
+  use Simulation_data
+
+  implicit none
+#include "Flash.h"
+#include "Multispecies.h"
+
+  call RuntimeParameters_get('sim_abarXe', sim_abarXe)
+  call RuntimeParameters_get('sim_zbarXe', sim_zbarXe)
+  call RuntimeParameters_get('sim_abarCh', sim_abarCh)
+  call RuntimeParameters_get('sim_zbarCh', sim_zbarCh)
+  call RuntimeParameters_get('sim_abarVa', sim_abarVa)
+  call RuntimeParameters_get('sim_zbarVa', sim_zbarVa)
+  call RuntimeParameters_get('sim_abarBe', sim_abarBe)
+  call RuntimeParameters_get('sim_zbarBe', sim_zbarBe)
+
+#ifdef XE_SPEC
+  call Multispecies_setProperty(XE_SPEC, A, sim_abarXe)
+  call Multispecies_setProperty(XE_SPEC, Z, sim_zbarXe)
+  call Multispecies_setProperty(XE_SPEC, GAMMA, 5.0/3.0)
+#endif
+
+#ifdef BE_SPEC
+  call Multispecies_setProperty(BE_SPEC, A, sim_abarBe)
+  call Multispecies_setProperty(BE_SPEC, Z, sim_zbarBe)
+  call Multispecies_setProperty(BE_SPEC, GAMMA, 5.0/3.0)
+#endif
+
+#ifdef POLI_SPEC
+  call Multispecies_setProperty(POLI_SPEC, A, sim_abarCh)
+  call Multispecies_setProperty(POLI_SPEC, Z, sim_zbarCh)
+  call Multispecies_setProperty(POLI_SPEC, GAMMA, 5.0/3.0)
+#endif
+
+#ifdef VACU_SPEC
+  call Multispecies_setProperty(VACU_SPEC, A, sim_abarVa)
+  call Multispecies_setProperty(VACU_SPEC, Z, sim_zbarVa)
+  call Multispecies_setProperty(VACU_SPEC, GAMMA, 5.0/3.0)
+#endif
+
+end subroutine Simulation_initSpecies
+

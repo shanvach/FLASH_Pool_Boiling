@@ -1,0 +1,25 @@
+# Configuration file for Huang-Greengard-style Poisson solver
+
+# Available submodules:
+
+#   fft_opt  Optimized FFT single-block solver
+
+DEFAULT fft
+
+# Runtime parameters
+
+D max_mg_corrections      Maximum number of correction V-cycles to employ.
+D max_mg_residual_norm    Apply V-cycle corrections until this residual norm
+D &                       is reached or max_mg_corrections V-cycles have been
+D &                       performed.
+D mgrid_print_norm        If .true., print the ratio of the residual norm to
+D &                       the source norm as each V-cycle is completed.
+
+PARAMETER max_mg_corrections    INTEGER 100
+PARAMETER max_mg_residual_norm  REAL    1.E-6
+PARAMETER mgrid_print_norm      BOOLEAN TRUE
+
+# Work variables needed by solver
+
+VARIABLE hgw1 NOADVECT NORENORM NOCONSERVE
+VARIABLE hgw2 NOADVECT NORENORM NOCONSERVE

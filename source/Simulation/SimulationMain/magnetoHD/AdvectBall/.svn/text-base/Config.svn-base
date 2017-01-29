@@ -1,0 +1,26 @@
+#       Configuration file for 3D Ball Advection MHD problem
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   tiny	    Threshold value used for numerical zero
+D   rx	            Field loop advection angle = atan(rx/ry)
+D   ry
+D   xCtr	    x center of the computational domain
+D   yCtr	    y center of the computational domain
+D   zCtr	    z center of the computatoinal domain
+D   Ux_initial	    Strength of initial vector fields
+D   Uy_initial	    Strength of initial vector fields
+D   Uz_initial	    Strength of initial vector fields
+D   ballRadius	    Radius of field loop
+
+PARAMETER tiny         REAL     1.e-16
+PARAMETER rx	       REAL     1.
+PARAMETER ry           REAL     2.
+PARAMETER xCtr	       REAL     1.
+PARAMETER yCtr	       REAL     0.5
+PARAMETER zCtr	       REAL     0.0
+PARAMETER Ux_initial    REAL    1.0
+PARAMETER Uy_initial    REAL    1.0
+PARAMETER Uz_initial    REAL    1.0
+PARAMETER ballRadius  REAL     0.1

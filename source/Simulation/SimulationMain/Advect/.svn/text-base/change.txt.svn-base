@@ -1,0 +1,11 @@
+rhoin	sim_rhoin
+rhoout	sim_rhoout
+pressure	sim_pressure
+velocity	sim_velocity
+width		sim_width
+xangle		sim_xangle
+yangle		sim_yangle
+posn		sim_posn  
+pulse_fctn	sim_pulseFunctn
+
+

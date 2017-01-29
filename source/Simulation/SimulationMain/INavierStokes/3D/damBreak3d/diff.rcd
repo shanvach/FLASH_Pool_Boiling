@@ -1,0 +1,59 @@
+4a5
+> USESETUPVARS Grid
+6c7
+< REQUIRES physics/IncompNS/IncompNSMain/vardens
+---
+> REQUIRES physics/IncompNS/IncompNSMain/constdens
+8a10,21
+> # Immersed boundary unit:
+> REQUIRES physics/ImBound
+> REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
+> 
+> # Solid Mechanics:
+> REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+> REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
+> REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+> 
+> DATAFILES kinematics.input.h5
+> #DATAFILES sm_body.00001.h5
+> 
+10,12c23,24
+< #REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D_VD
+< #REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+< USESETUPVARS Grid
+---
+> REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+> #/Slices
+18,23c30,32
+<    REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+< ###   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+< 
+<   REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+<   REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+< 
+---
+>    REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+>    REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+> #   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+26d34
+< 
+28,29c36,37
+< # ----------------------------------------------
+<   VARIABLE aaJunk  #kpd  for IfactorB
+---
+> # THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+> FACEVAR aux
+30a39
+> # ----------------------------------------------
+32c41
+< GUARDCELLS 3
+---
+> GUARDCELLS 2
+34,40d42
+< #Default position of the solid body
+< PARAMETER    sb_xmin      REAL    -1.0
+< PARAMETER    sb_xmax      REAL    -1.0
+< PARAMETER    sb_ymin      REAL    -1.0
+< PARAMETER    sb_ymax      REAL    -1.0
+< PARAMETER    sb_zmin      REAL    -1.0
+< PARAMETER    sb_zmax      REAL    -1.0

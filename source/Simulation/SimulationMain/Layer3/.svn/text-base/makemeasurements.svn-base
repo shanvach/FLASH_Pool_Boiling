@@ -1,0 +1,29 @@
+#!/bin/csh
+
+set FILE="makemeasurements.pro"
+
+echo "pro makemeasurements, spikelen, bublen, gaplen, time " > $FILE
+
+set n=`ls *plt_cnt*[0-9] | wc -w`
+
+echo "     spikelen = findgen(${n})" >> $FILE
+echo "     bublen   = findgen(${n})" >> $FILE
+echo "     gaplen   = findgen(${n})" >> $FILE
+echo "     time     = findgen(${n})" >> $FILE
+echo                                 >> $FILE
+echo "     i = 0"                    >> $FILE
+
+foreach i (*plt_cnt*[0-9])
+    echo "    print, 'working on file ${i}'" >> $FILE
+	echo "    measure, '${i}', t, sp, g, b " >> $FILE
+    echo "      spikelen[i] = sp " >> $FILE
+    echo "      bublen  [i] = b  " >> $FILE
+    echo "      gaplen  [i] = g  " >> $FILE
+    echo "      time    [i] = t  " >> $FILE
+    echo                           >> $FILE
+    echo "      i = i + 1"         >> $FILE
+    echo                           >> $FILE
+end
+
+echo "return" >> $FILE
+echo "end" >> $FILE

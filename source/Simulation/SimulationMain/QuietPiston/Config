@@ -1,0 +1,13 @@
+#		Configuration file for the QuietPiston problem 
+
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Gamma
+
+D               pAmbient        Initial ambient pressure
+D               rhoAmbient      Initial ambient density
+D		windVel 	Inflow velocity (parallel to x-axis)
+
+PARAMETER sim_pAmbient     REAL    1.0
+PARAMETER sim_rhoAmbient   REAL    1.4
+PARAMETER sim_windVel	   REAL	   3.0
+PARAMETER sim_temp	   REAL    300.0

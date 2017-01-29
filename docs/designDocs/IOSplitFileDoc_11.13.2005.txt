@@ -1,0 +1,98 @@
+Nov 13, 2005
+
+Documentation for parallel IO with file splitting.
+
+******************************************************
+Background
+*****************************************************
+With the projected date of the bgl full machine run 
+rapidly approaching we needed to implement some kind 
+of IO that showed promising scaling on 64,000.  Parallel hdf5 with
+all processors writing to the same file was not 
+scaling in all the tests we have run so far on the
+llnl bgl machine.  Richard Hedges is working on 
+this for us, but he has limited access to the 
+machine.  In the meantime, we needed some implementation that
+would work if we are not able to get parallel hdf5 to 
+scale on 64,0000 processors.  
+Our test runs on bgl showed reasonable IO
+performance with 1024 procs and even 2048 procs.
+Given this looked ok, we decided to add the ability for
+our checkpoint and plotfiles to be broken up into 'x'
+parts, where 'x' is the runtime parameter outputSplitNum.
+We can break up the checkpoint file into
+64 files with 1000 processors writing to 1 file since
+at least this appears to scale.
+
+
+******************************************************
+Parameter
+******************************************************
+The IO Config declares the parameter
+PARAMETER outputSplitNum INTEGER 1
+
+The default value is 1 meaning that all processors
+write to the same file.  (No change from existing 
+implementation.)
+
+if outputSplitNum = 2 then a checkpoint file
+will be broken up into 2 parts.
+
+For simplicity,
+mod(numProcs, outputSplitNum) == 0
+
+*********************************************************
+Implementation
+*********************************************************
+The implementation is quite simple for the FLASH uniform
+grid.  A checkpoint used to be named for example:
+sedov_chk_hdf5_0001  now if broken up into 2 parts will be:
+
+sedov_chk_hdf5_s0000_0001 and sedov_chk_hdf5_s0001_0001
+
+(If anyone has a better naming convention I'm certainly not
+stuck on this one.  I was going to use a,b,c for the split
+files but when you are talking about bgl, there really 
+are not enough letters.  In addition, there are some quirks
+I discovered with the file names and sfocu and fidlr where
+these tools are expecting the file names to have certain
+parts.  Noel is working to change these old requirements
+so a different naming convention will soon be possible.)
+
+To write to split files the processors are divided up
+linearly.  For a 16 proc run divided into 4 files, procs
+0-3 write to split file s0000, procs 4-7 write to split file
+s0001 and so on.  In order to do this and MPI communicator
+must be passed to hdf5 to initialize the file and return
+a file handle.  Currently, I am creating the communicators
+in FORTRAN and passing them to the IO c routines.  So
+far this has worked on zingiber and cube but I can imagine
+this is the least portable part of the implementation. 
+
+The 'globalNumBlocks' writing to a given file and the
+'offset' had to be generalized to work with or without
+file splitting.
+
+
+**********************************************************
+Testing
+**********************************************************
+Tested checkpoint writing and reading on zingiber with
+4 procs and cube with 8 procs.
+
+Need to test plotfiles and particle plotfiles.
+
+Need to test on bgl!
+
+**********************************************************
+Limitations
+**********************************************************
+Currently splitting files only works with the uniform
+grid and hdf5 parallel.  The implementation is simple because
+with the uniform grid there is only 1 block per processor and
+thus dividing files by processor number works easily.
+There is no implementation with
+amr or parallel netcdf yet. AMR grids and parallel netcdf
+io should keep the default value of outputSplitNum.
+(It would be simple to implement
+in parallel netcdf uniform grid if necessary.)

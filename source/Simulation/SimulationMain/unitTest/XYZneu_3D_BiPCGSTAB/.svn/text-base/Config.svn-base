@@ -1,0 +1,62 @@
+#       Configuration file for the x,y periodic; z Neuman BCs Poisson problem.
+REQUIRES Driver
+REQUIRES Grid/GridMain
+LIBRARY STDCXX
+USESETUPVARS Grid
+
+IF Grid=='UG'
+#   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+    REQUESTS Grid/GridSolvers/HYPRE/UG
+ELSE    
+#   REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+#    REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+# Wavenumbers in x, y and z for the solution.
+
+#D   waven_x  wavenumber in the solution in x direction
+PARAMETER waven_x         REAL     1.
+
+#D   waven_y  wavenumber in the solution in y direction
+PARAMETER waven_y         REAL     1.
+
+#D   waven_z  wavenumber in the solution in z direction
+PARAMETER waven_z         REAL     1.
+
+#D   alpha_x  Phase angle for the solution in x (in rads)
+PARAMETER alpha_x         REAL     0.3141592653589793
+
+#D   alpha_y  Phase angle for the solution in y (in rads)
+PARAMETER alpha_y         REAL     0.3141592653589793
+
+##PARAMETER SPECIAL_REFINEMENT   INTEGER    1
+
+## ----------------------------------------------
+## THIS PART IS FOR PHYSICS CONFIG
+## Variables required by the Solve_Poisson module
+VARIABLE vphi                	# Numerical Solution of Poisson Problem
+VARIABLE vsrc            	# Source for poisson problem (taken from analytical soln.)
+VARIABLE vanl                 	# Analytical solution of Poisson problem
+VARIABLE verr               	# Pointwise value of abs(vphi(i,j,k)-vanl(i,j,k))
+VARIABLE facb                   # Var for stencil.
+
+
+## Fluxes
+FLUX flab
+FLUX flbb
+FLUX flcb
+FLUX fldb
+
+## Use SCRATCHVAR for temporary storages
+
+## Use FACEVAR for cell interface velocity fields
+
+## Number of guardcells at each boundary
+GUARDCELLS 2
+#GUARDCELLS 2

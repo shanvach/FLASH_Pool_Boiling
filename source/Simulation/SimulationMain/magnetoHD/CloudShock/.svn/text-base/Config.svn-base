@@ -1,0 +1,55 @@
+#       Configuration file for Cloud-Shock Interaction problem
+#	(Dai & Woodward, JCP, 142:331--369, 1998)
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   d_left,  right   Density in left and right parts of grid
+D   p_left,  right   Pressure in left and right parts of grid
+D   u_left,  right   Fluid x-velocity in left and right parts of grid
+D   v_left,  right   Fluid y-velocity in left and right parts of grid
+D   w_left,  right   Fluid z-velocity in left and right parts of grid
+D   bx_left, right   Magnetic x-field component
+D   by_left, right   Magnetic y-field component
+D   bz_left, right   Magnetic z-field component
+D   lposn            Point of intersection between the shock plane and the x-axis
+D   cloudRadius      Radius of a high density cloud
+D   cloudXCtr        Center x-coord of a cloud
+D   cloudYCtr	     Center y-coord of a cloud
+D   cloudZCtr	     Center z-coord of a cloud
+D   cloudDensity     Density of cloud
+D   tiny	     Threshold value used for numerical zero
+D   simType	     Two variants in simulation: 1 for the original circular cloud; 2 for square cloud 
+
+# ADD DESCRIPTION HERE
+PARAMETER d_left	REAL	3.86859
+PARAMETER p_left	REAL	167.345
+PARAMETER u_left	REAL	0.
+PARAMETER v_left	REAL	0.
+PARAMETER w_left	REAL	0.
+PARAMETER bx_left	REAL	0.
+PARAMETER by_left	REAL	2.1826182
+PARAMETER bz_left	REAL	-2.1826182
+
+PARAMETER d_right	REAL	1.
+PARAMETER p_right	REAL	1.
+PARAMETER u_right	REAL	-11.2536
+PARAMETER v_right	REAL	0.
+PARAMETER w_right	REAL	0.
+PARAMETER bx_right	REAL	0.
+PARAMETER by_right	REAL	0.56418958
+PARAMETER bz_right	REAL	0.56418958
+
+PARAMETER lposn		REAL	0.6
+PARAMETER cloudRadius	REAL	0.115
+PARAMETER cloudXCtr	REAL	0.8
+PARAMETER cloudYCtr	REAL	0.5
+PARAMETER cloudZCtr	REAL	0.5
+PARAMETER cloudDensity	REAL	10.
+
+PARAMETER tiny 		REAL    1.e-16
+PARAMETER simType	INTEGER 1
+
+VARIABLE FAST
+VARIABLE SLOW
+VARIABLE VECZ

@@ -1,0 +1,57 @@
+#       Configuration file for RBC with Immresed boundary implementation 
+
+USESETUPVARS Grid
+
+REQUIRES Driver/DriverMain/SolidMechanics_rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/ 
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Elements/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rbc
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/Verlet/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/SurfaceInteraction/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Kinematics/
+
+REQUIRES physics/ImBound
+#REQUIRES physics/IncompNS
+#REQUIRES physics/IncompNS/IncompNSMain/constdens
+#REQUIRES physics/IncompNS/IncompNSMain/extras
+REQUIRES Grid/GridMain/paramesh/paramesh4/Paramesh4dev/PM4_package/bittree
+# Immersed boundary unit:
+#REQUIRES physics/ImBound
+
+# Tecplot routines:
+#REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D_VD
+#REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+
+IF Grid=='UG'
+#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+###   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+#REQUIRES Simulation/SimulationMain/INavierStokes
+#REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+
+#Grid/GridMain/paramesh/paramesh4/Paramesh4dev/PM4_package/bittree/bittree.F90
+#  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+#  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+ENDIF
+
+
+VARIABLE pres
+FACEVAR  VELC
+
+
+# Data files needed
+DATAFILES sm_body.1.h5 
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2

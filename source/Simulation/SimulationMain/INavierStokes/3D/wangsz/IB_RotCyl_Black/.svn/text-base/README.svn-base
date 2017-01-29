@@ -1,0 +1,18 @@
+This directory contains the data and routines for a moving cylinder
+computation where the cylinder is oscillating vertically an rotating.
+The cylinder kinematics is defined on the sm_body.00001XX.h5 file and 
+can be seen on the ReadRigidEULER321_RotCyl_write_h5.m script within 
+the matlab dir provided.
+
+- To setup a Uniform Grid calculation use IB_RotCyl_ug.sh 
+  in the base dir of FLASH and copy MANUALLY the files from
+  this simulation directory:
+  flash_ug.par -> OBJDIR/flash.par
+  sm_body.00001_ug.h5 -> OBJDIR/sm_body.00001.h5
+
+- To setup an AMR calculation use IB_RotCyl_amr.sh 
+  in the base dir of FLASH and copy MANUALLY the files from
+  this simulation directory:
+  flash_amr.par -> OBJDIR/flash.par
+  sm_body.00001_amr.h5 -> OBJDIR/sm_body.00001.h5
+

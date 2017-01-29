@@ -1,0 +1,96 @@
+11.8.2005
+
+Anshu, Dan, Katie, Murali
+
+Architecture issues
+
+*************************************************************
+INTRO
+*************************************************************
+Our code needs to relax some assumptions on unit architecture.  There
+are too many places in the code where a 'common' implementation is needed
+We are running into these problems all over the code.  In IO the question is
+how to include particles elegantly.  In Grid, the issue is also over 
+particles.  Within the particle unit the issue is how to deal 
+with necessary 'subunits' like directories 'mapping' and 'communication 
+in an elegant way.  Source Terms, Solvers will also need more flexibility
+than we currently allow.
+
+After much discussion we concluded that we do need to formalize 
+a way to have subunits and a way to have 'common' or 'user' implementation
+
+**************************************************************
+SUBUNITS
+**************************************************************
+
+Key Concepts:
+*A unit has a full implementation.that can stand on its own
+*In contrast a sub unit only contains part of an implementation
+    and can not stand by itself
+    -A subunit might require other parts of a unit
+    -A will implement only part of the API
+    -Example subunit IO_particles requires IO/common/hdf5
+*Each subunit would have its own "data" module
+*Subunits can use each others "data" modules
+
+
+Example: Grid Unit
+
+Grid
+   -common  (default main unit for mesh implementation
+       -UG
+       -paramesh
+	  -PM2
+	  -PM3
+       -Samrai
+   -GridParticles (sub unit, add on functionality)
+   -GridMGrid  (sub unit, add on functionality)
+   -GridSomething  (sub unit, add on functionality)
+
+
+Open Questions:
+*Should there only be stubs at the very top level?  Or should there
+ be stubs under each subunit
+*Need to clarify how initialization occurs.
+      -the main unit will have a Grid_init which will then
+       call Grid_ParticlesInit, Grid_MGridInit etc.  This is clear.
+       What isn't decided is if Grid_ParticlesInit and other subunit
+       initializations should have stubs.  If so, should they sit 
+       at the top level?  If not should we put #ifdefs around them
+       in the regular Grid_init? 
+
+
+*****************************************************************
+COMMON/USER DEFINED AREA
+****************************************************************
+
+Key Concepts:
+*A directory structure that is not a unit or sub unit which allows
+ the user to place a file or files that replace another implementation
+*A user can also add small or specific implementation to a directory
+ in the common or user folder
+
+
+
+Examples:
+*Versions of amr redistribute block.  We want them to be in the 
+ repository but they do not warrent their own 'subunit' or 'unit'
+ architecture.  In F2 we would have to make a directory for them 
+ under grid or mesh
+
+*Grid_updateRefinement has it's own implementation for the
+ ShockCyl problem but it is only specific to PM grid implementations.
+ Right now we have kind of a hacky way of putting a version into
+ the Simulations/setups/ShockCyl directory and having the setup
+ script determine when it is included or not.  I think it is still
+ confusing.  We instead could put the implementation in a Grid
+ 'user defined' directory
+
+
+Open Questions:
+
+*What should we name this directory?  Ideas are 'common','user',
+ 'userdefined'
+
+
+

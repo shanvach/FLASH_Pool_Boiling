@@ -1,0 +1,45 @@
+#       Configuration file for RBC with Immresed boundary implementation 
+
+USESETUPVARS Grid
+REQUIRES monitors/Profiler/
+REQUIRES monitors/Profiler/ProfilerMain 
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+REQUIRES Driver/DriverMain/SolidMechanics_rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/ 
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Elements/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Elements/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Misc/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rbc/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/Verlet/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/SurfaceInteraction/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Kinematics/
+
+REQUIRES physics/ImBound
+REQUIRES Grid/GridMain/paramesh/paramesh4/Paramesh4dev/PM4_package/bittree
+# Immersed boundary unit:
+
+#REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+
+IF Grid=='UG'
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ENDIF
+
+
+VARIABLE pres
+
+# PARAMETER 
+PARAMETER  Fext                REAL       0.0
+PARAMETER  stretching_exp      INTEGER    0
+
+# Data files needed
+DATAFILES sm_body.1.h5 
+DATAFILES sm_body.2.h5
+
+# Number of guardcells at each boundary
+GUARDCELLS 2

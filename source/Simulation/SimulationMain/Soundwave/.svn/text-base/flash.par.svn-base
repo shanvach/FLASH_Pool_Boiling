@@ -1,0 +1,107 @@
+
+#	Runtime parameters for the Soundwave problem.
+
+#		Density and perurbation information
+
+orientation = 1
+rho_init	= 1.
+wavelength      = 1.
+perturb_amp     = 0.1
+cs              = 1.
+
+#		Gas ratio of specific heats
+
+gamma           = 1.4
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = cartesian
+
+#		Size of computational volume
+
+xmin		= 0.
+xmax		= 1.
+ymin		= 0.
+ymax		= 1.
+
+zmin		= 0.
+zmax		= 1.
+
+#		Boundary conditions
+
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+
+#	Simulation (grid, time, I/O) parameters
+
+cfl		= 0.8
+basenm          = "soundwave_"
+restart         = .false.
+checkpointFileIntervalTime          = 0.2
+nend            = 1000
+tmax            = 1.
+
+run_comment     = "Soundwave problem ,parallel to x-axis"
+log_file        = "soundwave.log"
+eintSwitch     = 1.e-4
+
+# AMR refinement parameters
+
+lrefine_max     = 6
+refine_var_1    = "dens"
+
+# Uniform grid specific parameters
+# see note below for more explanation
+
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# These parameter are needed only in non fixed blocksize mode
+#iGridSize = 64   # global number of points along IAXIS
+#jGridSize = 64
+#kGridSize = 64
+
+# The default UG setup parameters assume a 2d problem with nxb=nyb=8,
+# in fixed blocksize mode
+# 4 guardcells, and 1 processor.  If the user wanted a 2d problem 
+# of global size 16x16, when nxb=nyb=8, the specification would be
+#iProcs = 2	#number or procs in the i direction	
+#jProcs = 2	#number of procs in the j direction
+#kProcs = 1
+
+# in non fixed block size mode nxb and nyb are not predetermined
+# one Would specify the global size as follow :
+#iGridSize = 16   
+#jGridSize = 16
+#kGridSize = 1
+# The number of processors can be picked at runtime, then
+# the local block size is iGridSize/iProcs etc
+
+ 
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##

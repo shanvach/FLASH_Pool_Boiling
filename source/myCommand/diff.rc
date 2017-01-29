@@ -1,0 +1,4 @@
+cp sm_integ* physics/SolidMechanics/SolidMechanicsMain/Solvers/sm_integ_checkconverg.F90
+
+cp sm_Pred* physics/SolidMechanics/SolidMechanicsMain/Solvers/PredCorr/sm_PredCorr_checkconverg.F90
+cp Solid*.h physics/SolidMechanics/SolidMechanics.h

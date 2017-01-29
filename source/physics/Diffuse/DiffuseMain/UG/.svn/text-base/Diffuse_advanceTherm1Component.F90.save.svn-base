@@ -1,0 +1,253 @@
+!!****if* source/physics/sourceTerms/Diffuse/DiffuseStandalone/Pencilgrid/Diffuse_advanceTherm1Component
+!!
+!!  NAME 
+!!
+!!  Diffuse_advanceTherm1Component
+!!
+!!  SYNOPSIS
+!!
+!!  call Diffuse_advanceTherm1Component(integer, intent(IN)           :: iVar                                              
+!!                                      integer, intent(IN)           :: iFactorB
+!!                                      integer, intent(IN)           :: iFactorA
+!!                                      integer, intent(IN)           :: bcTypes(6)
+!!                                      real,    intent(IN)           :: bcValues(2,6)
+!!                                      real,    intent(IN)           :: dt
+!!                                      real,    intent(IN)           :: scaleFact
+!!                                      real,              intent(IN) :: chi
+!!                                      integer, OPTIONAL, intent(IN) :: pass
+!!                                      integer,           intent(IN) :: blockCount
+!!                                      integer,dimension(blockCount),intent(IN) :: blockList
+!!                                      integer, intent(IN), OPTIONAL :: iFactorC
+!!                                      integer, intent(IN), OPTIONAL :: iFactorD)
+!!
+!!
+!!  DESCRIPTION 
+!!      This routine advances the diffusion equation  of the form,
+!!
+!!      A * dV/dt = d/dx(B*dV/dx) + d/dy(B*dV/dy) + d/dx(B*dV/dz) + C*V + D
+!!
+!!
+!!
+!! ARGUMENTS
+!!
+!!
+!! SIDE EFFECTS
+!!
+!!  
+!! NOTES:
+!!  
+!!
+!!***
+
+!!REORDER(4): solnVec
+
+
+subroutine Diffuse_advanceTherm1Component(iVar, iFactorB, iFactorA, bcTypes, bcValues, dt, scaleFact, chi, pass, blockCount, blockList, iFactorC, iFactorD)
+
+ use diff_saData,    ONLY : diff_scaleFactThermSaTime
+ use Diffuse_data,   ONLY : diff_myPE
+ use Grid_interface, ONLY : Grid_getBlkPtr, Grid_releaseBlkPtr, &
+                            Grid_getBlkIndexLimits, Grid_fillGuardCells, &
+                            Grid_getDeltas
+ 
+
+ implicit none
+
+#include "Flash.h"
+#include "constants.h"
+#include "Flash_mpi.h"
+#include "Eos.h"
+
+ integer,                      intent(IN) :: iVar
+ integer,                      intent(IN) :: iFactorB
+ integer,                      intent(IN) :: iFactorA
+ integer, OPTIONAL,            intent(IN) :: iFactorC
+ integer, OPTIONAL,            intent(IN) :: iFactorD
+ integer,                      intent(IN) :: bcTypes(6)
+ real,                         intent(IN) :: bcValues(2,6)
+ real,                         intent(IN) :: dt
+ real,                         intent(IN) :: scaleFact
+ real,                         intent(IN) :: chi
+ integer, OPTIONAL,            intent(IN) :: pass
+ integer,                      intent(IN) :: blockCount
+ integer,dimension(blockCount),intent(IN) :: blockList
+
+ ! Local
+ integer                   :: i,j,k,ierr,Iter,lb,MaxIter = 100, iter_inner
+ real                      :: Cond_R, Cond_L, OldVar = 0.
+ real                      :: theta = 0.5, TOL = 1.0E-6
+ real, dimension(MDIM)     :: del
+ real                      :: L2Block, L2Err, L2Tot
+ real                      :: AA,BB,DD
+ real                      :: relaxation = 1., CDiv
+ 
+ logical :: mask(NUNK_VARS)
+
+ real, POINTER, DIMENSION(:,:,:,:) :: solnVec
+ integer, dimension(2,MDIM):: blkLimitsGC, blkLimits
+
+ !========================================================================= 
+
+ OldVar = 0.0
+
+ mask = .false.
+ mask(iVar) = .true.
+ mask(iFactorA) = .true.
+ mask(iFactorB) = .true.
+
+ ! Setup RHS (Source)
+ do lb = 1, blockCount
+
+     call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)
+
+     call Grid_getDeltas(blocklist(lb), del)
+
+     call Grid_getBlkPtr(blocklist(lb), solnVec)
+
+
+     do k = blkLimits(LOW,KAXIS), blkLimits(HIGH,KAXIS)
+        do j = blkLimits(LOW,JAXIS), blkLimits(HIGH,JAXIS)
+           do i = blkLimits(LOW,IAXIS), blkLimits(HIGH,IAXIS)
+        
+               cDiv = 1.0/solnVec(iFactorA,i,j,k)
+
+               Cond_R = 0.5*(solnVec(iFactorB,i+1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+               Cond_L = 0.5*(solnVec(iFactorB,i-1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+
+               SolnVec(WTMP_VAR,i,j,k) = SolnVec(iVar,i,j,k) + (1.0-theta)*(dt/del(1)**2) * & 
+                                        (cond_R*solnVec(iVar,i+1,j,k) - (cond_R+cond_L)*solnVec(iVar,i,j,k) + cond_L*solnVec(iVar,i-1,j,k))
+
+               if (present(iFactorD)) then
+                  SolnVec(WTMP_VAR,i,j,k) = SolnVec(WTMP_VAR,i,j,k) + &
+                       dt * SolnVec(iFactorD, i, j, k)
+               end if
+
+               if (NDIM .ge. 2) then
+
+                   Cond_R = 0.5*(solnVec(iFactorB,i,j+1,k) + solnVec(iFactorB,i,j,k))*CDiv
+                   Cond_L = 0.5*(solnVec(iFactorB,i,j-1,k) + solnVec(iFactorB,i,j,k))*CDiv
+
+                   SolnVec(WTMP_VAR,i,j,k) =  SolnVec(WTMP_VAR,i,j,k) + (1.0-theta)*(dt/del(2)**2) * &
+                                             (cond_R*solnVec(iVar,i,j+1,k)-(cond_R+cond_L)*solnVec(iVar,i,j,k)+cond_L*solnVec(iVar,i,j-1,k))
+
+               endif
+
+               if (NDIM .eq. 3) then
+
+                   Cond_R = 0.5*(solnVec(iFactorB,i,j,k+1) + solnVec(iFactorB,i,j,k))*CDiv
+                   Cond_L = 0.5*(solnVec(iFactorB,i,j,k-1) + solnVec(iFactorB,i,j,k))*CDiv
+
+                   SolnVec(WTMP_VAR,i,j,k) =  SolnVec(WTMP_VAR,i,j,k) + (1.0-theta)*(dt/del(3)**2) * &
+                                             (cond_R*solnVec(iVar,i,j,k+1) - (cond_R+cond_L)*solnVec(iVar,i,j,k) + cond_L*solnVec(iVar,i,k-1,k))
+
+              endif
+              
+           end do
+        end do
+     end do
+
+    call Grid_releaseBlkPtr(blocklist(lb), solnVec)
+
+ end do
+
+ ! Solve, The technique uses domain decomposition. However the convergence criteria is shady,
+ !Ideally it should be based on changes in GC values (ONLY) after every iteration, Have not 
+ !come up with a technique by which that can be obtained. 
+
+ iter_inner = 0
+
+  L2Tot = 1.
+  Iter  = 0  
+  do while (sqrt(L2Tot) > TOL .and. Iter .lt. MaxIter)
+
+     Iter = Iter + 1
+
+     ! call Grid_fillGuardCells(diff_myPE,CENTER,ALLDIR, masksize=NUNK_VARS, mask=mask)
+     call Grid_fillGuardCells(diff_myPE,CENTER,ALLDIR)
+
+     L2Tot = 0.
+
+     L2Block = 0.0
+
+     do lb = 1, blockCount
+        L2Err = 1.0
+        do while (sqrt(L2Err) > TOL)
+           iter_inner = iter_inner + 1
+           L2Err = 0.0
+
+           call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)
+
+           call Grid_getDeltas(blocklist(lb), del)
+
+           call Grid_getBlkPtr(blocklist(lb), solnVec)
+
+           do k = blkLimits(LOW,KAXIS), blkLimits(HIGH,KAXIS)
+              do j = blkLimits(LOW,JAXIS), blkLimits(HIGH,JAXIS)
+                 do i = blkLimits(LOW,IAXIS), blkLimits(HIGH,IAXIS)          
+
+                    OldVar = solnVec(iVar,i,j,k) 
+                    cDiv = 1.0/solnVec(iFactorA,i,j,k)
+
+                    Cond_R = 0.5*(solnVec(iFactorB,i+1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+                    Cond_L = 0.5*(solnVec(iFactorB,i-1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+
+                    DD = 1.0 + theta*(Cond_R + Cond_L)*(dt/(del(1)**2))
+
+                    if (present(iFactorC)) then
+                       DD = DD + dt * solnVec(iFactorC,i,j,k)
+                    end if
+
+                    if (NDIM .ge. 2) then
+
+                        Cond_R = 0.5*(solnVec(iFactorB,i,j+1,k) + solnVec(iFactorB,i,j,k))*CDiv
+                        Cond_L = 0.5*(solnVec(iFactorB,i,j-1,k) + solnVec(iFactorB,i,j,k))*CDiv
+
+                        DD = DD + theta*(Cond_R + Cond_L)*(dt/(del(2)**2))
+                    endif
+
+                    AA = -theta*Cond_L*(dt/(del(1)**2))
+                    BB = -theta*Cond_R*(dt/(del(1)**2))
+ 
+                    solnVec(iVar,i,j,k) = (solnVec(WTMP_VAR,i,j,k)/DD - (AA/DD)*solnVec(iVar,i-1,j,k) - (BB/DD)*solnVec(iVar,i+1,j,k))
+
+                    if (NDIM .ge. 2) then
+ 
+                        Cond_R = 0.5*(solnVec(iFactorB,i,j+1,k) + solnVec(iFactorB,i,j,k))*CDiv
+                        Cond_L = 0.5*(solnVec(iFactorB,i,j-1,k) + solnVec(iFactorB,i,j,k))*CDiv
+
+                        AA = -theta*Cond_L*(dt/(del(2)**2))
+                        BB = -theta*Cond_R*(dt/(del(2)**2))
+
+                        solnVec(iVar,i,j,k) = (solnVec(iVar,i,j,k) - (AA/DD)*solnVec(iVar,i,j-1,k) - (BB/DD)*solnVec(iVar,i,j+1,k))
+
+                   endif
+
+                   solnVec(iVar,i,j,k) = OldVar + relaxation * (solnVec(iVar,i,j,k) - OldVar)
+
+                   L2Err = L2Err + ((OldVar-solnVec(iVar,i,j,k))/OldVar)**2
+
+              end do
+           end do
+        end do
+
+        L2Block = L2Block + L2Err / blockCount
+
+      end do
+
+       call Grid_releaseBlkPtr(blocklist(lb), solnVec)
+     end do
+
+    call mpi_allreduce ( L2Block, L2Tot, 1, FLASH_REAL, &
+         MPI_SUM, MPI_COMM_WORLD, ierr )
+
+  end do
+
+  if (Iter .eq. MaxIter) then
+      print*,"Diffuse_advanceTherm : Max Iterations: ", MaxIter
+      call Driver_abortFlash("Diffuse : No Convergence in Diffuse_advanceTherm")
+  endif
+
+
+  return
+
+end subroutine Diffuse_advanceTherm1Component

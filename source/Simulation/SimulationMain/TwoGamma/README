@@ -1,0 +1,107 @@
+Notes by Alan Calder, 2006, and by Lynn Reid, 2007 after email discussion with Alan
+
+This setup is for a simple test of advecting two fluids
+having different gammas. The goal is to investigate whether
+or not an instability develops at the interface between
+the two fluids (Abgrall and Karni, JCP 169, 594 (2001)). 
+
+What happens is that if you start out with two materials
+of different gamma with a flat interface between them and
+propagate that across the grid, numerical mixing as the
+interface propagates across multiple zones leads to
+unphysical behavior. Numerical mixing is always a problem
+and an interface propagating across the mesh without some
+sort of interface tracking method will get diffuse. But
+this two gamma example is worse than just that, the resulting
+mixed zones are not just a diffuse mixture. Instead,
+something weird.  Right now this Simulation demonstrates
+a problem without providing a solution.
+
+Preliminary results were at
+http://fleetwood.asci.uchicago.edu/~calder/validation/twogamma/
+but have disappeared with Alan's computer when he lefet.
+
+Please do not take them to mean that we completely understand 
+what is going on. The purpose of this setup is to investigate
+the issue.
+
+Here is an email exchange between Alan Calder and Eduard Kirr, 
+who was a postdoc with Todd Dupont and possibly Vikram.
+
+>> On Sun, 13 Apr 2003, Alan Calder wrote:
+>>
+>>>
+>>> Eduard and Vikram-
+>>>
+>>> I ran a few simple simulations this weekend. It appears that
+>>> we do see evidence of an instability at the interface between
+>>> two different-gamma fluids propagating across the mesh as
+>>> expecte from Abgrall and Karni. I put up a web page with
+>>> details of what I did and results in the form of quicktime
+>>> movies.
+>>>
+>>> Alan
+
+>
+> On Mon, 14 Apr 2003, Eduard Kirr wrote:
+>
+>> Hi Alan,
+>>
+>> Thank you for the prompt simulations you have done. I haven't seen all the
+>> movies yet because I am stuck at home with a flu and a slow internet
+>> connection. Actually the velocity profiles should look worse than density
+>> and pressure but if the latter are convincing enough we could start
+>> implementing a fix.
+>>
+>> There are four different fixes described in Abgrall/Karni paper. With
+>> three of them I am rather familiar but they all have some drawbacks. The
+>> ghost fluid and pressure propagation methods loose conservation of energy
+>> in the neighborhood of the fluid interfaces. However, according to Karni's
+>> studies, this becomes significant only for flows with very strong shocks
+>> (mach
+>> # in the hundreds). They are also easier to implement in the Flash code,
+>> in my opinion. Abgrall's technique of propagating 1/(\gamma-1) has a very
+>> strong "tracking" flavor which makes it difficult to implement but
+>> conserves the energy. It does not conserve the mass of each specie but
+>> Flash uses the latter only to get the "correct" eq of state and actually
+>> fails to do so in Alan's simulations. However it appears that Abgrall's
+>> technique will be hard to generalize when one has more than two different
+>> fluids in contact.
+>>
+>> In conclusion I think it is good to try to implement all the fixes
+>> described in Abgrall/Karni paper and check them against more serious
+>> simulations (they should at least cure the spurious waves Alan's
+>> simulations showed)
+>>
+>> Let me know what you think!
+>>
+>> Eduard
+
+On Mon, 14 Apr 2003, Alan Calder wrote:
+
+>
+> Hello Eduard,
+>
+> Sorry to hear about your flu. I hope you have a speedy recovery.
+>
+> I checked the setup I created for this test into the FLASH2.3
+> distribution, FLASH2.3/setups/twogamma. The parameters I used
+> were very similar to those of the Rayleigh-Taylor work we
+> have been doing. As I think we are all aware, the instability
+> could affect some of the validation problems we are addressing,
+> so additional runs with parameters appropriate for
+> other problems is a logical next step.
+>
+> As far as how to proceed, I think this will have to be
+> discussed among the compphys/validation group and prioritized.
+> There are many outstanding problems, so I suspect that we may
+> not be able to jump into this just yet. I have commitments to
+> work on astrophysical problems in the near future, for example.
+> So, we will have to discuss how this instability affects work
+> in progress.
+>
+> Thanks,
+>
+> Alan
+>
+

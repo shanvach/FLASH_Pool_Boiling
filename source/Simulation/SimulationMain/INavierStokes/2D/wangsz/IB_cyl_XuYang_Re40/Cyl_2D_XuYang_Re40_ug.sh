@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/IB_cyl_XuYang_Re40/  -2d -auto -opt +ug -nxb=400 -nyb=440 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_XUYANG_RE40 -site=colonialone.gwu.edu

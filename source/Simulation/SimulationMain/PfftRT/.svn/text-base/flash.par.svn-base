@@ -1,0 +1,117 @@
+##########################################################
+# Parameters for RTFlame analysis
+#
+# setup (eureka as an example):
+# ./setup -auto -3d +cube16 +pm4dev PfftRT -debug --maxblocks=4000 --site=eureka.alcf.anl.gov
+##########################################################
+
+########################
+## Restart and output parameters
+########################
+
+basenm  = "rtflame_256_s30_"
+restart = .true.
+
+# Write plot files after each convolution?
+writeflsmdata = .false.
+
+checkpointFileNumber = 0
+plotFileNumber = 0
+
+plot_var_1 = "flam"
+plot_var_2 = "flsm"
+
+##########################################################
+
+######################
+# Smoothing parameters
+#
+# do ismooth = smooth_step_min, smooth_step_max
+#
+#    sigma = (cell dx) * 2^(ismooth * smooth_step_delta)
+#
+# end do
+######################
+
+smooth_step_min = 0   
+smooth_step_max = 16 # (lrefine_max + 3)/smooth_step_delta  -- integer arithmetic
+
+smooth_step_delta = 0.5e0
+
+##########################################################
+
+##########################################################
+
+#######################
+# Size of buffer region
+#######################
+
+bufFact = 1.0
+
+##########################################################
+
+##########################################################
+
+#######################
+# Levels of isosurfaces for
+# surface area calculation
+#######################
+
+isolevel_1 = 0.1
+isolevel_2 = 0.5
+isolevel_3 = 0.9
+
+##########################################################
+
+##########################################################
+
+#######################
+#  Set to 1 to get proper refinement behavior.
+#######################
+
+nrefs = 1
+
+##########################################################
+
+##########################################################
+
+#######################
+# Simulation Parameters
+# MUST MATCH ORIGINAL RTFLAME 
+# PARAMETERS IN RESTART FILE!
+#######################
+
+lrefine_max = 5
+lrefine_min = 1
+
+
+##########
+##  Grid
+##########
+geometry = "cartesian"
+
+nblockx = 54
+xmin = 0.e0
+xmax = 810e5
+nblocky = 1
+ymin = -7.5e5
+ymax = 7.5e5
+nblockz = 1
+zmin = -7.5e5
+zmax = 7.5e5
+
+#nblockx = 10
+#xmin = 0.e0
+#xmax = 10.0
+#nblocky = 1
+#ymin = -0.5
+#ymax = 0.5
+#nblockz = 1
+#zmin = -0.5
+#zmax = 0.5
+
+xl_boundary_type = "reflect"
+xr_boundary_type = "diode"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+

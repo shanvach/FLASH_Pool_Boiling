@@ -1,0 +1,44 @@
+#       Configuration file for Lid Driven Cavity Problem
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+USESETUPVARS Grid
+
+
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+#REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
+
+# Solid Mechanics:
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+
+DATAFILES kinematics.input.h5 sm_body.00001.h5
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/FluidVolInt
+
+IF Grid=='UG'
+#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+#   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2

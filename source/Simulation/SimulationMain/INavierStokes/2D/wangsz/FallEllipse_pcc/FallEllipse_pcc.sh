@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/FallEllipse_pcc/  -2d -auto -opt +ug -nxb=100 -nyb=256 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=FALLELLIPSE_PCC -site=colonialone.gwu.edu

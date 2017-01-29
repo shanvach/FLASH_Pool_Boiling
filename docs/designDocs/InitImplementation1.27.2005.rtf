@@ -1,0 +1,54 @@
+{\rtf1\mac\ansicpg10000\cocoartf102
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww15140\viewh12120\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+
+\f0\fs24 \cf0 NameValueLL implementation 1.27.2005\
+\
+\
+The NameValueLL will have 2 'slots', one for the Original Value and one for the current value\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural
+\cf0 \ul \ulc0 The Runtime Parameters\ulnone \
+\
+RuntimeParameters will have the methods, add, set and get which implement the\
+NameValueLL for the Runtime Parameters.\
+\
+	* RuntimeParameters_init is one of the very first Units to be initialized -- \
+	this is because whether we are starting from scratch we need all of the runtime 	parameters in order to run the simulation and if we are starting from checkpoint (with a 	flash.par), we need the checkpoint number, in order to even open the checkpoint file\
+		\
+		- When RuntimeParameters_init is called, the flash.par is read in, the parameters\
+		are added to the correct context, and the initial value and the current value are \
+		both set to the value in the flash.par\
+\
+		- If we are starting from checkpoint (with a flash.par) then when IO_init is called, \
+		the checkpoint file will be read and those runtimeParameters that were stored in\
+		the checkpoint will be inserted into the "initial value" slot in the NameValueLL\
+\
+			* IO_init should call, RuntimeParameters_setOrig after it reads in the 			runtimeParameters stored in  \
+			\
+\
+\
+-- getPrevious\
+\
+\
+\ul The Scalars\ulnone \
+\
+\
+\
+	* When starting from Scratch, all scalar values are derived or set from flash.par\
+\
+	* When it is time to checkpoint, in Driver_global, IO_output is called when it is time to do 	a checkpoint -- at this point, every Unit who wants to write a checkpoint is going to have 	to call\
+\
+\
+	IO_getScalar, IO_setScalar called from IO_updateScalars, from IO_output\
+\
+\
+\
+checkpoint file will consist of a 3 things.  RuntimeParameters, Scalars and Grid stuff\
+\
+\
+\
+\
+}

@@ -1,0 +1,147 @@
+#	Runtime parameters for the MHD 2D Riemann problem.
+#	Please also look at default.par for more runtime parameters in the object directory
+
+#	Specific heats ratio
+gamma		= 2.0
+
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#	Size of computational volume
+xmin		= 0.
+xmax		= 1.
+ymin		= 0.
+ymax		= 1.
+
+
+#	Boundary conditions
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+
+
+#	Parameters for initial model
+#	Density, pressure, velocity and magnetic field
+#	initial values on either side of the interface
+dens_1		= 0.125
+pres_1		= 0.1
+velx_1		= 0.
+vely_1		= 0.
+velz_1		= 0.
+magx_1		= 0.75
+magy_1		= 0.75
+magz_1		= 0.
+
+dens_2 		= 1.
+pres_2		= 1.
+velx_2		= 0.
+vely_2		= 0.
+velz_2		= 0.
+magx_2		= 0.75
+magy_2		= 0.75
+magz_2		= 0.
+
+dens_3		= 2.
+pres_3		= 1.
+velx_3		= 0.
+vely_3		= 0.
+velz_3		= 0.
+magx_3		= 0.75
+magy_3		= 0.75
+magz_3		= 0.
+
+dens_4		= 1.
+pres_4		= 1.
+velx_4		= 0.
+vely_4		= 0.
+velz_4		= 0.
+magx_4		= 0.75
+magy_4		= 0.75
+magz_4		= 0.
+
+
+#	Simulation (grid, time, I/O) parameters
+run_comment	= "2D MHD Riemann problem"
+log_file        = "2d_mhd_riemann.log"
+basenm          = "2d_mhd_riemann_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 1000000
+tmax            = 0.1
+cfl		= 0.8
+plot_var_1	= "dens"
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 0.01
+#checkpointFileIntervalStep = 10
+
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 1
+lrefine_max     = 6
+nrefs		= 2
+refine_var_1	= "dens"
+eintSwitch      = 1.e-6
+
+
+#	DivB control switch
+killdivb	= .true.
+
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT STAGGERED MESH MHD SOLVER  ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. MAGNETIC(B) AND ELECTRIC(E) FIELDS:
+E_modification	= .true.           # High order algorithm for E-field construction
+energyFix	= .true.           # Update magnetic energy using staggered B-fields
+ForceHydroLimit	= .false.          # Pure Hydro Limit (B=0)
+prolMethod      = "injection_prol" # Prolongation method (injecton_prol, balsara_prol)
+
+
+#	III. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, HLLD, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+entropy         = .false.     # Entropy fix for the Roe solver
+
+
+#	IV. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+
+#	The parameters below are only necessary for the Uniform Grid
+
+iGridSize	= 200	#defined as nxb * iprocs
+jGridSize	= 200	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+iProcs		= 2	#num procs in i direction
+jProcs		= 2	#num procs in j direction
+kProcs		= 1	#num procs in k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

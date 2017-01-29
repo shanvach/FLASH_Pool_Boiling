@@ -1,0 +1,251 @@
+run_comment = "Simulating plasma jet production at OMEGA"
+log_file    = "omega.log"
+basenm      = "omega_"
+
+#
+# based on LaserSlab input file in the User guide
+# Modified by Wen to simulate/design OMEGA experiment
+# Incident angle = 30 degrees
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 0.0
+checkpointFileIntervalStep = 50
+
+### Plot Options ###
+plotFileNumber       = 0
+plotFileIntervalTime = 0.0
+plotFileIntervalStep = 10
+plot_var_1           = "dens"
+plot_var_2           = "depo"
+plot_var_3           = "tele"
+plot_var_4           = "tion"
+plot_var_5           = "ye  "
+plot_var_6           = "sumy"
+plot_var_7 	     = "pres"
+plot_var_8 	     = "velx"
+plot_var_9 	     = "vely"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 0
+
+########################################
+#                                      #
+#     RADIATION/OPACITY PARAMETERS     #
+#                                      #
+########################################
+rt_useMGD       = .true.
+rt_mgdNumGroups = 6
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdBounds_7  = 1.0e+05
+rt_mgdFlMode    = "fl_harmonic"
+rt_mgdFlCoef    = 1.0
+
+rt_mgdXlBoundaryType = "reflecting"
+rt_mgdXrBoundaryType = "vacuum"
+rt_mgdYlBoundaryType = "reflecting"
+rt_mgdYrBoundaryType = "vacuum"
+rt_mgdZlBoundaryType = "reflecting"
+rt_mgdZrBoundaryType = "reflecting"
+
+useOpacity     = .true.
+
+### SET CHAMBER (HELIUM) OPACITY OPTIONS ###
+op_chamAbsorb   = "op_tabpa"
+op_chamEmiss    = "op_tabpe"
+op_chamTrans    = "op_tabro"
+op_chamFileType = "ionmix4"
+op_chamFileName = "he-imx-005.cn4"
+
+### SET TARGET (Plastic (CH)) OPACITY OPTIONS ###
+op_targAbsorb   = "op_tabpa"
+op_targEmiss    = "op_tabpe"
+op_targTrans    = "op_tabro"
+op_targFileType = "ionmix4"
+op_targFileName = "polystyrene-imx-001.cn4"
+
+
+############################
+#                          #
+#     LASER PARAMETERS     #
+#                          #
+############################
+
+useEnergyDeposition = .true.
+ed_maxRayCount      = 5000
+ed_gradOrder        = 2
+
+### LASER IO OPTIONS ###
+ed_useLaserIO             = .true.
+ed_laserIOMaxNumPositions = 10000
+ed_laserIONumRays         = 128
+
+### SETUP LASER PULSES ###
+ed_numPulses = 1
+
+# Define Pulse 1:
+ed_numSections_1 = 4
+ed_time_1_1  = 0.0
+ed_time_1_2  = 0.1e-09
+ed_time_1_3  = 1.0e-09
+ed_time_1_4  = 1.1e-09
+
+ed_power_1_1 = 0.0
+ed_power_1_2 = 4.712e+12
+ed_power_1_3 = 4.712e+12
+ed_power_1_4 = 0.0
+
+
+### SETUP LASER BEAM ###
+ed_numBeams = 1
+
+# Setup Gaussian Beam:
+ed_lensX_1            =  1000.0e-04
+ed_lensY_1            =  1732.0e-04
+ed_targetX_1          =  0.0e-04
+ed_targetY_1          =  0.0e-04
+ed_semiaxis1_1        =  125.0e-04
+ed_pulseNumber_1      =  1        
+ed_wavelength_1       =  0.351
+ed_crossSectionID_1   =  3
+ed_decayExponent_1    =  2.15
+# ed_decayRadius1_1     =  1.201122e-03 # 20 micron FWHM
+ed_decayRadius1_1     =  125.0e-04
+ed_lensEqualsTarget_1 =  .true.     
+ed_numRays_1          =  512
+
+
+### Conduction parameters ###
+useDiffuse      = .true.
+useConductivity = .true.
+diff_useEleCond = .true.
+diff_eleFlMode  = "fl_larsen"
+diff_eleFlCoef  = 0.06
+diff_thetaImplct = 1.0
+
+diff_eleXlBoundaryType = "outflow"
+diff_eleXrBoundaryType = "outflow"
+diff_eleYlBoundaryType = "outflow"
+diff_eleYrBoundaryType = "outflow"
+diff_eleZlBoundaryType = "outflow"
+diff_eleZrBoundaryType = "outflow"
+
+### Heat-Exchange parameters ###
+useHeatexchange = .true.
+
+### Material and EOS parameters ###
+eosModeInit      = "dens_temp_gather"
+eosMode          = "dens_ie_recal_gather"
+smallt           = 1.0
+smallx           = 1.0e-99
+eos_useLogTables = .false.
+
+############################
+#                          #
+#     HYDRO PARAMETERS     #
+#                          #
+############################
+useHydro = .true.
+
+# Use second order hybrid solver with minmod slope limiter. This
+# essentially eliminates any Carbuncle instability.
+ 
+order            = 3        # Interpolation order (first/second/third/fifth order)
+slopeLimiter     = "mc"     # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta = 1.       # Slope parameter for the "limited" slope by Toro
+charLimiting     = .true.   # Characteristic limiting vs. Primitive limiting
+use_avisc        = .true.   # use artificial viscosity (originally for PPM)
+cvisc            = 0.1      # coefficient for artificial viscosity
+use_flattening   = .true.   # use flattening (dissipative) (originally for PPM)
+use_steepening   = .false.  # use contact steepening (originally for PPM)
+use_upwindTVD    = .false.  # use upwind biased TVD slope for PPM (need nguard=6)
+RiemannSolver    = "hllc"   # Roe, HLL, HLLC, LLF, Marquina, hybrid
+entropy          = .false.  # Entropy fix for the Roe solver
+shockDetect      = .false.  # Shock Detect for numerical stability
+addThermalFlux   = .false.
+
+# Hydro boundary conditions:
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+
+##########################
+#   INITIAL CONDITIONS   #
+##########################
+
+sim_targetRadius = 1000.0e-04
+sim_targetHeight = 500.0e-04
+sim_vacuumHeight = 1500.0e-04
+
+# Target material defaults set for Plastic (CH) at room temperature:
+sim_rhoTarg  = 1.0
+sim_teleTarg = 290.11375
+sim_tionTarg = 290.11375
+sim_tradTarg = 290.11375
+ms_targA = 6.5
+ms_targZ = 3.5
+ms_targZMin = 0.1
+eos_targEosType = "eos_tab"
+eos_targSubType = "ionmix4"
+eos_targTableFile = "polystyrene-imx-001.cn4"
+
+# Chamber material defaults set for Helium:
+sim_rhoCham  = 2.0e-07
+sim_teleCham = 290.11375
+sim_tionCham = 290.11375
+sim_tradCham = 290.11375
+ms_chamA = 4.002602
+ms_chamZ = 2.0
+eos_chamEosType = "eos_tab"
+eos_chamSubType = "ionmix4"
+eos_chamTableFile = "he-imx-005.cn4"
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+tstep_change_factor = 1.10
+cfl            = 0.4
+dt_diff_factor = 1.0e+100 # Disable diffusion dt
+rt_dtFactor    = 0.02
+hx_dtFactor    = 1.0e+100
+tmax           = 2.0e-09
+dtmin          = 1.0e-16
+dtinit         = 1.0e-15
+dtmax          = 3.0e-09
+nend           = 1000000
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+
+geometry = "cylindrical"
+
+# Domain size:
+xmin = 0.0
+xmax = 1000.0e-04
+ymin = -500.0e-04
+ymax = 1500.0e-04
+
+# Total number of blocks:
+nblockx = 1
+nblocky = 2
+
+lrefine_max = 4
+lrefine_min = 1
+refine_var_1 = "dens"
+refine_var_2 = "tele"
+

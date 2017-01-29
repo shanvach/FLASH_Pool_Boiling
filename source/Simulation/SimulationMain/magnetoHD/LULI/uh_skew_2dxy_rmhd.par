@@ -1,0 +1,204 @@
+run_comment = "Simulations of LULI Experiments"
+log_file    = "luli.log"
+basenm      = "luli_"
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 10
+
+### Plot Options ###
+plotFileNumber = 0
+plot_var_1     = "dens"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 0
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+
+### Conduction parameters ###
+useDiffuse      = .true.
+useConductivity = .true.
+diff_useEleCond = .true.
+diff_eleFlMode  = "fl_larsen"
+diff_eleFlCoef  = 0.06
+diff_thetaImplct= 1.0
+
+diff_eleXlBoundaryType = "outflow"
+diff_eleXrBoundaryType = "outflow"
+diff_eleYlBoundaryType = "outflow"
+diff_eleYrBoundaryType = "outflow"
+diff_eleZlBoundaryType = "outflow"
+diff_eleZrBoundaryType = "outflow"
+
+### Heat-Exchange parameters ###
+useHeatexchange = .true.
+
+### Material and EOS parameters ###
+eosModeInit        = "dens_temp_gather"
+eosMode            = "dens_ie_gather"
+smallX             = 1.0e-99
+smallT      = 1.
+
+### Multigroup diffusion options ###
+rt_useMGD       = .true.
+rt_mgdNumGroups = 6
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdBounds_7  = 1.0e+05
+rt_mgdFlMode    = "fl_larsen"
+rt_mgdFlCoef    = 1.0
+
+useOpacity     = .true.
+
+rt_mgdXlBoundaryType = "outflow"
+rt_mgdXrBoundaryType = "outflow"
+rt_mgdYlBoundaryType = "outflow"
+rt_mgdYrBoundaryType = "outflow"
+rt_mgdZlBoundaryType = "outflow"
+rt_mgdZrBoundaryType = "outflow"
+
+
+### Hydro options ###
+
+# UNSPLIT HYDRO OPTIONS:
+useHydro         = .true.
+slopeLimiter     = "vanLeer" # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta = 1.        # Slope parameter for the "limited" slope by Toro
+charLimiting     = .true.    # Characteristic limiting vs. Primitive limiting
+RiemannSolver    = "hybrid"
+shockDetect      = .false.   # Shock Detect for numerical stability
+
+# PPM Options:
+order            = 3  
+use_avisc        = .true.
+cvisc            = 0.1
+use_steepening   = .false.
+use_flattening   = .true.
+
+# MHD OPTIONS:
+ForceHydroLimit  	= .false.
+addThermalFlux   	= .false.
+use_biermann     	= .true.
+hy_biermannCoef  	= 1.0e-10
+useMagneticResistivity  = .true.
+resistivity             = 10.0
+
+
+# # SPLIT HYDRO OPTIONS:
+# useHydro            = .true.
+# charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+# cvisc               = 0.1
+# use_steepening      = .FALSE.
+# ppmEintFluxConstructionMeth     = 0
+# ppmEintCompFluxConstructionMeth = 5
+# ppmEnerFluxConstructionMeth     = 0
+
+# 3T HYDRO OPTIONS:
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+hy_eosModeAfter = "dens_ie_gather"
+
+hy_3Ttry_Arelated = .TRUE.
+hy_3Ttry_B = 1
+hy_3Ttry_D = 2.0
+hy_3Ttry_E = 1
+hy_3Ttry_F = 2
+hy_3Ttry_G = 0
+hy_3Ttry_Q = 0
+
+# Hydro boundary conditions:
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "reflect"
+yr_boundary_type = "outflow"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+### Laser Options ###
+useEnergyDeposition = .false.
+
+##########################
+#   INITIAL CONDITIONS   #
+##########################
+
+sim_targetGeom    = "cylinder"
+sim_targetRadius  = 0.025
+sim_skewFactor    = 0.20
+sim_driverType    = "unispec"
+sim_pulseLength   = 1.0e-09
+sim_laserEnergy   = 5.34761e+13
+sim_targetZOffset = 0.0
+sim_ndiv          = 5
+
+# Target material defaults set for graphite at room temperature:
+sim_rhoTarg  = 2.16
+sim_teleTarg = 50.0
+sim_tionTarg = 50.0
+sim_tradTarg = 50.0
+sim_abarTarg = 12.0107
+sim_zbarTarg = 6.0
+
+# Chamber material defaults set for Helium at pressure 1.6 mbar:
+sim_rhoCham  = 2.655e-07
+sim_teleCham = 50.0
+sim_tionCham = 50.0
+sim_tradCham = 50.0
+sim_abarCham = 4.002602
+sim_zbarCham = 2.0
+
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+tstep_change_factor = 1.05
+cfl            = 0.4
+# dt_diff_factor = 1.0e+100 # Disable diffusion dt
+rt_dtFactor    = 0.02
+hx_dtFactor    = 1.0e+100
+tmax           = 10.0e-09
+dtmin          = 1.0e-16
+dtinit         = 1.0e-15
+dtmax          = 1.0e-09
+nend           = 10000000
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+
+# Domain size:
+xmin = 0.0
+xmax = 1.0
+ymin = 0.0
+ymax = 1.0
+
+# Number of processes in each logical direction:
+iProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 100
+
+# Total number of blocks:
+nblockx = 1
+nblocky = 1
+
+lrefine_min_init = 4
+lrefine_max = 7
+lrefine_min = 1
+refine_var_1 = "dens"
+refine_var_2 = "tele"
+refine_var_3 = "tion"

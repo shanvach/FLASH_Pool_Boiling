@@ -1,0 +1,86 @@
+
+Units/subunits to include            Directories/files to exclude
+
+
+Driver                               TimeDep/Driver_computeDtTemp.F90
+
+GridMain                             Samrai
+                                     UG/UGReordered
+
+GridParticles                        GridParticles/Paramesh
+
+IOMain                               MPIHybrid ?
+                                     MPIDump ?
+
+IOParticles                          hdf5/serial/PM
+                                     hdf5/parallel/PM
+                                     pnetcdf/PM
+                                     
+Multispecies
+
+ParticlesMain                        active
+                                     passive/PredCorrFlash2
+
+ParticlesMapping                     meshWeighting ?
+                                     pt_mapParticlesToMesh.F90
+
+ParticlesInitialization              WithDensity
+
+PhysicalConstants
+
+RuntimeParameters
+
+Simulation                           AdvectMassScalars
+                                     BlastBS
+                                     BlastHydro
+                                     BlastMHD
+                                     CurrentSheet
+                                     DustCollapseCart
+                                     FieldLoop
+                                     Flame*
+                                     Layer3
+                                     Orbit
+                                     SamraiTest
+                                     SedovSelfGravity
+                                     ShockCyl
+                                     SingleDM
+                                     SodSpherical?
+                                     SodStep
+                                     Soundwave
+                                     StirTurb
+                                     TestEosLite
+                                     TwoGamma
+                                     WD_def
+
+Logfile
+
+Timers
+
+Eos
+
+Gravity                              GravityParticles
+
+Hydro                                split/SPPM
+                                     split/SlowFlowPPM
+
+Burn                                 BurnMainAlt
+                                     BurnMain/nuclearBurn/Aprox19
+                                     BurnMain/nuclearBurn/Iso7
+
+Stir
+
+
+	
+
+
+Units Excluded 
+
+Profiler
+RuntimeViz
+All material property units
+Cool
+Heat
+Ionize
+Diffuse
+Interfaces
+

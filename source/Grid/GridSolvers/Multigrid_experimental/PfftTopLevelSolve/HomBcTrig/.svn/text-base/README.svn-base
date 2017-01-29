@@ -1,0 +1,2 @@
+Setup using:
+ -with-unit=Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve PfftSolver=HomBcTrigSolver

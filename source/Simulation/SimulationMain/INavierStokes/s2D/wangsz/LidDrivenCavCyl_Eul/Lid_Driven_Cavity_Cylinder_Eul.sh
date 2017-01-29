@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/LidDrivenCavCyl_Eul/  -2d -auto -opt +ug -nxb=256 -nyb=64 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=TIMER_LID_DRI_CAVITY_CYL_EUL -site=colonialone.gwu.edu

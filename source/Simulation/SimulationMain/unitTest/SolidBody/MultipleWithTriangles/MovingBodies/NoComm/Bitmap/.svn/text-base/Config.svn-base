@@ -1,0 +1,48 @@
+REQUIRES Driver
+
+PARTICLEPROP posx     REAL
+PARTICLEPROP posy     REAL
+PARTICLEPROP posz     REAL
+PARTICLEPROP velx     REAL
+PARTICLEPROP vely     REAL
+PARTICLEPROP velz     REAL
+PARTICLEPROP tag      REAL
+PARTICLEPROP blk      REAL
+PARTICLEPROP proc     REAL
+
+PARTICLEPROP pres     REAL
+PARTICLEPROP fxvi     REAL
+PARTICLEPROP fyvi     REAL
+PARTICLEPROP fzvi     REAL
+PARTICLEPROP glob     REAL
+
+
+# Use FACEVAR for cell interface velocity fields
+FACEVAR velc
+FACEVAR ibfc
+
+
+REQUIRES RuntimeParameters
+
+REQUIRES Grid/GridMain
+IF Grid == 'UG'
+   REQUIRES Grid/GridMain/UG
+ELSE
+   REQUIRES Grid/GridMain/paramesh
+ENDIF
+
+REQUIRES Grid/GridStructures/withTriangles/pointTopoint/bitmap
+REQUIRES Grid/GridStructures/withTriangles/pointTopoint/bitmap/unitTest
+REQUIRES flashUtilities/sorting
+
+#Default position of the solid body
+PARAMETER    sb_xmin      REAL    -1.0
+PARAMETER    sb_xmax      REAL    -1.0
+PARAMETER    sb_ymin      REAL    -1.0
+PARAMETER    sb_ymax      REAL    -1.0
+PARAMETER    sb_zmin      REAL    -1.0
+PARAMETER    sb_zmax      REAL    -1.0
+
+DATAFILES RBC.dat
+
+REQUIRES flashUtilities/system/memoryUsage

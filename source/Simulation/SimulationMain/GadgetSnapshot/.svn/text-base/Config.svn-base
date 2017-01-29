@@ -1,0 +1,25 @@
+# Configuration file for GadgetSnapshot problem.
+
+REQUIRES Driver/DriverMain/Split
+REQUIRES Grid
+REQUIRES Grid/GridParticles
+REQUIRES IO
+REQUIRES IO/IOParticles
+REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
+
+PARTICLETYPE active INITMETHOD fromfile MAPMETHOD weighted ADVMETHOD leapfrog
+REQUESTS Particles/ParticlesInitialization/FromFile
+REQUESTS Particles/ParticlesMain/active/massive/Leapfrog
+REQUIRES Particles/ParticlesForces/longRange/gravity/ParticleMesh
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+REQUESTS Particles/ParticlesMapping/meshWeighting/MapToMesh
+
+D snapshotNumber		Number of snapshot file(s)
+D numFiles			Number of files in snapshot
+D path				Path to snapshot file(s)
+D basename			Basename of snapshot file
+
+PARAMETER snapshotNumber     	 INTEGER  	 0
+PARAMETER numFiles	     	   	 INTEGER		 1
+PARAMETER path				 STRING 		 "/home/zuhone"
+PARAMETER basename			 STRING            "snapshot" 

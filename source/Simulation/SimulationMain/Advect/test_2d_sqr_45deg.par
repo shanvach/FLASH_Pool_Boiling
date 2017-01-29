@@ -1,0 +1,55 @@
+#	Runtime parameters for the linear advection problem.
+
+#	Parameters for initial model
+
+sim_rhoin		= 1.	# density inside pulse
+sim_rhoout		= 1.E-5	# density outside
+sim_pressure	= 1.
+sim_velocity	= 10.
+sim_width		= 0.1
+sim_pulseFunctn	= 1	# pulse shape:  1 = square, 2 = Gaussian
+
+#		Angle and position of interface relative to x and y axes
+
+sim_xangle		= 45.
+sim_yangle		= 90.
+sim_posn		= 1.
+
+#		Gas ratio of specific heats
+
+gamma           = 1.4
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = "cartesian"
+
+#		Size of computational volume
+
+xmin		= 0.
+xmax		= 2.
+ymin		= 0.
+ymax		= 2.
+
+#		Boundary conditions
+
+xl_boundary_type      = "outflow"
+xr_boundary_type      = "outflow"
+yl_boundary_type      = "outflow"
+yr_boundary_type      = "outflow"
+
+#	Simulation (grid, time, I/O) parameters
+
+cfl		= 0.8
+lrefine_max     = 4
+refine_var_1    = "dens"
+basenm          = "advect_2d_45deg_sqr_4lev_"
+restart         = .false.
+checkpointFileIntervalTime          = 0.1
+nend            = 5000
+tmax            = 0.1
+
+run_comment     = "2D linear advection, square pulse, 45 degree angle"
+log_file        = "advect_2d_45deg_sqr_4lev.log"
+eintSwitch     = 1.e-4

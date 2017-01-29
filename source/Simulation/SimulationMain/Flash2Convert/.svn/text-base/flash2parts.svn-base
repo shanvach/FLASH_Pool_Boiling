@@ -1,0 +1,16 @@
+15 2 13
+particle_tag tag i
+particle_block blk i
+particle_mass mass r
+particle_x_vel velx r
+particle_y_vel vely r
+particle_z_vel velz r
+particle_y posy r
+particle_x posx r
+particle_z posz r
+particle_x_acc accx r
+particle_y_acc accy r
+particle_z_acc accz r
+particle_x_acc_old oacx r
+particle_y_acc_old oacy r
+particle_z_acc_old oacz r

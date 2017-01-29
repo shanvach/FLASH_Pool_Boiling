@@ -1,0 +1,138 @@
+# Parameter file for ClusterSloshing Simulation
+
+# Parameters of the problem.
+
+testSingleCluster              = .TRUE.
+mTot                           = 1.5E15
+massRatio                      = 20.0
+a                              = 600.0
+aC                             = 60.0
+c1                             = 0.17
+c2                             = 0.17
+b                              = 200.0
+gasFrac                        = 0.12
+isGas                          = .FALSE.
+nsubzones                      = 3
+rMetal                         = 100.0
+noBubbles                     = .true.
+
+# I/O
+
+basenm                         = "cluster_sloshing_rigid_"
+
+restart                        = .FALSE.
+
+checkpointFileIntervalTime     = 3.1557E19
+particleFileIntervalTime       = 3.1557E15
+plotFileIntervalTime           = 3.1557E14
+
+wall_clock_checkpoint          = 13800.
+
+plot_var_1                     = "dens"
+plot_var_2                     = "temp"
+plot_var_3                     = "pres"
+plot_var_4                     = "gpot"
+plot_var_5                     = "metl"
+plot_var_6                     = "magx"
+plot_var_7                     = "magy"
+plot_var_8                     = "magz"
+plot_var_9		       = "magp"
+plot_var_10		       = "divb"
+			  
+run_comment                    = "Single Rigid Cluster Test"
+log_file                       = "cluster_sloshing_rigid.log"
+
+# Driver
+
+dtinit                         = 3.1557E12
+dtmax                          = 3.1557E16
+dtmin                          = 3.1557E12
+nend                           = 10000000
+tmax			       = 3.1557E17
+
+# Grid
+
+geometry                       = "cartesian"
+
+xmax                           = 1.543E24
+xmin                           = -1.543E24
+ymax                           = 1.543E24
+ymin                           = -1.543E24
+zmax                           = 1.543E24
+zmin                           = -1.543E24
+
+xl_boundary_type               = "periodic"
+xr_boundary_type               = "periodic"
+yl_boundary_type               = "periodic"
+yr_boundary_type               = "periodic"
+zl_boundary_type               = "periodic"
+zr_boundary_type               = "periodic"
+
+nblockx                        = 1
+nblocky                        = 1
+nblockz                        = 1
+
+lrefine_max                    = 4
+lrefine_min                    = 2
+
+refine_var_1                   = "dens"
+refine_var_2                   = "pres"
+refine_var_3                   = "temp"
+refine_var_4                   = "metl"
+
+refiningRadius = 200.
+
+# Hydrodynamics
+
+cfl                            = 0.8
+convertToConsvdInMeshInterp    = .TRUE.
+MinRefinementDensity           = 1.0E-29
+eintSwitch                     = 1.0e-4
+ppm_modifystates               = .TRUE.
+
+smalle                         = 1.E12
+smallp                         = 1.E-25
+smallt                         = 1.E4
+smallu                         = 1.E-10
+smallx                         = 1.E-10
+smlrho                         = 1.E-33
+
+# Gravity
+
+useGravity                     = .TRUE.
+
+# Cooling 
+
+useCool = .false.
+
+# Diffuse
+
+useDiffuse = .false.
+useViscosity = .false.
+
+#plasmaBeta = 100.
+UnitSystem = "none"
+
+## -------------------------------------------------------##
+## Switches specific to the StaggeredMesh Solver     ##
+order		     = 2 #(first / second order scheme)
+facevar2ndOrder	     = .false.
+slopeLimiter    = "mc" #(minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.   # only needed for the limited slope by Toro
+charLimiting	  = .true.
+E_modification	  = .true.
+energyFix	  = .false.
+
+
+#		  Riemann solver
+RiemannSolver	  = "roe"
+#entropy	  = .true.
+
+#		  CTU integrator
+CTU		      = .false.
+
+#		      Pure Hydro Limit
+ForceHydroLimit	      = .false.
+
+#        Prolongation method of Facevars
+prolMethod      = "injection_prol" #(injecton_prol, balsara_prol)

@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/IB_cyl_YangJM/  -2d -auto -opt +ug -nxb=625 -nyb=375 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_PRESC_YANGJM_UG -site=colonialone.gwu.edu

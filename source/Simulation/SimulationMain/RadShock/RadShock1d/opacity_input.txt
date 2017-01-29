@@ -1,0 +1,27 @@
+Planck Absorption
+Planck Absorption
+Rosseland
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+be-imx-003.cnr
+-------------------------------
+Constcm2g
+Constcm2g
+Constcm2g
+1.000000E-05
+1.000000E-05
+1.000000E-05
+
+
+-------------------------------
+Planck Absorption
+Planck Absorption
+Rosseland
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+xenon-imx-012.cnr
+-------------------------------

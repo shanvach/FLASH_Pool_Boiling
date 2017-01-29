@@ -1,0 +1,195 @@
+run_comment = "2D Radiative Shock test using a shifted driver"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 20
+
+### Plot Options ###
+plotFileNumber = 0
+plot_var_1     = "dens"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 0
+
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+useDiffuse      = .true.
+
+### Conduction parameters ###
+useConductivity = .true.
+diff_useEleCond = .true.
+diff_eleFlMode  = "fl_harmonic"
+diff_eleFlCoef  = 0.06
+
+### Heat-Exchange parameters ###
+useHeatexchange = .true.
+
+### Material and EOS parameters ###
+eosModeInit        = "dens_temp_gather"
+eosMode            = "dens_ie_gather"
+
+### Multigroup diffusion options ###
+rt_useMGD      = .true.
+rt_mgdNumGroups = 5
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdFlMode    = "fl_harmonic"
+rt_mgdFlCoef    = 1.0
+
+### Initial conditions ###
+sim_vely = -100.0e+05 # 100 km/s
+sim_nbuffer = 1
+sim_reflectDist = 270.0e-04
+
+# Set Xenon properties:
+sim_rhoXe  = 0.0065
+sim_zbarXe = 54.0
+sim_abarXe = 131.293
+sim_teleXe = 290.11375
+sim_tionXe = 290.11375
+sim_tradXe = 290.11375
+
+# Set plastic properties:
+#   The initial temperature for the plastic is currently set to 
+#   force it into pressure equilibrium with the Xenon
+sim_rhoCh  = 1.41
+sim_zbarCh = 5.0256
+sim_abarCh = 9.8032
+sim_teleCh = 0.911488595131
+sim_tionCh = 0.911488595131
+sim_tradCh = 0.911488595131
+
+# Set vacuum properties:
+#   Vacuum is currently set to same conditions as Xenon
+sim_rhoVa  = 0.0065
+sim_zbarVa = 54.0
+sim_abarVa = 131.293
+sim_teleVa = 290.11375
+sim_tionVa = 290.11375
+sim_tradVa = 290.11375
+
+### Boundary conditions ###
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "user"
+yr_boundary_type = "outflow"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+### Diffusion boundary conditions for Split Diffusion Solver ###
+diff_eleXlBoundaryType = "outflow"
+diff_eleXrBoundaryType = "outflow"
+diff_eleYlBoundaryType = "outflow"
+diff_eleYrBoundaryType = "outflow"
+diff_eleZlBoundaryType = "outflow"
+diff_eleZrBoundaryType = "outflow"
+
+### Multigroup Diffusion boundary conditions for Split Diffusion Solver ###
+rt_mgdXlBoundaryType = "outflow"
+rt_mgdXrBoundaryType = "vacuum"
+rt_mgdYlBoundaryType = "vacuum"
+rt_mgdYrBoundaryType = "outflow"
+rt_mgdZlBoundaryType = "outflow"
+rt_mgdZrBoundaryType = "outflow"
+
+
+### Hydro options ###
+useHydro            = .true.
+order               = 2      # Interpolation order (First/Second order)
+slopeLimiter        = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta    = 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+RiemannSolver       = "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+shockDetect         = .false.     # Shock Detect for numerical stability
+cvisc               = 0.1
+use_steepening      = .FALSE.
+ppmEintFluxConstructionMeth     = 0
+ppmEintCompFluxConstructionMeth = 5
+ppmEnerFluxConstructionMeth     = 0
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+hy_eosModeAfter = "dens_ie_sele_gather"
+
+# hy_eosModeAfter = "dens_ie_gather"
+# hy_3Ttry_Arelated = .TRUE.
+# hy_3Ttry_B = 1
+# hy_3Ttry_D = 2.0
+# hy_3Ttry_E = 1
+# hy_3Ttry_F = 2
+# hy_3Ttry_G = 0
+# hy_3Ttry_Q = 0
+
+
+### Quiet Start Options ###
+useQuietStart   = .false.
+quietStartTemp  = 1160.455 # 0.1 eV release temperature
+quietStartXmin = 287.5e-04
+quietStartXmax = 312.5e-04
+quietStartYmin = 0.0e-04
+quietStartYmax = 4000.0e-04
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+tstep_change_factor = 1.10
+
+cfl            = 0.5
+dt_diff_factor = 1.0e+10
+rt_dtFactor    = 1.0e+10
+hx_dtFactor    = 1.0e+10
+tmax           = 26.0e-09
+dtmin          = 1.0e-15
+dtinit         = 1.0e-14
+dtmax          = 1.0e-11
+nend           = 99999
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cylindrical
+
+# Domain size:
+xmin = 0.0
+xmax = 350.0e-04 # 350 microns
+ymin = 0.0
+ymax = 1044.0e-04  # 1044 microns
+
+# Total number of blocks:
+nblockx = 7
+nblocky = 21
+nblockz = 1
+
+### Mesh Refinement ###
+lrefine_min  = 1
+lrefine_max  = 3
+refine_var_1 = "dens"
+refine_var_2 = "pres"
+refine_var_3 = "velx"
+
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 2
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 350
+jGridSize = 1044
+kGridSize = 1

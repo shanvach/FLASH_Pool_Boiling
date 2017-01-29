@@ -1,0 +1,2 @@
+
+integer, parameter:: nr_c_max=128, nz_c_max=128

@@ -1,0 +1,10 @@
+
+REQUIRES Driver
+REQUIRES RuntimeParameters
+REQUIRES Grid/GridMain/UG
+REQUIRES Grid/GridSolvers/Pfft
+VARIABLE dens TYPE: PER_VOLUME
+VARIABLE pden TYPE: PER_VOLUME
+
+PARAMETER sim_jprocs INTEGER 1
+PARAMETER sim_kprocs INTEGER 1

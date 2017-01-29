@@ -1,0 +1,177 @@
+# Coniguration file for the 1D Radiative Shock
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+# REQUESTS physics/Eos/EosMain/multiTemp/Multitype
+# REQUESTS physics/Eos/EosMain/Tabulated
+
+REQUESTS physics/Eos/EosMain/multiTemp/Multigamma
+
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/materialProperties/Opacity
+
+REQUESTS physics/RadTrans/RadTransMain/MGD
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+# This simulation requires specifying the species via the setup
+# line. You must include the species setup variable:
+#
+# species=cham,targ
+#
+# An example 1D setup line for this simulation is:
+# ./setup -auto magnetoHD/LULI -1d +pm4dev +parallelIO \
+#         -geometry=spherical \
+#         -debug -nxb=16 \
+#         mgd_meshgroups=6 \
+#         -with-unit=physics/Hydro/HydroMain/split/PPM/multiTemp \
+#         -without-unit=physics/Eos/EosMain/multiTemp/Multigamma \
+#         +mtmmmt -maxblocks=2048 \
+#         species=cham,targ
+# 
+# 
+
+MASS_SCALAR HEAT
+VARIABLE BDRY
+
+# You NEED this line for entropy advection to work:
+MASS_SCALAR sele EOSMAP: SELE
+
+
+DATAFILES c-imx-001.cnr
+DATAFILES he-imx-003.cnr
+DATAFILES c-imx-003.cn4
+DATAFILES he-imx-005.cn4
+DATAFILES luli2d.beams
+DATAFILES luli.pulses
+
+
+# This variable stores the magnitude of dB/dt from the Biermann
+# Battery effect
+VARIABLE GNEX
+VARIABLE GNEY
+VARIABLE GNEZ
+VARIABLE GPEX
+VARIABLE GPEY
+VARIABLE GPEZ
+VARIABLE NELE
+VARIABLE BIEX
+VARIABLE BIEY
+VARIABLE BIEZ
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+
+D sim_computeBiermann When true, compute the Biermann Battery source term
+PARAMETER sim_computeBiermann BOOLEAN TRUE
+
+D sim_driverType The type of driver used for this simulation
+D                - laser: The Laser package will be used to drive the 
+D                         simulation
+D                - uniform: The target will be uniformly heated using an amount
+D                           of energy specified in sim_laserEnergy 
+D                - unispec: The target will be uniformly heated, but 
+D                           sim_laserEnergy specifies the total energy per 
+D                           unit mass to deposit in the target
+PARAMETER sim_driverType STRING "uniform" ["uniform", "unispec", "laser"]
+
+D sim_targetRadius The radius to use for the target
+PARAMETER sim_targetRadius REAL 0.025
+
+D sim_targetHeight For 2D simulations, half the length of the target
+PARAMETER sim_targetHeight REAL 0.025
+
+D sim_targetOffset For 2D simulations, target offset along r-direction
+PARAMETER sim_targetOffset REAL 0.0
+
+D sim_skewFactor Adds a (1+cos(theta)) mode to the target for 2D
+D                sphere and cylinder sims.
+PARAMETER sim_skewFactor REAL 0.0
+
+D sim_targetZOffset For 2D simulations, target offset along z-direction
+PARAMETER sim_targetZOffset REAL 0.0
+
+D sim_targetGeom Specify shape of target
+PARAMETER sim_targetGeom STRING "cylinder" ["cylinder", "sphere", "polar", "2sphere"]
+
+D sim_ndiv Number of subdivisions for each cell for feathering
+PARAMETER sim_ndiv INTEGER 1
+
+D sim_useMesh Turn the mesh on/off
+PARAMETER sim_useMesh BOOLEAN FALSE
+
+D sim_meshGeom Type of mesh to use
+PARAMETER sim_meshGeom STRING "flat" ["flat", "curved"]
+
+# "Laser" parameters:
+#   These parameters are not related to the actual laser package in
+#   FLASH. Rather, they control a simplified drive which attempts to
+#   uniformly deposit a total of sim_laserEnergy energy throughout the
+#   target over a time period given by sim_pulseLength.
+D sim_pulseLength The pulse length of the laser
+PARAMETER sim_pulseLength REAL 1.5e-09
+
+D sim_laserEnergy The amount of laser energy absorbed by the target
+PARAMETER sim_laserEnergy REAL 350e+07
+
+# Target material defaults set for graphite at room temperature:
+D sim_rhoTarg Initial target density
+PARAMETER sim_rhoTarg   REAL 2.16
+
+D sim_teleTarg Initial target electron temperature
+PARAMETER sim_teleTarg  REAL 290.11375
+
+D sim_tionTarg Initial target ion temperature
+PARAMETER sim_tionTarg  REAL 290.11375
+
+D sim_tradTarg Initial target radiation temperature
+PARAMETER sim_tradTarg  REAL 290.11375
+
+D sim_abarTarg target atomic weight
+PARAMETER sim_abarTarg  REAL 12.0107
+
+D sim_zbarTarg target average ionization
+PARAMETER sim_zbarTarg  REAL 6.0
+
+D sim_zminTarg target minimum zbar allowed
+PARAMETER sim_zminTarg  REAL 0.0
+
+D sim_eosTarg chamber EOS type
+PARAMETER sim_eosTarg   STRING "eos_tab" ["eos_tab","eos_gam"]
+
+# Chamber material defaults set for Helium at pressure 1.6 mbar:
+D sim_rhoCham Initial chamber density
+PARAMETER sim_rhoCham   REAL 2.655e-07
+
+D sim_teleCham Initial chamber electron temperature
+PARAMETER sim_teleCham  REAL 290.11375
+
+D sim_tionCham Initial chamber ion temperature
+PARAMETER sim_tionCham  REAL 290.11375
+
+D sim_tradCham Initial chamber radiation temperature
+PARAMETER sim_tradCham  REAL 290.11375
+
+D sim_abarCham chamber atomic weight
+PARAMETER sim_abarCham  REAL 4.002602
+
+D sim_zbarCham chamber average ionization
+PARAMETER sim_zbarCham  REAL 2.0
+
+D sim_eosCham chamber EOS type
+PARAMETER sim_eosCham   STRING "eos_gam" ["eos_tab","eos_gam"]
+
+
+D sim_Bx Initial magx fields
+PARAMETER sim_Bx        REAL 0.
+
+D sim_By Initial magy fields
+PARAMETER sim_By        REAL 0.
+
+D sim_Bz Initial magz fields
+PARAMETER sim_Bz        REAL 0.
+
+

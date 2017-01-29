@@ -1,0 +1,160 @@
+# 	Runtime parameters for the Oscillating Plate problem.
+gr_pmRpDivergenceFree = 1
+gr_pmRpNfieldDivf     = 2
+gr_pmRpConsvFluxes    = .TRUE.
+gr_pmRpConsvFluxDensities = .FALSE.
+
+# Particles
+pt_maxPerProc=100000
+
+# Inverse of Reynolds Number
+invRe           = .001
+
+# Subgrid Scale model flag (0 no sgs model, 1 sgs model)
+isgs            = 0
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+# Bodies:
+sm_NumBodies   =  1
+gr_sbNumBodies =  1
+
+#       Size of computational volume
+xmin            = -1.500000000000
+xmax            =  1.500000000000
+ymin            = -1.500000000000
+ymax            =  1.500000000000
+zmin            = -1.500000000000
+zmax            =  1.500000000000
+
+#       Boundary conditions
+xl_boundary_type = "slip_ins"
+xr_boundary_type = "slip_ins"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+zl_boundary_type = "slip_ins"
+zr_boundary_type = "slip_ins"
+
+#      Poisson Solver Boundary Conditions
+xl_mg_boundary_type = "outflow"
+xr_mg_boundary_type = "outflow"
+yl_mg_boundary_type = "periodic"
+yr_mg_boundary_type = "periodic"
+zl_mg_boundary_type = "outflow"
+zr_mg_boundary_type = "outflow"
+
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "3D Cleaver Oscillating-Plate problem"
+log_file	= "INS_OSPLATE.log"
+basenm		= "INS_OSPLATE_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 100000
+tmax            = 40. 
+cflflg          = 1
+cfl             = 0.3
+sigma           = 0.2
+dtspec          = 0.03
+dtinit          = 1.0
+tstep_change_factor = 1.
+
+#Integration Scheme:
+intschm            = 21
+
+# SolidMechanics Integration method
+sm_solidinteg = 2
+garhoinf = 0.8
+pcepsilon = 1.e-8
+gapredepsilon = 1.e-9
+gacorrepsilon = 1.e-3
+# idea: gapredepsilon should be very small
+#       gacorrepsilon > pcepsilon > gapredepsilon
+#       pcepsilon set where you want it
+sminteg3dflexdt = 0.005
+
+#Plot Variables for Visit
+plot_var_1	    = "pres"
+plot_var_2      = "velx"
+plot_var_3      = "vely"
+plot_var_4      = "velz"
+plot_var_5      = "omgx"
+plot_var_6      = "omgy"
+plot_var_7      = "omgz"
+plot_var_8      = "dust" #divergence
+  
+pfft_setupOnce  = .false.
+convertToConsvdInMeshInterp = .false.
+
+checkpointFileIntervalTime = 1.5
+checkpointFileIntervalStep =1200
+
+plotFileIntervalTime = 0.01
+plotFileIntervalStep = 300000
+
+##	AMR parameters
+nblockx	= 12
+nblocky	= 12
+nblockz	= 12
+lrefine_min	    = 1
+lrefine_max     = 1
+nrefs           = 10000000
+#refine_var_1      = "pres"
+#refine_cutoff_1   = .1
+#derefine_cutoff_1 = -.1
+enableMaskedGCFill=.true.
+##	Flux Conservation for AMR
+flux_correct    = .true.
+
+# Multigrid Convergence tolerance
+# Rickers Multigrid HG:
+mg_maxResidualNorm = 1.e-10
+
+# Martin and Cartwright Multigrid:
+mgrid_npresmooth = 1
+mgrid_npossmooth = 4
+mgrid_print_norm = .true.
+mgrid_max_residual_norm = 1.e-10
+mgrid_max_vcycles = 300
+
+# BiPCGStab Parameters:
+bipcgs_max_residual_norm = 1.e-10
+bipcgs_max_cycles = 4
+bipcgs_print_norm = .true.
+
+## Force Direct solve in this level:
+#maxDirectSolveLevel=2
+
+## Pfft Parameters:
+## Use Central Finite Difference discretization operator:
+gr_pfftDiffOpDiscretize = 2
+gr_mgDiffOpDiscretize   = 2
+
+# Timers vars:
+eachProcWritesSummary = .false.
+
+#-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
+#       The parameters below are only necessary for the Uniform Grid
+#iGridSize      = 8     #defined as nxb * iprocs
+#jGridSize      = 8     #defined as nyb * jprocs
+#kGridSize      = 1     #defined as nzb * kprocs
+iProcs          = 1     #number of procs in the i direction
+jProcs          = 2     #number of procs in the j direction
+kProcs          = 4     #number of procs in the k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#       When using fixed blocksize, iGridSize etc are redundant in
+#       runtime parameters. These quantities are calculated as 
+#       iGridSize = NXB*iprocs
+#       jGridSize = NYB*jprocs
+#       kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#       iGridSize etc must be specified. They constitute the global
+#       number of grid points in the physical domain without taking 
+#       the guard cell into account. The local blocksize is calculated
+#       as iGridSize/iprocs  etc.
+ 

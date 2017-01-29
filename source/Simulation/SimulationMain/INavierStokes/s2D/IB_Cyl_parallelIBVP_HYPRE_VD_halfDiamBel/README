@@ -1,0 +1,24 @@
+# Lid driven cavity problem on a 2D, 2 level AMR grid.
+# The problem is integrated for 5000 time steps.
+
+# Setup line
+./setup INavierStokes/2D/LidDrivenCavity/  -2d -auto -opt -nxb=16 -nyb=16 -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver  -objdir=LIDCAV_BI -site=(Your SITE)
+
+# Make directory IOData within the object directory.
+
+
+# Timestep and total integration time at step 5000:
+
+ ###############################################################################
+ [gr_hgPfftInitGrid]: Able to retain PFFT grid from last time.
+cycle    1 res norm =  2.57E-06 new to old ratio =  1.70E-03
+cycle    2 res norm =  4.37E-09 new to old ratio =  1.70E-03
+cycle    3 res norm =  4.66E-12 new to old ratio =  1.07E-03
+cycle    3 res norm =  4.66E-12 new to old ratio =  1.07E-03
+ Elapsed Time in Preconditioner =  3.30000000000000016E-002
+  
+ Min , Max  Divergence = -0.659195E-14  0.648093E-14
+ Total AB Step Time =  8.89999999999999958E-002
+  
+  5000, TimeStep=   0.11297981E-02, SimTime=    5.6763738    
+ ###############################################################################

@@ -1,0 +1,72 @@
+# use this file to convert variable names in flash.par
+# prompt> sed -f sed.flashpar flash.par > flash.par.new
+
+ s/cpnumber/checkpointFileNumber/g
+ s/pptnumber/particleFileNumber/g
+ s/ptnumber/plotFileNumber/g
+ s/trstrt/checkpointFileIntervalTime/g
+ s/ptplot/particleFileIntervalTime/g
+ s/tplot/plotFileIntervalTime/g
+ s/dtini/dt_init/g
+ s/xshock/sim_xShock/g
+ s/use_radial_fit/sim_useRadialFit/g
+ s/fit_radius/sim_radialFitRadius/g
+ s/rpix/sim_radialNumPixels/g
+ s/pixsize/sim_rawPixelSize/g
+ s/use_raw_data/sim_useRawData/g
+ s/nimgx/sim_rawNumPixelsX/g
+ s/nimgy/sim_rawNumPixelsY/g
+ s/ximgmin/sim_rawMinX/g
+ s/yimgmin/sim_rawMinY/g
+
+s/rho_amb/sim_rhoAmbient/g
+s/p_amb/sim_pAmbient/g
+s/vx_amb/sim_vxAmbient/g
+s/maxconc/sim_maxConc/g
+s/mach/sim_mach/g
+s/vz_sf6/sim_vzSF6/g
+s/xctr/sim_xNozzleCenter/g
+s/yctr/sim_yNozzleCenter/g
+s/use_rz_sim_dat/sim_useRzSimData/g
+s/use_raw_data/sim_useRawData/g
+s/nr_c/rz_numRadial/g
+s/nz_c/rz_numZ/g
+s/d_pert/sim_dPert/g
+s/n_pert/sim_nPert/g
+s/ref_rect_x/sim_refRectX/g
+s/ref_rect_y/sim_refRectY/g
+
+
+
+#input files for rz_sim
+s/sf6_file_cc/rz_fileSF6_cc/
+s/press_file_cc/rz_filePres_cc/
+s/rvel_file_ec/rz_fileRVel_ec/
+s/zvel_file_ce/rz_fileZVel_ce/
+# should put a sim_ or rz_ in front of runtime parameters
+s/nx_subint/rz_subintNX/g
+s/ny_subint/rz_subintNY/g
+s/nz_subint/rz_subintNZ/g
+
+# Particle initialization now handled by default ParticlesInitialization/Lattice module
+s/MaxParticlesPerProc/pt_maxPerProc/
+s/ipart/useParticles/
+s/PartXMin/pt_initialXMin/
+s/PartXMax/pt_initialXMax/
+s/PartYMin/pt_initialYMin/
+s/PartYMax/pt_initialYMax/
+s/PartZMin/pt_initialZMin/
+s/PartZMax/pt_initialZMax/
+s/NumXParticles/pt_numX/
+s/NumYParticles/pt_numY/
+s/NumZParticles/pt_numZ/
+
+# these variables no longer used in FLASH3
+s/MaxParticlesPerBlock/MaxParticlesPerBlock Not used in FLASH3 -- Please delete me!/
+ s/igeomx/igeomx Not used in FLASH3 -- Please delete me!   /
+ s/igeomy/igeomy Not used in FLASH3 -- Please delete me!   /
+ s/igeomz/igeomzNot used in FLASH3 -- Please delete me!   /
+
+# don't know what these variables do...
+# s/ichem/   /
+

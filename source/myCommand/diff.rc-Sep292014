@@ -1,0 +1,10 @@
+svn revert physics/SolidMechanics/SolidMechanicsMain/SurfaceInteraction/sm_surf_assembleFluidForce_rigid.F90
+
+svn revert physics/SolidMechanics/SolidMechanicsMain/IO/rigid/sm_ioWriteStates_rigid.F90
+
+svn ci -m 'Marcos helps to correct the bug for Paramesh' physics/ImBound/ImBoundMain/LagForce/Extras/gr_sbUpdateForces.F90
+ 
+svn ci -m 'Modify predefinations for TANGENT_WITH_VORTICITY'  physics/ImBound/ImBoundMain/LagForce/parallel/ib_distributedForces.F90
+
+svn ci -m 'Turn off the CHK_BND_VLC' physics/ImBound/ImBound.h
+

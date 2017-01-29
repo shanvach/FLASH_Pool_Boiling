@@ -1,0 +1,1 @@
+./setup INavierStokes/3D/Snorkel_mcHYPRE_VD_wFS/  -3d -auto -opt -nxb=16 -nyb=16 -nzb=16 -maxblocks=150 -gridinterpolation=native +pm4dev -objdir=FOIL_3D_wFS_16_OPT -site=splash.seas.gwu.edu_KPD Bittree=1

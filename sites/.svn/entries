@@ -1,0 +1,422 @@
+10
+
+dir
+22826
+svn+ssh://wangsz@flash.uchicago.edu/home/svn/repos/FLASH3/branches/INS/sites
+svn+ssh://wangsz@flash.uchicago.edu/home/svn/repos/FLASH3
+
+
+
+2014-07-28T23:05:13.854681Z
+22758
+wangsz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7e0bbb48-b9f0-0310-a4f1-ed4c604ac84b
+
+myristica.asci.uchicago.edu
+dir
+
+lenovolaptop
+dir
+
+sphere.uchicago.edu
+dir
+
+flashviz.uchicago.edu
+dir
+
+karloff.lbl.gov
+dir
+
+ellipse_pgf.uchicago.edu
+dir
+
+jaguar.nccs.gov
+dir
+
+eugenia.asci.uchicago.edu
+dir
+
+intel-hedp
+dir
+
+jubl.zam.kfa-juelich.de
+dir
+
+ellipse10.uchicago.edu
+dir
+
+ellipse02.uchicago.edu
+dir
+
+pg-mpi2-32
+dir
+
+hydra.si.edu
+dir
+
+deepthought.umd.edu_tfitz
+dir
+
+ellipse06.uchicago.edu
+dir
+
+uffda.asci.uchicago.edu
+dir
+
+splash.seas.gwu.edu
+dir
+
+bonsai.cfa.harvard.edu
+dir
+
+cthinkpad
+dir
+
+surveyor.alcf.anl.gov
+dir
+
+beagle.ci.uchicago.edu
+dir
+
+login1.pads.ci.uchicago.edu
+dir
+
+zingiber.uchicago.edu
+dir
+
+clark.asci.uchicago.edu
+dir
+
+code.uchicago.edu
+dir
+
+lahey-mpi2
+dir
+
+hera.llnl.gov
+dir
+
+datastar.sdsc.edu
+dir
+
+saguaro.fulton.asu.edu
+dir
+
+icc-9.0_fornax.uchicago.edu
+dir
+
+duce.gsfc.nasa.gov
+dir
+
+skeeter.asci.uchicago.edu
+dir
+
+SEAS13089.gwu.edu
+dir
+
+tsoodzil.astro.uiuc.edu
+dir
+
+intel-mpi2
+dir
+
+coyote.lanl.gov
+dir
+
+eureka.alcf.anl.gov
+dir
+
+watanlsn.watson.ibm.com
+dir
+
+intrepid.alcf.anl.gov
+dir
+
+eldorado.uchicago.edu
+dir
+
+redstorm.sandia.gov
+dir
+
+flash.uchicago.edu
+dir
+
+fornax.uchicago.edu
+dir
+
+kraken.nics.tennessee.edu_localHYPRE
+dir
+
+ellipse11.uchicago.edu
+dir
+
+ellipse03.uchicago.edu
+dir
+
+bgl.llnl.gov
+dir
+
+gnu-mpi2
+dir
+
+splash.seas.gwu.edu_KPD
+dir
+
+mira.alcf.anl.gov
+dir
+
+optix.cs.uoregon.edu
+dir
+
+brassica.asci.uchicago.edu
+dir
+
+bassi.nersc.gov
+dir
+
+tuxedo.uchicago.edu
+dir
+
+login2.pads.ci.uchicago.edu
+dir
+
+buckbeak
+dir
+
+sunspot.uchicago.edu
+dir
+
+nag-mpi1
+dir
+
+nag-mpi2
+dir
+
+tp-login2
+dir
+
+intel-ompi
+dir
+
+colonialone.gwu.edu
+dir
+
+zeus.llnl.gov
+dir
+
+hawkmoon.uchicago.edu
+dir
+
+mongchi.uchicago.edu
+dir
+
+Aliases
+file
+
+
+
+
+2014-06-13T22:47:15.645248Z
+0ba32442665c33a63aaadeb2ebd31e30
+2013-02-28T20:32:22.996370Z
+19127
+mohapatra
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1687
+
+crash2.umd.edu
+dir
+
+absoft-mpi2
+dir
+
+jaguar.ccs.ornl.gov
+dir
+
+vestalac1
+dir
+
+garnet.erdc.hpc.mil
+dir
+
+animal5
+dir
+
+Prototypes
+dir
+
+gnu-ompi
+dir
+
+ellipse04.uchicago.edu
+dir
+
+osel.uchicago.edu
+dir
+
+archimedes.uchicago.edu
+dir
+
+purple.llnl.gov
+dir
+
+ellipse08.uchicago.edu
+dir
+
+nagini.uchicago.edu
+dir
+
+pyramid.uchicago.edu
+dir
+
+khorba.uchicago.edu
+dir
+
+amazon.nswccd
+dir
+
+mhd2.asci.uchicago.edu
+dir
+
+franklin.nersc.gov
+dir
+
+kraken.nics.tennessee.edu
+dir
+
+scarf.rl.ac.uk
+dir
+
+cube.uchicago.edu
+dir
+
+elan.uchicago.edu
+dir
+
+klaus-laptop
+dir
+
+thinkpad.x61.linux
+dir
+
+ignition
+dir
+
+liturchi.uchicago.edu
+dir
+
+ramsusii.mps.ohio-state.edu
+dir
+
+fusion.lcrc.uchicago.edu
+dir
+
+oakley.osc.edu
+dir
+
+lupin.uchicago.edu
+dir
+
+zingiber.asci.uchicago.edu
+dir
+
+seaborg.nersc.gov
+dir
+
+gin.asci.uchicago.edu
+dir
+
+fusion.lcrc.anl.gov
+dir
+
+bgl.mcs.anl.gov
+dir
+
+alc.llnl.gov
+dir
+
+scooter.asci.uchicago.edu
+dir
+
+ellipse.uchicago.edu
+dir
+
+tagore-jr
+dir
+
+jacquard.nersc.gov
+dir
+
+cetus.asci.uchicago.edu
+dir
+
+ellipse05.uchicago.edu
+dir
+
+p655-4.nic.uoregon.edu
+dir
+
+SEAS13033.gwu.edu
+dir
+
+SEAS10927UB.gwu.edu
+dir
+
+fleetwood.asci.uchicago.edu
+dir
+
+ellipse09.uchicago.edu
+dir
+
+qsc.lanl.gov
+dir
+
+SEAS10926.gwu.edu
+dir
+
+SEAS10927.gwu.edu
+dir
+
+bgl.sdsc.edu
+dir
+
+ranger.tacc.utexas.edu
+dir
+
+SEAS12982.gwu.edu
+dir
+

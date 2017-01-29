@@ -1,0 +1,25 @@
+#       Configuration file for Lid Driven Cavity Problem
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+USESETUPVARS Grid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/ 
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/3DFlexible
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/3DFlexible
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Testing/DryRun
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/GenAlpha
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Solvers/PredCorr
+REQUIRES physics/ImBound
+DATAFILES sm_body.1.h5
+DATAFILES kinematics.input.h5
+DATAFILES sm_body_IC.1.h5
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+FACEVAR velc
+VARIABLE pres
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2

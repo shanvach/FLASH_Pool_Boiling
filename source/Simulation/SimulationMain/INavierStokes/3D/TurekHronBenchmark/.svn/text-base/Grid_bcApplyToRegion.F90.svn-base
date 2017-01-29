@@ -1,0 +1,1160 @@
+!!****if* source/Simulation/SimulationMain/INavierStokes/Grid_bcApplyToRegion
+!!
+!! NAME
+!!  Grid_bcApplyToRegion
+!!
+!! SYNOPSIS
+!!
+!!  call Grid_bcApplyToRegion(integer(IN)  :: bcType,
+!!                            integer(IN)  :: gridDataStruct,
+!!                            integer(IN)  :: guard,
+!!                            integer(IN)  :: axis,
+!!                            integer(IN)  :: face,
+!!                            real(INOUT)  :: regionData(:,:,:,:),
+!!                            integer(IN)  :: regionSize(:),
+!!                            logical(IN)  :: mask(:),
+!!                            logical(OUT) :: applied,
+!!                            integer(IN)  :: blockHandle,
+!!                            integer(IN)  :: secondDir,
+!!                            integer(IN)  :: thirdDir,
+!!                            integer(IN)  :: endPoints(LOW:HIGH,MDIM),
+!!                            integer(IN)  :: blkLimitsGC(LOW:HIGH,MDIM),
+!!                   OPTIONAL,integer(IN)  :: idest)
+!!
+!!
+!!
+!! DESCRIPTION
+!!
+!!  Applies the boundary conditions to the specified data structure.
+!!  The routine is handed a region that has been extracted from the
+!!  data structure, on which it should apply the boundary conditions.
+!!  The direction along which the BC are to be applied is always the first
+!!  dimension in the given region, and the last dimension contains the
+!!  the variables in the data structure. The middle two dimension contain
+!!  the size of the region along the two dimensions of the physical grid
+!!  that are not having the BC applied.
+!!
+!!  This routine applies the boundary conditions on a given face (lowerface
+!!  or upperface) along a given axis, by using and setting values
+!!  for all variables in the gridDataStruct that are not masked out. The
+!!  argument "mask" has the information about the masked variables.
+!!
+!!     If (face=LOW)
+!!       regionData(1:guard,:,:,masked(variables) =  boundary values
+!!     If (face=HIGH)
+!!       regionData(regionSize(BC_DIR)-guard+1:regionSize(BCDIR),:,:,masked(variables) =  boundary values
+!!
+!!  One reason why information about direction and variable is
+!!  included in this interface is because Velocities need to be
+!!  treated specially for REFLECTING boundary conditions. if
+!!  axis=IAXIS, then the variable VELX_VAR is treated differently,
+!!  same with VELY_VAR if axis=JAXIS and VELZ_VAR if
+!!  axis=KAXIS. All supported mesh packages extract the vector passed
+!!  in through the argument "dataRow" from the appropriated blocks,
+!!  and send it to this routine for boundary calculation. The
+!!  PERIODIC boundary is calculated by default when the blocks are
+!!  exchanging data with each other.
+!!  This routine currently passes handling of all other boundary condition
+!!  types on to Grid_applyBCEdge, which is called for each of the variables
+!!  in turn.
+!!
+!!  This routine support only simple boundary conditions that are applied strictly
+!!  directionally, and have no need for other grid information such as the coordinates etc.
+!!  Currently supported boundary conditions are "OUTFLOW", "REFLECTING" and "DIODE".
+!!  The "PERIODIC" boundary conditions are automatically applied in the process of filling
+!!  the guard cells all over the domain, and therefore do not need to call this routine
+!!
+!!  If the user wishes to apply different boundary conditions, they can either
+!!  use the interface Grid_bcApplyToRegionSpecialized, or make a copy of this
+!!  routine in their simulation directory and customize it.
+!!
+!!
+!! ARGUMENTS
+!!
+!!  bcType - the type of boundary conditions being applied
+!!  gridDataStruct - the Grid dataStructure
+!!  guard -    number of guardcells
+!!  axis  - the dimension along which to apply boundary conditions,
+!!          can take values of IAXIS, JAXIS and KAXIS
+!!  face    -  can take values LOW and HIGH, defined in constants.h
+!!             to indicate whether to apply boundary on lowerface or
+!!             upperface
+!!  regionData     : the extracted region from a block of permanent storage of the
+!!                   specified data structure. Its size is given by regionSize
+!!  regionSize     : regionSize(BC_DIR) contains the size of the each row and
+!!                   regionSize(SECOND_DIR) contains the number of along the second
+!!                   direction, and regionSize(THIRD_DIR) has the number of rows
+!!                   along the third direction. regionSize(GRID_DATASTRUCT) contains the
+!!                   number of variables in the data structure
+!!  mask - if present applies boundary conditions to only selected variables
+!!  applied - is set true if this routine has handled the given bcType, otherwise it is
+!!            set to false.
+!!
+!!  blockHandle - Handle for the block for which guardcells are to be filled.
+!!              In grid implementations other than Paramesh 4, this is always
+!!              a local blockID.
+!!
+!!              With Paramesh 4:
+!!              This may be a block actually residing on the local processor,
+!!              or the handle may refer to a block that belong to a remote processor
+!!              but for which cached information is currently available locally.
+!!              The two cases can be distinguished by checking whether
+!!              (blockHandle .LE. lnblocks): this is true only for blocks that
+!!              reside on the executing processor.
+!!              The block ID is available for passing on to some handlers for
+!!              boundary conditions that may need it, ignored in the default
+!!              implementation.
+!!
+!!  secondDir,thirdDir -   Second and third coordinate directions.
+!!                         These are the transverse directions perpendicular to
+!!                         the sweep direction.
+!!                         This is not needed for simple boundary condition types
+!!                         such as REFLECTIVE or OUTFLOW, It is provided for
+!!                         convenience so that more complex boundary condition
+!!                         can make use of it.
+!!                         The values are currently fully determined by the sweep
+!!                         direction bcDir as follows:
+!!                          bcDir   |    secondDir       thirdDir
+!!                          ------------------------------------------
+!!                          IAXIS   |    JAXIS             KAXIS
+!!                          JAXIS   |    IAXIS             KAXIS
+!!                          KAXIS   |    IAXIS             JAXIS
+!!
+!!  endPoints - starting and endpoints of the region of interest.
+!!              See also NOTE (1) below.
+!!
+!!  blkLimitsGC - the starting and endpoint of the whole block including
+!!                the guard cells, as returned by Grid_getBlkIndexLimits.
+!!              See also NOTE (1) below.
+!!
+!!  idest - Only meaningful with PARAMESH 3 or later.  The argument indicates which slot
+!!          in its one-block storage space buffers ("data_1blk.fh") PARAMESH is in the
+!!          process of filling.
+!!          The following applies when guard cells are filled as part of regular
+!!          Grid_fillGuardCells processing (or, in NO_PERMANENT_GUARDCELLS mode,
+!!          in order to satisfy a Grid_getBlkPtr request): The value is 1 if guard cells
+!!          are being filled in the buffer slot in UNK1 and/or FACEVAR{X,Y,Z}1 or WORK1
+!!          that will end up being copied to permanent block data storage (UNK and/or
+!!          FACEVAR{X,Y,Z} or WORK, respectively) and/or returned to the user.
+!!          The value is 2 if guard cells are being filled in the alternate slot in
+!!          the course of assembling data to serve as input for coarse-to-fine
+!!          interpolation.
+!!          When guard cells are being filled in order to provide input data for
+!!          coarse-to-fine interpolation as part of amr_prolong processing (which
+!!          is what happens when Grid_updateRefinement is called for an AMR Grid),
+!!          the value is always 1.
+!!
+!!          In other words, you nearly always want to ignore this optional
+!!          argument.  As of FLASH 3.1, it is only used internally within the
+!!          Grid unit by a Multigrid GridSolver implementation.
+!!
+!!  NOTES
+!!
+!!            This routine is common to all the mesh packages supported
+!!            The mesh packages extract the small vectors relevant to
+!!            boundary conditions calculations from their Grid data
+!!            structures. If users wish to apply a different boundary condition,
+!!            they should look at routine Grid_bcApplyToRegionSpecialzed.
+!!            They can replace this routine, the implentations included apply
+!!            some hydrostatic boundary conditions.
+!!
+!!  HISTORY
+!!
+!!    2007       Initial Grid_bcApplyToRegion logic    - Anshu Dubey
+!!    2007       Cleanup and fixes                     - Klaus Weide, Dongwook Lee
+!!    2008       Tweaks to support Multigrid           - Klaus Weide
+!!
+!!    2014       Added parabola inflow  - T. Fitzgerald
+!!***
+
+subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
+     guard,axis,face,regionData,regionSize,mask,applied,&
+     blockHandle,secondDir,thirdDir,endPoints,blkLimitsGC, idest)
+
+#include "constants.h"
+#include "Flash.h"
+#include "IncompNS.h"
+
+  use Driver_interface, ONLY : Driver_abortFlash
+  use gr_bcInterface, ONLY : gr_bcMapBcType
+
+  use Grid_interface, ONLY : Grid_getDeltas,         &
+       Grid_getBlkBoundBox,    &
+       Grid_getBlkCenterCoords,&
+       Grid_getBlkPtr,         &
+       Grid_releaseBlkPtr,     &
+       Grid_getDomainBoundBox 
+
+  use Driver_data, ONLY : dr_simTime, dr_dt
+
+#if NDIM == 2
+  use IncompNS_data, ONLY : ins_invRe,ins_convvel,ins_predcorrflg,ins_alfa,uvel_x,vvel_x,wvel_x, &
+       uvel_y,vvel_y,wvel_y,ins_outflowgridChanged,ins_intschm, &
+       ins_tlevel
+#elif NDIM == 3
+  use IncompNS_data, ONLY : ins_invRe,ins_convvel,ins_predcorrflg,ins_alfa,uvel_x,vvel_x,wvel_x, &
+       uvel_y,vvel_y,wvel_y,uvel_z,vvel_z,wvel_z, ins_outflowgridChanged,   &
+       ins_rhoa, ins_intschm, ins_tlevel
+#endif
+
+#ifdef FLASH_GRID_PARAMESH
+  use tree , only : lrefine
+#endif
+
+  implicit none
+
+  integer, intent(IN) :: bcType,axis,face,guard,gridDataStruct
+  integer,dimension(REGION_DIM),intent(IN) :: regionSize
+  real,dimension(regionSize(BC_DIR),&
+       regionSize(SECOND_DIR),&
+       regionSize(THIRD_DIR),&
+       regionSize(STRUCTSIZE)),intent(INOUT)::regionData
+  logical,intent(IN),dimension(regionSize(STRUCTSIZE)):: mask
+  logical, intent(OUT) :: applied
+  integer,intent(IN) :: blockHandle
+  integer,intent(IN) :: secondDir,thirdDir
+  integer,intent(IN),dimension(LOW:HIGH,MDIM) :: endPoints, blkLimitsGC
+  integer,intent(IN),OPTIONAL:: idest
+
+  integer :: i,j, k,ivar,je,ke,n,varCount,bcTypeActual
+  logical :: isFace
+  integer    :: sign
+
+  integer :: ia,ib,ja,jb,ka,kb
+
+  real, dimension(MDIM)  :: coord,bsize,del
+  real ::  boundBox(2,MDIM)
+
+  real :: xcell,xedge,ycell,yedge,alfadt
+
+  real, save :: TLEVEL
+
+  integer :: countj
+
+  real,dimension(LOW:HIGH,MDIM) :: domainBoundBox
+  real :: parabola_H, parabola_tau, parabola_zvel
+
+
+  select case (bcType)
+  case(REFLECTING,OUTFLOW,DIODE,DIRICHLET)
+     applied = .TRUE.           !will handle these types of BCs below
+  case(NEUMANN_INS, NOSLIP_INS, SLIP_INS, INFLOW_INS, MOVLID_INS, OUTFLOW_INS) ! Incompressible solver BCs
+     applied = .TRUE.           !will handle these types of BCs below
+  case(HYDROSTATIC_F2_NVOUT,HYDROSTATIC_F2_NVDIODE,HYDROSTATIC_F2_NVREFL, &
+       HYDROSTATIC_NVOUT,HYDROSTATIC_NVDIODE,HYDROSTATIC_NVREFL)
+     if (gridDataStruct==CENTER) then
+        applied = .FALSE.       !should be picked up by Flash2HSE implementation
+        !or Flash3HSE implementation if included.
+        return                  !RETURN immediately!
+     else
+        applied = .TRUE.           !will handle these types below (like OUTFLOW)
+     end if
+  case default
+     applied = .FALSE.
+     return                     !RETURN immediately!
+  end select
+
+
+  je=regionSize(SECOND_DIR)
+  ke=regionSize(THIRD_DIR)
+  varCount=regionSize(STRUCTSIZE)
+
+  isFace = (gridDataStruct==FACEX).and.(axis==IAXIS)
+  isFace = isFace.or.((gridDataStruct==FACEY).and.(axis==JAXIS))
+  isFace = isFace.or.((gridDataStruct==FACEZ).and.(axis==KAXIS))
+
+
+  !print*,'in applyBcRegion ',gridDataStruct,CENTER !,FACEX,FACEY,FACEZ
+  !print*,'in applyBcRegion ',varCount,guard,axis,face
+
+
+
+  do ivar = 1,varCount
+     if(mask(ivar)) then
+        call gr_bcMapBcType(bcTypeActual,bcType,ivar,gridDataStruct,axis,face,idest)
+        sign = 1
+
+
+        if (gridDataStruct==CENTER) then
+
+#ifdef VELX_VAR
+           if ((axis==IAXIS).and.(ivar==VELX_VAR))sign=-1
+#endif
+#ifdef VELY_VAR
+           if((axis==JAXIS).and.(ivar==VELY_VAR))sign=-1
+#endif
+#ifdef VELZ_VAR
+           if((axis==KAXIS).and.(ivar==VELZ_VAR))sign=-1
+#endif
+
+        end if
+
+
+        if(face==LOW) then
+           select case (bcTypeActual)
+           case(REFLECTING)
+              k = 2*guard+1
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)*real(sign)
+              end do
+
+           case(DIRICHLET)
+              do i = 1,guard
+                 regionData(guard+1-i,1:je,1:ke,ivar)= (1-2*i)*regionData(guard+1,1:je,1:ke,ivar)
+              end do
+           case(GRIDBC_MG_EXTRAPOLATE)
+              do i = 1,guard
+                 regionData(guard+1-i,1:je,1:ke,ivar)= (1+i)*regionData(guard+1,1:je,1:ke,ivar) &
+                      - i*regionData(guard+2,1:je,1:ke,ivar)
+              end do
+
+           case(OUTFLOW,HYDROSTATIC_F2_NVOUT,HYDROSTATIC_F2_NVDIODE,HYDROSTATIC_F2_NVREFL, &
+                HYDROSTATIC_NVOUT,HYDROSTATIC_NVDIODE,HYDROSTATIC_NVREFL)
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+              end do
+           case(DIODE)
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                 if (sign == -1) then
+                    do n=1,ke
+                       do j=1,je
+                          regionData(i,j,n,ivar) = min(regionData(i,j,n,ivar),0.0)
+                       end do
+                    end do
+                 end if
+              end do
+
+
+              ! The following cases correspond to Incompressible solver BC combinations:
+              ! Staggered grid, velocities: face centered, pressure: cell centered.
+           case(NEUMANN_INS)  ! Neumann BC
+
+              k = 2*guard+1
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+              end do
+
+
+           case(NOSLIP_INS)
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       k = 2*guard+2
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                       regionData(guard+1,1:je,1:ke,ivar)= 0.
+                    endif
+                 else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
+                    k = 2*guard+1
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+              endif
+
+
+           case(SLIP_INS)
+
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if((ivar == VELC_FACE_VAR)) then
+                       k = 2*guard+2
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                       regionData(guard+1,1:je,1:ke,ivar)= 0.
+                    endif
+                 else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+                    k = 2*guard+1
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard !-1
+                          regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                       !regionData(guard,1:je,1:ke,ivar)= (1.+1./16.)*regionData(k-guard,1:je,1:ke,ivar)-3./16.*regionData(k-guard+1,1:je,1:ke,ivar)+&
+                       !                                  3./16.*regionData(k-guard+2,1:je,1:ke,ivar)-1./16.*regionData(k-guard+3,1:je,1:ke,ivar)
+                    endif
+                 endif
+
+              endif
+
+
+           case(MOVLID_INS)
+
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if((ivar == VELC_FACE_VAR)) then
+                       k = 2*guard+2
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                       regionData(guard+1,1:je,1:ke,ivar)= 0.
+                    endif
+                 else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+                    k = 2*guard+1
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= 2. - regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+              endif
+
+
+           case(INFLOW_INS)
+
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard+1
+                          regionData(i,1:je,1:ke,ivar)= 1.
+                       end do
+                    endif
+                 else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+                    k = 2*guard+1
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+                 !!! Parabola for channel flow:
+                 if (axis .eq. KAXIS) then
+                    ! Get blocks dx, dy ,dz:
+                    call Grid_getDeltas(blockHandle,del)
+                    ! Get blocks coord and bsize
+                    ! Bounding box:
+                    call Grid_getBlkBoundBox(blockHandle,boundBox)
+                    bsize(1:NDIM) = boundBox(2,1:NDIM) - boundBox(1,1:NDIM)
+                    call Grid_getBlkCenterCoords(blockHandle,coord)
+
+                    ! get domain size
+                    call Grid_getDomainBoundBox(domainBoundBox)
+
+                    parabola_H = abs( domainBoundBox(HIGH, JAXIS) - domainBoundBox(LOW, JAXIS) )
+                    parabola_tau = 0. ! 2.
+
+                    TLEVEL = ins_tlevel
+
+                    !write(*,*) 'ins_outflowgridChanged=',ins_outflowgridChanged
+
+                    if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                       if(ivar == VELC_FACE_VAR) then
+                          countj = 0
+                          do j = endpoints(LOW,JAXIS),endpoints(HIGH,JAXIS)
+                             countj = countj + 1
+                             ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                                  real(j - NGUARD - 1)*del(JAXIS)  +  &
+                                  0.5*del(JAXIS)
+
+                             ! Eqn. 10 from Turek an Hron (2009), Ref Velocity Uref = 1
+                             parabola_zvel = 1.5*(1.0)*ycell*( parabola_H - ycell )/(0.5*parabola_H)**2
+
+                             do i = 1,guard+1
+
+                                if( TLEVEL < parabola_tau ) then
+                                   regionData(i,1:je,countj,ivar)= parabola_zvel*0.5*(1.-cos(PI/parabola_tau * TLEVEL))
+                                else
+                                   regionData(i,1:je,countj,ivar) = parabola_zvel
+                                end if
+
+                             end do
+                          end do
+                       endif
+!                    else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+!                       k = 2*guard+1
+!                       if(ivar == VELC_FACE_VAR) then
+!                          countj = 0
+!                          do j = endpoints(LOW,JAXIS),endpoints(HIGH,JAXIS)
+!                             countj = countj + 1
+!                             yedge = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+!                                  real(j - NGUARD - 1)*del(JAXIS)
+
+!                             ! Eqn. 10 from Turek an Hron (2009), Ref Velocity Uref = 1
+!                             parabola_zvel = 1.5*(1.0)*( parabola_H - yedge )/(0.5*parabola_H)**2
+
+!                             do i = 1,guard
+
+!                                if( TLEVEL < parabola_tau ) then
+!                                   regionData(i,countj,1:ke,ivar)= parabola_zvel*0.5*(1.-cos(PI/parabola_tau * TLEVEL))
+!                                else
+!                                   regionData(i,countj,1:ke,ivar) = parabola_zvel
+!                                end if
+
+!                             end do
+!                          end do
+!                       endif
+
+                    endif
+                 endif
+
+
+!!$              ! Taylor Vortex velocity inflow + uconv 1. only on x Axis
+!!$              if (axis .eq. IAXIS) then
+!!$              ! Get blocks dx, dy ,dz:
+!!$              call Grid_getDeltas(blockHandle,del)
+!!$              ! Get blocks coord and bsize
+!!$              ! Bounding box:
+!!$              call Grid_getBlkBoundBox(blockHandle,boundBox)
+!!$              bsize(1:NDIM) = boundBox(2,1:NDIM) - boundBox(1,1:NDIM)
+!!$              call Grid_getBlkCenterCoords(blockHandle,coord)
+!!$
+!!$              TLEVEL = ins_tlevel
+!!$
+!!$              write(*,*) 'ins_outflowgridChanged=',ins_outflowgridChanged
+!!$
+!!$              !if (.not. ins_outflowgridChanged) then
+!!$              if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+!!$                 if(ivar == VELC_FACE_VAR) then
+!!$                 countj = 0
+!!$                 do j = endpoints(LOW,JAXIS),endpoints(HIGH,JAXIS)
+!!$                    countj = countj + 1
+!!$                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+!!$                             real(j - NGUARD - 1)*del(JAXIS)  +  &
+!!$                             0.5*del(JAXIS)
+!!$                 do i = 1,guard+1
+!!$                    xedge = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+!!$                            real(i - NGUARD - 1)*del(IAXIS)
+!!$
+!!$                    regionData(i,countj,1:ke,ivar)=-EXP(-2.0*ins_invRe*(TLEVEL)*1.)*        &
+!!$                                                    COS(xedge-1.*(TLEVEL))*SIN(ycell) + 1.
+!!$                 end do
+!!$                 end do
+!!$                 endif
+!!$              else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+!!$                 k = 2*guard+1
+!!$                 if(ivar == VELC_FACE_VAR) then
+!!$                 countj = 0
+!!$                 do j = endpoints(LOW,JAXIS),endpoints(HIGH,JAXIS)
+!!$                    countj = countj + 1
+!!$                    yedge = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+!!$                            real(j - NGUARD - 1)*del(JAXIS)
+!!$                 do i = 1,guard
+!!$                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+!!$                            real(i - NGUARD - 1)*del(IAXIS) +   &
+!!$                            0.5*del(IAXIS)
+!!$
+!!$                    regionData(i,countj,1:ke,ivar)= EXP(-2.0*ins_invRe*TLEVEL*1.)*        &
+!!$                                                    SIN(xcell-1.*TLEVEL)*COS(yedge)
+!!$                 end do
+!!$                 end do
+!!$                 endif
+!!$              endif
+!!$              !endif
+!!$              endif
+!!$
+              endif
+
+
+           case(OUTFLOW_INS) ! Convective outflow boundary condition. Only done for face == high
+
+              call Driver_abortFlash("OUTFLOW_INS boundary condition is not supported on Lower Face")
+
+           case default
+              !!              print*,'boundary is',bcType
+              !!              call Driver_abortFlash("unsupported boundary condition on Lower Face")
+           end select
+
+        else  !(face==HIGH)
+
+           select case (bcTypeActual)
+           case(REFLECTING)
+              k = 2*guard+1
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)*real(sign)
+              end do
+
+           case(DIRICHLET)
+              k=guard
+              do i = 1,guard
+                 regionData(k+i,1:je,1:ke,ivar)= (1-2*i)*regionData(k,1:je,1:ke,ivar)
+              end do
+           case(GRIDBC_MG_EXTRAPOLATE)
+              k=guard
+              do i = 1,guard
+                 regionData(k+i,1:je,1:ke,ivar)= (1+i)*regionData(k,1:je,1:ke,ivar) &
+                      - i*regionData(k-1,1:je,1:ke,ivar)
+              end do
+
+           case(OUTFLOW,HYDROSTATIC_F2_NVOUT,HYDROSTATIC_F2_NVDIODE,HYDROSTATIC_F2_NVREFL, &
+                HYDROSTATIC_NVOUT,HYDROSTATIC_NVDIODE,HYDROSTATIC_NVREFL)
+              k=guard
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(k+i,1:je,1:ke,ivar)= regionData(k,1:je,1:ke,ivar)
+              end do
+           case(DIODE)
+              k=guard
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(k+i,1:je,1:ke,ivar)= regionData(k,1:je,1:ke,ivar)
+                 if (sign == -1) then
+                    do n = 1,ke
+                       do j = 1,je
+                          regionData(k+i,j,n,ivar) = max(regionData(k+i,j,n,ivar),0.0)
+                       end do
+                    end do
+                 end if
+              end do
+
+
+              ! The following cases correspond to Incompressible solver BC combinations:
+              ! Staggered grid, velocities: face centered, pressure: cell centered.
+           case(NEUMANN_INS)  ! Neumann BC
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+
+                 k = 2*guard+1
+                 if(isFace) then
+                    ! First order down-wind for collocated var in the face:
+                    do i =1,guard
+                       regionData(guard+1+i,1:je,1:ke,ivar)= regionData(guard+i,1:je,1:ke,ivar)
+                    enddo
+                 else
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 endif
+
+              endif
+
+           case(NOSLIP_INS)
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 k = 2*guard+1
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       k = k+1
+                       do i = 1,guard
+                          regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
+                       end do
+                       regionData(guard+1,1:je,1:ke,ivar)= 0.
+                    endif
+                 else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+              endif
+
+           case(SLIP_INS)
+
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 k = 2*guard+1
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if((ivar == VELC_FACE_VAR)) then
+                       k=k+1
+                       do i = 1,guard
+                          regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
+                       end do
+                       regiondata(guard+1,1:je,1:ke,ivar)= 0.
+                    endif
+                 else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard !-1
+                          regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                       end do
+                       !regionData(guard+1,1:je,1:ke,ivar)= (1.-1./16.)*regionData(guard,1:je,1:ke,ivar)+3./16.*regionData(guard-1,1:je,1:ke,ivar)-&
+                       !                                  3./16.*regionData(guard-2,1:je,1:ke,ivar)+1./16.*regionData(guard-3,1:je,1:ke,ivar)
+                    endif
+                 endif
+
+              endif
+
+
+           case(MOVLID_INS)
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 k = 2*guard+1
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if((ivar == VELC_FACE_VAR)) then
+                       k=k+1
+                       do i = 1,guard+1
+                          regionData(k-i,1:je,1:ke,ivar)= 0.
+                       end do
+                    endif
+                 else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(k-i,1:je,1:ke,ivar)= 2. - regionData(i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+              endif
+
+           case(INFLOW_INS)
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES
+                 k = 2*guard+1
+                 if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       k=k+1
+                       do i = 1,guard+1
+                          regionData(k-i,1:je,1:ke,ivar)= -1.
+                       end do
+                    endif
+                 else             ! Use guardcells to set to zero normal gradients of velocities not normal to boundary, at boundary
+                    if(ivar == VELC_FACE_VAR) then
+                       do i = 1,guard
+                          regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                       end do
+                    endif
+                 endif
+
+              endif
+
+
+
+
+           case(OUTFLOW_INS) ! Convective outflow boundary condition.
+
+
+
+              if (gridDataStruct==WORK) then ! NEUMANN
+                 k = 2*guard+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+
+              elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
+                 select case(ivar)
+                 case (PRES_VAR,DELP_VAR,TVIS_VAR)
+                    k = 2*guard+1
+                    do i = 1,guard
+                       regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    end do
+                 end select
+
+              else ! BOUNDARY CONDITIONS ON VELOCITIES - ONLY for 2nd ORDER STAGGERED GRIDS !
+
+                 alfadt = ins_alfa*dr_dt
+
+                 ! Get blocks dx, dy ,dz:
+                 call Grid_getDeltas(blockHandle,del)
+
+                 ! X direction:
+                 if (axis .eq. IAXIS) then
+
+                    !write(*,*) 'In Outflow',ins_predcorrflg
+
+                    ja = endPoints(LOW,JAXIS)
+                    jb = endPoints(HIGH,JAXIS)
+                    ka = endPoints(LOW,KAXIS)
+                    kb = endPoints(HIGH,KAXIS)
+
+                    if (ins_predcorrflg) then
+                       if (isFace) then
+                          if(ivar == VELC_FACE_VAR) then ! U velocities on X face grid
+
+                             regionData(guard+1,1:je,1:ke,ivar) = uvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle) -&
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (uvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle) - &
+                                  uvel_x(guard,ja:jb,ka:kb,HIGH,blockHandle))
+
+                          endif
+
+                       elseif(gridDataStruct .eq. FACEY) then ! V velocities on X direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             vvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle) = vvel_x(guard,ja:jb,ka:kb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (vvel_x(guard,ja:jb,ka:kb,HIGH,blockHandle) - &
+                                  vvel_x(guard-1,ja:jb,ka:kb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  vvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle)
+
+                          endif
+#if NDIM == 3
+                       elseif(gridDataStruct .eq. FACEZ) then ! W velocities on X direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             wvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle) = wvel_x(guard,ja:jb,ka:kb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (wvel_x(guard,ja:jb,ka:kb,HIGH,blockHandle) - &
+                                  wvel_x(guard-1,ja:jb,ka:kb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  wvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle)
+
+
+                          endif
+#endif
+                       endif
+
+                    else !ins_predcorrflg
+
+                       if (isFace) then
+!!$                 if(ivar == VELC_FACE_VAR) then ! U velocities on X face grid
+!!$                 endif
+                       elseif(ins_outflowgridChanged) then ! Estrapolate linearly V or W from the interior when grid changes.
+                          regionData(guard+1,1:je,1:ke,ivar) = 2.*regionData(guard,1:je,1:ke,ivar) - &
+                               regionData(guard-1,1:je,1:ke,ivar)
+
+                       elseif(gridDataStruct .eq. FACEY) then ! V velocities on X direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  vvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle)
+
+                          endif
+
+#if NDIM == 3
+                       elseif(gridDataStruct .eq. FACEZ) then ! W velocities on X direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  wvel_x(guard+1,ja:jb,ka:kb,HIGH,blockHandle)
+
+                          endif
+#endif
+                       endif
+
+
+                    endif !ins_predcorrflg
+                 endif !IAXIS
+
+
+
+                 ! Y direction:
+                 if (axis .eq. JAXIS) then
+
+                    ia = endPoints(LOW,IAXIS)
+                    ib = endPoints(HIGH,IAXIS)
+                    ka = endPoints(LOW,KAXIS)
+                    kb = endPoints(HIGH,KAXIS)
+
+                    if (ins_predcorrflg) then
+                       if (isFace) then
+                          if(ivar == VELC_FACE_VAR) then ! V velocities on Y face grid
+
+                             regionData(guard+1,1:je,1:ke,ivar) = vvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) -&
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (vvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) - &
+                                  vvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle))
+
+                          endif
+
+                       elseif(gridDataStruct .eq. FACEX) then ! U velocities on Y direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) = uvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (uvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
+                                  uvel_y(guard-1,ia:ib,ka:kb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+
+                          endif
+
+#if NDIM == 3
+                       elseif(gridDataStruct .eq. FACEZ) then ! W velocities on Y direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) = wvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (wvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
+                                  wvel_y(guard-1,ia:ib,ka:kb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+
+
+                          endif
+#endif
+
+                       endif
+
+                    else !ins_predcorrflg
+
+                       if (isFace) then
+!!$                 if(ivar == VELC_FACE_VAR) then ! V velocities on Y face grid
+!!$                 endif
+                       elseif(ins_outflowgridChanged) then ! Estrapolate linearly U or W from the interior when grid changes.
+                          regionData(guard+1,1:je,1:ke,ivar) = 2.*regionData(guard,1:je,1:ke,ivar) - &
+                               regionData(guard-1,1:je,1:ke,ivar)
+
+                       elseif(gridDataStruct .eq. FACEX) then ! U velocities on Y direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+
+                          endif
+
+#if NDIM == 3
+                       elseif(gridDataStruct .eq. FACEZ) then ! W velocities on Y direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+
+                          endif
+#endif
+                       endif
+
+
+                    endif !ins_predcorrflg
+                 endif !JAXIS
+
+#if NDIM == 3
+
+                 ! Z direction:
+                 if (axis .eq. KAXIS) then
+
+                    ia = endPoints(LOW,IAXIS)
+                    ib = endPoints(HIGH,IAXIS)
+                    ja = endPoints(LOW,JAXIS)
+                    jb = endPoints(HIGH,JAXIS)
+
+                    if (ins_predcorrflg) then
+                       if (isFace) then
+                          if(ivar == VELC_FACE_VAR) then ! W velocities on Z face grid
+
+                             regionData(guard+1,1:je,1:ke,ivar) = wvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle) -&
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (wvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle) - &
+                                  wvel_z(guard,ia:ib,ja:jb,HIGH,blockHandle))
+
+                          endif
+
+
+                       elseif(gridDataStruct .eq. FACEX) then ! U velocities on Z direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             uvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle) = uvel_z(guard,ia:ib,ja:jb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (uvel_z(guard,ia:ib,ja:jb,HIGH,blockHandle) - &
+                                  uvel_z(guard-1,ia:ib,ja:jb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  uvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle)
+
+                          endif
+
+
+                       elseif(gridDataStruct .eq. FACEY) then ! V velocities on Z direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             vvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle) = vvel_z(guard,ia:ib,ja:jb,HIGH,blockHandle) - &
+                                  (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
+                                  (vvel_z(guard,ia:ib,ja:jb,HIGH,blockHandle) - &
+                                  vvel_z(guard-1,ia:ib,ja:jb,HIGH,blockHandle))
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  vvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle)
+
+
+                          endif
+
+                       endif
+
+                    else !ins_predcorrflg
+
+                       if (isFace) then
+!!$                 if(ivar == VELC_FACE_VAR) then ! W velocities on Z face grid
+!!$                 endif
+                       elseif(ins_outflowgridChanged) then ! Estrapolate linearly V or U from the interior when grid changes.
+                          regionData(guard+1,1:je,1:ke,ivar) = 2.*regionData(guard,1:je,1:ke,ivar) - &
+                               regionData(guard-1,1:je,1:ke,ivar)
+
+                       elseif(gridDataStruct .eq. FACEX) then ! U velocities on Z direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  uvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle)
+
+                          endif
+
+                       elseif(gridDataStruct .eq. FACEY) then ! V velocities on Z direction
+                          if(ivar == VELC_FACE_VAR) then
+
+                             regionData(guard+1,1:je,1:ke,ivar) =  vvel_z(guard+1,ia:ib,ja:jb,HIGH,blockHandle)
+
+                          endif
+
+                       endif
+
+
+                    endif !ins_predcorrflg
+                 endif !KAXIS
+
+
+
+#endif
+
+
+
+              endif ! Velocities
+
+           case default
+              !!              print*,'boundary is',bcType
+              !!              call Driver_abortFlash("unsupported boundary condition on Upper Face")
+           end select
+
+
+        end if
+     end if
+  end do
+
+  return
+end subroutine Grid_bcApplyToRegion

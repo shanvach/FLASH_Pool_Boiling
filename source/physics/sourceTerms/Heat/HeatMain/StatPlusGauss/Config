@@ -1,0 +1,26 @@
+REQUIRES Driver
+
+D statheat  stationary heating
+D qheat     intensity of the transient heating
+D x0heat    X location of the transient heating
+D y0heat    Y location of the transient heating
+D z0heat    Z location of the transient heating
+D sigheat   sigma of the transient heating
+D tstar     start time of the transient
+D t0heat    switch off time of the transient
+D tau       decay time of the transient
+D theatmin  Min heating temperature
+
+PARAMETER statheat      REAL      1.0E-5  
+PARAMETER qheat         REAL      0.0E0   
+PARAMETER x0heat        REAL      1.0E0   
+PARAMETER y0heat        REAL      1.0E0   
+PARAMETER z0heat        REAL      1.0E0   
+PARAMETER sigheat       REAL      1.0E0   
+PARAMETER tstar         REAL     -1.0E0   
+PARAMETER t0heat        REAL     -1.0E0   
+PARAMETER tau           REAL      1.0E0   
+PARAMETER theatmin      REAL      1.0E3   
+PARAMETER useHeat   BOOLEAN TRUE 
+
+VARIABLE enuc                # nuclear energy gen. rate

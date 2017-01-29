@@ -1,0 +1,159 @@
+# 	Runtime parameters for the MHD circularly polarized Alfven wave problem.
+#	Please also look at default.par for more runtime parameters in the object directory
+
+#	Specific heats ratio
+gamma           = 1.66666666666666667
+
+
+#       Grid dimensionality and geometry
+geometry       = "cartesian"
+
+
+#       Size of computational volume
+#xmin            = 0.
+#xmax            = 2.23606797749979 #(=sqrt(5))
+#ymin            = 0.
+#ymax            = 1.11803398874989 #(=sqrt(5)/2)
+#zmin            = 0.
+#zmax            = 1.11803398874989 #(=sqrt(5)/2)
+
+xmin            = 0.
+xmax            = 3.
+ymin            = 0.
+ymax            = 1.5
+zmin            = 0.
+zmax            = 1.5
+
+
+#	advection angle
+#	angle = atan(rx/ry)
+rx		= 2.
+ry		= 1.
+
+
+#	Initial strength of the velocity fields : advection or steady
+steady		= .false.
+
+
+#	Initial strength of the velocity fields
+U0	= 0.1 #0.1 is a default setup in Gardiner & Stone
+
+
+#	Magnitude of the sinusoidal Alfven wave
+B0	= 0.1 #0.1 is a default setup in Gardiner & Stone
+
+
+#	Initial Pressure
+P0	= 0.1 #0.1 is a default setup in Gardiner & Stone
+
+
+#       Boundary conditions
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+#       Simulation (grid, time, I/O) parameters
+run_comment     = "2D Circularly polarized Alfven wave MHD problem"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 1000000
+tmax            = 5.0
+cfl             = 0.8
+plot_var_1	= "dens"
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 1.
+#checkpointFileIntervalStep = 10
+
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 1
+lrefine_max     = 6 
+nrefs           = 2
+refine_var_1    = "dens"
+refine_var_2	= "magx"
+refine_var_3	= "magy"
+eintSwitch	= 1.e-6
+
+
+#	DivB control switch
+killdivb	= .true.
+
+
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+dr_shortenLastStepBeforeTMax   = .true.
+
+log_file        = "./data/cpaw-ppm-mc-steep-32-Eup.log"
+basenm          = "./data/cpaw-ppm-mc-steep-32-Eup_"
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT STAGGERED MESH MHD SOLVER  ##
+#	I. INTERPOLATION SCHEME:
+order		= 3      # Interpolation order (first/second/third/fifth order))
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+use_avisc	= .false. # use artificial viscosity (originally for PPM)
+cvisc		= 0.1     # coefficient for artificial viscosity
+use_flattening	= .false. # use flattening (dissipative) (originally for PPM)
+use_steepening	= .true. # use contact steepening (originally for PPM)
+use_upwindTVD	= .false. # use upwind biased TVD slope for PPM (need nguard=6)
+
+
+#	II. MAGNETIC(B) AND ELECTRIC(E) FIELDS:
+E_modification	= .true.           # High order algorithm for E-field construction
+E_upwind	= .true.
+energyFix	= .true.           # Update magnetic energy using staggered B-fields
+ForceHydroLimit	= .false.          # Pure Hydro Limit (B=0)
+prolMethod      = "injection_prol" # Prolongation method (injecton_prol, balsara_prol)
+
+
+#	III. RIEMANN SOLVERS:
+RiemannSolver	= "hlld"       # Roe, HLL, HLLC, HLLD, LLF, Marquina
+entropy         = .false.     # Entropy fix for the Roe solver
+
+
+#	IV. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+## ---------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE SUPER-TIME-STEPPING (STS) ALGORITHM  ##
+##  NOTE: For details on using STS runtime parameters, please     ##
+##        refer to user's guide (Driver chapter).                 ##
+useSTS                  = .false.
+nstepTotalSTS           = 5
+nuSTS                   = 0.2
+## ---------------------------------------------------------------##
+
+
+#These parameters below are only necessary for the Uniform Grid
+iGridSize = 32   #defined as nxb * iprocs
+jGridSize = 16
+kGridSize = 16
+iProcs = 2      #num procs in i direction
+jProcs = 2      #num procs in j direction
+kProcs = 2
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

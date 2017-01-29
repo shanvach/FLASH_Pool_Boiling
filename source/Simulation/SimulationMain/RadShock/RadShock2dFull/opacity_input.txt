@@ -1,0 +1,54 @@
+Planck Absorption
+Planck Absorption
+Planck Absorption
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+polyimide-imx-006.cnr
+-------------------------------
+Planck Absorption
+Planck Absorption
+Planck Absorption
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+be-imx-003.cnr
+-------------------------------
+Planck Absorption
+Planck Absorption
+Planck Absorption
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+xenon-imx-012.cnr
+-------------------------------
+Planck Absorption
+Planck Absorption
+Planck Absorption
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+polyimide-imx-006.cnr
+-------------------------------
+Constant
+Constant
+Constant
+1.0e-05
+1.0e-05
+1.0e-05
+VOID
+void
+-------------------------------
+Planck Absorption
+Planck Absorption
+Planck Absorption
+0.000000E+00
+0.000000E+00
+0.000000E+00
+IONMIX
+xenon-imx-012.cnr
+-------------------------------

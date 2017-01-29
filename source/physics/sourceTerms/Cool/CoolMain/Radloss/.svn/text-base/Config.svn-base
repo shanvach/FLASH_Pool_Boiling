@@ -1,0 +1,44 @@
+REQUIRES Driver
+
+D tradmin  Min radloss temperature
+D tradmax  Max radloss temperature
+D dradmin  Min radloss electron number density
+D dradmax  Max radloss electron number density
+
+PARAMETER tradmin       REAL      4.44E3  
+PARAMETER tradmax       REAL      1.0E8  
+PARAMETER dradmin       REAL      1.0E0 
+PARAMETER dradmax       REAL      1.0E14 
+PARAMETER useCool   BOOLEAN  TRUE    
+
+
+VARIABLE enuc                # nuclear energy gen. rate
+
+D cl_speciesNameH1 name of a FLASH SPECIES (mass fraction variable)
+D & that tracks the mass fraction of protons, for purposes of the
+D & Radloss implementation of the Cool source term unit.
+D & Note that Cool/Radloss may expect that only two mass fraction
+D & variables are declared, one for protons and one for electrons.
+D & A species of this name should be declared either in the simulation's
+D & Config file or by including a code unit that declares it.
+PARAMETER cl_speciesNameH1	STRING	"H"
+
+D cl_speciesNameElec name of a FLASH SPECIES (mass fraction variable)
+D & that tracks the mass fraction of electrons, for purposes of the
+D & Radloss implementation of the Cool source term unit.
+D & Note that Cool/Radloss may expect that only two mass fraction
+D & variables are declared, one for protons and one for electrons.
+D & A species of this name should be declared either in the simulation's
+D & Config file or by including a code unit that declares it.
+PARAMETER cl_speciesNameElec	STRING	"ELEC"
+
+## Older instances of the Cool/Radloss Config file declared the
+## following three SPECIES.  To use, uncomment and change the PARAMETER
+## values as indicated below (or similar).
+# 
+# SPECIES h1
+# SPECIES prot
+# SPECIES neut
+#
+# PARAMETER cl_speciesNameH1	STRING	"H1"
+# PARAMETER cl_speciesNameElec	STRING	"ELEC"

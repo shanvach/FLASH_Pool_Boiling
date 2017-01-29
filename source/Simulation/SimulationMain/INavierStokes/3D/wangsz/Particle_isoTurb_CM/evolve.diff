@@ -1,0 +1,117 @@
+69,70d68
+<   use Profiler_interface, ONLY : Profiler_start, Profiler_stop
+< 
+81c79
+<   use IncompNS_data, only : ins_cflflg, ins_isgs, ins_invRe
+---
+>   use IncompNS_data, only : ins_cflflg
+82a81
+>   use gr_sbData, only : gr_sbNumBodies, gr_sbBodyInfo
+85,88c84,87
+< 
+<   use IncompNSstats_interface, only : IncompNSstats
+< 
+<   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+---
+>   use sm_Misc_interface, only: sm_get_NumBodies
+>   use sm_iointerface, only: sm_ioWriteSnapshot,sm_ioWriteParticles, &
+>                             sm_ioWriteStates, sm_iouttotecplot
+>   use SolidMechanics_Data, only : sm_meshMe,sm_meshComm,sm_BodyInfo
+110,115c109,110
+<  
+<   ! Turbulence simulation test case variables:
+<   real :: turbkin
+<   integer :: iso_nstatsz
+<   integer :: istatsz = 0
+<  
+---
+>   
+>   integer :: ibd,NumBodies
+119,121d113
+< 
+<   call RuntimeParameters_get("nstatsz",iso_nstatsz)
+< 
+123d114
+<   call Profiler_start("FLASH_evolution")
+140,148c131
+< 
+<   ! Substract mean velocities of initial field:
+<   !call ins_substractmeanvel_z(VELC_FACE_VAR,blockCount,blockList)
+<    call ins_substractmeanvel(dr_globalMe,dr_nstep,dr_simTime,&
+<                               ins_invRe,blockCount,blockList)
+< 
+< 
+<   ! Fill Guardcells for everything:
+<   call Grid_fillGuardCells( CENTER_FACES, ALLDIR)
+---
+>   call Grid_getListOfBlocks(LEAF,blockList,blockCount)
+155d137
+<   count    = 0
+162,166d143
+<   ! Substract mean velocities of initial field:
+<   !call ins_substractmeanvel(dr_globalMe,dr_nstep,dr_simTime,&
+<   !                          ins_invRe,blockCount,blockList)
+< 
+< 
+235,264d211
+<      ! Substract mean velocities:
+<      !call ins_substractmeanvel(dr_globalMe,dr_nstep,dr_simTime,&
+<      !                          ins_invRe,blockCount,blockList)
+< 
+<      ! Substract mean velocities of initial field:
+<      !call ins_substractmeanvel_z(VELC_FACE_VAR,blockCount,blockList)
+< 
+<      ! Fill Guardcells for everything:
+<      !call Grid_fillGuardCells( CENTER_FACES, ALLDIR)
+< 
+< 
+<      !--------------------------------------------------------------------
+<      ! Turbulent Statistics:
+<      !-------------------------------------------------------------------
+<      ! Compute Time averaged Statistics
+<      call ins_turbstats(dr_globalMe,dr_nstep,dr_simTime,&
+<                         ins_invRe,blockCount,blockList,turbkin)
+< 
+< 
+<      if (MOD(dr_nstep,iso_nstatsz) .eq. 0) then
+<        istatsz = istatsz + 1
+<        !call ins_turbstats_z(dr_nstep,istatsz,dr_simTime,ins_invRe,blockCount,blockList)
+< 
+<        call ins_exportslices_z(dr_nstep,istatsz,dr_simTime,ins_invRe,blockCount,blockList)
+< 
+<      endif
+< 
+<      !--------------------------------------------------------------------
+< 
+< 
+274,276d220
+< 
+< !       if (dr_globalMe .eq. MASTER_PE) write(*,*) 'tecplot_flg=',tecplot_flg,dr_dt,dr_simTime,IO_plotFileIntervalTime 
+< 
+288a233,246
+>     
+>         ! Here call write out Solid Stuff
+>         ! Write to Bodies to Tecplot:
+>         call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
+> 
+>         ! Write to Snapshot
+>         call sm_get_NumBodies(NumBodies)
+>         do ibd = 1,NumBodies
+>            if (sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster)then
+>               call sm_ioWriteSnapshot(ibd,count)
+>               ! Here we write particles
+>               call sm_ioWriteParticles(ibd,count)
+>            endif
+>         end do
+293a252,254
+>      ! Write SolidMechanics States defined by user:
+>      call sm_ioWriteStates()
+> 
+303,307d263
+< 
+<      ! Compute Time averaged Statistics
+<      call IncompNSstats()
+< 
+< 
+355d310
+<   call Profiler_stop("FLASH_evolution")

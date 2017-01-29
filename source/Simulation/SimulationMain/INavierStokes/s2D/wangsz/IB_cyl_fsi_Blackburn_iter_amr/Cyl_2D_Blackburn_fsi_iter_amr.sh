@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/IB_cyl_fsi_Blackburn_iter_amr/  -2d -auto -opt +pm4dev -nxb=25 -nyb=25 -maxblocks=10000 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_BLACKBURN_FSI_ITER_AMR -site=colonialone.gwu.edu -noclobber Bittree=1

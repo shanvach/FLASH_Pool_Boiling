@@ -1,0 +1,9 @@
+# Config file for the cool module
+
+# available submodules are
+
+# cool/radloss
+
+REQUIRES Driver
+
+

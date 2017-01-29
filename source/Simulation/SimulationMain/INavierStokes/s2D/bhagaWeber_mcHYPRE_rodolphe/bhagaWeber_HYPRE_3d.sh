@@ -1,0 +1,1 @@
+./setup INavierStokes/VARDENS/3D/bhagaWeber_mcHYPRE  -3d -auto  -nxb=16 -nyb=16 -nzb=16 -maxblocks=100 -gridinterpolation=native +pm4dev -objdir=BHAGA_mcHYPRE_3d_PGI_FAST_cfl -site=splash.seas.gwu.edu -noclobber

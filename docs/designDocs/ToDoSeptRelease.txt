@@ -1,0 +1,69 @@
+June 9, 2006
+
+
+Sept Release
+
+Update Users Guide		- Everyone, Noel in lead
+Pnetcdf				- KDA
+Particle IO			- KDA
+Particles			- KDA (help with doc from AD for UG particles)
+Direct IO			- KDA
+2D MHD				- Dongwook, AD
+Burn				- LR
+Cool, needs testing		- AD
+Ionization, testing		- AD
+Stir with PM3			- KDA
+Helmholtz Eos			- LR
+Multipole self gravity		- KDA
+Simple Gravity, test, cleanup	- AD
+Geometry and Interpolation	- Klaus (maybe in time...)
+NFBS IO Support			 - NTT
+F3ize Monotonic Interpolation	 - AD
+Fildr w/ Particle support	 - NTT
+Setups
+	*Orbit			- KDA
+	*MHD Setups		- Dongwook, AD
+	*Isentropic Vortex	- KDA
+	*2Gamma			- Klaus (research prob?)
+	*Cellular		- LR
+	*source terms setups	- AD
+	*k90			- LR (if we have time)
+	
+
+
+
+Test Suite
+Next Version of release		- NTT
+
+
+Major Things still missing from F3
+3d MHD
+Multigrid
+Cosmology
+
+
+Other Things to do not for Release ...
+Flame				   - AD
+Publish (see next list)		   - ALL
+Expansion (with Alexi P)	   - Klaus
+Visit F3			   - ???
+G90 with UG			   - Murali?
+
+
+Publish List
+F3 Architecture			   - ALL
+Test Suite			   - NTT, DS, KDA
+Particles cornerID + match	   - AD, KA
+Particles Movement, time integation, UG, PM, redistribute - AD, LR, KA
+Parallel Divide Domain ?	     - AD, DS
+Performance stuff		     - KMR
+
+Questions for Kevin
+Datastructs off PM
+Reordering Grid
+amr_1blk_bc_set
+Hardwire in refinederefine
+F90 please!
+
+
+ 

@@ -1,0 +1,53 @@
+# Setup Line Used:
+# For AMR grid 8^3 blocks, HomBcTrigSolver for coarse level direct solve:
+./setup unitTest/PFFT_XYdir_2D_MG -auto -2d -opt -nxb=8 -nyb=8 -maxblocks=4000 -gridinterpolation=native -parfile=(YOUR BASE DIRECTORY)/source/Simulation/SimulationMain/unitTest/PFFT_XYdir_2D_MG/flash_pm_2d.par Grid=PM4DEV ParameshLibraryMode=True PfftSolver=HomBcTrigSolver -objdir=XYDIR_MULTI_2D_MC -site=(YOUR SITE) -noclobber +noio
+
+# For Martin & Cartwright Multigrid:
+# Use (uncomment) the REQUIRES line:
+# REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve
+# in the unitTest/Poisson_XYperZneu_3D_MG/Config file, and Comment 
+# REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+
+# For Rickers multigrid:
+# Do viceversa of M&C multigrid in Config file and use this setup line (grid interpolation monotonic):
+./setup unitTest/PFFT_XYdir_2D_MG  -auto -2d -opt -nxb=8 -nyb=8 -maxblocks=4000 -parfile=(YOUR BASE DIRECTORY)/source/Simulation/SimulationMain/unitTest/PFFT_XYdir_2D_MG/flash_pm_2d.par Grid=PM4DEV ParameshLibraryMode=True PfftSolver=HomBcTrigSolver -objdir=XYDIR_MULTI_2D_RK -site=(YOUR SITE) -noclobber +noio
+
+# In the simulation directory XYDIR_MULTI_2D_* make the directory IOData (tecplot files are dumped there)
+
+# Result with 3-4 levels as defined in flash_pm_2d.par and Grid_markRefineDerefine.F90 file:
+# Harmonic source:
+
+
+# Martin & Cartwright Multigrid:
+cycle    1 : res_norm_ratio =  1.13E-02 res norm =  4.46E-01 new to old ratio =  1.13E-02
+cycle    2 : res_norm_ratio =  1.69E-04 res norm =  6.69E-03 new to old ratio =  1.50E-02
+cycle    3 : res_norm_ratio =  5.61E-06 res norm =  2.21E-04 new to old ratio =  3.31E-02
+cycle    4 : res_norm_ratio =  3.28E-07 res norm =  1.29E-05 new to old ratio =  5.85E-02
+cycle    5 : res_norm_ratio =  2.08E-08 res norm =  8.22E-07 new to old ratio =  6.35E-02
+cycle    6 : res_norm_ratio =  1.33E-09 res norm =  5.26E-08 new to old ratio =  6.39E-02
+cycle    7 : res_norm_ratio =  8.51E-11 res norm =  3.36E-09 new to old ratio =  6.39E-02
+ Poisson Solver time =  0.233500000000000
+ Mean Anl, Num= -2.428612866367530E-017  4.837102940413729E-014
+ L2 error =   7.092634787145702E-004
+ Linf error =   1.682148921690385E-003
+
+
+# Rickers Multigrid (hg): 
+ gr_hgSolve: ite  0: norm(residual)/norm(src) =  2.557839E-02          
+ gr_hgSolve: ite  1: norm(residual)/norm(src) =  1.056271E-03          
+ gr_hgSolve: ite  2: norm(residual)/norm(src) =  4.495038E-05          
+ gr_hgSolve: ite  3: norm(residual)/norm(src) =  2.041092E-06          
+ gr_hgSolve: ite  4: norm(residual)/norm(src) =  9.605047E-08          
+ gr_hgSolve: ite  5: norm(residual)/norm(src) =  4.640493E-09          
+ gr_hgSolve: ite  6: norm(residual)/norm(src) =  2.317153E-10          
+ gr_hgSolve: ite  7: norm(residual)/norm(src) =  1.171203E-11          
+ Poisson Solver time =  0.14699999999999999     
+ Mean Anl, Num= -2.77555756156289135E-017 -9.78451390510476360E-006
+ L2 error =   4.70743615530697535E-003
+ Linf error =   1.17327051263224069E-002
+
+
+# Same result (up to convergence tolerance) is obtained using PfftSolver=Generic_Direct on the setup line.
+
+
+

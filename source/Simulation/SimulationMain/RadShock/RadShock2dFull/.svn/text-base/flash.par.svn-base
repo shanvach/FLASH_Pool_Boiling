@@ -1,0 +1,212 @@
+run_comment = "Radiative shock simulation"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 50
+
+### Plot Options ###
+plotFileNumber = 0
+plot_var_1     = "dens"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 1
+
+##########################
+#      LASER PARAMS      #
+##########################
+useEnergyDeposition = .false.
+ed_doDeposition = .false.
+ed_maxRayCount = 500
+ed_inputFileName = "laser.beams"
+sim_gradSize = 0.0e-4
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+
+### Conduction parameters ###
+useDiffuse      = .true.
+useConductivity = .true.
+diff_useEleCond = .true.
+diff_eleFlMode  = "fl_harmonic"
+diff_eleFlCoef  = 0.06
+
+### Heat-Exchange parameters ###
+useHeatexchange = .true.
+
+### Material and EOS parameters ###
+eosModeInit        = "dens_temp_gather"
+eosMode            = "dens_ie_gather"
+
+### Multigroup diffusion options ###
+rt_useMGD       = .true.
+rt_mgdNumGroups = 5
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdFlMode    = "fl_harmonic"
+rt_mgdFlCoef    = 1.0
+
+useOpacity     = .true.
+
+### Initial conditions ###
+sim_vacThickness = 0.0
+
+sim_rhoXe  = 0.0065
+sim_abarXe = 131.293
+sim_zbarXe = 54.0
+sim_teleXe = 50.0
+sim_tionXe = 50.0
+sim_tradXe = 50.0
+
+sim_rhoBe  = 1.41
+sim_abarBe = 9.8032
+sim_zbarBe = 5.0256
+sim_teleBe = 50.0
+sim_tionBe = 50.0
+sim_tradBe = 50.0
+
+sim_rhoVa  = 0.0065
+sim_abarVa = 131.293
+sim_zbarVa = 54.0
+sim_teleVa = 50.0
+sim_tionVa = 50.0
+sim_tradVa = 50.0
+
+sim_rhoCh  = 1.41
+sim_abarCh = 9.8032
+sim_zbarCh = 5.0256
+sim_teleCh = 50.0
+sim_tionCh = 50.0
+sim_tradCh = 50.0
+
+sim_rhoAu  = 19.3
+sim_abarAu = 196.966569
+sim_zbarAu = 74.0
+sim_teleAu = 50.0
+sim_tionAu = 50.0
+sim_tradAu = 50.0
+
+sim_rhoAc  = 1.15
+sim_abarAc = 9.8032
+sim_zbarAc = 5.025
+sim_teleAc = 50.0
+sim_tionAc = 50.0
+sim_tradAc = 50.0
+
+### Boundary conditions ###
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+### Diffusion boundary conditions for Split Diffusion Solver ###
+diff_eleXlBoundaryType = "outflow"
+diff_eleXrBoundaryType = "outflow"
+diff_eleYlBoundaryType = "outflow"
+diff_eleYrBoundaryType = "outflow"
+diff_eleZlBoundaryType = "outflow"
+diff_eleZrBoundaryType = "outflow"
+
+rt_mgdXlBoundaryType = "outflow"
+rt_mgdXrBoundaryType = "outflow"
+rt_mgdYlBoundaryType = "dirichlet"
+rt_mgdYrBoundaryType = "outflow"
+rt_mgdZlBoundaryType = "outflow"
+rt_mgdZrBoundaryType = "outflow"
+
+rt_mgdYlBoundaryTemp = 1624637.0
+
+### Hydro options ###
+useHydro            = .true.
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+cvisc               = 0.1
+use_steepening      = .FALSE.
+ppmEintFluxConstructionMeth     = 0
+ppmEintCompFluxConstructionMeth = 5
+ppmEnerFluxConstructionMeth     = 0
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+
+# hy_eosModeAfter = "dens_ie_sele_gather"
+
+# Activate RAGE-like hydro:
+hy_eosModeAfter = "dens_ie_gather"
+hy_3Ttry_Arelated = .TRUE.
+hy_3Ttry_B = 1
+hy_3Ttry_D = 2.0
+hy_3Ttry_E = 1
+hy_3Ttry_F = 2
+hy_3Ttry_G = 0
+hy_3Ttry_Q = 0
+
+
+### Quiet Start Options ###
+useQuietStart   = .false.
+quietStartTemp  = 200.0
+quietStartXmin = 287.5e-04
+quietStartXmax = 312.5e-04
+quietStartYmin = 0.0e-04
+quietStartYmax = 700.0e-04
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+tstep_change_factor = 1.10
+cfl            = 0.5
+dt_diff_factor = 1.0e+100 # Disable diffusion dt
+rt_dtFactor    = 0.02
+hx_dtFactor    = 5000.0
+tmax           = 16.0e-09
+dtmin          = 1.0e-16
+dtinit         = 1.0e-15
+dtmax          = 1.0e-11
+nend           = 1000000
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cylindrical
+
+# Domain size:
+xmin = 0.0
+xmax = 1000.0e-04
+ymin = 0.0
+ymax = 4000.0e-04
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 10
+jGridSize = 150
+kGridSize = 1
+
+# Total number of blocks:
+nblockx = 8
+nblocky = 32
+nblockz = 1
+
+lrefine_max = 5
+lrefine_min = 1
+refine_var_1 = "dens"
+ 
+# nblockx * nxb * 2**(lrefinemax-1)

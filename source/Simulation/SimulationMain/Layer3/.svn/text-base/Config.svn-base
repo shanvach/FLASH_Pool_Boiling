@@ -1,0 +1,14 @@
+# configuration file for the 3-layer target problem
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosGamma/Multigamma
+REQUIRES Grid
+
+D model_file   name of the file from which to read the initial model
+PARAMETER model_file STRING "3lay1d.dat"
+
+SPECIES CU
+SPECIES CF
+SPECIES CH
+

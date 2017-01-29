@@ -1,0 +1,114 @@
+#       Runtime parameter file for the 1-cylinder problem
+#       
+
+#              simulation parameters
+
+basenm          = "1cyl_rz_"
+log_file        = "1cyl_rz.log"
+run_comment     = "RZ IC: case 128x64u"
+
+checkpointFileNumber        = 0
+plotFileNumber        = 0
+
+restart         = .false.
+checkpointFileIntervalTime          = 10.e30
+plotFileIntervalTime           = 10.e30
+wall_clock_checkpoint = 35800
+
+nend            = 999999
+tmax            = 900.e-6
+dtinit           = 1.0e-7
+cfl             = 0.2
+nrefs           = 4
+
+#checkpointFileIntervalStep = 1
+
+plot_var_1      = "dens"
+plot_var_2      = "sf6"
+plot_var_3      = "ener"
+plot_var_4      = "pres"
+plot_var_5      = "velx"
+plot_var_6      = "vely"
+plot_var_7      = "vrtz"
+
+
+
+xmin            = 0.
+xmax            = 60.
+ymin            = 0.
+ymax            = 7.5
+zmin            = 0.
+zmax            = 7.5
+
+nblockx         = 8
+nblocky         = 1
+
+xl_boundary_type  = "outflow"
+xr_boundary_type  = "outflow"
+yl_boundary_type  = "reflecting"
+yr_boundary_type  = "reflecting"
+zl_boundary_type  = "reflecting"
+zr_boundary_type  = "reflecting"
+
+#              AMR parameters
+
+lrefine_min     = 2
+lrefine_max     = 5
+
+refine_var_2    = "none"
+refine_var_1    = "none"
+
+use_steepening  = .false.
+cvisc           = 0.0
+igrav           = 0
+useShockBurn          = 0
+ichem           = 0
+
+# shock parameters
+
+mach    = 1.2
+
+#  Pre-shock parameters
+
+rho_amb  = 0.95e-3
+p_amb    = 8.e5
+vx_amb   = 0.0
+
+# Other experiment-related data
+sim_xShock  = 20.0
+xctr    = 22.0
+yctr    = 3.75
+ref_rect_x      = 3.
+ref_rect_y      = 3.
+
+# radial fit only
+sim_useRadialFit = .false.
+sim_radialFitRadius     = 0.6
+vz_sf6         = 20.0
+
+# both radial fit and expt. image
+maxconc         = 0.6
+sim_radialNumPixels            = 150.
+sim_rawPixelSize = 0.0038
+
+# expt. image only
+sim_useRawData    = .false.
+sim_rawNumPixelsX   = 608
+sim_rawNumPixelsY   = 468
+sim_rawMinX = 22.
+sim_rawMinY = 3.1
+
+# rz_sim_ic only
+use_rz_sim_data = .true.
+rz_rmax      = 3.2
+rz_zmax      = 7.5       # Should match zmax if 3d sim
+nr_c         = 64
+nz_c         = 128
+rz_zplane     = 5.5
+rz_fileSF6_cc     =  "128x64u_sf6"
+rz_filePres_cc   =  "128x64u_press"
+rz_fileRVel_ec    =  "128x64u_rvel"
+rz_fileZVel_ce    =  "128x64u_zvel"
+rz_subintNX       = 4
+rz_subintNY       = 4
+rz_subintNZ       = 1

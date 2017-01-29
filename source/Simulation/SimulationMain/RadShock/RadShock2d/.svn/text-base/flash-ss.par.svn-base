@@ -1,0 +1,145 @@
+# Paramaters for the MGD inifinite medium simulation
+run_comment = "1D Radiative Shock test using a shifted driver"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+### Checkpoint Options  ###
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 10
+
+### Plot Options ###
+plotFileNumber = 0
+plot_var_1     = "dens"
+
+### Restart Options ###
+restart              = .false.
+checkpointFileNumber = 0
+
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+
+### Material and EOS parameters ###
+eosModeInit        = "dens_temp"
+eosMode            = "dens_ie"
+
+### Multigroup diffusion options ###
+rt_useMGD        = .false.
+opac_emitConst   = 10.0
+opac_transConst  = 10.0
+opac_absorbConst = 10.0
+
+### Initial conditions ###
+sim_velx = -100.0e+05 # 100 km/s
+
+eos_singleSpeciesA = 131.293
+eos_singleSpeciesZ = 30.0
+
+# Set Xenon properties:
+sim_rhoXe  = 0.006
+sim_zbarXe = 30.0 # Note, this is NOT fully ionized on purpose...
+sim_abarXe = 131.293
+sim_teleXe = 116049.0 # 10 eV
+sim_tionXe = 116049.0 # 10 eV
+sim_tradXe = 116049.0 # 10 eV
+
+# Set plastic properties:
+#   The initial temperature for the plastic is currently set to 
+#   force it into pressure equilibrium with the Xenon
+sim_rhoCh  = 1.43
+sim_zbarCh = 30.0 # This is a guess!
+sim_abarCh = 131.293 # This is a guess!
+sim_teleCh = 486.91888111888113
+sim_tionCh = 486.91888111888113
+sim_tradCh = 486.91888111888113
+
+### Boundary conditions ###
+xl_boundary_type = "user"
+xr_boundary_type = "outflow"
+yl_boundary_type = "reflect"
+yr_boundary_type = "reflect"
+zl_boundary_type = "reflect"
+zr_boundary_type = "reflect"
+
+### Hydro options ###
+useHydro            = .true.
+order               = 2      # Interpolation order (First/Second order)
+slopeLimiter        = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta    = 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+RiemannSolver       = "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+shockDetect         = .false.     # Shock Detect for numerical stability
+cvisc               = 0.1
+use_steepening      = .FALSE.
+ppmEintFluxConstructionMeth     = 0
+ppmEintCompFluxConstructionMeth = 5
+ppmEnerFluxConstructionMeth     = 0
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+# hy_eosModeAfter = "dens_ie_sele_gather"
+
+
+### Quiet Start Options ###
+useQuietStart   = .true.
+quietStartTemp  = 500.0
+quietStartXmin = 0.0
+quietStartXmax = 4000.0e-04
+quietStartYmin = 300.0e-04
+quietStartYmax = 400.0e-04
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+cfl            = 0.8
+dt_diff_factor = 1.0e+10 # Disable diffusion dt
+rt_dtFactor    = 0.02
+hx_dtFactor    = 50.0
+tmax           = 20.0e-09
+dtmin          = 1.0e-15
+dtinit         = 1.0e-14
+dtmax          = 1.0e-11
+nend           = 500
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+
+# Domain size:
+xmin = 0.0
+xmax = 1000.0e-04 # 1000 microns, 1 mm
+ymin = 0.0
+ymax = 400.0e-04  # 400 microns
+
+# Total number of blocks:
+nblockx = 10
+nblocky = 4
+nblockz = 1
+
+### Mesh Refinement ###
+lrefine_min  = 1
+lrefine_max  = 3
+refine_var_1 = "dens"
+refine_var_2 = "pres"
+refine_var_3 = "velx"
+
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 100
+jGridSize = 1
+kGridSize = 1

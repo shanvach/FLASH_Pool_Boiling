@@ -1,0 +1,89 @@
+---------------------
+Flash Flame Unit
+---------------------
+
+Principle references:
+Vladimirova, Weirs, & Ryzhik (2006)
+Asida et al (in preparation)
+
+supplementary references:
+        Nuclear energetics: (mostly oved to Burn/parametric)
+          Calder et al (2007)
+          Townsley et al (2007)
+
+Introduction
+------------
+
+This unit implements tracking of thin flames, used both directly for the Type
+Ia problem and for studying Rayleigh-Taylor unstable flames more generically.
+The Unit currently implements a variation of the "artificial flame"
+technique introduced by Khokhlov (1995).  In this technique, the evolution of
+a burning progress variable (variously phi, flam, f, or rpv1, here we will
+use phi) is determined by an advection-reaction-diffusion (ADR) equation.
+The diffusion and reaction constants are chosen so that the rection front
+(where phi goes from 0 to 1) propagates at some desired scalar speed, and is
+as thin as can be tracked without undue numerical noise and ill effects on
+the speed or stability.
+
+This unit implements only the diffusion and reaction ("sources") part of the
+ADR equation.  The flame variable, phi, is declared as a mass-scalar, so that
+the hydro unit takes care of the advection.  Thus the advection and
+(diffusion-rection) are time-split operators.
+
+As originally proposed by Khokhlov (1995), the ADR scheme used a "top-hat" or
+"step-function" reaction term.  This is not a unique choice, and in fact our
+khokhlov implementation has its discontinuity "softened" a bit, and so
+differs slighty from the original.  Another reaction term is implemented, the
+KPP reaction rate, and is discussed extensively by Vladimirova, Weirs &
+Ryzhik (2006), in which it is shown to be much less noisy.  The latest
+improvements were to "sharpen" the KPP flame (truncating its tails) during
+work done in Summer 2006 which is being written up by Shimon Asida.
+
+
+Layout of the Unit
+------------------
+
+The sub-units are:
+FlameMain      --  routines to advance the artificial flame
+FlameEffects   --  energy release and species transformations which are
+                   tied to the flame
+FlameSpeed     --  various flamespeeds (Ia subgrid flamespeed is fairly complex)
+
+FlameMain
+
+This sub-unit has two implementations, /Khokhlov and /KPP, which actually
+share most of their functions at the higher level.  These were discussed
+above.
+
+FlameEffects
+
+This sub-unit has two implementations, FlameEffects/Co2nse and
+FlameEffects/Fuel2Ash.  Also the flame should be able to propagate with no
+energy release at all for testing purposes.  /Fuel2Ash implements a simple,
+one-stage burning energy release where the properties (A and Z) of two
+species "fuel" and "ash" are set, and an energy release is specified.
+/Co2nse is a shell which connects the flame to the Burn/parametricBurn/Co2nse
+module of similar name which implements the multi-stage reactive-ash burning
+for Type Ia supernovae.
+
+
+FlameSpeed 
+
+Contains functions almost entirely dedicated to calculating the flame speed.
+
+
+
+Contributing Authors
+--------------------
+
+Current Maintainer:  Dean Townsley
+Original authors: Natasha Vladimirova, ?
+Contributors:
+	Tomek Plewa
+        Bronson Messer
+        Alan Calder (implemented sKPP, noise testing)
+        Anshu Dubey (ported to flash3)
+
+(see also Burn/parametricBurn/Co2nse)
+
+

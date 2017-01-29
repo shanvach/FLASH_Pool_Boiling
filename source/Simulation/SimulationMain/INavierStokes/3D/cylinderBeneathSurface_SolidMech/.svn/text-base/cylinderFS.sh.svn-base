@@ -1,0 +1,1 @@
+./setup INavierStokes/3D/cylinderBeneathSurface_SolidMech/  -3d -auto -debug -nxb=8 -nyb=8 -nzb=8 -maxblocks=250 -gridinterpolation=native +pm4dev -objdir=CYL_3d_wFS_8_OPT -site=SEAS10927.gwu.edu Bittree=1 -noclobber

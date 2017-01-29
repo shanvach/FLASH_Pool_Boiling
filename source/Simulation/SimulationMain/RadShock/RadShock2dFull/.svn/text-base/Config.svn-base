@@ -1,0 +1,177 @@
+# Coniguration file for the 1D Radiative Shock
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+# EOS/Opacity files:
+DATAFILES xe-imx-027.cn4
+DATAFILES polyimide-imx-013.cn4
+DATAFILES be-imx-009.cn4
+DATAFILES he-imx-008.cn4
+
+# You NEED this line for entropy advection to work:
+MASS_SCALAR sele EOSMAP: SELE
+
+###########################
+#                         #
+#   MATERIAL PARAMETERS   #
+#                         #
+###########################
+D sim_rhoXe Initial Xenon density
+PARAMETER sim_rhoXe   REAL 0.0065
+
+D sim_teleXe Initial Xenon electron temperature
+PARAMETER sim_teleXe  REAL 290.11375
+
+D sim_tionXe Initial Xenon ion temperature
+PARAMETER sim_tionXe  REAL 290.11375
+
+D sim_tradXe Initial Xenon radiation temperature
+PARAMETER sim_tradXe  REAL 290.11375
+
+
+# Set Polyimide values (C22 H10 O5 N2)
+D sim_rhoCh Initial Polyimide density
+PARAMETER sim_rhoCh   REAL 1.41
+
+D sim_teleCh Initial Polyimide electron temperature
+PARAMETER sim_teleCh  REAL 290.11375
+
+D sim_tionCh Initial Polyimide ion temperature
+PARAMETER sim_tionCh  REAL 290.11375
+
+D sim_tradCh Initial Polyimide radiation temperature
+PARAMETER sim_tradCh  REAL 290.11375
+
+
+D sim_rhoVa Initial Vacuum density
+PARAMETER sim_rhoVa   REAL 0.0065
+
+D sim_teleVa Initial Vacuum electron temperature
+PARAMETER sim_teleVa  REAL 290.11375
+
+D sim_tionVa Initial Vacuum ion temperature
+PARAMETER sim_tionVa  REAL 290.11375
+
+D sim_tradVa Initial Vacuum radiation temperature
+PARAMETER sim_tradVa  REAL 290.11375
+
+
+D sim_rhoBe Initial Beryllium density
+PARAMETER sim_rhoBe   REAL 1.81
+
+D sim_teleBe Initial Beryllium electron temperature
+PARAMETER sim_teleBe  REAL 290.11375
+
+D sim_tionBe Initial Beryllium ion temperature
+PARAMETER sim_tionBe  REAL 290.11375
+
+D sim_tradBe Initial Beryllium radiation temperature
+PARAMETER sim_tradBe  REAL 290.11375
+
+
+D sim_rhoAu Initial Gold density
+PARAMETER sim_rhoAu   REAL 19.3
+
+D sim_teleAu Initial Gold electron temperature
+PARAMETER sim_teleAu  REAL 290.11375
+
+D sim_tionAu Initial Gold ion temperature
+PARAMETER sim_tionAu  REAL 290.11375
+
+D sim_tradAu Initial Gold radiation temperature
+PARAMETER sim_tradAu  REAL 290.11375
+
+
+# Set Acrylic values (C5 H8 O2)
+D sim_rhoAc Initial Acrylic density
+PARAMETER sim_rhoAc   REAL 1.15
+
+D sim_teleAc Initial Acrylic electron temperature
+PARAMETER sim_teleAc  REAL 290.11375
+
+D sim_tionAc Initial Acrylic ion temperature
+PARAMETER sim_tionAc  REAL 290.11375
+
+D sim_tradAc Initial Acrylic radiation temperature
+PARAMETER sim_tradAc  REAL 290.11375
+
+
+############################
+#                          #
+#   GEOMETRIC PARAMETERS   #
+#                          #
+############################
+D sum_tubeRadius Plastic tube, inner radius
+PARAMETER sim_tubeRadius REAL 287.5e-04
+  
+D sim_tubeThickness Plastic tube, wall thickness
+PARAMETER sim_tubeThickness REAL 25.0e-04
+
+D sim_slabThickness Beryllium slab thickness
+PARAMETER sim_slabThickness REAL 20.0e-04
+
+D sim_slabRadius Beryllium slab radius
+PARAMETER sim_slabRadius REAL 1000.0e-04
+
+D sim_goldThickness Gold washer thickness
+PARAMETER sim_goldThickness REAL 50.0e-04
+
+D sim_goldRadius Gold washer outer radius
+PARAMETER sim_goldRadius REAL 1000.0e-04
+
+D sim_acrylicThickness Acrylic collar thickness
+PARAMETER sim_acrylicThickness REAL 800.0e-04
+
+D sim_acrylicRadius Acrylic outer radius
+PARAMETER sim_acrylicRadius REAL 1000.0e-04
+
+D sim_windowThickness Length of the "window" in the tube
+PARAMETER sim_windowThickness REAL 200.0e-04
+
+D sim_vacThickness Thickness of the Vacuum region between z = 0 and the slab
+PARAMETER sim_vacThickness REAL 300.0e-04
+
+
+#############################
+#                           #
+#   REFINEMENT PARAMETERS   #
+#                           #
+#############################
+
+D sim_lrefmaxBase Base lrefine_max to use over most of the
+D &               domain. When negative, no localized D refinement
+D &                will be used.
+PARAMETER sim_lrefmaxBase INTEGER -1
+
+
+D sim_lrefmaxBe lrefine_max to use in Beryllium region
+PARAMETER sim_lrefmaxBe INTEGER -1
+
+D sim_belrXMin xmin of box over which sim_lrefmaxBe is applied
+PARAMETER sim_belrXMin REAL -0.5e-04
+
+D sim_belrXMax xmax of box over which sim_lrefmaxBe is applied
+PARAMETER sim_belrXMax REAL 1.0
+
+D sim_belrYMin ymin of box over which sim_lrefmaxBe is applied
+PARAMETER sim_belrYMin REAL 950.0e-04
+
+D sim_belrYMax ymax of box over which sim_lrefmaxBe is applied
+PARAMETER sim_belrYMax REAL 1050.0e-04
+
+
+D sim_lrefmaxPoly lrefine_max to use in Polyimide region
+PARAMETER sim_lrefmaxPoly INTEGER -1
+
+D sim_polylrXMin xmin of box over which sim_lrefmaxPoly is applied
+PARAMETER sim_polylrXMin REAL 280.0e-04
+
+D sim_polylrXMax xmax of box over which sim_lrefmaxPoly is applied
+PARAMETER sim_polylrXMax REAL 320.0e-04
+
+D sim_polylrYMin ymin of box over which sim_lrefmaxPoly is applied
+PARAMETER sim_polylrYMin REAL 1000.0e-04
+
+D sim_polylrYMax ymax of box over which sim_lrefmaxPoly is applied
+PARAMETER sim_polylrYMax REAL 1.0

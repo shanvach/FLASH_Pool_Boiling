@@ -1,0 +1,65 @@
+#       Configuration file for Lid Driven Cavity Problem
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+#/ImboundMain/LagForce/parallel
+#/old_version2D
+#REQUIRES Grid/GridStructures/withTriangles/pointTopoint/bitmap
+##REQUIRES Grid/GridStructures/withTriangles/pointTopoint/bitmap/unitTest
+#REQUIRES flashUtilities/sorting
+#REQUIRES flashUtilities/system/memoryUsage
+
+# This is just to get the virtual particles
+#PARTICLETYPE passive INITMETHOD custom MAPMETHOD custom ADVMETHOD custom
+#REQUIRES Particles
+##REQUESTS Particles/ParticlesInitialization/Lattice
+##REQUESTS Particles/ParticlesMapping/Quadratic
+#REQUESTS Particles/ParticlesMapping/meshWeighting/CIC/  #we need smearLen which we dont use
+#REQUIRES RuntimeParameters
+#REQUIRES Grid/GridMain/
+#REQUIRES Grid/GridParticles/
+#REQUIRES Grid/GridParticles/GridParticlesMove/paramesh/VirtualParticles
+#REQUESTS Grid/GridParticles/GridParticlesMapToMesh/paramesh
+#REQUESTS IO/IOParticles
+
+
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+USESETUPVARS Grid
+
+IF Grid=='UG'
+#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+#   REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+#   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve
+   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2
+
+#Default position of the solid body
+PARAMETER    sb_xmin      REAL    -1.0
+PARAMETER    sb_xmax      REAL    -1.0
+PARAMETER    sb_ymin      REAL    -1.0
+PARAMETER    sb_ymax      REAL    -1.0
+PARAMETER    sb_zmin      REAL    -1.0
+PARAMETER    sb_zmax      REAL    -1.0
+
+DATAFILES CYL.dat

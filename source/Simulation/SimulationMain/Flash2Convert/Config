@@ -1,0 +1,33 @@
+
+USESETUPVARS withParticles
+
+IF withParticles
+   REQUIRES Simulation/SimulationMain/Flash2Convert/ConvertParticles
+ENDIF
+
+REQUIRES flashUtilities/general
+REQUIRES flashUtilities/nameValueLL
+
+REQUIRES Driver
+REQUIRES Grid
+REQUIRES IO/IOMain/hdf5/parallel/PM
+#REQUESTS Grid/GridParticles/ParameshAlt
+#REQUESTS IO/IOParticles
+
+
+DATAFILES flash2vars
+DATAFILES flash2parts
+
+#PARAMETER rstar REAL 2.1269e8
+
+D Variables must be set for Flash3 equivalent of Flash2 problem being examined.
+VARIABLE ener
+VARIABLE temp
+VARIABLE dens
+VARIABLE game
+VARIABLE gamc
+VARIABLE velz
+VARIABLE vely
+VARIABLE velx
+VARIABLE eint
+VARIABLE pres

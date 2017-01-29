@@ -1,0 +1,45 @@
+# configuration file for the TwoGamma target problem
+
+REQUIRES Driver
+REQUIRES Grid/GridBoundaryConditions
+REQUIRES physics/Hydro
+REQUIRES Multispecies
+REQUESTS IO
+
+USESETUPVARS Mtmmmt
+
+IF Mtmmmt
+   REQUESTS physics/Eos/EosMain/multiTemp/Multitype
+   REQUESTS physics/Eos/EosMain/multiTemp/Gamma
+
+   LINKIF Simulation_initSpecies.F90.custom Multispecies
+
+   # Setup MGD Variables:
+   MASS_SCALAR R001
+   PPDEFINE MGD_NGROUPS 1
+
+   SPECIES XE
+   SPECIES POLI
+ELSE
+   REQUESTS physics/Eos/EosMain/Multigamma
+ENDIF
+
+# Parameters 
+
+D sim_p0   constant pressure
+PARAMETER sim_p0          REAL       2.5e-0
+
+D sim_rho1  density of the first fluid
+PARAMETER sim_rho1        REAL       1.0e-0
+
+D sim_rho2  density of the second fluid
+PARAMETER sim_rho2        REAL       1.0e-0
+
+D sim_cvelx  initial velocity
+PARAMETER sim_cvelx       REAL       0.1e-0
+
+SPECIES FLD1
+SPECIES FLD2
+
+MASS_SCALAR sele EOSMAP: SELE
+

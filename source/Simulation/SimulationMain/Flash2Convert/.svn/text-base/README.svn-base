@@ -1,0 +1,12 @@
+Notes to myself first, eventually put together something publishable.
+
+Files that have to be set for a successful conversion:
+
+Config must include grid quantities for the run we want, not included with
+units we have set up with.
+Would it be enough to include just the units we are looking for.
+
+You need to have a good flash2vars file. The script in tools should help
+
+flash2parts will be needed for particle mapping.
+Particles don't work yet.

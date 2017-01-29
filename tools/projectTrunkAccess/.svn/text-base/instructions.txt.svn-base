@@ -1,0 +1,37 @@
+Instructions for creating a pruned FLASH trunk tarball ready to be
+distributed.
+
+
+1). Check out a clean copy of trunk and the last FLASH release (this
+is FLASH3.3_release at the time of writing the instructions).
+
+2). Edit trunk_additions.sh so that the variables flash_trunk and
+flash_release point to the code checked out in step 1.
+
+3). Run trunk_additions.sh.  This will create a file named
+trunk_additions.txt which tells you all source directories that are in
+trunk but are not in release.
+
+4). Copy trunk_additions.txt into a new text file named,
+e.g. trunk_releasable.txt.  Edit this new file so that it contains the
+complete list of new directories from trunk which we want included in
+the tarball.  For example, if we want to include all directories from
+FLASH3.3_release plus a new directory named
+Particles/ParticlesMain/active/charged in our tarball then all
+directories should be removed from trunk_releasable.txt except:
+
+source/Particles/ParticlesMain/active/charged
+source/Particles/ParticlesMain/active/charged/HybridPIC
+
+Notice that all sub-directories of an included directory must be
+listed.
+
+Be aware that new stub directories in trunk must also be listed.  This
+is because FLASH subroutines like Driver_initSourceTerms depend on the
+new stub subroutines.
+
+5). Edit the variables in create_project_tar.sh.  The variable
+trunk_additions should be set to trunk_additions.txt and the variable
+trunk_access in our case should be set to trunk_releasable.txt.
+
+6). Run create_project_tar.sh to create the new tarball.

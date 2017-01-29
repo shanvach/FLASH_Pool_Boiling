@@ -1,0 +1,45 @@
+########################
+## runtimes and dumptimes
+basenm  = "pfft_convolve_test"
+
+# Smoothing radius, in units of cells
+smooth_radius = 4.0
+
+restart = .false.
+#checkpointFileNumber = 10
+#plotFileNumber = 0
+
+lrefine_max = 3
+
+plot_var_1 = "flam"
+plot_var_2 = "flsm"
+
+##########
+##  Grid
+geometry = "cartesian"
+
+#nblockx = 54
+#xmin = 0.e0
+#xmax = 810e5
+#nblocky = 1
+#ymin = -7.5e5
+#ymax = 7.5e5
+#nblockz = 1
+#zmin = -7.5e5
+#zmax = 7.5e5
+
+nblockx = 10
+xmin = 0.e0
+xmax = 10.0
+nblocky = 1
+ymin = -0.5
+ymax = 0.5
+nblockz = 1
+zmin = -0.5
+zmax = 0.5
+
+xl_boundary_type = "reflect"
+xr_boundary_type = "diode"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+

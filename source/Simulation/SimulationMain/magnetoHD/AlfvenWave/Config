@@ -1,0 +1,23 @@
+#       Configuration file for Circularly polarized Alfven wave MHD problem
+#	James Stone, www.astro.princeton.edu/~jstone
+
+REQUIRES physics/Hydro/HydroMain 
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   tiny	    Threshold value used for numerical zero
+D   rx	            advection angle = atan(rx/ry)
+D   ry
+D   U0 		    Strength of initial vector fields
+D   B0              Magnitude of circularly polarized Alfven wave
+D   P0              Initial pressure
+D   steady          Dynamics of the problem
+
+PARAMETER tiny         REAL     1.e-16
+PARAMETER rx	       REAL     1.
+PARAMETER ry           REAL     2.
+PARAMETER U0	       REAL     1.0
+PARAMETER B0           REAL     0.1
+PARAMETER P0	       REAL     0.1
+PARAMETER steady       BOOLEAN  FALSE
+VARIABLE BTRA
+VARIABLE XNOR

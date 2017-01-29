@@ -1,0 +1,19 @@
+#       Configuration file for the Noh problem
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUIRES physics/Eos
+
+
+D sim_rhoInit        Initial density
+PARAMETER sim_rhoInit      REAL    1.0
+
+D sim_pInit          Initial pressure
+PARAMETER sim_pInit        REAL    0.0
+
+D sim_uInit          Initial inward radial velocity
+PARAMETER sim_uInit        REAL    1.0
+
+D sim_gamma          Ideal gas EOS gamma
+PARAMETER sim_gamma        REAL    1.6666667
+

@@ -1,0 +1,37 @@
+# Taylor Green Vortex problem, with a constant advection velocity in x direction (uc=1).
+# One hundred steps are run and errors respect to analytical solution are compared. 
+# An AMR grid is used, two levels (4 and 5), refinement on right side of domain.
+
+# Setup line:
+./setup INavierStokes/2D/TaylorGreenVortex_pm4_mc -2d -auto -nxb=16 -nyb=16 -opt -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver -objdir=TAYLOR_GREEN_AMR -site=(Your SITE)
+
+# Make directory IOData within the object directory.
+
+
+# Result for step 100, Linf and L2 norms of error:
+ ###############################################################################
+ Mean DivUstar, DeltaMass=  4.76255210552442253E-018 -1.88018020884405182E-016
+ [gr_mgPfftInitGrid]: Able to retain PFFT grid from last time.
+cycle    1 : res_norm_ratio =  1.99E-04 res norm =  6.40E-06 new to old ratio =  2.70E-02
+cycle    2 : res_norm_ratio =  2.72E-06 res norm =  8.75E-08 new to old ratio =  1.37E-02
+cycle    3 : res_norm_ratio =  7.82E-08 res norm =  2.52E-09 new to old ratio =  2.88E-02
+cycle    4 : res_norm_ratio =  1.72E-09 res norm =  5.54E-11 new to old ratio =  2.20E-02
+cycle    5 : res_norm_ratio =  5.66E-11 res norm =  1.82E-12 new to old ratio =  3.29E-02
+  
+          Min , Max  U =  0.740482E-02   1.99260    
+          Min , Max  V = -0.992713      0.992712    
+          Min , Max  P = -0.492574      0.492575    
+ Min , Max  Divergence = -0.118794E-13  0.136557E-13
+ Total AB Step Time =  0.70899999999999996     
+  
+   100, TimeStep=   0.36816925E-02, SimTime=   0.36816925    
+ ###############################################################################
+ Mean Pressure =  1.51157242855183510E-017
+ Nux,Nvy,Npp=       34816       34816       32768
+           0 einf U=  1.10826029863231312E-004 eL2 U=  3.60268665677215689E-005
+           0 einf V=  8.05897110750519730E-005 eL2 U=  3.45497998625248238E-005
+           0 einf P=  1.07382685863316452E-003 eL2 P=  6.63432251413446851E-004
+ *** Wrote checkpoint file to INS_Taylor_Green_hdf5_chk_0001 ****
+ *** Wrote plotfile to INS_Taylor_Green_forced_hdf5_plt_cnt_0000 ****
+ gr_pfftFinalize: pfft_setupOnce is F
+

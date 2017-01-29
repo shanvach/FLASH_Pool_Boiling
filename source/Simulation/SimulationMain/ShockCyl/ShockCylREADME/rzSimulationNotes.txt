@@ -1,0 +1,19 @@
+Note:  LynnReid 2005-09-28
+No idea what this stuff means.
+I _think_ "Todd's data" was generating the initial conditions
+!
+!
+!  Todd's data was computed with an axisymmetric code and each variable
+!    is written to a file.  Coordinates are not written to any file.
+!    Data location in the cell is:
+!      at cell centers: rho, p, SF6 mass fraction, SF6 mole fraction
+!      centered in z, at edge in r: radial velocity
+!      at edge in z, centered in r: vertical velocity
+!    For an (nr,nz) grid, there are
+!      (nr,nz) cell centered points
+!      (nr-1,nz) radial velocity points
+!      (nr,nz-1) vertical velocity points
+!    Compared to the flash simulations, the axisymmetric simulations
+!      are on a much coarser grid.
+!
+

@@ -1,0 +1,34 @@
+#       cubic domain.
+LIBRARY STDCXX
+
+
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Driver
+REQUIRES Grid/GridMain
+REQUIRES flashUtilities/sorting/quicksort
+
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+
+USESETUPVARS Grid
+
+#REQUESTS Grid/GridSolvers/SUPERLU
+#REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson_SLU
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+## kpd - This is for the HYPRE implementation
+VARIABLE aaJunk  #kpd  for IfactorB
+
+FACEVAR mgw8
+
+PARAMETER quadrant          BOOLEAN  FALSE
+
+# Number of guardcells at each boundary
+GUARDCELLS 3
+
+

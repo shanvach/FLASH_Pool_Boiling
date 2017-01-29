@@ -1,0 +1,71 @@
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+#REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens
+
+USESETUPVARS Grid
+
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  #REQUESTS Grid/GridSolvers/BiPCGStab/varcoeffpoisson
+  #REQUESTS Grid/GridSolvers/BiPCGStab/poisson
+
+## kpd - This is for the HYPRE implementation
+  VARIABLE aaJunk  #kpd  for IfactorB
+
+  FACEVAR MGW8
+
+PARAMETER quadrant          BOOLEAN  FALSE
+
+# Number of guardcells at each boundary
+GUARDCELLS 3
+
+
+#/Generic_Direct
+
+#DATAFILES libtecio.a
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+#D   invRe  inverse Reynolds number
+#PARAMETER invRe         REAL     1.
+
+#D   isgs   Subgrid scale model flag
+#PARAMETER isgs          INTEGER  0
+
+
+
+## ----------------------------------------------
+## THIS PART IS FOR PHYSICS CONFIG
+## Variables required by the INS module
+#VARIABLE pres                	# pressure
+#VARIABLE delp            	# pressure correction
+#VARIABLE dust                 	# divergence of ustar, poissons equation source term
+#VARIABLE tvis               	# turbulent viscosity
+
+## Fluxes
+#FLUX velx
+#FLUX vely
+
+
+## Use GRIDVAR for temporary storages
+#GRIDVAR divv
+
+
+
+## Use FACEVAR for cell interface velocity fields
+#FACEVAR velc
+#FACEVAR rhds
+
+
+## Number of guardcells at each boundary
+#GUARDCELLS 2

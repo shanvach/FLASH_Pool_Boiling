@@ -1,0 +1,32 @@
+#Configuration file for Huang & Greengard problem
+
+REQUIRES Driver
+REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
+REQUIRES RuntimeParameters
+REQUIRES Grid/GridMain/paramesh
+
+
+REQUIRES physics/Hydro
+REQUIRES physics/Eos
+
+
+#Active particles.
+PARTICLETYPE active INITMETHOD fromfile MAPMETHOD weighted ADVMETHOD leapfrog
+
+REQUIRES Grid/GridParticles
+REQUIRES Particles/ParticlesMain/active/massive/Leapfrog
+REQUESTS Particles/ParticlesInitialization/FromFile
+
+#REQUIRES Particles/ParticlesForces/longRange/gravity/ParticleMesh
+REQUESTS Particles/ParticlesMapping/meshWeighting/MapToMesh
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+
+REQUIRES IO/IOParticles
+
+
+
+D sim_smlRho
+PARAMETER sim_smlRho     REAL    1.E-10
+PARAMETER pt_numX              INTEGER 1
+PARAMETER pt_numY              INTEGER 1
+PARAMETER pt_numZ              INTEGER 1

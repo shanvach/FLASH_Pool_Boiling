@@ -1,0 +1,10 @@
+REQUIRES Driver
+REQUIRES RuntimeParameters
+REQUIRES Grid/GridMain
+REQUIRES Grid/GridSolvers/Pfft
+VARIABLE dens TYPE: PER_VOLUME
+VARIABLE pden TYPE: PER_VOLUME
+
+D output_grid_data creates files for each processor that 
+D contain the local grid in different transposed states.
+PARAMETER output_grid_data BOOLEAN true

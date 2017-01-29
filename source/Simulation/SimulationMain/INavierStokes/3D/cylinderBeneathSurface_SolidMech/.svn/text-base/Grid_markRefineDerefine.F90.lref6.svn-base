@@ -1,0 +1,422 @@
+!!****if* source/Simulation/SimulationMain/INavierStokes/3D/Snorkel_mcHYPRE_VD_wFS/Grid_markRefineDerefine
+!!
+!! NAME
+!!  Grid_markRefineDerefine
+!!
+!! SYNOPSIS
+!!
+!!  Grid_markRefineDerefine()
+!!  
+!! DESCRIPTION 
+!!  Mark blocks for refinement or derefinement
+!!  This routine is used with AMR only where individual 
+!!  blocks are marked for refinement or derefinement based upon
+!!  some refinement criterion. The Uniform Grid does not need
+!!  this routine, and uses the stub.
+!!
+!! ARGUMENTS
+!! 
+!! NOTES
+!!
+!! Every unit uses a few unit scope variables that are
+!! accessible to all routines within the unit, but not to the
+!! routines outside the unit. For Grid unit these variables begin with "gr_"
+!! like, gr_myPE or gr_eosMode, and are stored in fortran
+!! module Grid_data (in file Grid_data.F90). The other variables
+!! are local to the specific routines and do not have the prefix "gr_"
+!!
+!!
+!!***
+
+subroutine Grid_markRefineDerefine()
+
+#include "Flash.h"
+
+#ifdef FLASH_GRID_PARAMESH
+  use Grid_data, ONLY : gr_refine_cutoff, gr_derefine_cutoff,&
+                        gr_refine_filter,&
+                        gr_numRefineVars,gr_refine_var, gr_meshComm
+
+  use tree, ONLY : newchild, refine, derefine, stay,lrefine_max
+  use Grid_interface, ONLY : Grid_markRefineSpecialized,Grid_fillGuardCells
+  use Simulation_data
+
+
+  implicit none
+
+#include "constants.h"
+!#include "MHD.h"
+#include "Flash_mpi.h"
+
+  real :: ref_cut,deref_cut,ref_filter
+  integer       :: l,i,iref
+  integer :: ierr
+
+
+  logical :: gcMask(NUNK_VARS)
+
+  !! Special refinement criteria -----------------
+  real, dimension(7) :: specs
+  real, dimension(7) :: specsA
+  real, dimension(7) :: specsB
+  real, dimension(7) :: specsC
+  real, dimension(7) :: specsD
+  real, dimension(3) :: specs2
+  real, dimension(6) :: specs4
+  real, dimension(4) :: specs3
+  integer :: lref,specsSize, specsSize2, specsSize3,specsSize4
+  integer :: specsSizeA, specsSizeB, specsSizeC,specsSizeD
+  !! End of special refinement treatment ---------
+
+  call Grid_fillGuardCells(CENTER,ALLDIR)
+
+  newchild(:) = .FALSE.
+  refine(:)   = .FALSE.
+  derefine(:) = .FALSE.
+  stay(:)     = .FALSE.
+
+#define SPECIAL_REFINEMENT 1
+
+#ifdef SPECIAL_REFINEMENT
+  specsSizeA=7
+  specsA(1) =  -1.0
+  !Old...specsA(2) =   7.0
+  specsA(2) =   100.0
+  specsA(3) =  -2.0
+  specsA(4) =   0.0
+  specsA(5) =  -100.0
+  specsA(6) =   100.0
+  specsA(7) = 0.0
+  lref = lrefine_max-2
+  !lref = lrefine_max-1
+  !lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSizeA,specsA,lref)
+#endif
+
+     call MPI_BARRIER(gr_meshComm,ierr)
+
+
+!KPD - Original Free Surface AMR...
+#ifdef SPECIAL_REFINEMENT
+  specsSizeC=7
+  specsC(1) =  -100. 
+  specsC(2) =   100.  
+  specsC(3) =  -.4 
+  specsC(4) =   .4 
+  specsC(5) =  -100. 
+  specsC(6) =  100. 
+  specsC(7) = 0.0
+  !! Bring all qualifying blocks to this level of refinement
+  lref = lrefine_max-2
+  !lref = lrefine_max-1
+  !lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSizeC,specsC,lref)
+#endif
+
+     call MPI_BARRIER(gr_meshComm,ierr)
+
+#ifdef SPECIAL_REFINEMENT
+  specsSizeA=7
+  specsA(1) =  -0.75
+  !KPDspecsA(2) =   1.90
+  specsA(2) =   3.25
+  specsA(3) =  -1.78
+  specsA(4) =   0.0
+  specsA(5) =  -100.0
+  specsA(6) =   100.0
+  specsA(7) = 0.0
+  !lref = lrefine_max-2
+  lref = lrefine_max-1
+  !lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSizeA,specsA,lref)
+#endif
+
+!KPD - Original Free Surface AMR...
+#ifdef SPECIAL_REFINEMENT
+  specsSizeC=7
+  specsC(1) =  -100.
+  specsC(2) =   100.
+  !specsC(1) =  -5. 
+  !specsC(2) =   100.  
+  specsC(3) =  -.1
+  specsC(4) =   .1
+  specsC(5) =  -100.
+  specsC(6) =  100.
+  specsC(7) = 0.0
+  !! Bring all qualifying blocks to this level of refinement
+  !lref = lrefine_max-2
+  lref = lrefine_max-1
+  !lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSizeC,specsC,lref)
+#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSizeC=3
+!  specsC(1) = real(OMGZ_VAR)
+!  specsC(2) =   0.25
+!  specsC(3) =  -0.25
+!
+!  lref = lrefine_max-1
+!  !lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized_KPD (VORTICITY,specsSizeC,specsC,lref)
+!#endif
+
+#ifdef SPECIAL_REFINEMENT
+  specsSizeA=7
+  specsA(1) =  -0.61
+  specsA(2) =   0.61
+  specsA(3) =  -1.7
+  specsA(4) =   -0.35
+  specsA(5) =  -100.0
+  specsA(6) =   100.0
+  specsA(7) = 0.0
+  !lref = lrefine_max-2
+  !lref = lrefine_max-1
+  lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSizeA,specsA,lref)
+#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!
+!  specsSize3=4
+!
+!  specs3(1) =  0.0
+!  specs3(2) = -0.9
+!  specs3(3) =  0.0
+!  specs3(4) =  0.5
+!
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (WITHRADIUS, specsSize3,specs3,lref)
+!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize2=3
+!  specs2(1) =  real(DFUN_VAR)
+!  specs2(2) =  -0.075
+!  specs2(3) =   0.075
+!  lref = lrefine_max-1
+!  !lref = lrefine_max
+!  call Grid_markRefineSpecialized_KPD (THRESHOLD,specsSize2,specs2,lref)
+!#endif
+!
+!#ifdef SPECIAL_REFINEMENT
+!  !! Call for the specialized refinement
+!  specsSizeB=7
+!  specsB(1) =  -1.0
+!  specsB(2) =   1.5
+!  specsB(3) =  -1.5
+!  specsB(4) =   0.0
+!  specsB(5) =  -100.0
+!  specsB(6) =   100.0
+!  specsB(7) = 0.0
+!
+!  lref = lrefine_max-1
+!  !lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSizeB,specsB,lref)
+!#endif
+!
+!     call MPI_BARRIER(gr_meshComm,ierr)
+!
+!#ifdef SPECIAL_REFINEMENT
+!  !! Call for the specialized refinement
+!  specsSizeB=7
+!  specsB(1) =  -0.6
+!  specsB(2) =   0.6
+!  specsB(3) =  -1.66
+!  specsB(4) =  -0.52
+!  specsB(5) =  -100.0
+!  specsB(6) =   100.0
+!  specsB(7) = 0.0
+!
+!  lref = lrefine_max-1
+!  !lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSizeB,specsB,lref)
+!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize4=6
+!  specs4(1) =   0.0
+!  specs4(2) =  -1.09
+!  specs4(3) =   0.0
+!  specs4(4) =   0.55
+!  specs4(5) =   0.55
+!  specs4(6) =   1000000.0
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (ELLIPSOID,specsSize4,specs4,lref)
+!#endif
+
+     call MPI_BARRIER(gr_meshComm,ierr)
+
+!****************************************************************************
+!****************************************************************************
+!****************************************************************************
+!****************************************************************************
+
+!!KPD - Original Free Surface AMR...
+!#ifdef SPECIAL_REFINEMENT
+!  specsSizeD=7
+!  specsD(1) =  -100.
+!  specsD(2) =  -5.
+!  specsD(3) =  -.4
+!  specsD(4) =   .4
+!  specsD(5) =  -100.
+!  specsD(6) =  100.
+!  specsD(7) = 0.0
+!  !! Bring all qualifying blocks to this level of refinement
+!  lref = lrefine_max-1
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSizeD,specsD,lref)
+!#endif
+!
+!     call MPI_BARRIER(gr_meshComm,ierr)
+!
+!!KPD - Original Free Surface AMR...
+!#ifdef SPECIAL_REFINEMENT
+!  specsSizeD=7
+!  specsD(1) =  10.
+!  specsD(2) =  100.
+!  specsD(3) =  -.4
+!  specsD(4) =   .4
+!  specsD(5) =  -100.
+!  specsD(6) =  100.
+!  specsD(7) = 0.0
+!  !! Bring all qualifying blocks to this level of refinement
+!  lref = lrefine_max-1
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSizeD,specsD,lref)
+!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize=7
+!  !specs(1) =  -5.
+!  !specs(2) =   10.
+!  specs(1) =  -100.
+!  specs(2) =   -10.
+!  specs(3) =  -.2
+!  specs(4) =   .2
+!  specs(5) =  -100.
+!  specs(6) =  100.
+!  specs(7) = 0.0
+!  !! Bring all qualifying blocks to this level of refinement
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+!#endif
+
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize2=3
+!  specs2(1) =  real(DFUN_VAR)
+!  specs2(2) =  -0.2
+!  specs2(3) =   0.2
+!  lref = lrefine_max
+!  call Grid_markRefineSpecialized_KPD (THRESHOLD,specsSize2,specs2,lref)
+!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize4=6
+!  specs4(1) =   0.0
+!  specs4(2) =  -0.9
+!  specs4(3) =   0.0
+!  specs4(4) =   0.35
+!  specs4(5) =   0.35
+!  specs4(6) =   1000000.0
+!  lref = lrefine_max-1
+!
+!  call Grid_markRefineSpecialized (ELLIPSOID,specsSize4,specs4,lref)
+!#endif
+
+!!#ifdef SPECIAL_REFINEMENT
+!!  specsSize=7
+!!  specs(1) =  -1.0 
+!!  specs(2) =   2.5 
+!!  specs(3) =  -2.0  
+!!  specs(4) =   0.0  
+!!  specs(5) =  -100.0 
+!!  specs(6) =   100.0 
+!!  specs(7) = 0.0
+!!  lref = lrefine_max-1
+!!
+!!  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+!!#endif
+!!
+!!#ifdef SPECIAL_REFINEMENT
+!!  !! Call for the specialized refinement
+!!  specsSize=7
+!!  specs(1) =  -1.0
+!!  specs(2) =   1.5
+!!  specs(3) =  -2.0
+!!  specs(4) =   0.0
+!!  specs(5) =  -100.0
+!!  specs(6) =   100.0
+!!  specs(7) = 0.0
+!!
+!!  lref = lrefine_max
+!!
+!!  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+!!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  specsSize4=6
+!  specs4(1) =   0.0 
+!  specs4(2) =  -0.9 
+!  specs4(3) =   0.0  
+!  specs4(4) =   0.51  
+!  specs4(5) =   0.51 
+!  specs4(6) =   1000000.0 
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (ELLIPSOID,specsSize4,specs4,lref)
+!#endif
+
+!#ifdef SPECIAL_REFINEMENT
+!  !! Call for the specialized refinement
+!  specsSize=7
+!  specs(1) =  -1.0
+!  specs(2) =   1.0
+!  specs(3) =  -2.0
+!  specs(4) =   0.0
+!  specs(5) =  -100.0
+!  specs(6) =   100.0
+!  specs(7) = 0.0
+!
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+!#endif
+
+
+!#ifdef SPECIAL_REFINEMENT
+!
+!  specsSize3=4
+!
+!  specs3(1) =  0.0
+!  specs3(2) = -0.9
+!  specs3(3) =  0.0
+!  specs3(4) =  0.6
+!
+!  lref = lrefine_max
+!
+!  call Grid_markRefineSpecialized (INRADIUS, specsSize3,specs3,lref)
+!#endif
+
+#ifdef FLASH_GRID_PARAMESH2
+  ! Make sure lrefine_min and lrefine_max are obeyed - KW
+  if (gr_numRefineVars .LE. 0) then
+     call gr_markRefineDerefine(-1, 0.0, 0.0, 0.0)
+  end if
+#endif
+  return
+#endif
+
+end subroutine Grid_markRefineDerefine

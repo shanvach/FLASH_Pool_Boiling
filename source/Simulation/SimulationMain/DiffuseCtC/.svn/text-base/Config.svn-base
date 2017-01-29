@@ -1,0 +1,66 @@
+# Coniguration file for Diffusion Code-to-Code Comparison Test
+REQUIRES Driver
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/Eos/EosMain/multiTemp/Multigamma
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+# Create single species for Helium
+SPECIES HE
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+
+# MATERIAL SPECIFICATION:
+D sim_abar Mass number of the material
+PARAMETER sim_abar   REAL 4.0026032497
+
+D sim_zbar Atomic number of the material
+PARAMETER sim_zbar   REAL 2.0
+
+D sim_geom Geometry for initial condition
+PARAMETER sim_initGeom STRING "planar" ["planar","polar"]
+
+
+# DENSITY SPECIFICATION:
+D sim_rho Initial density
+PARAMETER sim_rho    REAL 1.0
+
+
+# ELECTRON TEMPERATURE SPECIFICATION:
+D sim_tele1 Initial electron temperature
+PARAMETER sim_tele1  REAL 1.0
+PARAMETER sim_tele2  REAL 1.0
+
+D sim_teleOffset Location of the electron temperature dropoff
+PARAMETER sim_teleOffset REAL 0.02
+
+D sim_teleSteepness Steepness of the electron temperature variation
+PARAMETER sim_teleSteepness REAL 250.0
+
+
+# ION TEMPERATURE SPECIFICATION:
+D sim_tion1 Initial ion temperature
+PARAMETER sim_tion1  REAL 1.0
+PARAMETER sim_tion2  REAL 1.0
+
+D sim_tionOffset Location of the ion temperature dropoff
+PARAMETER sim_tionOffset REAL 0.02
+
+D sim_tionSteepness Steepness of the ion temperature variation
+PARAMETER sim_tionSteepness REAL 250.0
+
+
+# RADIATION TEMPERATURE SPECIFICATION:
+D sim_trad1 Initial radiation temperature
+PARAMETER sim_trad1  REAL 1.0
+PARAMETER sim_trad2  REAL 1.0
+
+D sim_tradOffset Location of the radiatoin temperature dropoff
+PARAMETER sim_tradOffset REAL 0.02
+
+D sim_tradSteepness Steepness of the radiation temperature variation
+PARAMETER sim_tradSteepness REAL 250.0

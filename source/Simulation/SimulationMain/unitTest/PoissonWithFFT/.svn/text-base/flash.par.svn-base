@@ -1,0 +1,10 @@
+# The size of the grid where we solve the poisson equation
+
+xGridSize = 8
+yGridSize = 8
+lx = 0.0
+ux = 1.0
+ly = 0.0
+uy = 1.0
+
+

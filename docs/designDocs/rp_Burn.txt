@@ -1,0 +1,81 @@
+
+physics/sourceTerms/Burn
+    useBurn [BOOLEAN] [FALSE]
+        shall I burn?
+
+physics/sourceTerms/Burn/BurnMain
+    enucDtFactor [REAL] [1.e30]
+        Valid Values: Unconstrained
+        Limit timestep to limit total energy deposited by burning is kept
+        artificially high to effectively turn off limiting by default
+    useShockBurn [BOOLEAN] [FALSE]
+        Is burning allowed within shocks?
+
+physics/sourceTerms/Burn/BurnMain/nuclearBurn
+    algebra [INTEGER] [1]
+        Valid Values: 1 to 2
+        choice of linear algebra package & 1 = MA28 ;  2 = GIFT
+    nuclearDensMax [REAL] [1.0E14]
+        Valid Values: 0 to INFTY
+        Max burning density
+    nuclearDensMin [REAL] [1.0E-10]
+        Valid Values: 0 to INFTY
+        Min burning density
+    nuclearNI56Max [REAL] [1.0]
+        Valid Values: 0 to INFTY
+        Max Ni56 mass frac. for burning
+    nuclearTempMax [REAL] [1.0E12]
+        Valid Values: 0 to INFTY
+        Max burning temperature
+    nuclearTempMin [REAL] [1.1E8]
+        Valid Values: 0 to INFTY
+        Min burning temperature
+    odeStepper [INTEGER] [1]
+        Valid Values: 1 to 2
+        choice of ode time stepper 1 = Bader-Deuflhard variable order 2 =
+        Rosenbrock 4th order
+    useBurnTable [BOOLEAN] [FALSE]
+        choice of rate evaluation FALSE = analytic rates TRUE = table
+        interpolation
+
+physics/sourceTerms/Burn/BurnMain/nuclearBurn/Aprox13t
+    bn_rrScale [REAL] [1.0]
+        Valid Values: 0.0 to 1.0
+        Can be used to decrease the ratdum reaction rates
+
+physics/sourceTerms/Burn/BurnMain/parametricBurn
+    threadBurnBlockList [BOOLEAN] [TRUE]
+
+
+physics/sourceTerms/Burn/BurnMain/parametricBurn/Co2nse
+    bn_pbNoreactFlameThreshold [REAL] [1.e-6]
+        Valid Values: Unconstrained
+        Do not burn in a flame unless the local "flame" value is below this
+        threshold. This is only used when/were a special Noreact region is NOT
+        being honored; in a special Noreact region (when pbHonorNoreactRegion is
+        TRUE), the criteria for suppressing burning are in general different and
+        involve temperature as well as the "flame" value. This runtime parameter
+        is meaningless when burning is not used or when pbReact is false.
+    c_frac [REAL] [0.5]
+        Valid Values: Unconstrained
+
+    pbFqdotMult [REAL] [1.e0]
+        Valid Values: Unconstrained
+
+    pbHonorNoreactRegion [BOOLEAN] [true]
+
+    pbNseWarnLevel [INTEGER] [1]
+        Valid Values: Unconstrained
+
+    pbReact [BOOLEAN] [true]
+
+    pbUseConstComposition [BOOLEAN] [true]
+
+
+physics/sourceTerms/Burn/BurnNSE
+    pbDensTableName [STRING] ["nse_dens_emq_table.txt"]
+        Valid Values: Unconstrained
+        Name of the lookup table for final NSE state for isochoric burn
+    pbPresTableName [STRING] ["nse_pres_hmq_table.txt"]
+        Valid Values: Unconstrained
+        Name of the lookup table for final NSE state for isobaric burn

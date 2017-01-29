@@ -1,0 +1,128 @@
+Cases
+
+16aug03
+
+  64x64 time 0 to 3, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 1.25 times inlet on top, made up at bottom edge
+
+  64x64a time 0 to 1.5, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 1.25 times inlet on top, made up at bottom edge
+
+  64x64b time 0 to 0.8, 500 ms start up. No SF6, just air.
+
+17aug03
+
+  64x64c time 0 to 3, 500 ms start up. No SF6, just air., more sidestream
+
+  64x64d time 0 to 3, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 1.5 times inlet on top, made up at bottom edge
+
+  64x64e time 0 to 6, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 1.5 times inlet on top, made up at bottom edge
+
+  64x64f time 0 to 6, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 3 times inlet on top, made up at bottom edge
+
+  64x64g time 0 to 6, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 5 times inlet on top, made up at bottom edge
+
+20sep03 & 21sep03
+
+  64x64h time 0 to 2, 500ms start up, sf6 at 10cm/sec in 8mm diam
+  outflow at bottom 5 times inlet on top, made up at bottom edge
+  test of pressure smoothing -- has very little effect
+  While pressure smoothing has little effect, smoothing mf, only for
+  use in evaluating den, in the hydraulic step helps a lot.
+
+22sep03
+
+   128x64a like 64x64h but with doulbe the r resolution
+
+19Jan04
+
+  64x64i like 64x64h but with mole fraction output
+
+  128x64b like 64x64i but with 7.5cm height.
+
+  128x64c like 128x64b but with 4x outlet flow
+
+20Jan04
+
+  128x64d like 128x64c but with more flexible code
+
+  128x64e like 128x64c but with half the inlet flow,
+          also adjusted crackHeight to match intervals
+          and doubled the diam of exit hole.
+
+ 128x64f like 128x64e with p=0.8atm, visc=0.16cp, diff=0.1176
+         and outflow=5*top inlet.
+
+ 128x64g like 128x64f with inlet concentration cut to 0.75
+
+9mar04
+ 64x32a inlet 0.5 -- debug
+       FOUND A MISING FACTOR OF RHO in the boundary flows
+ 64X32b inlet mf=1, aveVel = 10;
+
+10 mar 04
+ 128x64h like 62x32b
+
+ 128x64i inlet mf=1, aveVel = 5
+
+ 128x64j inlet mf=1, aveVel = 20
+
+ 256x64a inlet mf =1, aveVel = 20, height = 15 (twice that of the above)
+
+ 128x64k like 128x64j with aveVel = 30, dt 1/2 the size
+
+ 128x64l like 128x64j with aveVel = 25, dt 1/2 the size
+
+ 128x128b like 128x64k, but smaller dr, aveVel = 30, dt = 5e-6/sec
+
+ 128x128c like 128x64k, but smaller dr, aveVel = 25, dt = 5e-6/sec
+
+11 mar 04
+
+ 128x128d aveVel = 25, radius=4.2666, height = 7.5, dt=5e-6
+
+19 mar 04
+
+ 128x64m like 128x64l with aveVel = 10, dt 5.e-6
+
+23 mar 04
+
+ 128x64n like 128x64m with aveVel = 10, dt 1.e-5, inlet conc = 0.9
+
+ 128x64o like 128x64m with aveVel = 10, dt 1.e-5, inlet conc = 0.5
+         This provides a good match to Tomek's fit with max conc = 0.14
+
+ 128x64p like 128x64m with dt = 1e-5, and tfinal=4
+         The 2cm mole fraction  profile at 4 sec is the same as 1 sec
+
+ 128x64q aveVel = 15, inlet conc=1.0, dt = 1e-5, and tfinal=1
+
+ 128x64r aveVel = 15, inlet conc=0.8, dt = 1e-5, and tfinal=1
+
+ 128x64s aveVel = 20, inlet conc=0.9, dt = 1e-5, and tfinal=1
+         This provides a good match to Tomek's fit with max conc = 0.43
+
+7 Apr 04
+
+ 128x64t aveVel = 23.43, inlet conc=0.9685, dt = 1e-5, and tfinal=1
+         This provides a good match to Tomek's fit with max conc = 0.83
+
+ 128x128e aveVel = 20, inlet massfr = 0.9, dt = 1e-5sec
+         A little narrower than Tomek's fit
+
+19 Apr 04
+
+ 128x64u aveVel = 21.58, inlet conc=0.9315, dt = 1e-5, and tfinal=1
+         OK match to Tomek's fit with max = 0.69
+
+ 128x64v aveVel = 22.5, inlet conc=0.95, dt = 1e-5, and tfinal=1
+         OK match to Tomek's fit with max = 0.75
+
+
+8 Jul 04
+
+ 128x64w aveVel = 20, inlet conc=0.99, dt = 1e-5, and tfinal=1

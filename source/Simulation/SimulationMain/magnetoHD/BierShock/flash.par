@@ -1,0 +1,112 @@
+# Paramaters for the MGD inifinite medium simulation
+run_comment = "Biermann Battery Shock Test"
+log_file    = "biershock.log"
+basenm      = "biershock_"
+restart     = .false.
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 50
+checkpointFileNumber       = 0
+plotFileNumber             = 0
+plot_var_1                 = "dens"
+
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+useDiffuse      = .false.
+useConductivity = .false.
+diff_useEleCond = .false.
+diff_eleFlMode  = "fl_harmonic"
+diff_eleFlCoef  = 0.06
+
+# Heat-Exchange parameters:
+useHeatexchange = .false.
+
+# Material and EOS parameters:
+eosModeInit        = "dens_ie_gather"
+eosMode            = "dens_ie_recal_gather"
+eos_singleSpeciesA = 4.0
+eos_singleSpeciesZ = 2.0
+gamma              = 1.66666666
+
+
+
+# Initial conditions:
+sim_skewFactor = 0.5
+
+sim_rho  = 0.0018
+sim_eint = 1.08531495e+13
+sim_erad = 1.0
+sim_velx = -100.0e+05
+
+
+# Hydro options:
+useHydro            = .true.
+order               = 2      # Interpolation order (First/Second order)
+slopeLimiter        = "vanLeer"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta    = 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+RiemannSolver       = "hllc"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+shockDetect         = .false.     # Shock Detect for numerical stability
+use_avisc           = .false.
+cvisc               = 0.1
+use_steepening      = .false.
+eintSwitch      = 1.e-4
+hy_eosModeAfter = "dens_ie_sele_gather"
+
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "user"
+yr_boundary_type = "user"
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+cfl            = 0.8
+dt_diff_factor = 1.0e+10 # Disable diffusion dt
+rt_dtFactor    = 1.0e+100 # Disable MGD dt
+hx_dtFactor    = 50.0
+tstep_change_factor = 1.05
+tmax           = 30.0e-09
+dtmin          = 1.0e-19
+dtinit         = 1.0e-16
+dtmax          = 1.0e-10
+nend           = 999999999
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+
+# Domain size:
+xmin = 0.0
+xmax = 2000.0e-04 # 1000 microns, 1 mm
+ymin = 0.0
+ymax = 1000.0e-04  # 400 microns
+
+# Total number of blocks:
+nblockx = 2
+nblocky = 1
+nblockz = 1
+
+lrefine_min  = 4
+lrefine_max  = 4
+refine_var_1 = "dens"
+refine_var_2 = "pres"
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 1000
+jGridSize = 1
+kGridSize = 1

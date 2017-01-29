@@ -1,0 +1,32 @@
+# Taylor Green Vortex problem, with a constant advection velocity in x direction (uc=1).
+# One hundred steps are run and errors respect to analytical solution are compared. 
+# An AMR grid is used, two levels (4 and 5), refinement on right side of domain.
+
+# Setup line:
+./setup INavierStokes/2D/TaylorGreenVortex_pm4_mc -2d -auto -nxb=16 -nyb=16 -opt -maxblocks=3000 -gridinterpolation=native -parfile=(Directory to FLASH)/source/Simulation/SimulationMain/INavierStokes/2D/TaylorGreenVortex_pm4_mc/flash.par +pm4dev PfftSolver=HomBcTrigSolver -objdir=TAYLOR_GREEN_BI -site=(Your SITE)
+
+# Make directory IOData within the object directory.
+
+# Same results should be obtained changing PfftSolver=Generic_Direct, or solver in 
+# the Config file of TaylorGreenVortex_pm4_mc directory to:
+REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve
+
+
+# Result for step 100, Linf and L2 norms of error:
+ ###############################################################################
+ [gr_hgPfftInitGrid]: Able to retain PFFT grid from last time.
+cycle    1 res norm =  1.71E-06 new to old ratio =  4.65E-04
+cycle    2 res norm =  3.61E-09 new to old ratio =  2.11E-03
+cyc1/2   3 res norm =  9.91E-11 new to old ratio =  2.74E-02
+ Elapsed Time in Preconditioner =  0.10700000000000000     
+  
+ Min , Max  Divergence = -0.180966E-13  0.226485E-13
+ Total AB Step Time =  0.24299999999999999     
+  
+   100, TimeStep=   0.18442537E-02, SimTime=   0.18425458    
+ ###############################################################################
+ Mean Pressure = -6.47358015124001700E-007
+ Nux,Nvy,Npp=       34816       34816       32768
+           0 einf U=  6.23587637744726919E-005 eL2 U=  1.80158587819239504E-005
+           0 einf V=  4.51515355395226692E-005 eL2 U=  1.84720519812171775E-005
+           0 einf P=  6.37375592070499319E-004 eL2 P=  3.43346454801004598E-004

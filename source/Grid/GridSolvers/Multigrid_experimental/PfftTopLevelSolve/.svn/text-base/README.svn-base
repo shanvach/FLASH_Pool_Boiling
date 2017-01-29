@@ -1,0 +1,13 @@
+Setup using:
+ -with-unit=Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve
+
+We provide a custom implementation of gr_hgSolve which 
+is the glue between the Ricker(+Brune) multigrid solver and 
+the PFFT solver.  It contains calls to 
+initialise the PFFT grid, perform the PFFT FFT, and 
+deallocate the PFFT grid.
+
+We need to use the Multigrid_experimental version of Grid_solvePoisson.  
+There is a line like the following in Grid/GridSolvers/Config 
+to force setup to choose the right Grid_solvePoisson:
+CHILDORDER Pfft Multigrid...

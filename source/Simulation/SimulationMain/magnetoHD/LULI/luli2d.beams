@@ -1,0 +1,22 @@
+# total number of beams
+   1
+----- beam Nr 1 --------
++1.000000e-002    ! lens X coordinate
+-1.000000e+000    ! lens Y coordinate
++0.000000e+000    ! lens Z coordinate
++1.000000e-002    ! target X coordinate
++1.200000e-002    ! target Y coordinate
++0.000000e+000    ! target Z coordinate
++1.000000e-002    ! target 1st semiaxis length
++0.000000e+000    ! target 2nd semiaxis length
++0.000000e+000    ! 1st semiaxis torsion angle in degrees
+                  ! 1st semiaxis torsion axis
+   1              ! pulse ID number
++5.270000e-001    ! wavelength in microns
+   5              ! cross section function ID
++0.000000e+000    ! gaussian decay exponent
++1.000000e+000    ! gaussian decay x-radius
++1.000000e+000    ! gaussian decay y-radius
+T                 ! is lens are = target area size ?
++1.500000e+001    ! lens aperture angle in degrees
+164               ! number of rays wanted

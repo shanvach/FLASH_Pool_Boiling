@@ -1,0 +1,22 @@
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+REQUIRES Simulation/SimulationMain/INavierStokes/zoso/test_LIDCAV_akash/Heat_AD
+REQUIRES Simulation/SimulationMain/INavierStokes/zoso/test_LIDCAV_akash/Heat_AD/Heat_ADMain
+
+USESETUPVARS Grid
+
+LIBRARY STDCXX
+
+IF Grid == 'UG'
+
+	REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+
+ELSE
+
+	REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+	REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+
+ENDIF
+
+GUARDCELLS 2

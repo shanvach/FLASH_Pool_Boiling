@@ -1,0 +1,36 @@
+#Number of particles to create within the solid body
+sb_ptNumX = 2
+sb_ptNumY = 2
+sb_ptNumZ = 2
+
+#Number of solid bodies
+sb_NumBodies = 10
+
+#Physical domain
+xmin = -3.
+xmax = 3.
+ymin = -3.
+ymax = 3.
+zmin = -3.
+zmax = 3.
+
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+basenm = "solidBodyUnitTest_"
+
+iGridSize = 16
+jGridSize = 16
+kGridSize = 1
+
+iProcs = 4
+jProcs = 2
+kProcs = 1
+
+#Added for PARAMESH setup
+lrefine_min = 1
+lrefine_max = 4

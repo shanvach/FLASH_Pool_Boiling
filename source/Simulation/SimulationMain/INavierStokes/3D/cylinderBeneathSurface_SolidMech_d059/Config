@@ -1,0 +1,54 @@
+#       Configuration file for Lid Driven Cavity Problem
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens_SBM
+REQUIRES physics/IncompNS/IncompNSMain/extras
+REQUIRES monitors/Timers
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
+REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/vardens
+
+# Tecplot routines:
+USESETUPVARS Grid
+
+# Solid Mechanics:
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+
+DATAFILES kinematics.input.h5
+DATAFILES sm_body.00001.h5
+DATAFILES sm_body.00002.h5
+DATAFILES sm_body.00003.h5
+DATAFILES sm_body.00004.h5
+
+IF Grid=='UG'
+  REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+  REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+ENDIF
+
+
+# ----------------------------------------------
+# ----------------------------------------------
+  VARIABLE aaJunk  #kpd  for IfactorB
+
+# Number of guardcells at each boundary
+GUARDCELLS 3
+
+#Default position of the solid body
+PARAMETER    sb_xmin      REAL    -1.0
+PARAMETER    sb_xmax      REAL    -1.0
+PARAMETER    sb_ymin      REAL    -1.0
+PARAMETER    sb_ymax      REAL    -1.0
+PARAMETER    sb_zmin      REAL    -1.0
+PARAMETER    sb_zmax      REAL    -1.0
+
+PARAMETER    cylDepth     REAL    -0.9
+

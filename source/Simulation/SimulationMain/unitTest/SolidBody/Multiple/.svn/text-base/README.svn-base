@@ -1,0 +1,14 @@
+Setup line is
+./setup unitTest/SolidBody/Multiple -auto +nofbs -noc -debug -objdir=multiple_solid_body
+
+This unit test creates 4000 solid bodies that is distributed randomly over 4
+processors. The exchange routine (named Grid_updateSolidBodyForces)
+sends the appropriate particles to the processor that contains the LEAF
+block which covers the particle.  The receiving processor then
+sets the particles' PROC_PART_PROP element to its processor ID.  The
+updated particles sends back to the master allowing the
+processor ID check in Grid_solidBodyUnitTest test to succeed.
+
+Note that the exchange is not needed in a single processor unit test.
+Set iprocs = jprocs = 1 in the flash.par.
+

@@ -1,0 +1,14 @@
+
+physics/materialProperties/MassDiffusivity
+    useMassDiffusivity [BOOLEAN] CONSTANT [FALSE]
+        -- allows the mass diffusivity to be turned off at runtime, even if the
+        unit is included in the simulation
+
+physics/materialProperties/MassDiffusivity/MassDiffusivityMain
+    useMassDiffusivity [BOOLEAN] [TRUE]
+        flags whether the mass diffusivity material property is being used
+
+physics/materialProperties/MassDiffusivity/MassDiffusivityMain/Constant
+    diff_spec_D [REAL] [1.0]
+        Valid Values: Unconstrained
+

@@ -1,0 +1,48 @@
+The Noh Problem
+===============
+
+Introduction
+------------
+
+The Noh problem (Journal of Computational Physics, No.72, p.78)
+tests a hydrocodes ability to convert kinetic energy to internal energy.
+A uniform velocity cold ideal gas converges towards the origin
+and creates an outward moving shock from the origin that stagnates the 
+incomming gas.
+
+
+Comments concerning the FLASH implementation of the Noh problem
+---------------------------------------------------------------
+
+A uniform mesh is used in the calculations because AMR produced
+refinement everywhere in the spatial domain instead of only at
+the shock. It is not recommended to use AMR for this problem at
+this time.
+
+The .par file requires the user to create a subdirectory to store
+the checkpoint and par file. See the specific .par file to
+determine the name of this subdirectory. The code will exit
+with an error if this subdirectory does not exist.
+
+The crun.pl script performs a convergence study and makes plots.
+This perl script requires idl to extract data from the resulting
+checkpoint files. In order to run the crun.pl script, do the following:
+
+1) Run FLASH setup: ./setup Noh -1d -auto -geometry=spherical -maxblocks=10000 -objdir=Noh
+
+2) Compile FLASH:
+
+cd Noh
+make
+mkdir dumps
+
+3) Copy crun.pl, ildrun, *.pro to your object directory and plot_rates.pl, *.m to your dumps subdirectory
+
+4) Edit crun.pl to specificy the proper path to idl
+
+5) Run crun.pl: ./crun.pl
+
+6) Run plot_rates.pl:
+
+cd dumps
+./plot_rates.pl

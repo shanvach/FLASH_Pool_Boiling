@@ -1,0 +1,394 @@
+!!****if* source/physics/sourceTerms/Diffuse/DiffuseStandalone/UG/Diffuse_advanceTherm1Component
+!!
+!!  NAME 
+!!
+!!  Diffuse_advanceTherm1Component
+!!
+!!  SYNOPSIS
+!!
+!!  call Diffuse_advanceTherm1Component(integer, intent(IN)           :: iVar,
+!!                                      integer, intent(IN)           :: iFactorB,
+!!                                      integer, intent(IN)           :: iFactorA,
+!!                                      integer, intent(IN)           :: bcTypes(6),
+!!                                      real,    intent(IN)           :: bcValues(2,6),
+!!                                      real,    intent(IN)           :: dt,
+!!                                      real,    intent(IN)           :: scaleFact,
+!!                                      real,              intent(IN) :: chi,
+!!                                      real,              intent(IN) :: theta,
+!!                                      integer, OPTIONAL, intent(IN) :: pass,
+!!                                      integer,           intent(IN) :: blockCount,
+!!                                      integer,dimension(blockCount),intent(IN) :: blockList,
+!!                                      integer, intent(IN), OPTIONAL :: iFactorC,
+!!                                      integer, intent(IN), OPTIONAL :: iFactorD)
+!!
+!!
+!!  DESCRIPTION 
+!!      This routine advances the diffusion equation  of the form,
+!!
+!!      A * dV/dt = d/dx(B*dV/dx) + d/dy(B*dV/dy) + d/dx(B*dV/dz) + C*V + D
+!!
+!!
+!!
+!! ARGUMENTS
+!!
+!!  theta - should be 0.5 ?!
+!!
+!! SIDE EFFECTS
+!!
+!!  
+!! NOTES
+!!  
+!!
+!!***
+
+!!REORDER(4): solnVec
+
+
+subroutine Diffuse_advanceTherm1Component(iVar, iFactorB, iFactorA, bcTypes, bcValues, dt, scaleFact, chi, theta, pass, &
+     blockCount, blockList, iFactorC, iFactorD)
+
+ use diff_saData,    ONLY : diff_scaleFactThermSaTime
+ use Diffuse_data,   ONLY : diff_myPE
+ use Grid_interface, ONLY : Grid_getBlkPtr, Grid_releaseBlkPtr, &
+                            Grid_getBlkIndexLimits, Grid_fillGuardCells, &
+                            Grid_getDeltas
+ use Diffuse_interface, ONLY: Diffuse_computeAX, Diffuse_precondition, dotproduct
+ 
+ implicit none
+
+#include "Flash.h"
+#include "constants.h"
+#include "Flash_mpi.h"
+#include "Eos.h"
+
+ integer,                      intent(IN) :: iVar
+ integer,                      intent(IN) :: iFactorB
+ integer,                      intent(IN) :: iFactorA
+ integer, OPTIONAL,            intent(IN) :: iFactorC
+ integer, OPTIONAL,            intent(IN) :: iFactorD
+ integer,                      intent(IN) :: bcTypes(6)
+ real,                         intent(IN) :: bcValues(2,6)
+ real,                         intent(IN) :: dt
+ real,                         intent(IN) :: scaleFact
+ real,                         intent(IN) :: chi
+ real,                         intent(IN) :: theta
+ integer, OPTIONAL,            intent(IN) :: pass
+ integer,                      intent(IN) :: blockCount
+ integer,dimension(blockCount),intent(IN) :: blockList
+
+ ! Local
+ integer                   :: i, j, k, lb, ierr
+ real                      :: Cond_R, Cond_L
+ real, dimension(MDIM)     :: del 
+ real                      :: CDiv 
+ logical :: mask(NUNK_VARS)
+ real, POINTER, DIMENSION(:,:,:,:) :: solnVec
+ integer, dimension(2,MDIM)        :: blkLimitsGC, blkLimits 
+ real    :: alpha, Beta, APdotP(blockCount), newRdotZ(blockCount), RdotZ(blockCount)
+ integer :: datasize(MDIM), cgiter
+ real, allocatable, dimension(:,:,:)  :: AP
+ real, allocatable, dimension(:,:,:,:):: R, Z 
+ real    :: cg_tol = 1.0e-16, iniRes
+ real    :: GlobalRdotZ, GlobalAPdotP,GlobalnewRdotZ
+
+ !========================================================================= 
+ ! GC needs to be exchanged for Krylov vector only.
+ mask           = .FALSE.
+ mask(DTMP_VAR) = .TRUE. ! Krylov Vector
+ 
+!#define PRECON 
+
+ call Grid_fillGuardCells(diff_myPE,CENTER,ALLDIR)
+ 
+ ! Compute RHS of AX=B
+ do lb = 1, blockCount
+    
+    call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)    
+    call Grid_getDeltas(blocklist(lb), del)    
+    call Grid_getBlkPtr(blocklist(lb), solnVec)    
+    
+    do k = blkLimits(LOW,KAXIS), blkLimits(HIGH,KAXIS)
+       do j = blkLimits(LOW,JAXIS), blkLimits(HIGH,JAXIS)
+          do i = blkLimits(LOW,IAXIS), blkLimits(HIGH,IAXIS)
+             
+             cDiv = 1.0/solnVec(iFactorA,i,j,k)
+             
+             Cond_R = 0.5*(solnVec(iFactorB,i+1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+             Cond_L = 0.5*(solnVec(iFactorB,i-1,j,k) + solnVec(iFactorB,i,j,k))*CDiv
+             
+             SolnVec(WTMP_VAR,i,j,k) = (SolnVec(iVar,i,j,k) + (1.0-theta)*(dt/del(1)**2) * & 
+                  (cond_R*solnVec(iVar,i+1,j,k) - (cond_R+cond_L)*solnVec(iVar,i,j,k) + cond_L*solnVec(iVar,i-1,j,k)))
+             
+             if (present(iFactorD)) then
+                SolnVec(WTMP_VAR,i,j,k) = SolnVec(WTMP_VAR,i,j,k) + dt*SolnVec(iFactorD, i, j, k)
+             end if
+             
+#if NDIM >= 2
+             Cond_R = 0.5*(solnVec(iFactorB,i,j+1,k) + solnVec(iFactorB,i,j,k))*CDiv
+             Cond_L = 0.5*(solnVec(iFactorB,i,j-1,k) + solnVec(iFactorB,i,j,k))*CDiv
+             
+             SolnVec(WTMP_VAR,i,j,k) =  SolnVec(WTMP_VAR,i,j,k) + (1.0-theta)*(dt/del(2)**2) * &
+                  (cond_R*solnVec(iVar,i,j+1,k)-(cond_R+cond_L)*solnVec(iVar,i,j,k)+cond_L*solnVec(iVar,i,j-1,k))                  
+             
+#if NDIM == 3
+             Cond_R = 0.5*(solnVec(iFactorB,i,j,k+1) + solnVec(iFactorB,i,j,k))*CDiv
+             Cond_L = 0.5*(solnVec(iFactorB,i,j,k-1) + solnVec(iFactorB,i,j,k))*CDiv
+             
+             SolnVec(WTMP_VAR,i,j,k) =  SolnVec(WTMP_VAR,i,j,k) + (1.0-theta)*(dt/del(3)**2) * &
+                  (cond_R*solnVec(iVar,i,j,k+1) - (cond_R+cond_L)*solnVec(iVar,i,j,k) + cond_L*solnVec(iVar,i,k-1,k))
+#endif
+              
+#endif                         
+          end do
+       end do
+    end do
+    call Grid_releaseBlkPtr(blocklist(lb), solnVec)  
+ end do
+ 
+ 
+ !! This is a minor hack, helps to get the max block size (typically 8X8X8)
+ !! this might change in chombo.
+ datasize(1:MDIM) = 0.
+ do lb = 1, blockCount           
+    call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)                      
+    datasize(1:MDIM)=max(blkLimitsGC(HIGH,1:MDIM)-blkLimitsGC(LOW,1:MDIM)+1,datasize(1:MDIM))    
+ end do
+
+ 
+ !! Now lets allocate        
+ allocate(R  (blockCount,datasize(IAXIS),datasize(JAXIS), datasize(KAXIS)))
+ allocate(AP (           datasize(IAXIS),datasize(JAXIS), datasize(KAXIS)))   
+ allocate(Z  (blockCount,datasize(IAXIS),datasize(JAXIS), datasize(KAXIS))) 
+ 
+ R  = 0.
+ AP = 0.
+ Z  = 0.
+
+ 
+ !!=============================================================================================== 
+
+ !! Obtain the first Krylov vector
+ !! This steps gets CG rolling by computing initial Residue, Krylov Vector
+ do lb = 1, blockCount         
+    call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)    
+    call Grid_getDeltas(blocklist(lb), del)
+    call Grid_getBlkPtr(blocklist(lb), solnVec)  
+    
+    !! Compute AX. using solnVec(iVar,:,:,:), non zero initial guess.    
+    if (present(iFactorC)) then    
+       call Diffuse_computeAX(solnVec(iVar,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+            blkLimits, blkLimitsGC,del, dt, theta, solnVec(iFactorC,:,:,:))        
+    else        
+       call Diffuse_computeAX(solnVec(iVar,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+            blkLimits, blkLimitsGC,del, dt, theta)        
+    endif
+
+    
+    !! Compute initial residue, R = B-AX   
+    do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
+       do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
+          do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
+             R(lb,i,j,k) = SolnVec(WTMP_VAR,i,j,k)- AP(i,j,k) 
+          end do
+       end do
+    end do
+    
+#ifdef PRECON    
+    if (present(iFactorC)) then
+       call Diffuse_precondition(Z(lb,:,:,:), R(lb,:,:,:), blkLimits, blkLimitsGC, & 
+            solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),del, dt, theta,solnVec(iFactorC,:,:,:))
+    else
+       call Diffuse_precondition(Z(lb,:,:,:), R(lb,:,:,:), blkLimits, blkLimitsGC, & 
+            solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),del, dt, theta)
+    end if
+#else
+    Z(lb,:,:,:) = R(lb,:,:,:)
+#endif
+    
+    ! An UNK variable to store Krylov vector
+    ! This vector will be exchanged using GC filling.
+    solnVec(DTMP_VAR,:,:,:) = Z(lb,:,:,:)
+    
+        
+    call dotproduct(R(lb,:,:,:), Z(lb,:,:,:), RdotZ(lb), blkLimits, blkLimitsGC)      
+    
+    call Grid_releaseBlkPtr(blocklist(lb), solnVec)
+    
+ end do !block loop
+ !!=============================================================================================== 
+
+ cgiter = 1
+
+ 
+
+ !! Lets do a Global residue estimate, To start of the CG iterations.
+ call mpi_allreduce (sum(RdotZ),  GlobalRdotZ, 1, FLASH_REAL, MPI_SUM, MPI_COMM_WORLD, ierr)
+ 
+ !! Use this to set initial residue
+ iniRes = GlobalRdotZ
+ 
+
+ 
+ !! However unlikely it might be, initial residue could be zero.
+ if (iniRes /= 0.0) then
+    do while (sqrt(GlobalRdotZ/iniRes) .gt. cg_tol)  
+        
+       !! This GC fill helps deal with block/physical boundaries, only exchanges Krylov vector.    
+       call Grid_fillGuardCells(diff_myPE,CENTER,ALLDIR, masksize=NUNK_VARS, mask=mask)                
+
+       do lb = 1, blockCount     
+          call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)    
+          call Grid_getDeltas(blocklist(lb), del)
+          call Grid_getBlkPtr(blocklist(lb), solnVec)
+       
+          !! compute Matrix vector product, AP
+          if (present(iFactorC)) then    
+             call Diffuse_computeAX (solnVec(DTMP_VAR,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+                  blkLimits, blkLimitsGC,del, dt, theta, solnVec(iFactorC,:,:,:))     
+          else        
+             call Diffuse_computeAX (solnVec(DTMP_VAR,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+                  blkLimits, blkLimitsGC,del, dt, theta)       
+          endif
+       
+          !! compute inner product (P,AP), stored in APdotP
+          call dotproduct(AP, solnVec(DTMP_VAR,:,:,:), APdotP(lb),blkLimits, blkLimitsGC) 
+      
+          call Grid_releaseBlkPtr(blocklist(lb), solnVec)        
+       end do
+
+    
+       !! Global reduction of APdotP.
+       call mpi_allreduce (sum(APdotP), GlobalAPdotP, 1, FLASH_REAL, MPI_SUM, MPI_COMM_WORLD, ierr)    
+
+       alpha = GlobalRdotZ/GlobalAPdotP
+    
+    
+       !! Now with the new global alpha we update UNK and RES per block.
+       do lb = 1, blockCount       
+          call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)           
+          call Grid_getBlkPtr(blocklist(lb), solnVec)           
+          call Grid_getDeltas(blocklist(lb), del)           
+          !! Solution update.
+          do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
+             do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
+                do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)                                                      
+                   solnVec(iVar,i,j,k) = solnVec(iVar,i,j,k) + alpha*solnVec(DTMP_VAR,i,j,k)
+                end do
+             end do
+          end do
+       
+                
+          if (present(iFactorC)) then    
+             call Diffuse_computeAX (solnVec(DTMP_VAR,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+                  blkLimits, blkLimitsGC,del, dt, theta, solnVec(iFactorC,:,:,:))     
+          else        
+             call Diffuse_computeAX (solnVec(DTMP_VAR,:,:,:), AP, solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),  &
+                  blkLimits, blkLimitsGC,del, dt, theta)       
+          endif
+       
+          !! Residue update.
+          do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
+             do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
+                do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)                
+                   R(lb,i,j,k) = R(lb,i,j,k) - alpha*AP(i,j,k)
+                end do
+             end do
+          end do
+          
+          !! Now we need to compute the new 'P' vector.       
+#ifdef PRECON             
+          if (present(iFactorC)) then
+             call Diffuse_precondition(Z(lb,:,:,:), R(lb,:,:,:), blkLimits, blkLimitsGC, & 
+                  solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:), del, dt, theta, solnVec(iFactorC,:,:,:))
+          else
+             call Diffuse_precondition(Z(lb,:,:,:), R(lb,:,:,:), blkLimits, blkLimitsGC, & 
+                  solnVec(iFactorB,:,:,:), solnVec(iFactorA,:,:,:),del, dt, theta)
+          end if
+#else
+          Z(lb,:,:,:) = R(lb,:,:,:)
+#endif
+       
+          !!Inner product of newly computed residue.
+          call dotproduct(R(lb,:,:,:),Z(lb,:,:,:),newRdotZ(lb),blkLimits, blkLimitsGC)       
+          
+          call Grid_releaseBlkPtr(blocklist(lb), solnVec)
+       end do
+    
+       call mpi_allreduce (sum(newRdotZ), GlobalnewRdotZ, 1, FLASH_REAL, MPI_SUM, MPI_COMM_WORLD, ierr)   
+       
+       Beta = GlobalnewRdotZ / GlobalRdotZ
+    
+       do lb = 1, blockCount       
+          call Grid_getBlkIndexLimits(blockList(lb),blkLimits,blkLimitsGC)           
+          call Grid_getBlkPtr(blocklist(lb), solnVec)          
+
+          !! new vector.
+          do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
+             do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
+                do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
+                   solnVec(DTMP_VAR,i,j,k) = Z(lb,i,j,k) + Beta*solnVec(DTMP_VAR,i,j,k)
+                end do
+             end do
+          end do
+          
+          call Grid_releaseBlkPtr(blocklist(lb), solnVec)    
+       end do
+
+       !! set older inner product to newly computed.
+       RdotZ(lb) = newRdotZ(lb) 
+    
+       cgiter = cgiter  + 1
+       
+       !! Update old residue with new residue.
+       GlobalRdotZ = GlobalnewRdotZ 
+       
+    end do ! CG iterations.
+
+    !! sucessfully diffused, print some information. 
+    write(*,*) "CG Iterations, blocks", cgiter, blockCount
+
+ end if
+
+ 
+ !! deallocate memory across the block.
+ deallocate (R)
+ deallocate (AP)
+ deallocate (Z)
+ 
+ return
+
+contains 
+  
+  
+  
+  
+  
+  subroutine dotproduct (A, B, dotprod, blkLimits, blkLimitsGC) 
+
+    implicit none
+
+    integer, dimension(LOW:HIGH,MDIM),intent(IN) :: blkLimits, blkLimitsGC
+
+    real, intent(IN)    :: A(blkLimitsGC(LOW,IAXIS):blkLimitsGC(HIGH,IAXIS), &
+         blkLimitsGC(LOW,JAXIS):blkLimitsGC(HIGH,JAXIS), &
+         blkLimitsGC(LOW,KAXIS):blkLimitsGC(HIGH,KAXIS))  
+    real, intent(IN)    :: B(blkLimitsGC(LOW,IAXIS):blkLimitsGC(HIGH,IAXIS), &
+         blkLimitsGC(LOW,JAXIS):blkLimitsGC(HIGH,JAXIS), &
+         blkLimitsGC(LOW,KAXIS):blkLimitsGC(HIGH,KAXIS))
+
+    real, intent (OUT)  :: dotprod
+
+    integer :: i, j, k
+
+    dotprod = 0.  
+
+    do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)
+       do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
+          do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
+             dotprod = dotprod + A(i,j,k)*B(i,j,k)
+          end do
+       end do
+    end do
+
+  end subroutine dotproduct
+end subroutine Diffuse_advanceTherm1Component

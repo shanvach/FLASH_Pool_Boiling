@@ -1,0 +1,80 @@
+NOTES
+
+* boundary conditions approved.
+
+* Unit testing
+  what to do with EOS -- we still don't know
+  Andrew will do unit testing for hydro, grid
+
+
+  Andrew - mpi should just be treated as another library in Makefile.h
+  need to clean up Makefiles -- assigned to Dan
+  
+  to do -- bring in the sites info
+
+
+* Where to put user defined functions in PM?
+
+
+* Should we change the way over riding is done?  right now capablilites is in 
+setups direcotry.  should we make each flash unit have its own direcotry 
+for user defined functions.
+
+
+* something about keeping a default setup 
+
+pm3 
+    user_defined
+	amr_1blk_bcset
+		manipulate your args
+	Call Gridbcset()
+
+
+
+
+
+Andrew Problem in Flash2, if a user wants to change something in hydro1d
+then have to go through 15 setups to change
+
+need a well defined/designed user_defined directory
+
+
+EOS
+ * Katherine - EOS, where to put it.
+	     it is a utility
+
+ * Andrew - What is EOS? does it solve?  a set of equations? or does it
+            help solve specific problems?
+
+	    There is a place here for long names EOS_do_this_block
+	    Anshu will give this a try because similar to Grid interface
+
+Conclusion: Everyone agrees, not a mapper
+
+Andrew - Is it a top level module?
+Katherine - No
+
+
+
+
+nxb, nyb, nzb belong in Grid.h
+
+flasb.h our global defines
+
+wrap mpi
+change MPI_COMM_WORLD
+
+
+Jignesh - do MPI calls
+
+Dan - makefile.h,  grid interface, setup interface
+
+
+Katherine/Katie After Discussion:
+
+Each high level unit will have a user_defined directory which can have
+subdirectories test1, test2, test3,
+
+so if you want to customize you will add the file change to the user_defined
+directory NOT setup.  There will be a generic provided for you in setup.
+

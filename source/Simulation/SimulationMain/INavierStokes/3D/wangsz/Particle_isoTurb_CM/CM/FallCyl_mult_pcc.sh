@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/FallCyl_mult_pcc/  -2d -auto -opt +ug -nxb=200 -nyb=150 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=FALLCYL_MULT_PCC -site=colonialone.gwu.edu

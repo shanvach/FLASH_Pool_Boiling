@@ -1,0 +1,22 @@
+
+REQUIRES Driver
+REQUIRES RuntimeParameters
+REQUIRES Grid/GridMain
+REQUIRES Grid/rayTrace
+
+VARIABLE refr TYPE: PER_VOLUME
+
+
+PARAMETER sim_ilBnd  REAL 0.25
+PARAMETER sim_jlBnd  REAL 0.25
+PARAMETER sim_klBnd  REAL 0.25
+PARAMETER sim_iuBnd  REAL 0.75
+PARAMETER sim_juBnd  REAL 0.75
+PARAMETER sim_kuBnd  REAL 0.75
+
+PARAMETER sim_refract REAL 2.0
+
+PARAMETER sim_numRay INTEGER 1
+
+PARAMETER sim_fileRay STRING "rayIncidence.txt"
+PARAMETER sim_refractType STRING "linear"

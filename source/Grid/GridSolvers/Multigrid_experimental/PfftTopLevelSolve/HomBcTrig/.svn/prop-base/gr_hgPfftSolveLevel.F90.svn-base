@@ -1,0 +1,10 @@
+K 13
+svn:mergeinfo
+V 854
+/branches/INS_Plus/source/Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:19014-19015,19017-19043
+/branches/bgq_prod/source/Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:18111,18118
+/branches/flash4/source/Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:17468-17910,17912-18307
+/branches/project-pfftRT/source/Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:18117
+/trunk/source/Grid/GridSolvers/Multigrid/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:12575,14859-15127,17539-17852,17968,17979,17985-17986,18735
+/trunk/source/Grid/GridSolvers/Multigrid_experimental/PfftTopLevelSolve/HomBcTrig/gr_hgPfftSolveLevel.F90:16466,16713-16714,16745-18186,18242-18410,18686-19008
+END

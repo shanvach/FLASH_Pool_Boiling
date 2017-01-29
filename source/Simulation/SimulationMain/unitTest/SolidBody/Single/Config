@@ -1,0 +1,26 @@
+REQUIRES Driver
+
+PARTICLETYPE passive INITMETHOD lattice MAPMETHOD quadratic ADVMETHOD PT_ADVMETH_NONE
+REQUIRES Particles
+REQUESTS Particles/ParticlesInitialization/Lattice
+REQUESTS Particles/ParticlesMapping/Quadratic
+REQUIRES Particles/ParticlesMain/unitTest
+REQUIRES RuntimeParameters
+
+REQUIRES Grid/GridMain
+IF Grid == 'UG'
+   REQUIRES Grid/GridMain/UG
+ELSE
+   REQUIRES Grid/GridMain/paramesh
+ENDIF
+
+REQUIRES Grid/GridStructures
+REQUIRES Grid/GridStructures/unitTest
+
+#Default position of the solid body
+PARAMETER    sb_xmin      REAL    0.4
+PARAMETER    sb_xmax      REAL    0.7
+PARAMETER    sb_ymin      REAL    0.4
+PARAMETER    sb_ymax      REAL    0.7
+PARAMETER    sb_zmin      REAL    0.4
+PARAMETER    sb_zmax      REAL    0.7

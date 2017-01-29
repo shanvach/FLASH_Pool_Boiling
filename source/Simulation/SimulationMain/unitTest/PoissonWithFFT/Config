@@ -1,0 +1,15 @@
+REQUIRES Driver
+REQUESTS monitors/Logfile
+REQUESTS monitors/Timers
+REQUIRES RuntimeParameters/RuntimeParametersMain
+
+LIBRARY PFFT
+
+PARAMETER xGridSize INTEGER 32
+PARAMETER yGridSize INTEGER 32
+PARAMETER lx REAL 0.0
+PARAMETER ux REAL 1.0
+PARAMETER ly REAL 0.0
+PARAMETER uy REAL 1.0
+
+

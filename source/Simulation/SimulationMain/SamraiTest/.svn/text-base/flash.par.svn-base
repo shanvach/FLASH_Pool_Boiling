@@ -1,0 +1,19 @@
+#Samrai flash.par
+#refine_var_1  = "dens" 
+
+iguard = 4
+jguard = 4
+kguard = 4
+
+
+gridImax = 16	#defined as nxb + 2*ng
+gridJmax = 16
+gridKmax = 1
+iGridSize = 8	#defined as nxb * iprocs
+jGridSize = 8
+kGridSize = 1
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+

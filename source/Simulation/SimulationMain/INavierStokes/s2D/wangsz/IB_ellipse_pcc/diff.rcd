@@ -1,0 +1,105 @@
+9,10c9
+< #define TEST_COMPARE
+< #define NORMAL_PROBE_POINTS
+---
+> !#define TEST_COMPARE
+97,101d95
+<   real :: ddpdxndxt
+<   real :: un, ut
+<   real :: dutdxn, ddutdxndxn
+<   real :: dvel(3,3)
+<   integer :: ipp
+192c186
+<   alpha = real(NDIM)
+---
+>   alpha = 2.0
+197a192,204
+>    ! Initial the flow in z direction. This is necessary for the 2D case
+>    we   = 0.; dwdx = 0.; dwdy =0.;
+>    dwdz = 0.
+>    ddwdxdx = 0.
+>    ddwdxdy = 0.
+>    ddwdxdz = 0.
+>    ddwdydy = 0.
+>    ddwdydz = 0.
+>    ddwdzdz = 0.
+>    ddpdxdz = 0.; ddpdydz = 0.; ddpdzdz =0.;
+>    ddudxdz = 0.; ddudydz = 0.; ddudzdz =0.;
+>    ddvdxdz = 0.; ddvdydz = 0.; ddvdzdz =0.;
+> 
+212,216c219
+< 
+< #ifdef NORMAL_PROBE_POINTS 
+<   do ipp = 1, 100
+<     h = (ipp-1)*dx + 1.0e-14
+< #endif             
+---
+>              
+804a808
+> 
+812,821d815
+<   dvel(1,1) = dudx
+<   dvel(2,1) = dudy
+<   dvel(3,1) = dudz
+<   dvel(1,2) = dvdx
+<   dvel(2,2) = dvdy
+<   dvel(3,2) = dvdz
+<   dvel(1,3) = dwdx
+<   dvel(2,3) = dwdy
+<   dvel(3,3) = dwdz
+< 
+861a856
+> 
+863,864c858
+<   !zL2   = zpres - dpdxn*h
+<   zL2   = zpres - dpdxn*h
+---
+>   zL2    = zpres - dpdxn*h
+919d912
+< #ifdef INS_CONSTDENS 
+923,967d915
+< #else /* not INS_CONSTDENS */
+< 
+<   call Driver_abortFlash("Variable density particle pressure and tangent stress not defined.")
+< 
+< #endif
+< 
+< 
+< #ifdef NORMAL_PROBE_POINTS
+< 
+<   dpdxn = dpdx*np(1) + dpdy*np(2) + dpdz*np(3)
+<   dpdxt = dpdx*tp(1) + dpdy*tp(2) + dpdz*tp(3)
+< 
+<   ddpdxndxt = 0.0
+<   do jj = 1, MDIM
+<     do ii = 1, MDIM
+<       ddpdxndxt = ddpdxndxt +  tp(ii)*np(jj)*ddp(ii,jj)
+<     enddo
+<   enddo  
+< 
+<   un = ue*np(1) + ve*np(2) + we*np(3)
+<   ut = ue*tp(1) + ve*tp(2) + we*tp(3)
+<  
+<   dutdxn = 0.0 
+<   do jj = 1, MDIM
+<     do ii = 1, MDIM
+<       dutdxn = dutdxn + tp(jj)*np(ii)*dvel(ii,jj)
+<     enddo
+<   enddo
+< 
+<   ddutdxndxn = 0.0
+<   do kk = 1, MDIM
+<     do jj = 1, MDIM
+<       do ii = 1, MDIM
+<         ddutdxndxn = ddutdxndxn + tp(ii)*np(jj)*np(kk)*ddvel(ii,jj,kk)
+<       enddo
+<     enddo
+<   enddo  
+< 
+<   write(1000000+particleData(GLOB_PART_PROP),'(20f20.8)') h,xbe, zpres, dpdx, dpdy, ddpdxdx, ddpdydy, ddpdxdy,np,tp 
+<   write(2000000+particleData(GLOB_PART_PROP),'(20f20.8)') h,xbe, ue, dudx, dudy, ddudxdx, ddudydy, ddudxdy,np,tp
+<   write(3000000+particleData(GLOB_PART_PROP),'(20f20.8)') h,xbe, ve, dvdx, dvdy, ddvdxdx, ddvdydy, ddvdxdy,np,tp
+<   write(1100000+particleData(GLOB_PART_PROP),'(20f20.8)') h,xbe, zpres, dpdxn, dpdxt, ddpdxndxt 
+<   write(2100000+particleData(GLOB_PART_PROP),'(20f20.8)') h,xbe, un, ut, dutdxn, ddutdxndxn
+<   enddo
+< #endif

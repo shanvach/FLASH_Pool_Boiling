@@ -1,0 +1,44 @@
+#       Configuration file for Cloud-Shock Interaction problem
+#	(Dai & Woodward, JCP, 142:331--369, 1998)
+
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   d_ambient   Density in left and right parts of grid
+D   p_ambient   Pressure in left and right parts of grid
+D   u_ambient   Fluid x-velocity in left and right parts of grid
+D   v_ambient   Fluid y-velocity in left and right parts of grid
+D   w_ambient   Fluid z-velocity in left and right parts of grid
+D   bx_ambient  Magnetic x-field component
+D   by_ambient  Magnetic y-field component
+D   bz_ambient  Magnetic z-field component
+D   cloudRadius      Radius of a high density cloud
+D   cloudXCtr        Center x-coord of a cloud
+D   cloudYCtr	     Center y-coord of a cloud
+D   cloudZCtr	     Center z-coord of a cloud
+D   cloudDensity     Density of cloud
+D   tiny	     Threshold value used for numerical zero
+
+# ADD DESCRIPTION HERE
+PARAMETER d_ambient	REAL	1.
+PARAMETER p_ambient	REAL	1.
+PARAMETER u_ambient	REAL	10.
+PARAMETER v_ambient	REAL	0.
+PARAMETER w_ambient	REAL	0.
+PARAMETER bx_ambient	REAL	0.
+PARAMETER by_ambient	REAL	0.55
+PARAMETER bz_ambient	REAL	0.
+
+PARAMETER cloudRadius	REAL	0.115
+PARAMETER cloudXCtr	REAL	0.8
+PARAMETER cloudYCtr	REAL	0.5
+PARAMETER cloudZCtr	REAL	0.5
+PARAMETER cloudDensity	REAL	10.
+
+PARAMETER tiny 		REAL    1.e-16
+VARIABLE  vecz		# vector potential Az
+VARIABLE fast			# fast mode
+VARIABLE slow			# slow mode
+
+SPECIES HEAV
+SPECIES LIGH

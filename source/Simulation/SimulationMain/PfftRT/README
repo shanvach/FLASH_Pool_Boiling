@@ -1,0 +1,8 @@
+In tests, I've set this up with
+
+setup.py -auto -3d +cube16 +pm4dev PfftRT -debug --maxblocks=400
+
+ -- Carlo
+
+Added a plot file (which is renamed as a checkpoint file so that it can be used to restart)
+with the Gaussian in it.

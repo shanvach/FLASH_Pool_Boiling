@@ -1,0 +1,51 @@
+Email from Greg Weirs to Cal Jordan, 2005-07
+Note:  file mentioned below as "cases" is now named
+InitialConditions_cases.txt
+________________________________________________________________
+
+Cal,
+You can look in flash/shockcyl-release.  There are lots of directories
+there, some run directories with data, some with code, and some with
+initial conditions stuff.
+                                                                                                                     
+For the runs, those initialized with Todd's profiles start with rz_.
+The next number is the highest resolution (dx)  in micrometers. Third
+is the profile identifier, e.g. 128x64u, which means Todd's case
+128x64u, 128 is points in z and 64 is points radial, and u is just case
+u, which corresponds to a particular inlet mass fraction and average
+velocity.  The cases are described in flash/shockcyl_ic/cases.  Next,
+it says 5.5cm which means it was a 2d run and I extracted the profile
+from Todd's data at z=5.5cm, the image plane in the experiment.  For 3d
+cases there is no _5.5cm.    _vc0 means the simulation is is in the
+cylinder frame, which I just did by just putting in a background
+velocity (vx_amb), and the next number is the length (in x) of the
+domain in cm.  If there is no number, it is 60cm, the same as for the
+fixed frame simulations.
+uniform and cfl= are self explanatory; default is adaptive grid and
+cfl=0.2.
+                                                                                                                     
+About the profiles.  In the flash.par for the rz_ runs, there are
+parameters sf6_file_cc, press_file_cc, rvel_file_ec, and zvel_file_ce,
+which are set to the names of the files containing that data. (cc=>
+variable is associated with center in x, center in y in the cell. ec =>
+edge in x, center in y.)  The zvel is not used in 2d, and I think the
+pressure is not used in 2d or 3d.  But I still put the data files
+there, I'm pedantic.  The files themselves are just the output from
+Todd's code, renamed. So e.g. 128x64l_sf6 is identical to
+massfr_0xxxxxx for Todd's run 128x64l, where the xxxxx is the highest
+iteration number (last time step) for Todd's run.  All the data is in
+the case-named directory in flash/shockcyl_ic.
+
+     ! cc refers to centered in r, centered in z    cell-centered variables
+     ! ce refers to centered in r, edge in z        vertical (z) velocity
+     ! ec refers to edge in r, centered in z        radial velocity
+
+                                                                                                                     
+I have more run data scattered around tawari and other machines, but
+you should be able to set up what you need from the examples in
+flash/shockcyl-release/rz_.....
+                                                                                                                     
+Greg
+
+
+-- 

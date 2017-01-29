@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/test_LIDCAV_akash/  -2d -auto -opt -nxb=16 -nyb=16 -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver  -objdir=LIDCAV_BI_test -site=splash.seas.gwu.edu

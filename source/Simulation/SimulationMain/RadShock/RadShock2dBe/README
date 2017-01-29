@@ -1,0 +1,2 @@
+Setup line for 2D RadShock problem with Be disk and laser energy depostion:
+ ./setup RadShock/RadShock2dBe -auto -2d +nofbs -geometry=cylindrical -with-unit=physics/Diffuse/DiffuseMain/Split -without-unit=physics/Diffuse/DiffuseMain/UG -without-unit=Particles

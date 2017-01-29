@@ -1,0 +1,130 @@
+# Coniguration file for the 1D Radiative Shock
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUESTS physics/Eos/EosMain/multiTemp/Multigamma
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/materialProperties/Opacity
+REQUESTS physics/RadTrans/RadTransMain/MGD
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+REQUESTS physics/sourceTerms/EnergyDeposition
+
+LINKIF Simulation_initSpecies.F90.custom Multispecies
+
+# Laser files:
+DATAFILES test.beams
+DATAFILES be-simple.beams
+DATAFILES be-simple.par
+
+# Opacity files:
+DATAFILES xenon-imx-012.cnr
+DATAFILES polyimide-imx-006.cnr
+DATAFILES be-imx-003.cnr
+DATAFILES opacity_input.txt
+
+# You NEED this line for entropy advection to work:
+MASS_SCALAR sele EOSMAP: SELE
+
+SPECIES XE
+SPECIES POLI
+SPECIES BE
+SPECIES VACU
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+D sim_rhoXe Initial Xenon density
+PARAMETER sim_rhoXe   REAL 1.0
+
+D sim_teleXe Initial Xenon electron temperature
+PARAMETER sim_teleXe  REAL 1.0
+
+D sim_tionXe Initial Xenon ion temperature
+PARAMETER sim_tionXe  REAL 1.0
+
+D sim_tradXe Initial Xenon radiation temperature
+PARAMETER sim_tradXe  REAL 1.0
+
+D sim_abarXe Xenon atomic weight
+PARAMETER sim_abarXe  REAL 1.0
+
+D sim_zbarXe Xenon average ionization
+PARAMETER sim_zbarXe  REAL 1.0
+
+
+D sim_rhoCh Initial Plastic density
+PARAMETER sim_rhoCh   REAL 1.0
+
+D sim_teleCh Initial Plastic electron temperature
+PARAMETER sim_teleCh  REAL 1.0
+
+D sim_tionCh Initial Plastic ion temperature
+PARAMETER sim_tionCh  REAL 1.0
+
+D sim_tradCh Initial Plastic radiation temperature
+PARAMETER sim_tradCh  REAL 1.0
+
+D sim_abarCh Plastic atomic weight
+PARAMETER sim_abarCh  REAL 1.0
+
+D sim_zbarCh Plastic average ionization
+PARAMETER sim_zbarCh  REAL 1.0
+
+
+D sim_rhoVa Initial Vacuum density
+PARAMETER sim_rhoVa   REAL 1.0
+
+D sim_teleVa Initial Vacuum electron temperature
+PARAMETER sim_teleVa  REAL 1.0
+
+D sim_tionVa Initial Vacuum ion temperature
+PARAMETER sim_tionVa  REAL 1.0
+
+D sim_tradVa Initial Vacuum radiation temperature
+PARAMETER sim_tradVa  REAL 1.0
+
+D sim_abarVa Vacuum atomic weight
+PARAMETER sim_abarVa  REAL 1.0
+
+D sim_zbarVa Vacuum average ionization
+PARAMETER sim_zbarVa  REAL 1.0
+
+
+D sim_rhoBe Initial Beryllium density
+PARAMETER sim_rhoBe   REAL 1.0
+
+D sim_teleBe Initial Beryllium electron temperature
+PARAMETER sim_teleBe  REAL 1.0
+
+D sim_tionBe Initial Beryllium ion temperature
+PARAMETER sim_tionBe  REAL 1.0
+
+D sim_tradBe Initial Beryllium radiation temperature
+PARAMETER sim_tradBe  REAL 1.0
+
+D sim_abarBe Beryllium atomic weight
+PARAMETER sim_abarBe  REAL 1.0
+
+D sim_zbarBe Beryllium average ionization
+PARAMETER sim_zbarBe  REAL 1.0
+
+D sim_gradSize Size of the Beryllium gradient region
+PARAMETER sim_gradSize  REAL 0.0
+
+
+D sum_tubeRadius Plastic tube, inner radius
+PARAMETER sim_tubeRadius REAL 287.5e-04
+  
+D sim_tubeThickness Plastic tube, wall thickness
+PARAMETER sim_tubeThickness REAL 25.0e-04
+
+D sim_slabThickness Beryllium slab thickness
+PARAMETER sim_slabThickness REAL 20.0e-04
+
+D sim_slabRadius Beryllium slab radius
+PARAMETER sim_slabRadius REAL 1000.0e-04
+
+D sim_vacThickness Thickness of the Vacuum region between z = 0 and the slab
+PARAMETER sim_vacThickness REAL 300.0e-04

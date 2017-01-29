@@ -1,0 +1,146 @@
+!!****if* source/Simulation/SimulationMain/RadShock/RadShock1d/Simulation_initBlock
+!!
+!! NAME
+!!
+!!  Simulation_initBlock
+!!
+!!
+!! SYNOPSIS
+!!
+!!  Simulation_initBlock(integer(IN) :: blockID) 
+!!                       
+!!
+!!
+!!
+!! DESCRIPTION
+!!
+!!  Initializes fluid data (density, pressure, velocity, etc.) for
+!!  a specified block.
+!! 
+!! ARGUMENTS
+!!
+!!  blockID -        the number of the block to initialize
+!!  
+!!
+!!
+!!***
+
+subroutine Simulation_initBlock(blockId)
+  use Simulation_data
+  use Grid_interface, ONLY : Grid_getBlkIndexLimits, &
+       Grid_getCellCoords, Grid_putPointData
+  use Driver_interface, ONLY: Driver_abortFlash
+  use RadTrans_interface, ONLY: RadTrans_mgdEFromT
+
+  implicit none
+
+#include "constants.h"
+#include "Flash.h"
+
+  ! compute the maximum length of a vector in each coordinate direction 
+  ! (including guardcells)
+
+  integer, intent(in) :: blockId
+  
+  integer :: i, j, k, n
+  integer :: blkLimits(2, MDIM)
+  integer :: blkLimitsGC(2, MDIM)
+  integer :: axis(MDIM)
+  real, allocatable :: xcent(:), ycent(:)
+  real :: tradActual
+  real :: rho, tele, trad, tion, zbar, abar
+  integer :: species
+
+  ! get the coordinate information for the current block from the database
+  call Grid_getBlkIndexLimits(blockId,blkLimits,blkLimitsGC)
+
+  ! get the coordinate information for the current block from the database
+  call Grid_getBlkIndexLimits(blockId,blkLimits,blkLimitsGC)
+  allocate(xcent(blkLimitsGC(HIGH, IAXIS)))
+  call Grid_getCellCoords(IAXIS, blockId, CENTER, .true., &
+       xcent, blkLimitsGC(HIGH, IAXIS))
+
+  allocate(ycent(blkLimitsGC(HIGH, JAXIS)))
+  call Grid_getCellCoords(JAXIS, blockId, CENTER, .true., &
+       ycent, blkLimitsGC(HIGH, JAXIS))
+
+  !------------------------------------------------------------------------------
+
+  ! Loop over cells and set the initial state
+  do k = blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+     do j = blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i = blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+           axis(IAXIS) = i
+           axis(JAXIS) = j
+           axis(KAXIS) = k
+
+           call Grid_putPointData(blockId, CENTER, VELX_VAR, EXTERIOR, axis, sim_velx)
+
+#if NSPECIES == 0
+           ! Xenon
+           rho = sim_rho
+           tele = sim_tele
+           tion = sim_tion
+           trad = sim_trad
+#else
+           if(xcent(i) >= sim_slabThickness + sim_vacThickness) then
+              ! Xenon
+              rho = sim_rho
+              tele = sim_tele
+              tion = sim_tion
+              trad = sim_trad
+              species = XE_SPEC
+           elseif(xcent(i) >= sim_vacThickness) then
+              ! Beryllium
+              rho = sim_rhoBe
+              tele = sim_teleBe
+              tion = sim_tionBe
+              trad = sim_tradBe
+              species = BE_SPEC
+           else
+              ! Vacuum
+              rho = sim_rhoVa
+              tele = sim_teleVa
+              tion = sim_tionVa
+              trad = sim_tradVa
+              species = VACU_SPEC
+           end if
+#endif
+
+           call Grid_putPointData(blockId, CENTER, DENS_VAR, EXTERIOR, axis, rho)
+
+           call Grid_putPointData(blockId, CENTER, TEMP_VAR, EXTERIOR, axis, tele)
+#ifdef TION_VAR
+           call Grid_putPointData(blockId, CENTER, TION_VAR, EXTERIOR, axis, tion)
+#endif
+#ifdef TELE_VAR
+           call Grid_putPointData(blockId, CENTER, TELE_VAR, EXTERIOR, axis, tele)
+#endif
+
+           if (NSPECIES > 0) then
+              ! Fill mass fractions in solution array if we have any SPECIES defined.
+              ! We put nearly all the mass into either the Xe material if XE_SPEC is defined,
+              ! or else into the first species.
+              do n = SPECIES_BEGIN,SPECIES_END
+                 if (n==species) then
+                    call Grid_putPointData(blockID, CENTER, n, EXTERIOR, axis, 1.0e0-(NSPECIES-1)*sim_smallX)
+                 else
+                    call Grid_putPointData(blockID, CENTER, n, EXTERIOR, axis, sim_smallX)
+                 end if
+              enddo
+           end if
+
+           ! Set up radiation energy density:
+           call RadTrans_mgdEFromT(blockId, axis, trad, tradActual)
+           call Grid_putPointData(blockId, CENTER, TRAD_VAR, EXTERIOR, axis, tradActual)
+        enddo
+     enddo
+  enddo
+
+  deallocate(xcent)
+  deallocate(ycent)
+
+  return
+
+end subroutine Simulation_initBlock

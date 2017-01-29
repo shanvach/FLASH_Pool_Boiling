@@ -1,0 +1,73 @@
+# FLASH3 runtime parameter file for TwoGamma simulation
+
+# AMR parameters
+lrefine_max = 4
+lrefine_min = 4
+
+# simulation parameters
+basenm   = "twogamma_"
+restart  = .false.
+plotFileIntervalTime       = 0.1
+checkpointFileIntervalTime = 0.5
+nend     = 15000
+tmax     = 10.0
+checkpointFileNumber = 0
+plotFileNumber = 0
+
+dtinit = 1.e-10
+dtmin = 1.e-10
+
+cfl = .5
+cvisc = .1
+#irenorm = 1   #renorms abundances
+
+smlrho = 1.e-10
+smallt = 1.e-10
+
+xmin = 0.0e0
+xmax = 1.0
+ymin = 0.0e0
+ymax = 1.0e0
+
+geometry = "cartesian"
+
+useGravity = .FALSE.
+useBurn    = .FALSE.
+
+# variables for plotting
+plot_var_1 = "dens"
+plot_var_2 = "temp"
+plot_var_3 = "ener"
+plot_var_4 = "pres"
+plot_var_5 = "velx"
+plot_var_6 = "fld1"
+plot_var_7 = "fld2"
+
+
+xl_boundary_type = "user"
+xr_boundary_type = "outflow"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+nblockx = 1
+nblocky = 1
+
+eintSwitch     = 1.e-4
+ 
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##

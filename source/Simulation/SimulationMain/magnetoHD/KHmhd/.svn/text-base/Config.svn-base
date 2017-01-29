@@ -1,0 +1,23 @@
+#       Configuration file for MHD KH instability problem
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+SPECIES HEAV
+SPECIES LIGH
+
+D   tiny	Threshold value used for numerical zero
+D   Vx0		Shearing velocity
+D   Bx0		Initial Bx
+D   By0		Initial By
+D   Bz0		Initial Bz
+D   epsilon     Amplitude of velocity perturbation
+D   irenorm	normalize abundances
+
+PARAMETER tiny	  REAL 1.e-16
+PARAMETER Vx0     REAL 0.25  # Shearing velocity 
+PARAMETER Bx0     REAL 0.00  # Initial Bx component
+PARAMETER By0     REAL 0.00  # Initial By component
+PARAMETER Bz0     REAL 0.00  # Initial Bz component
+PARAMETER epsilon REAL 0.025 # Amplitude of velocity perturbation
+PARAMETER irenorm INTEGER 0

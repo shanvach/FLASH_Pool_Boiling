@@ -1,0 +1,202 @@
+!!****if* source/Grid/GridMain/paramesh/gr_expandDomain
+!!
+!!  NAME
+!!     gr_expandDomain
+!!
+!!  SYNOPSIS
+!!     call gr_expandDomain()
+!!
+!!  DESCRIPTION
+!!
+!!    The grid is initialized in gr_createDomain, with specified
+!!    number of blocks. Typically single block. This routine
+!!    refines appropriate portions of the initialized physical 
+!!    domain according to the given criterion, and applies initial 
+!!    conditions to the AMR domain. 
+!!
+!!  ARGUMENTS
+!!
+!!***
+
+! #define REPRODUCE_SMALL_GCFILL_SIDE_EFFECTS
+#define KEEP_REDUNDANT_EOS_CALLS
+! #define KEEP_REDUNDANT_EOS_CALLS_ON_GC
+#define DEBUG_GRID_GCMASK
+
+subroutine gr_expandDomain (particlesInitialized)
+
+
+  use Grid_data, ONLY : gr_domainBC,gr_eosModeInit
+#ifdef REPRODUCE_SMALL_GCFILL_SIDE_EFFECTS
+  use Grid_data, ONLY : gr_convertToConsvdForMeshCalls
+#endif
+  use Timers_interface, ONLY : Timers_start, Timers_stop
+  use Logfile_interface, ONLY : Logfile_stamp, Logfile_stampVarMask
+  use Grid_interface, ONLY : Grid_getBlkIndexLimits, &
+    Grid_getLocalNumBlks, Grid_getListOfBlocks, Grid_fillGuardCells, &
+    Grid_markRefineDerefine, Grid_getBlkPtr, Grid_releaseBlkPtr
+  use Grid_data, ONLY : gr_ihiGc,gr_jhiGc,gr_khiGc,gr_blkList
+  use tree, ONLY : lrefine, lrefine_max
+  use paramesh_interfaces, ONLY : amr_refine_derefine
+  use Eos_interface, ONLY : Eos_wrapped
+
+#include "Flash.h"
+#ifndef FLASH_GRID_PARAMESH2
+  use physicaldata, ONLY: no_permanent_guardcells
+#endif
+  use Simulation_interface, ONLY : Simulation_initBlock
+
+  implicit none
+
+#include "constants.h"
+#include "Eos.h"
+  
+  include 'Flash_mpi.h'
+
+  real, pointer:: solnData(:,:,:,:)
+  logical, intent(out) :: particlesInitialized
+  integer :: lnblocks
+
+
+!!          Local variables and functions
+
+  integer :: ntimes, i
+
+  integer, dimension(2,MDIM) :: blkLimits
+  integer, dimension(2,MDIM) :: blkLimitsGC
+  integer :: count, cur_treedepth
+  logical :: restart = .false.
+
+  integer :: level = FINEST  !not yet implemented, 1 is a dummy value
+  integer ,dimension(MAXBLOCKS) :: blkList
+  character(len=32), dimension(2,2) :: block_buff
+  character(len=32)                 :: int_to_str
+  integer :: gridDataStruct
+#ifdef REPRODUCE_SMALL_GCFILL_SIDE_EFFECTS
+  logical :: gcMask(NUNK_VARS)
+#endif
+
+!!============================================================================
+
+
+ particlesInitialized=.false.
+
+!!============================================================================
+
+!!          The beginning timestep number, time, and timestep.
+!!              If the initial redshift (zinitial) is physical (>= 0),
+!!              we use it to initialize the time; otherwise we set the
+!!              redshift to zero and get the initial time from tinitial.
+!!              The latter case (no cosmology) is the default.
+
+! initialize the step counter and the simulation time
+! the timestep initialization is moved to after the initialization,
+! so we can check whether it is > t_cfl
+
+  call Grid_getBlkIndexLimits(1, blkLimits, blkLimitsGC)
+
+  call gr_initParameshArrays(restart,numProcs,      myPe,        &
+       gr_domainBC(LOW,IAXIS),gr_domainBC(HIGH,IAXIS), &
+       gr_domainBC(LOW,JAXIS),gr_domainBC(HIGH,JAXIS), &
+       gr_domainBC(LOW,KAXIS),gr_domainBC(HIGH,KAXIS))
+
+! The Paramesh call above may have already resulted in some block refining,
+! so try get the current max level from the lrefine array. This is only used for
+! diagnostic output. Note that this assumes that lrefine on the current 
+! processor is representative of the grid as a whole.
+  cur_treedepth = maxval(lrefine)
+
+  gridDataStruct = CENTER
+#if NFACE_VARS > 0
+  gridDataStruct = CENTER_FACES
+#endif
+
+  do ntimes = 1, lrefine_max+2
+     write (block_buff(1,1), '(a)') 'iteration'
+     write (int_to_str, '(i7,a1)') ntimes, ','
+     write (block_buff(1,2), '(a,1x,a)') trim(adjustl(int_to_str))
+
+     write (block_buff(2,1), '(a)') 'create level'
+     write (int_to_str, '(i7)') min(cur_treedepth+1,lrefine_max)
+     write (block_buff(2,2), '(a)') trim(adjustl(int_to_str))
+     
+     call Logfile_stamp(myPe, block_buff, 2, 2, '[GRID gr_expandDomain]')
+     
+     call gr_updateData()
+     call Grid_getLocalNumBlks(lnblocks)
+     call Grid_getListOfBlocks(LEAF, blkList,count)
+
+
+#ifndef FLASH_GRID_PARAMESH2
+     if (no_permanent_guardcells) then
+        call gr_commSetup(gridDataStruct)
+     end if
+#endif
+
+     do i = 1, count
+        !  We need to zero data in case we reuse blocks from previous levels
+        !  but don't initialize all data in Simulation_initBlock... in particular
+        !  the total vs. internal energies can cause problems in the eos call that 
+        !  follows.
+        call Grid_getBlkPtr(blkList(i), solnData)
+        solnData = 0.0
+        call Grid_releaseBlkPtr(blkList(i), solnData)
+        !      Now reinitialize the solution on the new grid so that it has
+        !      the exact solution.
+        call Simulation_initBlock (blkList(i), myPe)
+     end do
+#ifdef KEEP_REDUNDANT_EOS_CALLS
+     call Timers_start("eos")
+     do i = 1, count
+        call Eos_wrapped(gr_eosModeInit,blkLimits,blkList(i))
+     end do
+     call Timers_stop("eos")
+#endif
+
+
+     if (ntimes .le. lrefine_max+1) then
+        ! Guard cell filling and Eos_wrapped are done in Grid_markRefineDerefine as needed.
+        call Grid_markRefineDerefine(myPe)
+        call amr_refine_derefine()
+        cur_treedepth = max(maxval(lrefine),min(cur_treedepth+1,lrefine_max))
+
+     else                       ! last iteration of ntimes loop:
+
+        ! We do not need to do guardcell filling here.
+        ! May want to do it anyway, either for robustness or to preserve
+        ! exact compatibility with previous code versions. - KW
+#ifdef REPRODUCE_SMALL_GCFILL_SIDE_EFFECTS
+        if (gr_convertToConsvdForMeshCalls) then
+           gcMask(:) = .FALSE.
+#ifdef DENS_VAR
+           gcMask(DENS_VAR) = .TRUE.
+#endif
+#ifdef DEBUG_GRID_GCMASK
+           call Logfile_stampVarMask(gcMask, .FALSE., '[gr_expandDomain]', 'final gcMask')
+#endif
+           call Grid_fillGuardCells(myPe,gridDataStruct, ALLDIR, maskSize=NUNK_VARS,mask=gcMask)
+        end if
+#endif
+
+#ifdef KEEP_REDUNDANT_EOS_CALLS
+#ifdef KEEP_REDUNDANT_EOS_CALLS_ON_GC
+        call Timers_start("eos incl. gc")
+        do i = 1, count
+           call Eos_wrapped(gr_eosModeInit,blkLimitsGC,blkList(i))
+        end do
+        call Timers_stop("eos incl. gc")
+#else
+        call Timers_start("eos")
+        do i = 1, count
+           call Eos_wrapped(gr_eosModeInit,blkLimits,blkList(i))
+        end do
+        call Timers_stop("eos")
+#endif
+#endif
+
+     end if
+
+  end do !ntimes
+
+  return
+end subroutine gr_expandDomain

@@ -1,0 +1,32 @@
+#       Configuration file for the Degenerate EOS problem
+#Note: ./setup DegenEOS -1d -auto +nofbs -opt -without-unit=Multispecies (+unsplitHydro)
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Helmholtz
+
+
+# Add custom variables below
+
+D   dens0	light density
+D   Atwood	Atwood number
+D   Mach	Mach number
+D   pres0	Initial pressure
+D   posn	Shock position
+D   tiny	Threshold value used for numerical zero
+
+# ADD DESCRIPTION HERE
+
+PARAMETER dens0		REAL	2.e9
+PARAMETER Atwood	REAL    0.08
+PARAMETER Mach		REAL	1.
+PARAMETER pres0		REAL	1.2123952e27
+PARAMETER posn		REAL	0.0
+PARAMETER tiny		REAL    1.e-16
+
+D eos_singleSpeciesA  Single-species nucleon number for the gas 
+D &         (only used by Eos/Helmholtz when compiled w/o Multispecies)
+PARAMETER eos_singleSpeciesA         REAL    13.714285714285715  [0.0 to ]
+D eos_singleSpeciesZ  Single-species proton number for the gas  
+D &         (only used Eos/Helmholtz when compiled w/o Multispecies)
+PARAMETER eos_singleSpeciesZ         REAL    6.8571428571428577  [0.0 to ]
+

@@ -1,0 +1,5 @@
+eachProcWritesOwnAbortLog = .TRUE.
+
+lrefine_max = 4
+refine_on_particle_count = .TRUE.
+max_particles_per_blk = 1

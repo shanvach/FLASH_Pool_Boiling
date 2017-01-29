@@ -1,0 +1,100 @@
+#            Configuration file for shock interacting with dense gas column
+#            Ambient gas - air
+#            Dense gas - SF6
+#            Conditions to match LANL experiment
+
+REQUIRES driver/time_dep
+REQUIRES hydro
+REQUIRES materials/eos/multigamma
+REQUIRES io/amr
+REQUIRES mesh/amr/paramesh2.0
+REQUIRES particles/passive/distribution/lattice
+REQUIRES particles/passive/time_integration/pred_corr
+REQUIRES particles/mapping/quadratic
+REQUIRES particles/communication
+
+# number of species (ionmax)
+
+NUMSPECIES 2
+
+# extra variables
+
+VARIABLE vrtz
+
+#  Pre-shock parameters
+
+# rho_amb    density of air
+# vx_amb     x-velocity of air
+# p_amb      pressure of air
+# mach       shock Mach number
+
+PARAMETER    rho_amb      REAL    0.95e-3
+PARAMETER    p_amb        REAL    8.e5
+PARAMETER    vx_amb       REAL    0.0
+
+# Parameters describing SF6 concentrations
+
+PARAMETER    maxconc      REAL    0.8
+PARAMETER    vz_sf6       REAL    0.0
+
+PARAMETER    xshock       REAL    20.0
+PARAMETER    mach         REAL    1.2
+PARAMETER    xctr         REAL    25.0
+PARAMETER    yctr         REAL    4.
+
+PARAMETER    ref_rect_x   REAL    0.
+PARAMETER    ref_rect_y   REAL    0.
+
+PARAMETER    use_radial_fit BOOLEAN TRUE
+
+PARAMETER    fit_radius     REAL    0.6
+PARAMETER    rpix           REAL    150.
+
+PARAMETER    use_raw_data BOOLEAN FALSE
+
+PARAMETER    nimgx        INTEGER 608
+PARAMETER    nimgy        INTEGER 468
+PARAMETER    ximgmin      REAL    22.
+PARAMETER    yimgmin      REAL    3.1
+PARAMETER    pixsize      REAL    0.0038
+
+
+# Below only apply when use_rz_sim_data is true
+PARAMETER    use_rz_sim_data BOOLEAN FALSE
+
+PARAMETER    nr_c            INTEGER 128
+PARAMETER    nz_c            INTEGER 64
+PARAMETER    sf6_file_cc     STRING  "massfr0200000"
+PARAMETER    press_file_cc   STRING  "press00200000"
+PARAMETER    rvel_file_ec    STRING  "rvel000200000"
+PARAMETER    zvel_file_ce    STRING  "zvel000200000"
+
+PARAMETER    rz_rmax         REAL 3.2
+PARAMETER    rz_zmax         REAL 7.5
+PARAMETER    rz_zplane       REAL 5.5
+
+PARAMETER    rz_3d_use_sym   BOOLEAN FALSE
+PARAMETER    rz_pert_amp     REAL -1.00
+PARAMETER    rz_pert_zlen    REAL 0.05859375
+D  rz_pert_amp   amplitude of perturbation in radial interpolation location
+D  rz_pert_zlen  z length scale of perturbation; current value is 4dx at 146 microns
+
+PARAMETER    nx_subint       INTEGER  10
+PARAMETER    ny_subint       INTEGER  10
+PARAMETER    nz_subint       INTEGER  10
+
+# For including particles in the simulation
+
+PROPERTY        p_dens          REAL
+PROPERTY        p_pres          REAL
+PROPERTY        p_sf6           REAL
+PROPERTY        p_simtime       REAL
+PROPERTY        p_nstep         INTEGER
+
+PARAMETER       PartXMin        REAL   15.0 
+PARAMETER       PartXMax        REAL   28.0
+PARAMETER       PartYMin        REAL    0.0 
+PARAMETER       PartYMax        REAL    7.5
+PARAMETER       dydeta_wall     REAL   0.25
+PARAMETER       PartZMin        REAL   0.0 
+PARAMETER       PartZMax        REAL   7.5

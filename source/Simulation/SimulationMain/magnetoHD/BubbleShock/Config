@@ -1,0 +1,55 @@
+#       Configuration file for Bubble-Shock Interaction problem
+
+REQUIRES physics/Hydro/HydroMain
+#REQUIRES physics/Eos/EosMain/Gamma
+REQUIRES physics/Eos/EosMain/Multigamma
+REQUIRES Multispecies
+
+
+D   densT,  densB   Density in top and bottom parts of grid
+D   presT,  presB   Pressure in top and bottom parts of grid
+D   velxT,  velxB   Fluid x-velocity in top and bottom parts of grid
+D   velyT,  velyB   Fluid y-velocity in top and bottom parts of grid
+D   velzT,  velzB   Fluid z-velocity in top and bottom parts of grid
+D   magxT,  magxB   Magnetic x-field component
+D   magyT,  magyB   Magnetic y-field component
+D   magzT,  magzB   Magnetic z-field component
+D   lposn            Point of intersection between the shock plane and the y-axis
+D   bubbleRadius     Radius of a high density bubble
+D   bubbleXCtr       Center x-coord of a bubble
+D   bubbleYCtr	     Center y-coord of a bubble
+D   bubbleZCtr	     Center z-coord of a bubble
+D   bubbleDensity    Density of bubble
+D   tiny	     Threshold value used for numerical zero
+
+# ADD DESCRIPTION HERE
+PARAMETER densT		REAL	13.5
+PARAMETER presT		REAL	100000000.
+PARAMETER velxT		REAL	0.
+PARAMETER velyT		REAL	0.
+PARAMETER velzT 	REAL	0.
+PARAMETER magxT		REAL	0.
+PARAMETER magyT		REAL	0.
+PARAMETER magzT		REAL	0.
+
+PARAMETER densB		REAL	13.5
+PARAMETER presB		REAL	1000000.
+PARAMETER velxB		REAL	0.
+PARAMETER velyB		REAL	0.
+PARAMETER velzB		REAL	0.
+PARAMETER magxB		REAL	0.
+PARAMETER magyB		REAL	0.
+PARAMETER magzB		REAL	0.
+
+PARAMETER lposn		REAL   -0.25
+PARAMETER bubbleRadius	REAL	0.05
+PARAMETER bubbleXCtr	REAL	0.0
+PARAMETER bubbleYCtr	REAL   -0.35
+PARAMETER bubbleZCtr	REAL	0.0
+PARAMETER bubbleDensity	REAL	0.1
+
+PARAMETER tiny 		REAL    1.e-16
+
+# Two different fluids
+SPECIES FLD1
+SPECIES FLD2

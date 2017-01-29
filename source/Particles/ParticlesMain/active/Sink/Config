@@ -1,0 +1,101 @@
+# Configuration file for the sink particle module
+
+REQUIRES Grid/GridMain/paramesh/paramesh4
+
+PARAMETER refineOnJeansLength    BOOLEAN  TRUE
+PARAMETER refineOnSinkParticles  BOOLEAN  TRUE
+
+PARAMETER jeans_ncells_ref       REAL     32.0
+PARAMETER jeans_ncells_deref     REAL     64.0
+
+REQUIRES Particles/ParticlesMain/active/massive/Leapfrog
+REQUIRES Grid/GridMain/paramesh
+REQUIRES physics/Gravity/GravityMain/Poisson/Multigrid
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain
+#REQUIRES IO/IOMain/hdf5
+REQUIRES IO/IOParticles
+
+
+# Get the right HDF5 unit for sink particle I/O
+USESETUPVARS parallelIO, Grid
+
+IF Grid=='UG'
+   SETUPERROR Sink particles require Paramesh
+ELSE
+#   IF parallelIO
+#      SETUPERROR Sink particles only support serial HDF5 I/O
+#   ELSE
+#      REQUIRES IO/IOParticles/hdf5/serial/SinkParticles
+#      REQUIRES IO/IOMain/hdf5/serial/PM/SinkParticles
+#   ENDIF
+ENDIF
+
+# select the right Driver_evolveFlash.F90, depending on the Hydro/MHD scheme
+# this should be selected with USESETUPVARS in the future, but there is no UNSPLIT versus SPLIT
+# setup var at the moment, so we are stuck with this temporary solution
+#LINKIF ../../../Driver/DriverMain/Split/SinkParticles/Driver_evolveFlash.F90 Driver/DriverMain/Split
+#LINKIF ../../../Driver/DriverMain/Split/SinkParticles/Driver_computeDt.F90 Driver/DriverMain/Split
+#LINKIF ../../../Driver/DriverMain/Unsplit/SinkParticles/Driver_evolveFlash.F90 Driver/DriverMain/Unsplit
+#LINKIF ../../../Driver/DriverMain/Unsplit/SinkParticles/Driver_computeDt.F90 Driver/DriverMain/Unsplit
+
+REQUIRES Particles/ParticlesForces/longRange/gravity/ParticleMesh
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+REQUESTS Particles/ParticlesMapping/meshWeighting/MapToMesh
+
+# The following only needed to stop an error being written by setup script:
+PARTICLETYPE sink INITMETHOD custom MAPMETHOD weighted ADVMETHOD leapfrog
+
+
+# Grid acceleration from sink particles onto gas
+VARIABLE sgax
+VARIABLE sgay
+VARIABLE sgaz
+
+
+D UseSinkParticles             switch sink particles on/off
+D sink_density_thresh          density treshold for sink creation and accretion
+D sink_accretion_radius        accretion radius of sink particle
+D sink_merging                 activate/deactivate sink particle merging
+D sink_softening_type_gas      gravitational softening gas--sinks
+D sink_softening_type_sinks    gravitational softening sinks--sinks
+D sink_softening_radius        gravitational softening radius
+D sink_integrator              time step integrator (euler, leapfrog)
+D sink_subdt_factor            timestep safety factor for subcycling
+D sink_dt_factor               glocal timestep safety factor for sinks
+
+PARAMETER UseSinkParticles          BOOLEAN  FALSE
+PARAMETER sink_density_thresh       REAL     1.0e-14
+PARAMETER sink_accretion_radius     REAL     1.0e14
+PARAMETER sink_softening_radius     REAL     1.0e14
+PARAMETER sink_softening_type_gas   STRING   "linear"
+PARAMETER sink_softening_type_sinks STRING   "spline"
+PARAMETER sink_integrator           STRING   "leapfrog"
+PARAMETER sink_subdt_factor         REAL     0.01
+PARAMETER sink_dt_factor            REAL     0.7
+PARAMETER sink_merging              BOOLEAN  FALSE
+
+# those should all be true by default
+# (only change for debug purposes)
+PARAMETER sink_convergingFlowCheck  BOOLEAN TRUE
+PARAMETER sink_potentialMinCheck    BOOLEAN TRUE
+PARAMETER sink_jeansCheck           BOOLEAN TRUE
+PARAMETER sink_negativeEtotCheck    BOOLEAN TRUE
+PARAMETER sink_GasAccretionChecks   BOOLEAN TRUE
+
+PARAMETER pt_maxSinksPerProc        INTEGER 100
+
+# sink particle properties
+PARTICLEPROP accr_radius    REAL
+PARTICLEPROP x_ang          REAL
+PARTICLEPROP y_ang          REAL
+PARTICLEPROP z_ang          REAL
+PARTICLEPROP accr_rate      REAL
+PARTICLEPROP old_pmass      REAL 
+PARTICLEPROP creation_time  REAL
+PARTICLEPROP mgas           REAL
+PARTICLEPROP tag            REAL
+PARTICLEPROP dtold          REAL
+PARTICLEPROP x_bflux        REAL
+PARTICLEPROP y_bflux        REAL
+PARTICLEPROP z_bflux        REAL

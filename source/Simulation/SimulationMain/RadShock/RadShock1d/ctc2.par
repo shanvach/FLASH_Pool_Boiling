@@ -1,0 +1,182 @@
+# Paramaters for the MGD inifinite medium simulation
+run_comment = "1D Radiative Shock test using a shifted driver"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+restart     = .false.
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 50
+checkpointFileNumber       = 0
+plotFileNumber             = 0
+plot_var_1                 = "dens"
+
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+useDiffuse      = .true.
+
+# Conduction parameters:
+useConductivity  = .true.
+diff_useEleCond  = .true.
+diff_eleFlMode   = "fl_none"
+diff_eleFlCoef   = 0.06
+diff_thetaimplct = 1.0
+
+# Heat-Exchange parameters:
+useHeatexchange = .false.
+
+# Material and EOS parameters:
+eosModeInit = "dens_temp_gather"
+eosMode     = "dens_ie_gather"
+sim_abar    = 4.0026032497
+sim_zbar    = 2.0
+gamma       = 1.6666666
+
+# Multigroup diffusion options:
+useOpacity      = .false.
+rt_useMGD       = .false.
+rt_mgdNumGroups = 5
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdFlMode    = "fl_harmonic"
+rt_mgdFlCoef    = 1.0
+
+# Initial conditions:
+sim_rho  = 0.0018
+
+sim_tele = 464182.0 # 40 eV
+sim_tion = 464182.0 # 40 eV
+sim_trad = 0.0
+
+sim_velx = -100.0e+05 # 150 km/s
+
+rt_mgdXlBoundaryType           = "vacuum"
+rt_mgdXrBoundaryType           = "vacuum"
+rt_mgdYlBoundaryType           = "outflow"
+rt_mgdYrBoundaryType           = "outflow"
+rt_mgdZlBoundaryType           = "outflow"
+rt_mgdZrBoundaryType           = "outflow"
+
+diff_eleXlBoundaryType         = "outflow"
+diff_eleXrBoundaryType         = "outflow"
+diff_eleYlBoundaryType         = "outflow"
+diff_eleYrBoundaryType         = "outflow"
+diff_eleZlBoundaryType         = "outflow"
+diff_eleZrBoundaryType         = "outflow"
+
+
+#####################
+#   HYDRO OPTIONS   #
+#####################
+
+# SPLIT HYDRO OPTIONS:
+useHydro            = .true.
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+cvisc               = 0.1
+use_steepening      = .FALSE.
+ppmEintFluxConstructionMeth     = 0
+ppmEintCompFluxConstructionMeth = 5
+ppmEnerFluxConstructionMeth     = 0
+
+# # UNSPLIT HYDRO OPTIONS:
+# useHydro         = .true.
+# slopeLimiter     = "vanLeer" # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+# LimitedSlopeBeta = 1.        # Slope parameter for the "limited" slope by Toro
+# charLimiting     = .true.    # Characteristic limiting vs. Primitive limiting
+# RiemannSolver    = "hllc"
+# shockDetect      = .false.   # Shock Detect for numerical stability
+# ForceHydroLimit  = .true.
+# addThermalFlux   = .false.
+
+# # PPM Options:
+# order            = 3  
+# use_avisc        = .true.
+# cvisc            = 0.1
+# use_steepening   = .false.
+# use_flattening   = .true.
+
+# # MH Options:
+# order            = 2
+# use_avisc        = .false.
+# use_steepening   = .false.
+# use_flattening   = .false.
+
+
+# 3T HYDRO OPTIONS:
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+hy_eosModeAfter = "dens_ie_gather"
+
+hy_3Ttry_Arelated = .TRUE.
+hy_3Ttry_B = 1
+hy_3Ttry_D = 2.0
+hy_3Ttry_E = 1
+hy_3Ttry_F = 2
+hy_3Ttry_G = 0
+hy_3Ttry_Q = 0
+
+# HYDRO BOUNDARY CONDITIONS:
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "reflect"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+cfl            = 0.8
+dt_diff_factor = 1.0e+10 # Disable diffusion dt
+rt_dtFactor    = 1.0e+100 # Disable MGD dt
+hx_dtFactor    = 50.0
+tstep_change_factor = 1.01
+tmax           = 10.0e-09
+dtmin          = 1.0e-19
+dtinit         = 1.0e-16
+dtmax          = 1.0e-11
+nend           = 999999999
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+
+# Domain size:
+xmin = 0.0
+xmax = 4000.0e-04 # 1000 microns, 1 mm
+ymin = 0.0
+ymax = 400.0e-04  # 400 microns
+
+# Total number of blocks:
+nblockx = 4
+nblocky = 1
+nblockz = 1
+
+lrefine_min  = 1
+lrefine_max  = 10
+refine_var_1 = "dens"
+refine_var_2 = "tele"
+refine_cutoff_2 = 0.2
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 1000
+jGridSize = 1
+kGridSize = 1

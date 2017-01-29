@@ -1,0 +1,9 @@
+#	Config file for the source term module.
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+# the temperature to be maintained
+
+PARAMETER isotherm REAL 10.0
+PARAMETER useCool   BOOLEAN  TRUE    

@@ -1,0 +1,30 @@
+#       Configuration file for MHD RT instability problem
+
+REQUIRES physics/Hydro/HydroMain
+#REQUIRES physics/Hydro/HydroMain/split/PPM
+#REQUIRES physics/Hydro/HydroMain/unsplit/Hydro_Unsplit
+REQUIRES physics/Eos/EosMain/Gamma
+REQUIRES physics/Gravity/GravityMain/Constant
+
+SPECIES HEAV
+SPECIES LIGH
+
+D   tiny	Threshold value used for numerical zero
+D   Bx0		Initial Bx
+D   By0		Initial By
+D   Bz0		Initial Bz
+D   epsilon     Amplitude of velocity perturbation
+D   rho_heavy   Density of heavy fluid
+D   rho_light   Density of light fluid
+D   irenorm     normalize abundances
+D   simulation  Two setups for RT simulation
+
+PARAMETER tiny	      REAL 1.e-16
+PARAMETER Bx0         REAL 0.00  # Initial Bx component
+PARAMETER By0         REAL 0.00  # Initial By component
+PARAMETER Bz0         REAL 0.00  # Initial Bz component
+PARAMETER epsilon     REAL 0.025 # Mach number of velocity perturbation
+PARAMETER rho_heavy   REAL 2.0
+PARAMETER rho_light   REAL 0.0
+PARAMETER irenorm     INTEGER 0
+PARAMETER simulation  INTEGER 1  # 1 for default FLASH's RT setup; 2 for Jim Stone's setup

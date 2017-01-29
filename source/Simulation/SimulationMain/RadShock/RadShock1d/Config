@@ -1,0 +1,90 @@
+##python:genLines
+
+def genLines(setupvars):
+    # Coniguration file for the 1D Radiative Shock
+    yield """
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+REQUESTS physics/Eos/EosMain/multiTemp/Multigamma
+REQUESTS physics/Diffuse/DiffuseMain/Unsplit
+REQUESTS physics/materialProperties/Opacity
+
+REQUESTS physics/RadTrans/RadTransMain/MGD
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+USESETUPVARS Wavy
+IF Wavy
+   LINKIF Simulation_initBlock.F90.varMassFrac Driver
+ENDIF
+
+MASS_SCALAR sele EOSMAP: SELE
+MASS_SCALAR srad EOSMAP: SRAD
+
+DATAFILES opacity_input.txt
+DATAFILES xenon-imx-012.cnr
+DATAFILES be-imx-003.cnr
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+
+D sim_specialGroup When positive, Dirichlet radiation boundary condition applied to this group
+PARAMETER sim_specialGroup INTEGER -1
+
+D sim_specialUrad Boundary value for Dirichlet boundary condition in group sim_specialGroup
+PARAMETER sim_specialUrad REAL 0.0
+
+D sim_slabThickness The thickness of the Beryllium slab
+PARAMETER sim_slabThickness REAL 0.0
+
+D sim_rhoBe Initial Beryllium density
+PARAMETER sim_rhoBe   REAL 1.81
+
+D sim_teleBe Initial Beryllium electron temperature
+PARAMETER sim_teleBe  REAL 290.11375
+
+D sim_tionBe Initial Beryllium ion temperature
+PARAMETER sim_tionBe  REAL 290.11375
+
+D sim_tradBe Initial Beryllium radiation temperature
+PARAMETER sim_tradBe  REAL 290.11375
+
+D sim_vacThickness The thickness of the Vacuum layer
+PARAMETER sim_vacThickness REAL 0.0
+
+D sim_rhoVa Initial Vacuum density
+PARAMETER sim_rhoVa   REAL 0.003
+
+D sim_teleVa Initial Vacuum electron temperature
+PARAMETER sim_teleVa  REAL 290.11375
+
+D sim_tionVa Initial Vacuum ion temperature
+PARAMETER sim_tionVa  REAL 290.11375
+
+D sim_tradVa Initial Vacuum radiation temperature
+PARAMETER sim_tradVa  REAL 290.11375
+
+D sim_rho Initial density
+PARAMETER sim_rho   REAL 1.0
+
+D sim_rho Initial electron temperature
+PARAMETER sim_tele  REAL 1.0
+
+D sim_rho Initial ion temperature
+PARAMETER sim_tion  REAL 1.0
+
+D sim_rho Initial radiation temperature
+PARAMETER sim_trad  REAL 1.0
+
+D sim_velx Initial fluid velocity
+PARAMETER sim_velx  REAL 1.0
+"""
+
+    # Link in a specialized Grid_markRefineDerefine.F90 for
+    # code-to-code comparison simulations.
+    if "ctc" in setupvars:
+        yield "LINKIF Grid_markRefineDerefine.F90.custom Driver"

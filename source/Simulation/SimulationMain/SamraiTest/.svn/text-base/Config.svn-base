@@ -1,0 +1,36 @@
+#       Configuration file for the Sedov explosion problem
+#       (Sedov, L. I., 1959, Similarity and Dimensional Methods
+#       in Mechanics [New York:  Academic])
+
+REQUIRES Driver
+#REQUIRES physics/Hydro
+#REQUIRES physics/Eos
+REQUIRES Grid/common/Samrai
+REQUESTS IO/common/hdf5/parallel/Samrai
+
+D   p_ambient       Initial ambient pressure
+D   rho_ambient     Initial ambient density
+D   exp_energy      Explosion energy (distributed over
+D                           &         2^dimen central zones)
+D   r_init          Radial position of inner edge of grid (for 1D)
+D   xctr            Explosion center coordinates
+D   yctr            Explosion center coordinates
+D   zctr            Explosion center coordinates
+D   t_init          Initial time since explosion
+D   nsubzones       Number of `sub-zones' to break cells into for
+D                    & applying 1d profile
+
+PARAMETER p_ambient     REAL    1.E-5
+PARAMETER rho_ambient   REAL    1.
+PARAMETER exp_energy    REAL    1.
+PARAMETER r_init        REAL    0.05
+PARAMETER xctr          REAL    0.5
+PARAMETER yctr          REAL    0.5
+PARAMETER zctr          REAL    0.5
+PARAMETER nsubzones     INTEGER 7
+PARAMETER refine_var_1 STRING "dens"
+PARAMETER refine_var_2 STRING "pres"
+
+# Do not reshuffle standard variables (yet). 
+
+

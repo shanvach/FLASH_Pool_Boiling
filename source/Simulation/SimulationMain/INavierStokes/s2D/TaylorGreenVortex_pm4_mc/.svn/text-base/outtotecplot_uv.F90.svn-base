@@ -1,0 +1,555 @@
+! Subroutine outtotecplot
+!
+! Subroutine to write out to Tecplot data in binary form.
+!
+! ---------------------------------------------------------------------------
+
+#include "constants.h"
+#include "Flash.h"
+
+      subroutine outtotecplot_uv(mype,time,dt,istep,count, &
+                 timer,blockList,blockCount,firstfileflag,uconv)
+
+      use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
+        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, &
+        Grid_getBlkBoundBox, Grid_getBlkCenterCoords
+
+
+#ifdef FLASH_GRID_UG
+#else
+      use physicaldata, ONLY : interp_mask_unk,interp_mask_unk_res
+#endif
+
+
+  use IncompNS_data, ONLY : ins_invRe
+
+
+  implicit none
+
+  include "Flash_mpi.h"
+      
+  integer, intent(in) :: mype,istep,count,firstfileflag
+  integer, intent(in) :: blockCount
+  integer, intent(in) :: blockList(MAXBLOCKS)
+  real, intent(in) :: time,dt,timer,uconv
+      
+  ! Local Variables:
+  integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc
+  character(25) :: filename
+  character(6) :: index_lb,index_mype
+
+  real xedge(NXB+1),xcell(NXB+1)
+  real yedge(NYB+1),ycell(NYB+1)
+  real intsx(NXB+1), intsy(NYB+1)
+
+
+  real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData
+
+  real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD),   &
+       facevarxxan(NXB+2*NGUARD+1,NYB+2*NGUARD), &
+       difffacevarx(NXB+2*NGUARD+1,NYB+2*NGUARD)
+
+  real facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1),   &
+       facevaryyan(NXB+2*NGUARD,NYB+2*NGUARD+1), & 
+       difffacevary(NXB+2*NGUARD,NYB+2*NGUARD+1)
+
+
+  real presvar(NXB+2*NGUARD,NYB+2*NGUARD),       &
+       presvar_an(NXB+2*NGUARD,NYB+2*NGUARD),    &
+       diffpresvar(NXB+2*NGUARD,NYB+2*NGUARD)
+
+  real xi,yj
+
+  real*4 arraylb(NXB+1,NYB+2,1),        &
+         arraylb2(NXB+2,NYB+1,1),       &
+         arraylb3(NXB,NYB,1)
+
+  integer blockID
+  real del(MDIM),dx,dy
+  real, dimension(MDIM)  :: coord,bsize
+  real ::  boundBox(2,MDIM)
+
+  integer*4 TecIni,TecDat,TecZne,TecNod,TecFil,TecEnd
+  integer*4 VIsdouble
+  integer*4 Debug,ijk,ijk2,ijk3,Npts,NElm
+  character*1 NULLCHR
+  
+  real :: pi, tn, mvisc
+
+  mvisc = ins_invRe
+
+  pi = 4.*atan(1.)
+
+  tn = time
+
+!-----------------------------------------------------------------------
+!                                                         TecPlot set-up
+!-----------------------------------------------------------------------
+  Debug     = 0
+  VIsdouble = 0
+  NULLCHR   = CHAR(0)
+  ijk       = (NXB+1)*(NYB+2)
+  ijk2      = (NXB+2)*(NYB+1)
+  ijk3      = NXB*NYB
+!-----------------------------------------------------------------------
+
+
+! -- filetime.XX --
+
+  write(filename, '("./IOData/dauv_time.", i2.2)') mype
+
+  ! create/clear filetime.XX if time = 0
+  if(firstfileflag .eq. 0) then
+     open(unit=33, file=filename, status='replace')
+
+#ifdef FLASH_GRID_UG
+     write(33,*) 'NXB, NYB, NZB'
+     write(33,'(3i4.1)') NXB, NYB, NZB    
+#else
+     write(33,*) 'NXB, NYB, NZB, interp. order (prolong, restrict)'
+     write(33,'(5i4.1)') NXB, NYB, NZB, interp_mask_unk(1), &
+             interp_mask_unk_res(1)         
+#endif
+
+     write(33,'(a23,a43,a49,a12)') 'file number, time, dt, ',      &
+              'step number, ',                                     &
+              'total number of blocks, number of blocks output, ', &
+              'elapsed time'
+         
+     close(33)
+  endif
+
+  ! write timestep data to filetime.XX on each processor
+  open(unit=33, file=filename, status='old', position='append')
+  write(33,66) count, tn, dt, istep,blockcount,timer
+  close(33)
+66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
+
+! -- data.XXXX.XX --
+
+      nxc = NXB + NGUARD + 1
+      nyc = NYB + NGUARD + 1
+
+! write solution data to UVEL.XXXX.XX
+  write(filename,'("./IOData/UVEL.",i4.4,".",i2.2,".plt")') &
+        count, mype
+
+
+!  i = TecIni('AMR2D'//NULLCHR,              &
+!             'x y unum uan uerr'//NULLCHR,  &
+!             filename//NULLCHR,             &
+!             './IOData/'//NULLCHR,          &
+!             Debug,VIsdouble)
+
+  call int2char(mype,index_mype)
+
+
+  do lb = 1,blockcount
+
+
+     blockID =  blockList(lb)
+
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+     dx = del(IAXIS)
+     dy = del(JAXIS)
+  
+
+     ! Get Coord and Bsize for the block:
+     ! Bounding box:
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Point to blocks center and face-x vars:
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+
+     do j=NGUARD,nyc              
+
+        if (j .eq. NGUARD) then
+            yj = coord(JAXIS) - bsize(JAXIS)/2.0
+        elseif (j .eq. nyc) then
+            yj = coord(JAXIS) + bsize(JAXIS)/2.0
+        else
+            yj = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                 real(j-NGUARD-1)*dy + dy/2.0
+        endif
+
+
+        do i=NGUARD+1,nxc
+
+           xi =  coord(IAXIS) - bsize(IAXIS)/2.0 +    &
+                 real(i-NGUARD-1)*dx -uconv*tn
+
+           facevarxxan(i,j) = &
+           -EXP(-2.0*mvisc*tn)*COS(xi)*SIN(yj)            ! Taylor Green Vortex
+!           -cos(tn)*sin(pi*xi)**2.*sin(2.*pi*yj)     ! Forced solution
+
+
+           if (j .eq. NGUARD) then
+
+              facevarxx(i,j) =  0.5*(facexData(VELC_FACE_VAR,i,j,1)+    &
+                                     facexData(VELC_FACE_VAR,i,j+1,1)) -uconv
+
+              ! Use same error as in j+1:
+              difffacevarx(i,j) = 1.*(                   &
+                  (facexData(VELC_FACE_VAR,i,j+1,1) -uconv -    & 
+                  (-EXP(-2.0*mvisc*tn)*COS(xi)*SIN(yj+dy/2.0)))) ! Taylor Green Vortex
+!                   (-cos(tn)*sin(pi*xi)**2.*sin(2.*pi*(yj+dy/2.0))))) ! Forced Solution
+
+
+           elseif (j .eq. nyc) then
+
+              facevarxx(i,j) =  0.5*(facexData(VELC_FACE_VAR,i,j,1)+    &
+                                     facexData(VELC_FACE_VAR,i,j-1,1)) -uconv
+
+              ! Use same error as in j-1           
+              difffacevarx(i,j) = 1.*(                   &
+                  (facexData(VELC_FACE_VAR,i,j-1,1) -uconv -    &
+                   (-EXP(-2.0*mvisc*tn)*COS(xi)*SIN(yj-dy/2.0)))) ! Taylor Green Vortex
+!                  (-cos(tn)*sin(pi*xi)**2.*sin(2.*pi*(yj-dy/2.0))))) ! Forced Solution
+
+           else
+                  
+              facevarxx(i,j) = facexData(VELC_FACE_VAR,i,j,1) -uconv
+
+              difffacevarx(i,j) = facevarxx(i,j) -       &
+                                  facevarxxan(i,j)
+
+           endif
+
+
+
+
+        enddo
+     enddo
+
+
+
+     ! Write Block Results into data file:
+     call int2char(blockID,index_lb)
+
+!     i = TecZne(                                                  &
+!         'ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR,    &
+!         NXB+1,NYB+2,1,                                      &
+!         'BLOCK'//NULLCHR,                                        &
+!         CHAR(0))
+       
+     ! Write x:
+     do j=1,NYB+2 
+        do i=1,NXB+1
+      
+           xi =  coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-1)*dx
+           arraylb(i,j,1) = sngl(xi)
+        enddo
+     enddo
+!     i = TecDat(ijk,arraylb,0)
+
+
+     ! Write y:
+     do j=1,NYB+2 
+
+        if (j .eq. 1) then
+           yj = coord(JAXIS) - bsize(JAXIS)/2.0
+        elseif (j .eq. NYB+2) then 
+           yj = coord(JAXIS) + bsize(JAXIS)/2.0
+        else
+           yj = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-2)*dy + dy/2.0
+        endif
+
+        do i=1,NXB+1
+           arraylb(i,j,1) = sngl(yj)
+        enddo
+     enddo
+!     i = TecDat(ijk,arraylb,0)
+
+
+     ! Write unum:
+     arraylb(:,:,1) =    &
+     sngl(facevarxx(NGUARD+1:nxc,NGUARD:nyc))
+!     i = TecDat(ijk,arraylb,0)
+
+     ! Write uann:
+     arraylb(:,:,1) =    &
+     sngl(facevarxxan(NGUARD+1:nxc,NGUARD:nyc))
+!     i = TecDat(ijk,arraylb,0)
+
+     ! Write uerr:
+     arraylb(:,:,1) =    &
+     sngl(difffacevarx(NGUARD+1:nxc,NGUARD:nyc))
+!     i = TecDat(ijk,arraylb,0)
+
+  enddo
+!  i = TecEnd()
+
+
+
+  ! write solution data to VVEL.XXXX.XX
+  write(filename,'("./IOData/VVEL.",i4.4,".",i2.2,".plt")') &
+        count, mype
+
+
+!  i = TecIni('AMR2D'//NULLCHR,        &
+!      'x y vnum van verr'//NULLCHR,   &
+!      filename//NULLCHR,              &
+!      './IOData/'//NULLCHR,           &
+!      Debug,VIsdouble)
+
+  call int2char(mype,index_mype)
+
+  do lb = 1,blockcount
+
+     blockID =  blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+     dx = del(IAXIS)
+     dy = del(JAXIS)
+  
+
+     ! Get Coord and Bsize for the block:
+     ! Bounding box:
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Point to blocks center and face-y vars:
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+ 
+     do j=NGUARD+1,nyc              
+
+        yj =  coord(JAXIS) - bsize(JAXIS)/2.0 + &
+              real(j-NGUARD-1)*dy
+
+        do i=NGUARD,nxc
+
+           if (i .eq. NGUARD) then
+              xi = coord(IAXIS) - bsize(IAXIS)/2.0 -uconv*tn
+           elseif (i .eq. nxc) then
+              xi = coord(IAXIS) + bsize(IAXIS)/2.0 -uconv*tn
+           else
+              xi = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                   real(i-NGUARD-1)*dx + dx/2.0 -uconv*tn
+           endif
+
+           ! Analytical solution:
+           facevaryyan(i,j) =   &
+            EXP(-2.0*mvisc*tn)*SIN(xi)*COS(yj)        ! Taylor Green Vortex
+!           cos(tn)*sin(2.*pi*xi)*sin(pi*yj)**2.  ! Forced Solution
+
+           if (i .eq. NGUARD) then
+
+              facevaryy(i,j) =  0.5*(faceyData(VELC_FACE_VAR,i,j,1)+    &
+                                     faceyData(VELC_FACE_VAR,i+1,j,1))
+
+              difffacevary(i,j) = 1.*(         &
+                  (faceyData(VELC_FACE_VAR,i+1,j,1) -   &
+                  (EXP(-2.0*mvisc*tn)*SIN(xi+dx/2.0)*COS(yj)))) ! Taylor Green Vortex
+!                   (cos(tn)*sin(2.*pi*(xi+dx/2.0))*sin(pi*yj)**2.)))  ! Forced Solution
+
+           elseif (i .eq. nxc) then
+
+              facevaryy(i,j) =  0.5*(faceyData(VELC_FACE_VAR,i,j,1)+   &   
+                                     faceyData(VELC_FACE_VAR,i-1,j,1))
+
+              difffacevary(i,j) = 1.*(         &
+                  (faceyData(VELC_FACE_VAR,i-1,j,1) -   &
+                  (EXP(-2.0*mvisc*tn)*SIN(xi-dx/2.0)*COS(yj)))) ! Taylor Green Vortex
+!                   (cos(tn)*sin(2.*pi*(xi-dx/2.0))*sin(pi*yj)**2.)))  ! Forced Solution
+
+           else
+                  
+              facevaryy(i,j) = faceyData(VELC_FACE_VAR,i,j,1)
+
+              difffacevary(i,j) = facevaryy(i,j) -  &
+                                  facevaryyan(i,j)
+
+           endif
+
+
+
+
+        enddo
+     enddo
+
+
+
+     ! Write Block Results into data file:
+     call int2char(blockID,index_lb)
+
+!     i = TecZne(                                                 &
+!         'ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR,   &
+!         NXB+2,NYB+1,1,                                     &
+!         'BLOCK'//NULLCHR,                                       &
+!         CHAR(0))
+
+            
+     ! Write x:
+     do j=1,NYB+1
+        do i=1,NXB+2 !NGUARD
+
+           if (i .eq. 1) then
+              xi = coord(IAXIS) - bsize(IAXIS)/2.0
+           elseif (i .eq. NXB+2) then !NGUARD
+              xi = coord(IAXIS) + bsize(IAXIS)/2.0
+           else
+              xi = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                   real(i-2)*dx + dx/2.0
+           endif
+ 
+           arraylb2(i,j,1) = sngl(xi)
+        enddo
+     enddo
+!     i = TecDat(ijk2,arraylb2,0)
+
+
+     ! Write y:
+     do j=1,NYB+1
+
+        yj =  coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(j-1)*dy
+
+        do i=1,NXB+2 !NGUARD
+           arraylb2(i,j,1) = sngl(yj)
+        enddo
+     enddo
+!     i = TecDat(ijk2,arraylb2,0)
+
+
+     ! Write vnum:
+     arraylb2(:,:,1) = & 
+     sngl(facevaryy(NGUARD:nxc,NGUARD+1:nyc))
+!     i = TecDat(ijk2,arraylb2,0)
+
+     ! Write vann:
+     arraylb2(:,:,1) = &
+     sngl(facevaryyan(NGUARD:nxc,NGUARD+1:nyc))
+!     i = TecDat(ijk2,arraylb2,0)
+
+     ! Write verr:
+     arraylb2(:,:,1) = &
+     sngl(difffacevary(NGUARD:nxc,NGUARD+1:nyc))
+!     i = TecDat(ijk2,arraylb2,0)
+
+  enddo
+!  i = TecEnd()
+
+
+  ! write solution data to PRES.XXXX.XX
+  write(filename,'("./IOData/PRES.",i4.4,".",i2.2,".plt")') &
+        count, mype
+
+
+!  i = TecIni('AMR2D'//NULLCHR,        &    
+!      'x y pnum pan perr'//NULLCHR,   &
+!      filename//NULLCHR,              &
+!      './IOData/'//NULLCHR,           &
+!      Debug,VIsdouble)
+
+  call int2char(mype,index_mype)
+
+
+  do lb = 1,blockcount
+
+     blockID =  blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+     dx = del(IAXIS)
+     dy = del(JAXIS)
+  
+
+     ! Get Coord and Bsize for the block:
+     ! Bounding box:
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Point to blocks center and center vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     do j=NGUARD+1,nyc-1              
+
+        yj =  coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(j-NGUARD-1)*dy + dy/2.0
+
+        do i=NGUARD+1,nxc-1
+
+
+           xi = coord(IAXIS) - bsize(IAXIS)/2.0 + &
+                real(i-NGUARD-1)*dx + dx/2.0 -uconv*tn
+                  
+
+           presvar_an(i,j) = &
+            -0.25*EXP(-4.0*mvisc*tn)*( COS(2.0*xi) + COS(2.0*yj) )  ! Taylor Green Vortex
+!           -sin(tn)/4.*(2.+cos(pi*xi))*(2.+cos(pi*yj)) + & ! Forced Soluiton
+!            pi**2./2.*cos(tn)*(cos(pi*xi)+cos(pi*yj)   + &
+!            cos(pi*xi)*cos(pi*yj)) + sin(tn) ! Here we substract the mean value of P
+
+                  
+            presvar(i,j) = solnData(PRES_VAR,i,j,1)
+
+            diffpresvar(i,j) = presvar(i,j)-presvar_an(i,j)
+
+
+         enddo
+      enddo
+
+      ! Write Block Results into data file:
+      call int2char(blockID,index_lb)
+
+!      i = TecZne(                                                  &
+!          'ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR,    &
+!          NXB,NYB,1,                                               &
+!          'BLOCK'//NULLCHR,                                        &
+!          CHAR(0))
+
+            
+      ! Write x:
+      do j=1,NYB
+         do i=1,NXB
+
+            xi = coord(IAXIS) - bsize(IAXIS)/2.0 + &
+                 real(i-1)*dx + dx/2.0
+            arraylb3(i,j,1) = sngl(xi)
+         enddo
+      enddo
+!      i = TecDat(ijk3,arraylb3,0)
+
+
+      ! Write y:
+      do j=1,NYB
+
+         yj =  coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+               real(j-1)*dy + dy/2.0
+
+         do i=1,NXB
+            arraylb3(i,j,1) = sngl(yj)
+         enddo
+      enddo
+!      i = TecDat(ijk3,arraylb3,0)
+
+
+      ! Write pnum:
+      arraylb3(:,:,1) =  &
+      sngl(presvar(NGUARD+1:nxc-1,NGUARD+1:nyc-1))
+!      i = TecDat(ijk3,arraylb3,0)
+
+      ! Write pann:
+      arraylb3(:,:,1) =  & 
+      sngl(presvar_an(NGUARD+1:nxc-1,NGUARD+1:nyc-1))
+!      i = TecDat(ijk3,arraylb3,0)
+
+      ! Write perr:
+      arraylb3(:,:,1) =  &
+      sngl(diffpresvar(NGUARD+1:nxc-1,NGUARD+1:nyc-1))
+!      i = TecDat(ijk3,arraylb3,0)
+
+   enddo
+!   i = TecEnd()
+
+ End subroutine outtotecplot_uv

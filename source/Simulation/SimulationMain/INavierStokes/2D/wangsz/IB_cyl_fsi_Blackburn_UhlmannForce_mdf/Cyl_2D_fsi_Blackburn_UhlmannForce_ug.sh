@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/IB_cyl_fsi_Blackburn_UhlmannForce_mdf/  -2d -auto -opt +ug -nxb=250 -nyb=250 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_BLACKBURN_FSI_UHLMANNFORCE_UG_mdf -site=colonialone.gwu.edu

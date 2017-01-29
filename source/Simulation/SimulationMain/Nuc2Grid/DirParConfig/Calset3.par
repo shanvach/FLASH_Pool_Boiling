@@ -1,0 +1,106 @@
+#	Runtime parameters for the Huang & Greengard Poisson test problem.
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = "cartesian"
+
+#		Size of computational volume
+
+xmin		= 0
+xmax		= 12.4e9 # 7.0e9 # 7.2e9
+ymin		= -2.
+ymax		= 2.
+zmin		= -2.
+zmax		= 2.
+
+radTranOutputXmin = 0.0
+radTranOutputXmax = 12.4e9
+
+#		Boundary conditions
+
+xl_boundary_type = "reflecting"
+xr_boundary_type = "diode"
+
+basenm          = "phoenix_input_"
+#restart         = .true.
+
+#checkpointFileNumber = 12
+checkpointFileIntervalStep = 1
+
+nend            = 7
+tmax            = 999.
+
+plot_var_1 = "pden"
+plot_var_2 = "dens"
+plot_var_3 = "temp"
+plot_var_4 = "eint"
+plot_var_5 = "velx"
+plot_var_6 = "nump"
+plot_var_7 = "gaus"
+plot_var_8 = "velx"
+plot_var_9 =  "C"
+plot_var_10 = "O"
+plot_var_11 = "Si"
+plot_var_12 = "Ca"
+plot_var_13 = "Fe"
+plot_var_14 = "Ni"
+plot_var_15 = "Ni56"
+plot_var_16 = "rpv1"
+plot_var_17 = "rpv2"
+plot_var_18 = "rpv3"
+plot_var_19 = "nup0"
+plot_var_20 = "pres"
+
+run_comment     = "creating input for phoenix"
+log_file        = "phoenix_input.log"
+
+pt_maxPerProc = 10000
+io_ptMaxReadPerProc = -1
+sim_ptMass = 2.8e29
+
+doConvolve = .FALSE.
+convoSmearWidI = -4
+convertToConsvdInMeshInterp = FALSE
+
+doInterpExtrap = .TRUE.
+
+doLowerBounds = .TRUE.
+doEos = .TRUE.
+
+lrefine_min = 3
+lrefine_max = 3
+eosModeInit = "eos_nop"
+
+
+radTranDataFile = "PhoenixInputData"
+radTranGridSizeI = 64 # 256 # 64 ### 100
+radTranGridSizeJ = 1
+radTranGridSizeK = 1
+
+
+# These parameters are used only for the uniform grid
+
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+#FIXEDBLOCKSIZE mode ::
+# When using fixed blocksize, iGridSize etc are redundant in
+# runtime parameters. These quantities are calculated as 
+# iGridSize = NXB*iprocs
+# jGridSize = NYB*jprocs
+# kGridSize = NZB*kprocs
+#NONFIXEDBLOCKSIZE mode ::
+# iGridSize etc must be specified. They constitute the global
+# number of grid points in the physical domain without taking 
+# the guard cell into account. The local blocksize is calculated
+# as iGridSize/iprocs  etc.
+

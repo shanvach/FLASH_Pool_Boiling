@@ -1,0 +1,90 @@
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf230
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww14360\viewh13420\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0 Grid_moveParticles\
+\
+Murali's Algorithm\
+\
+1. minlevel= find_min_level\
+\
+2. myparticles = empty for non-leaf\
+\
+3. if not leaf\
+	recv particles from children (blocking)\
+	add to myparticles\
+     end if\
+\
+4. if mylevel finer than minlevel send outside particles to parent\
+    \
+5. MPI_Barrier\
+\
+6. If mlevel == minlevel\
+	exchange particles w/ sibling\
+     end if\
+\
+\
+7.  If mylevel finer than minlevel recv. new particles from parent (blocking)\
+	append new-particles to myparticles\
+\
+	if not leaf split myparticles into (left, right)\
+		send left + right to childre\
+            end if\
+       end if\
+\
+\
+8. MPI_Barrier?\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+Anshu's Algorithm\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 CoarseLeafLevel = findCoarsestLeafLevel()\
+\
+do level = lrefinemax,CoarseLeafLevel+1,-1 !! start from the finest level\
+                                     !! and keep pruning the tree\
+   call Grid_getListOfBlock(level,blockList,count) !! get list of blocks\
+                                                   !! at current level\
+   do i = 1,count\
+	sortParticles(Particle(:,beginning_of_blockList(i)),bin) !sort by geometry\
+   end do\
+   call MoveParticlesToParent(bin)\
+end do\
+\
+call redistributeParticlesAtLeafCoarseLevel\
+\
+do level = CoarseLevel,lrefinemax-1 !! start from pruned tree and \
+reconstructs\
+   call Grid_getListOfBlock(level,blockList,count) !! get list of blocks\
+                                                   !! at current level\
+   do i = 1,count\
+	if(blockList(i)/=LEAF) then\
+        call MoveParticlesToChildren()\
+   end do\
+end do\
+\
+\
+\
+\
+sortParticles\
+\
+}

@@ -1,0 +1,24 @@
+REQUIRES Driver
+REQUIRES flashUtilities/contourSurface
+REQUIRES Grid/GridMain
+#the next line is the path where Config file might
+#be gathering some resources to operate with PM
+#REQUIRES Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+REQUIRES Grid/GridSolvers/Pfft
+REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
+
+VARIABLE DENS TYPE: PER_VOLUME
+VARIABLE FLAM TYPE: PER_VOLUME
+VARIABLE FLSM TYPE: PER_VOLUME
+VARIABLE AUXV TYPE: PER_VOLUME
+VARIABLE GAUS TYPE: PER_VOLUME
+
+#MASS_SCALAR FLAM
+#MASS_SCALAR FLSM
+
+# the smoothed flame scalar
+#VARIABLE FS TYPE: PER_VOLUME
+
+# smoothing length, units of grid cells
+PARAMETER smooth_radius  REAL 10e0
+

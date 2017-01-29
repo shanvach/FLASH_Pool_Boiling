@@ -1,0 +1,24 @@
+
+#	Configuration file for Soundwave setup
+#       puts a sine wave perturbation in density, speed, and pressure
+#       on the grid along x, y, or z axis
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+D orientation  1/2/3 -- sine wave is oriented along x/y/z axis
+D wavelength   period of the sine wave
+D rho_init     undisturbed initial density
+D perturb_amp  fractional amplitude of sine wave disturbance
+D cs           adiabatic soundspeed of a small-amplitude soundwave, evaluated 
+D &            at the unperturbed background state
+ 
+
+PARAMETER orientation	INTEGER 1
+PARAMETER wavelength	REAL	1.
+PARAMETER rho_init	REAL	1.
+PARAMETER perturb_amp	REAL	0.1
+PARAMETER cs  	REAL	1.
+
+
+

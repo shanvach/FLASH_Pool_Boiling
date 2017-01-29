@@ -1,0 +1,52 @@
+#  Configuration file for a burning test (without hydro)
+#[source/Simulation/SimulationMain/unitTest/Burn]
+
+#
+#  This setup creates a line/square/cube of varying quantities
+#  through the domain, then running a burner for one timestep on
+#  the resulting domain.
+#
+#  along the different axes in the domain are:
+#  x-axis: the composition from being pure `compA' to pure `compB'
+#  y-axis: temperature, from t_min to t_max.
+#  z-axis: density, from rho_min to rho_max
+#
+#  Then one can take one burning step, and verify that the burners
+#  are doing The Right Thing.
+
+REQUIRES Driver/DriverMain/Split
+REQUIRES physics/Eos/EosMain/Multigamma    # can't use Gamma and Multispecies
+REQUIRES Multispecies
+
+# this can be any of the burners
+REQUIRES physics/sourceTerms/Burn
+REQUIRES IO
+
+# the initialization information is held here
+DATAFILES SpeciesList.txt
+
+# since we're not using Hydro, none of the standard variables are
+# defined.  Do them here, or "burning" doesn't make sense
+VARIABLE temp  EOSMAP: TEMP
+VARIABLE dens  EOSMAP: DENS
+VARIABLE pres  EOSMAP: PRES
+VARIABLE velx  EOSMAPIN: VELX
+VARIABLE vely  EOSMAPIN: VELY
+VARIABLE velz  EOSMAPIN: VELZ
+VARIABLE eint  EOSMAP: EINT
+VARIABLE ener  EOSMAP: ENER
+
+
+D    compA        name of composition at -x end of domain
+D    compB        name of composition at +x end of domain
+D    rhoMin       density at -y end of domain
+D    rhoMax       density at +y end of domain
+D    tempMin      temp at -z end of domain
+D    tempMax      temp at +z end of domain
+
+PARAMETER compA         STRING  "c12"
+PARAMETER compB         STRING  "n56"
+PARAMETER tempMin         REAL    1.e6
+PARAMETER tempMax         REAL    2.e8
+PARAMETER rhoMin       REAL    2.e8
+PARAMETER rhoMax       REAL    2.e8

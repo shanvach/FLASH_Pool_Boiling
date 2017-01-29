@@ -1,0 +1,31 @@
+This subdirectory lets us test whether the data movement to and from
+PFFT grid is correct.  The FFT is not carried out!
+
+Setup line:
+./setup PoisTest/PFFT -auto -2d
+
+It is a good test for PFFT as the refinement level of the grid varies
+significantly.  This allows us to test whether data movement is
+correct for any specified refinement level from 1 to
+MAX_COMMON_REFINEMENT.  Here, MAX_COMMON_REFINEMENT is the result of
+Grid_getMaxCommonRefinement().
+
+We use a modified version of:
+Grid/GridSolvers/Multigrid/PfftTopLevelSolve/gr_hgSolve.F90.  Our
+version simply moves data from FLASH grid to PFFT grid, and back
+again, with no FFT.
+
+
+In future
+---------
+
+When the FFT is correctly working in PFFT we can setup the standard
+PoisTest using:
+
+./setup PoisTest -auto -2d
+--with-unit=Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+
+This should give identical results to the standard Poistest with the
+intended setup (includes the standard Multigrid solver):
+
+./setup PoisTest -auto -2d

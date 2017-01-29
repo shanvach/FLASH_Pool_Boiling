@@ -1,0 +1,39 @@
+Outline of From Scratch:
+
+Grid_initMesh
+ Paramesh_init
+  amr_initialize
+
+Grid_init
+ gr_createDomain
+ gr_expandDomain
+  gr_initParameshArrays
+   ...
+
+  do ntimes = 1, lref_max + 2
+    update_data
+    Eos_wrapped
+    Grid_fillGuardCells
+    Eos_wrapped
+    if (ntimes < lrefmax)
+      Grid_markRefDeref
+      amr_refine_derefine
+    end if
+  end do
+
+Outline of Restart:
+Grid-initMesh
+ Paramesh_init
+  amr_initialize
+
+Grid_init
+ gr_initParameshArray
+  amr_refine_derefine
+  mpi_amr_global_domain_limits
+  amr_reorder_grid
+  BoundaryBox stuff
+  amr_morton_process
+
+amr_refine_derefine
+Grid_fillGuardcells
+Eos_wrapped

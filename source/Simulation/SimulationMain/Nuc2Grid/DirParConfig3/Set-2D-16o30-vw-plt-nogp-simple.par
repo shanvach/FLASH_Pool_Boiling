@@ -1,0 +1,189 @@
+#	Runtime parameters for NucOToRT
+
+# ./setup -auto NucOToRT3.0 -objdir=obj/NucOToRT3.0/16o30-vw-plt -noc -debug -2d +curvilinear +pm4dev --unit=IO/IOParticles +parallelIO -defines=PT_MAX_ATTRIBUTES=251 Convolve=True -nxb=16 -nyb=16 -parfile=Set-2D-16o30-vw-plt.par -maxblocks=2048 -gridinterpolation=native -portable
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = "cylindrical"
+#geometryOverride = .TRUE.
+
+particlesInputGeometry = "cylindrical"
+particlesInputNdim = 2
+
+#		Size of computational volume
+# xmax,ymax,-ymin in WD_def simulation were 2.097152000000E+11
+
+xmin		= 0
+xmax		= 2.097152000000E+11
+ymin		= -2.097152000000E+11
+ymax		= 2.097152000000E+11
+zmin		= -2.
+zmax		= 2.
+
+nBlockX = 32
+nBlockY = 64
+#nBlockZ = 1
+
+#radTranOutputXmin = 0
+#radTranOutputXmax = 1.572864e11 # 2.097152000000E+11
+#radTranOutputYmin = -1.572864e11  # -2.097152000000E+11
+#radTranOutputYmax = 1.572864e11 #2.097152000000E+11
+
+# Ratio of Output domain to whole simulation domain 
+# nBlockX*NXB x nBlockY*NYB x nBlockZ*NZB = 512 x 1024 x 8
+# nIOg = NXB*gr_nBlockX*OgRatioI/OgLowerI
+
+OgRatioI = 0.75
+OgRatioJ = 0.75
+OgRatioK = 1.0
+
+OgLowerI = 1
+OgLowerJ = 1
+OgLowerK = 8
+
+#radTranGridSizeI = 64
+#radTranGridSizeJ = 128
+#radTranGridSizeK = 1
+
+radTranDataFile = "PhoenixInputData"
+radTranOutputNdim = 2
+radTranOutputGeometry = "cylindrical"
+
+
+# Input particle files 
+
+sim_ptNumPartFiles = 1
+
+sim_nucFileName_1 = 2D_4km_4.5E9_1E8_16o30_nuc_yield_hdf5_part_s00000_0000
+
+#		Boundary conditions
+
+xl_boundary_type = "reflecting"
+xr_boundary_type = "user"
+yl_boundary_type = "user"
+yr_boundary_type = "user"
+
+# Output chk and plt files
+
+basenm          = "phoenix_input_"
+restart         = .true.
+earlyBlockDistAdjustment       = .TRUE.
+
+checkpointFileNumber = 1000
+checkpointFileIntervalStep = 1
+
+plotFileNumber = 1001
+plotFileIntervalStep = 1
+
+nend            = 53349
+#tmax            = 999.
+tinitial = 46.1106713467
+tmax = 46.1106713467
+
+plot_var_1 = "dens" 
+plot_var_2 = "temp" 
+plot_var_3 = "velx" 
+plot_var_4 = "vely" 
+plot_var_5 = "velz" 
+plot_var_6 = "nump"
+plot_var_7 =  "C"
+plot_var_8 = "O"
+plot_var_9 = "Si"
+plot_var_10 = "Ca"
+plot_var_11 = "Fe"
+plot_var_12 = "Ni"
+plot_var_13 = "Ni56"
+plot_var_14 = "h"
+plot_var_15 = "he"
+plot_var_16 = "li"
+plot_var_17 = "be"
+plot_var_18 = "b"
+plot_var_19 = "n"
+plot_var_20 = "f"
+plot_var_21 = "ne"
+plot_var_22 = "na"
+plot_var_23 = "mg"
+plot_var_24 = "al"
+plot_var_25 = "p"
+plot_var_26 = "s"
+plot_var_27 = "cl"
+plot_var_28 = "ar"
+plot_var_29 = "k"
+plot_var_30 = "sc"
+plot_var_31 = "ti"
+plot_var_32 = "v"
+plot_var_33 = "cr"
+plot_var_34 = "mn"
+plot_var_35 = "co"
+plot_var_36 = "cu"
+plot_var_37 = "zn"
+plot_var_38 = "ga"
+plot_var_39 = "ge"
+
+run_comment     = "creating input for SEDONA"
+log_file        = "phoenix_input.log"
+
+pt_maxPerProc = 32000
+io_ptMaxReadPerProc = -1
+sim_ptMass = 2.8e29
+
+# Weighting, interpolation & convolution for sparse cells
+
+doRandomSelect = .FALSE.
+particlesFraction = 0.5
+particlesMod = 1
+
+doConvolve = .FALSE.
+convoSmearWidI = -3 # -6 # -1.25
+convoSmearWidJ = -3 # -6 # -1.25
+convoSmearShapeI = 3 # 1 # 3
+convoSmearShapeJ = 3 # 1 # 3
+convoSmearShapeK = 3 # 1 # 3
+convertToConsvdInMeshInterp = FALSE
+
+doInterpExtrap = .FALSE.
+
+doWeight = .TRUE.
+doWAvg = .TRUE.
+doGP = .FALSE.
+# searching Method, 3=3pts, 4=4pts
+sMethod = 4
+
+doFixupAbundances = .TRUE.
+sim_abundanceFixupMaxDens = 1.0
+
+doLowerBounds = .TRUE.
+doEos = .FALSE.
+#eos_coulombMult = 0.5
+
+lrefine_min = 1
+lrefine_max = 1
+eosModeInit = "eos_nop"
+
+
+# These parameters are used only for the uniform grid
+
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+#FIXEDBLOCKSIZE mode ::
+# When using fixed blocksize, iGridSize etc are redundant in
+# runtime parameters. These quantities are calculated as 
+# iGridSize = NXB*iprocs
+# jGridSize = NYB*jprocs
+# kGridSize = NZB*kprocs
+#NONFIXEDBLOCKSIZE mode ::
+# iGridSize etc must be specified. They constitute the global
+# number of grid points in the physical domain without taking 
+# the guard cell into account. The local blocksize is calculated
+# as iGridSize/iprocs  etc.
+

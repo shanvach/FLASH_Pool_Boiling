@@ -1,0 +1,41 @@
+!*******************************************************************************
+
+!  Module:      bicg_common()
+
+!  Description: Global type and variable declarations for the BiPCGStab solver.
+
+module bicg_common
+
+implicit none
+save
+
+#include "constants.h"  ! for MDIM
+
+!===============================================================================
+
+
+! Ranges of interior indices for blocks.
+
+integer :: ili, iui, jli, jui, kli, kui
+
+! Ranges of exterior indices for blocks.
+
+integer :: ile, iue, jle, jue, kle, kue
+
+! Boundary conditions, flag to substract mean on the source.
+integer, dimension(2*MDIM) :: gr_bicgBndTypes
+integer :: bicg_bnd_cond
+
+! Interpolation for work
+integer, parameter :: interp_work_bipcgstab = 2
+integer, allocatable, dimension(:) :: interp_mask_work_save
+
+! Flag for initialization for preconditioner
+logical :: precond_init = .true.
+
+! Flag that defines if boundary guard-cells are filled before A*x operations
+logical :: gcellflg = .true. 
+
+!===============================================================================
+
+end module bicg_common

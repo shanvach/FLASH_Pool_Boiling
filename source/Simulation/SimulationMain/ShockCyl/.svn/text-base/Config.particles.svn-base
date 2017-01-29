@@ -1,0 +1,152 @@
+#            Configuration file for shock interacting with dense gas column
+#            Ambient gas - air
+#            Dense gas - SF6
+#            Conditions to match LANL experiment
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/Multigamma
+REQUIRES Multispecies
+
+
+USERDEFINED Grid_markRefineDerefine.F90 Grid/common/paramesh
+
+
+
+#REQUIRES particles/passive/distribution/lattice
+#REQUIRES particles/passive/time_integration/pred_corr
+#REQUIRES particles/mapping/quadratic
+#REQUIRES particles/communication
+
+# number of species (ionmax)
+SPECIES AIR
+SPECIES SF6
+
+# extra variables
+VARIABLE vrtz
+#DEV no idea where this is used
+
+#  Pre-shock parameters
+D rho_amb    Pre-shock parameter: density of air
+D vx_amb     Pre-shock parameter: x-velocity of air
+D p_amb      Pre-shock parameter: pressure of air
+PARAMETER    rho_amb      REAL    0.95e-3
+PARAMETER    p_amb        REAL    8.e5
+PARAMETER    vx_amb       REAL    0.0
+
+# Parameters describing SF6 concentrations
+#  Assume only SF6 has velocity in the z direction
+D maxconc	maximum mole fraction concentration of SF6
+D vz_sf6	z-velocity of SF6 
+PARAMETER    maxconc      REAL    0.8
+PARAMETER    vz_sf6       REAL    0.0
+
+# Parameters relating to shock
+D sim_xShock shock location in x direction 
+D mach       shock speed Mach number
+D xctr
+D yctr
+PARAMETER    sim_xShock       REAL    20.0
+PARAMETER    mach         REAL    1.2
+PARAMETER    xctr         REAL    25.0
+PARAMETER    yctr         REAL    4.
+
+PARAMETER    ref_rect_x   REAL    0.
+PARAMETER    ref_rect_y   REAL    0.
+
+#There are three mutually-exclusive methods for initializing the simulation
+# sim_useRadialFit -- use a radial fit of the experimental image
+# use_raw_data -- use the experimental image directly
+# use rz_sim_data -- interpolate simulations of initial conditions
+
+# These parameters below only used if radial fit of experimental image used for initializations
+D sim_useRadialFit 	Use a radial fit of the experimental image to determine SF6 initial conditions?
+D sim_radialFitRadius 	[sim_useRadialFit=TRUE] fitting radius (not used, hard coded in sim_radialFit)
+D sim_radialNumPixels	[sim_useRadialFit=TRUE] use a radius of sim_radialNumPixels pixels for fitting (not used, hardcoded in sim_radialFit)	
+PARAMETER    sim_useRadialFit BOOLEAN TRUE
+PARAMETER    sim_radialFitRadius     REAL    0.6
+PARAMETER    sim_radialNumPixels           REAL    150.
+# end of initialization with sim_useRadialFit = TRUE
+
+# These parameters only used if use_raw_data is TRUE -- initial conditions from experiments
+PARAMETER    sim_useRawData BOOLEAN FALSE
+D sim_useRawData		Determine initial conditions from the experimental image results?
+D sim_rawNumPixelsX		[sim_useRawData=TRUE] number of pixels in the x direction
+D sim_rawNumPixelsY		[sim_useRawData=TRUE] number of pixels in the y direction
+D sim_rawMinX			[sim_useRawData=TRUE] x location of image edge
+D sim_rawMinY			[sim_useRawData=TRUE] y location of image edge
+D sim_rawPixelSize		[sim_useRawData=TRUE] physical size of the pixels in centimeters
+PARAMETER    sim_rawNumPixelsX        INTEGER 608
+PARAMETER    sim_rawNumPixelsY        INTEGER 468
+PARAMETER    sim_rawMinX      REAL    22.
+PARAMETER    sim_rawMinY      REAL    3.1
+PARAMETER    sim_rawPixelSize      REAL    0.0038
+# end of sim_useRawData=TRUE
+
+
+# Below only apply when use_rz_sim_data is true
+PARAMETER    use_rz_sim_data BOOLEAN FALSE
+D use_rz_sim_data   Read in simulated profile data for initial conditions?
+D nr_c				[rz_sim_data=TRUE] number of grid cells in the radial direction
+D nz_c				[rz_sim_data=TRUE] number of grid cells in the z direction
+D sf6_file_cc		[rz_sim_data=TRUE] initial conditions profile data for sf6
+D press_file_cc		[rz_sim_data=TRUE] initial conditions profile data for pressure (not used)
+D rvel_file_ec		[rz_sim_data=TRUE] initial conditions profile data for radial velocity
+D zvel_file_ce		[rz_sim_data=TRUE] initial conditions profile data for vertical velocity (not used in 3d)
+PARAMETER    nr_c            INTEGER 128
+PARAMETER    nz_c            INTEGER 64
+PARAMETER    sf6_file_cc     STRING  "massfr0200000"
+PARAMETER    press_file_cc   STRING  "press00200000"
+PARAMETER    rvel_file_ec    STRING  "rvel000200000"
+PARAMETER    zvel_file_ce    STRING  "zvel000200000"
+D rz_rmax			[rz_sim_data=TRUE] maximum radial extent  of simulation data
+D rz_zmax			[rz_sim_data=TRUE] maximum vertical extent of simulation data
+D rz_zplane			[rz_sim_data=TRUE] location of 2D horizontal slice in vertical z direction
+PARAMETER    rz_rmax         REAL 3.2
+PARAMETER    rz_zmax         REAL 7.5
+PARAMETER    rz_zplane       REAL 5.5
+
+D rz_3d_use_sym		[rz_sim_data=TRUE]
+D rz_pert_amp		[rz_sim_data=TRUE] amplitude of perturbation in radial interpolation location
+D rz_pert_zlen		[rz_sim_data=TRUE] z length scale of perturbation; current value is 4dx at 146 microns
+PARAMETER    rz_3d_use_sym   BOOLEAN FALSE
+PARAMETER    rz_pert_amp     REAL -1.00
+PARAMETER    rz_pert_zlen    REAL 0.05859375
+
+D nx_subint			[rz_sim_data=TRUE]
+D ny_subint			[rz_sim_data=TRUE]
+D nz_subint			[rz_sim_data=TRUE]
+PARAMETER    nx_subint       INTEGER  10
+PARAMETER    ny_subint       INTEGER  10
+PARAMETER    nz_subint       INTEGER  10
+# end of use_rz_sim_data = TRUE
+
+# For including particles in the simulation
+#DEV: kda these particle props were p_dens, p_pres ...
+PARTICLEPROP        dens          REAL
+PARTICLEPROP        pres          REAL
+PARTICLEPROP        sf6           REAL
+PARTICLEPROP        simtime       REAL
+PARTICLEPROP        nstep         INTEGER
+# These included for generating a Flash.h file for testing of particles
+#  Should NOT be included in the general ShockCyl calculations
+PARTICLEPROP	    velx		  REAL
+PARTICLEPROP	    vely		  REAL
+PARTICLEPROP	    velz		  REAL
+PARTICLEPROP	    posx		  REAL
+PARTICLEPROP	    posy		  REAL
+PARTICLEPROP	    posz		  REAL
+PARTICLEPROP	    block   	  INTEGER
+PARTICLEPROP	    tag			  INTEGER
+
+
+PARAMETER       PartXMin        REAL   15.0 
+PARAMETER       PartXMax        REAL   28.0
+PARAMETER       PartYMin        REAL    0.0 
+PARAMETER       PartYMax        REAL    7.5
+PARAMETER       dydeta_wall     REAL   0.25
+PARAMETER       PartZMin        REAL   0.0 
+PARAMETER       PartZMax        REAL   7.5
+
+DATAFILES 128*
+

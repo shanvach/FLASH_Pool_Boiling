@@ -1,0 +1,23 @@
+# Coniguration file for the 1D Radiative Shock
+REQUIRES Driver
+
+REQUESTS physics/Eos/EosMain/multiTemp/Gamma
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+
+PARAMETER sim_densTarg REAL    1.0
+PARAMETER sim_teleTarg REAL    116045.5
+PARAMETER sim_tionTarg REAL    116045.5
+
+PARAMETER sim_densCham REAL    1.0
+PARAMETER sim_teleCham REAL    116045.5
+PARAMETER sim_tionCham REAL    116045.5
+
+PARAMETER sim_radius   REAL    100.0e-04
+
+PARAMETER sim_ndiv     INTEGER 1

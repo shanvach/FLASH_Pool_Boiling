@@ -1,0 +1,165 @@
+#Configuration file for NucOToRT
+
+REQUIRES Driver
+REQUIRES RuntimeParameters
+REQUIRES Grid
+
+
+#Active particles.
+PARTICLETYPE active INITMETHOD custom MAPMETHOD weighted
+
+REQUIRES Grid/GridParticles
+REQUIRES Particles/ParticlesMain/active/Leapfrog
+REQUESTS Particles/ParticlesMapping/meshWeighting/MapToMesh
+REQUESTS Particles/ParticlesMapping/meshWeighting/CIC
+##REQUESTS Particles/ParticlesMapping/meshWeighting/NGP
+
+REQUESTS physics/Eos/EosMain/Helmholtz/Ye
+VARIABLE pres                   EOSMAP:  PRES  # pressure
+VARIABLE dens TYPE: PER_VOLUME  EOSMAP:  DENS
+VARIABLE temp                   EOSMAP:  TEMP
+VARIABLE eint TYPE: PER_MASS    EOSMAP:  EINT
+
+MASS_SCALAR YE    EOSMAPIN: YE
+MASS_SCALAR SUMY  EOSMAPIN: SUMY
+
+MASS_SCALAR SUMX
+
+PARTICLEPROP sumy REAL
+PARTICLEPROP sumzy REAL
+
+
+USESETUPVARS Convolve
+IF Convolve
+	REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
+	VARIABLE gaus
+	D	 doConvolve whether Convolution code should be executed.
+	PARAMETER doConvolve BOOLEAN TRUE
+	D	 convoSmearWidI width of convolution smearing function,
+	D & for Gaussian shape this is the FWHM.
+	PARAMETER convoSmearWidI REAL -1.0
+	PARAMETER convoSmearWidJ REAL -1.0
+	PARAMETER convoSmearWidK REAL -1.0
+	D	 convoSmearShapeI type of convolution smearing function,
+	D & currently supported: 1 - Gaussian
+	PARAMETER convoSmearShapeI INTEGER 1	[ 1 ... 3 ]
+	PARAMETER convoSmearShapeJ INTEGER 1	[ 1 ... 3 ]
+	PARAMETER convoSmearShapeK INTEGER 1	[ 1 ... 3 ]
+ENDIF
+
+GUARDCELLS 16
+
+PARAMETER sim_ptNumPartFiles	INTEGER 1 [ 1 ... 32 ]
+
+D sim_nucFileName_1 the (first) filename for reading in the particles data
+PARAMETER sim_nucFileName_1 STRING "nucOutput"
+PARAMETER sim_nucFileName_2 STRING "none"
+PARAMETER sim_nucFileName_3 STRING "none"
+PARAMETER sim_nucFileName_4 STRING "none"
+PARAMETER sim_nucFileName_5 STRING "none"
+PARAMETER sim_nucFileName_6 STRING "none"
+PARAMETER sim_nucFileName_7 STRING "none"
+PARAMETER sim_nucFileName_8 STRING "none"
+PARAMETER sim_nucFileName_9 STRING "none"
+PARAMETER sim_nucFileName_10 STRING "none"
+PARAMETER sim_nucFileName_11 STRING "none"
+PARAMETER sim_nucFileName_12 STRING "none"
+PARAMETER sim_nucFileName_13 STRING "none"
+PARAMETER sim_nucFileName_14 STRING "none"
+PARAMETER sim_nucFileName_15 STRING "none"
+PARAMETER sim_nucFileName_16 STRING "none"
+PARAMETER sim_nucFileName_17 STRING "none"
+PARAMETER sim_nucFileName_18 STRING "none"
+PARAMETER sim_nucFileName_19 STRING "none"
+PARAMETER sim_nucFileName_20 STRING "none"
+PARAMETER sim_nucFileName_21 STRING "none"
+PARAMETER sim_nucFileName_22 STRING "none"
+PARAMETER sim_nucFileName_23 STRING "none"
+PARAMETER sim_nucFileName_24 STRING "none"
+PARAMETER sim_nucFileName_25 STRING "none"
+PARAMETER sim_nucFileName_26 STRING "none"
+PARAMETER sim_nucFileName_27 STRING "none"
+PARAMETER sim_nucFileName_28 STRING "none"
+PARAMETER sim_nucFileName_29 STRING "none"
+PARAMETER sim_nucFileName_30 STRING "none"
+PARAMETER sim_nucFileName_31 STRING "none"
+PARAMETER sim_nucFileName_32 STRING "none"
+
+
+D pt_numParticlesWanted     Maximum number of tracer particles to use (May read fewer from file).
+D & A negativ number means try to use all valid particles in the input file.
+PARAMETER pt_numParticlesWanted INTEGER  -1 [ -1 to ]
+
+D io_ptMaxReadPerProc         maximum number of particles that each processor should read
+D & when particles are initialized from an IO file. Set to -1 for unlimited.
+PARAMETER io_ptMaxReadPerProc         INTEGER -1	[ -1 to ]
+
+#D sim_ptMass mass represented by one particles when replacing some mass in the
+#& domain with active particles to test refinement based on particles
+#& count
+PARAMETER sim_ptMass     REAL    0.005
+
+D particlesInputNdim dimensionality of particles coordinates
+PARAMETER particlesInputNdim INTEGER 1 [1 to 3]
+D particlesInputGeometry geometry of the grid for rad trans data
+PARAMETER particlesInputGeometry STRING  "cartesian" [ cartesian, cylindrical ]
+#Not all of the following are implemented:
+#PARAMETER particlesInputGeometry STRING  "cartesian" [ cartesian, polar ,cylindrical,spherical ]
+
+#D sim_smlRho the smallest allowed value of density so that we don't
+#& have overflow in calculations.
+PARAMETER sim_smlRho REAL 1.e-10
+D sim_smlRho unused
+PARAMETER sim_densityThreshold REAL 1.e-10
+
+D doInterpExtrap whether to apply interpolation / extrapolation for any lef node UNK cells that got no particles.
+D & This is an alternative to doing convolution.
+PARAMETER doInterpExtrap BOOLEAN FALSE
+
+D doFixupAbundances whether to fix up abundances (at points where density is sufficiently low) so
+D & that they sum up to 1 again.
+PARAMETER doFixupAbundances BOOLEAN FALSE
+D doLowerBounds whether to apply sim_smlrho,smalle,smallt to appropriate variables in UNK.
+PARAMETER doLowerBounds BOOLEAN TRUE
+D doEos whether to call Eos_wrapped on UNK, probably to compute pressure.
+PARAMETER doEos BOOLEAN TRUE
+
+D sim_abundanceFixupMaxDens density threshold for doFixupAbundances
+PARAMETER sim_abundanceFixupMaxDens REAL 1.0
+
+D radTranDataFile the filename for writing data that shall be input
+D & to radiation transfer code like Phoenix or Sedona
+PARAMETER radTranDataFile STRING "radTranInputData"
+
+D radTranOutputNdim dimensionality of rad trans data
+PARAMETER radTranOutputNdim INTEGER 1 [1 to 3]
+D radTranOutputGeometry geometry of the grid for rad trans data
+PARAMETER radTranOutputGeometry STRING  "cartesian" [ cartesian, cylindrical ]
+#Not all of the following are implemented:
+#PARAMETER radTranOutputGeometry STRING  "cartesian" [ cartesian, polar ,cylindrical,spherical ]
+
+D radTranGridSizeI size of the grid for output to rad trans data file, first dimension
+D radTranGridSizeJ size of the grid for output to rad trans data file, second dimension
+D radTranGridSizeK size of the grid for output to rad trans data file, third dimension
+PARAMETER radTranGridSizeI INTEGER 100 [2 to ]
+PARAMETER radTranGridSizeJ INTEGER 100 [1 to ]
+PARAMETER radTranGridSizeK INTEGER 100 [1 to ]
+
+PARAMETER radTranOutputXmin REAL 0.0
+PARAMETER radTranOutputXmax REAL 8.0e9
+PARAMETER radTranOutputYmin REAL 0.0
+PARAMETER radTranOutputYmax REAL 8.0e9
+PARAMETER radTranOutputZmin REAL 0.0
+PARAMETER radTranOutputZmax REAL 8.0e9
+
+MASS_SCALAR ni56
+## The following is handles specially in the code
+##PARTICLEPROP ni56 REAL
+#PARTICLEMAP TO ni56 FROM MASS_SCALAR ni56
+##PARAMETER particle_attribute_250 STRING "ni56"
+
+VARIABLE nump
+VARIABLE nup0
+VARIABLE nup1
+VARIABLE numc
+

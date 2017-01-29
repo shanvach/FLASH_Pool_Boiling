@@ -1,0 +1,35 @@
+#       Configuration file for Isotropic Turbulence Problem
+#       Linearly Forced Isotropic Turbulence problem in a
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+USESETUPVARS Grid
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain
+
+LIBRARY STDCXX
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+IF Grid=='UG'
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+ENDIF
+
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+
+
+
+## ----------------------------------------------
+## THIS PART IS FOR PHYSICS CONFIG
+
+
+# Number of guardcells at each boundar
+GUARDCELLS 2

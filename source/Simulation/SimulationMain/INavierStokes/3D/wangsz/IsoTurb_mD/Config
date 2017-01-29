@@ -1,0 +1,47 @@
+#       Configuration file for Laminar Channel Problem.
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+USESETUPVARS Grid
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+#REQUIRES physics/IncompNS/IncompNSMain/stats
+
+# Tecplot output:
+#REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D/Slices
+REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D
+
+# Poisson Solver
+IF Grid=='UG'
+   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+#HomBcTrigSolver
+#DirectSolver/Generic_Direct
+ELSE
+   REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+#   REQUESTS Grid/GridSolvers/Multigrid/PfftTopLevelSolve
+#   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve
+#   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ENDIF
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+FACEVAR fbao
+FACEVAR uprm
+
+PARAMETER sim_fbao  REAL 0.0
+PARAMETER sim_turbkin_expect  REAL 0.0
+PARAMETER sim_scaleForce  REAL 1.0
+# Compute stats vs time and write every nstatsz steps:
+PARAMETER nstatsz                 INTEGER     1000 
+
+PARAMETER stats_slicesz_from_file BOOLEAN    false
+PARAMETER stats_nslicesz          INTEGER        0
+
+
+# ----------------------------------------------
+
+# Number of guardcells at each boundary
+GUARDCELLS 2
+
+
+

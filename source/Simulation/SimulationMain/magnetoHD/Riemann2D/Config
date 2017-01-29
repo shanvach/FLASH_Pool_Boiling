@@ -1,0 +1,76 @@
+#       Configuration file for a 2D version of shock-tube MHD Riemann problem.
+
+REQUIRES physics/Hydro/HydroMain
+REQUIRES physics/Eos/EosMain/Gamma
+
+
+# Add custom variables below
+D   dens_1
+D   pres_1
+D   velx_1
+D   vely_1
+D   velz_1
+D   magx_1
+D   magy_1
+D   magz_1
+D   dens_2
+D   pres_2
+D   velx_2
+D   vely_2
+D   velz_2
+D   magx_2
+D   magy_2
+D   magz_2
+D   dens_3
+D   pres_3
+D   velx_3
+D   vely_3
+D   velz_3
+D   magx_3
+D   magy_3
+D   magz_3
+D   dens_4
+D   pres_4
+D   velx_4
+D   vely_4
+D   velz_4
+D   magx_4
+D   magy_4
+D   magz_4
+D   tiny	      Threshold value used for numerical zero
+
+# ADD DESCRIPTION HERE
+ 
+PARAMETER  dens_1     REAL    0.125
+PARAMETER  pres_1     REAL    0.1
+PARAMETER  velx_1     REAL    0.
+PARAMETER  vely_1     REAL    0.
+PARAMETER  velz_1     REAL    0.
+PARAMETER  magx_1     REAL    0.75
+PARAMETER  magy_1     REAL    0.75
+PARAMETER  magz_1     REAL    0.
+PARAMETER  dens_2     REAL    1.
+PARAMETER  pres_2     REAL    1.
+PARAMETER  velx_2     REAL    0.
+PARAMETER  vely_2     REAL    0.
+PARAMETER  velz_2     REAL    0.
+PARAMETER  magx_2     REAL    0.75
+PARAMETER  magy_2     REAL    0.75
+PARAMETER  magz_2     REAL    0.
+PARAMETER  dens_3     REAL    2.
+PARAMETER  pres_3     REAL    1.
+PARAMETER  velx_3     REAL    0.
+PARAMETER  vely_3     REAL    0.
+PARAMETER  velz_3     REAL    0.
+PARAMETER  magx_3     REAL    0.75
+PARAMETER  magy_3     REAL    0.75
+PARAMETER  magz_3     REAL    0.
+PARAMETER  dens_4     REAL    1.
+PARAMETER  pres_4     REAL    1.
+PARAMETER  velx_4     REAL    0.
+PARAMETER  vely_4     REAL    0.
+PARAMETER  velz_4     REAL    0.
+PARAMETER  magx_4     REAL    0.75
+PARAMETER  magy_4     REAL    0.75
+PARAMETER  magz_4     REAL    0.
+PARAMETER  tiny       REAL    1.e-16

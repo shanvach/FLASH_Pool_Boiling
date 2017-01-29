@@ -1,0 +1,93 @@
+#            Configuration file for particle unit test
+
+REQUIRES Driver
+
+PARTICLETYPE passive INITMETHOD custom MAPMETHOD quadratic ADVMETHOD DPD
+REQUIRES Particles
+REQUESTS Particles/ParticlesInitialization/Lattice
+REQUESTS Particles/ParticlesMapping/Quadratic
+REQUIRES RuntimeParameters
+REQUIRES Grid/GridMain/
+REQUIRES Grid/GridParticles/
+REQUIRES Grid/GridParticles/GridParticlesMove/UG/Directional/VirtualParticles
+REQUIRES Particles/ParticlesMain/active/DPD
+REQUESTS IO/IOParticles
+
+PARTICLEPROP fnx      REAL    # Forces at the beginning of the interval
+PARTICLEPROP fny      REAL    # Forces at the beginning of the interval
+PARTICLEPROP fnz      REAL    # Forces at the beginning of the interval
+PARTICLEPROP fnpx     REAL    # Forces at the beginning of the interval
+PARTICLEPROP fnpy     REAL    # Forces at the beginning of the interval
+PARTICLEPROP fnpz     REAL    # Forces at the beginning of the interval
+PARTICLEPROP vnpx     REAL    # velocities at the beginning of the interval
+PARTICLEPROP vnpy     REAL    # velocities at the beginning of the interval
+PARTICLEPROP vnpz     REAL    # velocities at the end of the interval
+PARTICLEPROP pnpx     REAL    # velocities at the beginning of the interval
+PARTICLEPROP pnpy     REAL    # velocities at the beginning of the interval
+PARTICLEPROP pnpz     REAL    # velocities at the end of the interval
+PARTICLEPROP vix      REAL    # velocities at the end of the interval
+PARTICLEPROP viy      REAL    # velocities at the end of the interval
+PARTICLEPROP viz      REAL    # velocities at the end of the interval
+PARTICLEPROP bdt      REAL    # bead type. 
+PARTICLEPROP prnt     REAL    # particle parent. Will be set to NONEXISTENT if has no parents
+PARTICLEPROP bdyt     REAL    # Parent type (body type) this property will be used to define the topology of the body
+PARTICLEPROP intr     REAL    # Parent type (body type) this property will be used to define the topology of the body
+
+#  parameters
+PARAMETER  xmin REAL 0.0
+PARAMETER  xmax REAL 1.0
+PARAMETER  ymin REAL 0.0
+PARAMETER  ymax REAL 1.0
+PARAMETER  zmin REAL 0.0
+PARAMETER  zmax REAL 1.0
+
+D sim_deltaMove   The distance by which the particle should move
+#PARAMETER    sim_deltaMoveX      REAL    0.01
+#PARAMETER    sim_deltaMoveY      REAL    0.01
+#PARAMETER    sim_deltaMoveZ      REAL    0.01
+
+D sim_initPosX    Initial position of the particle along x
+#PARAMETER    sim_initPosX       REAL    0.01
+#PARAMETER    sim_initPosY       REAL    0.01
+#PARAMETER    sim_initPosZ       REAL    0.01
+
+D Total number of particles to be read 
+PARAMETER    pt_NumPart           INTEGER  1       
+PARAMETER    pt_NumBodies         INTEGER  0
+PARAMETER    pt_BeadsPBody        INTEGER  0
+PARAMETER    pt_NumBTypes         INTEGER  1
+PARAMETER    pt_BodyTypes         INTEGER  1
+
+D DATAFILES
+DATAFILES MEMBRANE.dat
+DATAFILES MEMBRANE.h5
+
+
+#  Ambient parameters
+#D sim_rho_amb    Gas Density:  Entire domain receives this ambient parameter
+#PARAMETER    sim_rho_amb      REAL    0.95e-3
+
+#D sim_p_amb      Gas Pressure: Entire domain receives this ambient parameter
+#PARAMETER    sim_p_amb        REAL    8.e5
+
+#D sim_vx_amb     Gas x-velocity:  Dominant flow velocity throughout domain 
+#PARAMETER    sim_vx_amb       REAL    0.5
+
+#D sim_vx_multiplier   Half of the domain in y has x-velocity multiplied by this value
+#PARAMETER    sim_vx_multiplier REAL   1.0
+
+# Random velocity perturbations
+#D sim_seed   Random number seed -- NOT USED please ignore
+#PARAMETER    sim_seed         REAL     1.0
+
+#D sim_vx_pert   Scales [-1,1] random number in x direction: set to zero for uniform flow
+#PARAMETER    sim_vx_pert      REAL     0.1
+
+#D sim_vy_pert   Scales [-1,1] random number in y direction: set to zero for uniform flow
+#PARAMETER    sim_vy_pert      REAL     0.1
+
+#D sim_vz_pert   Scales [-1,1] random number in z direction: set to zero for uniform flow
+#PARAMETER    sim_vz_pert      REAL     0.1
+
+
+

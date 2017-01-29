@@ -1,0 +1,103 @@
+Only in ../Particle_isoTurb_CM/: CM
+diff ./Config ../Particle_isoTurb_CM/Config
+diff ./diff.rcd ../Particle_isoTurb_CM/diff.rcd
+diff ./Driver_evolveFlash.F90 ../Particle_isoTurb_CM/Driver_evolveFlash.F90
+> 
+Only in ../Particle_isoTurb_CM/: evolve.diff
+Only in ../Particle_isoTurb_CM/: export_stats
+Only in ../Particle_isoTurb_CM/: IncompNS_init.F90
+diff ./ins_ab2rk3.F90 ../Particle_isoTurb_CM/ins_ab2rk3.F90
+Only in .: ins_exportBlock.F90
+diff ./ins_turbstats.F90 ../Particle_isoTurb_CM/ins_turbstats.F90
+---
+>          write(240,'(I8,4g14.6)')istep,time,uavg,vavg,wavg
+134c133
+<          write(240,'(I16,4g20.12)')istep,time,uavg,vavg,wavg
+---
+>          write(240,'(I8,4g14.6)')istep,time,uavg,vavg,wavg
+307c306
+<       write(241,'(I16,5g20.12)')istep,time,turbkin,lambdaf,lambdag,dissavg
+---
+>       write(241,'(I8,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+310c309
+<       write(*,'(I8,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+---
+>       write(*,'(I6,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+319c318
+<       write(241,'(I16,5g20.12)')istep,time,turbkin,lambdaf,lambdag,dissavg
+---
+>       write(241,'(I8,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+322c321
+<       write(*,'(I8,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+---
+>       write(*,'(I6,5g14.6)')istep,time,turbkin,lambdaf,lambdag,dissavg
+330,332d328
+<   ! Scale the forces to forcing the isotropic turbulance
+<   sim_scaleForce = sim_turbkin_expect/turbkin
+< 
+Common subdirectories: ./ISOTURB_files and ../Particle_isoTurb_CM/ISOTURB_files
+Only in .: IsoTurb_particle.sh
+diff ./Makefile ../Particle_isoTurb_CM/Makefile
+2,3c2
+<               sm_gatherMassCent.o sm_assemble_repulForce_rigid.o sm_set_cm_para.o \
+<               ins_exportBlock.o 
+---
+>               sm_gatherMassCent.o sm_assemble_repulForce_rigid.o sm_set_cm_para.o 
+Only in ../Particle_isoTurb_CM/: Particle_isoTurb_CM.sh
+diff ./Simulation_data.F90 ../Particle_isoTurb_CM/Simulation_data.F90
+26,28d25
+<   
+<   integer, save :: sim_meshMe
+<   real, save :: sim_turbkin_expect, sim_fbao, sim_scaleForce
+29a27
+> integer, save :: sim_meshMe
+diff ./Simulation_initBlock.F90 ../Particle_isoTurb_CM/Simulation_initBlock.F90
+40c40
+<                               sim_gCell, sim_fbao, sim_turbkin_expect
+---
+>                               sim_gCell
+53,54d52
+<   
+<   use RuntimeParameters_interface, only: RuntimeParameters_get
+117,122c115
+< !  call RuntimeParameters_get('sim_fbao', sim_fbao)
+< !  call RuntimeParameters_get('sim_turbkin_expect', sim_turbkin_expect)
+< !  if(gr_meshMe == MASTER_PE) write(*,*) 'Forced turbulence, FBAO=', sim_fbao
+< !  if(gr_meshMe == MASTER_PE) write(*,*) 'Expected tke =', sim_turbkin_expect
+< 
+<   !if(gr_meshMe == MASTER_PE) write(*,*) 'Forced turbulence, ao=', ao
+---
+>   if(gr_meshMe == MASTER_PE) write(*,*) 'Forced turbulence, ao=', ao
+334,335c327
+<           !facexData(FBAO_FACE_VAR,i,j,k) = ao*fb
+<           facexData(FBAO_FACE_VAR,i,j,k) = sim_fbao
+---
+>           facexData(FBAO_FACE_VAR,i,j,k) = ao*fb
+354,355c346
+<           !faceyData(FBAO_FACE_VAR,i,j,k) = ao*fb         
+<           faceyData(FBAO_FACE_VAR,i,j,k) = sim_fbao
+---
+>           faceyData(FBAO_FACE_VAR,i,j,k) = ao*fb         
+376,377c367
+<           !facezData(FBAO_FACE_VAR,i,j,k) = ao*fb
+<           facezData(FBAO_FACE_VAR,i,j,k) = sim_fbao
+---
+>           facezData(FBAO_FACE_VAR,i,j,k) = ao*fb
+diff ./Simulation_init.F90 ../Particle_isoTurb_CM/Simulation_init.F90
+27,28c27
+<                               sim_xMax, sim_yMax, sim_zMax, sim_gCell, &
+<                               sim_fbao, sim_turbkin_expect, sim_scaleForce
+---
+>                               sim_xMax, sim_yMax, sim_zMax, sim_gCell
+32,33d30
+<   use Grid_data, only : gr_meshMe
+< 
+50,56d46
+<   call RuntimeParameters_get('sim_fbao', sim_fbao)
+<   call RuntimeParameters_get('sim_turbkin_expect', sim_turbkin_expect)
+<   call RuntimeParameters_get('sim_scaleForce', sim_scaleForce)
+<   if(gr_meshMe == MASTER_PE) write(*,*) 'Forced turbulence, FBAO=', sim_fbao
+<   if(gr_meshMe == MASTER_PE) write(*,*) 'Expected tke =', sim_turbkin_expect
+<   if(gr_meshMe == MASTER_PE) write(*,*) 'Initial force scalor =', sim_scaleForce
+< 
+Common subdirectories: ./.svn and ../Particle_isoTurb_CM/.svn

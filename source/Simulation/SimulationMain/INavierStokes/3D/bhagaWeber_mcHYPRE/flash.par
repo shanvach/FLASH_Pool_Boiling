@@ -1,0 +1,133 @@
+# 	Runtime parameters for the Surface Tension Bubble problem.
+
+#       Runtime parameters for the Inflow-Outflow problem.
+       gr_pmRpDivergenceFree = 1
+       gr_pmRpNfieldDivf = 2
+       gr_pmRpConsvFluxes = .TRUE.
+       gr_pmRpConsvFluxDensities = .FALSE.
+
+# Initial time step stuff (disabled)
+dtinit=1.0
+tstep_change_factor=1.
+
+# Inverse of Reynolds Number... Re=7.16
+invRe           = 0.139665
+
+# Subgrid Scale model flag (0 no sgs model, 1 sgs model)
+isgs            = 0
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#       Size of computational volume
+xmin            =  -1.500000000000
+xmax            =   1.5
+#ymin            =  -1.5000000000000
+#ymax            =   1.5
+ymin            =  -1.5000000000000
+ymax            =   4.5
+zmin            =  -1.500000000000
+zmax            =   1.5
+
+
+# Densities
+rho1  = 1.0
+rho2  = 1000.0 
+
+# Viscosities
+vis1 = 1.0
+vis2 = 100.0 
+
+# Surface Tension
+sten = 0.03277
+
+# Gravity in the -y direction
+gravX = 0.0
+gravY = 3.8066
+gravZ = 0.0
+
+# Number of level-set redistancing iterations
+lsit = 3
+inls = 0
+
+#       Boundary conditions
+#xl_boundary_type = "slip_ins"
+#xr_boundary_type = "slip_ins"
+#yl_boundary_type = "slip_ins"
+#yr_boundary_type = "slip_ins"
+#zl_boundary_type = "slip_ins"
+#zr_boundary_type = "slip_ins"
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "3D Rising bubble run."
+log_file	= "VARDENS_RisingBub.log"
+basenm		= "VARDENS_RisingBub_"
+restart         = .false.
+#checkPointFileNumber=2
+#plotFileNumber  = 2
+nend            = 1
+tmax            = 15. 
+cflflg          = 1
+cfl             = 0.0125
+sigma		= 0.0125
+dtspec          = 1.e-5
+
+#Integration Scheme:
+intschm            = 2
+
+plot_var_1	= "pres"
+
+pfft_setupOnce  = .false.
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 10000.1
+checkpointFileIntervalStep =1 
+
+
+#	AMR parameters
+nblockx	= 1
+nblocky	= 2
+nblockz	= 1
+lrefine_min	= 2
+lrefine_max     = 3
+mgrid_solveLevelKPD = 2 
+nrefs           = 100
+refine_var_1    = "pres"
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+# Multigrid Tolerances
+mgrid_npresmooth = 1
+mgrid_npossmooth = 5
+mgrid_print_norm = .true.
+mgrid_max_residual_norm = 1.e-10
+mgrid_max_vcycles = 40
+
+
+# Pfft Parameters:
+# Use Central Finite Difference discretization operator:
+gr_pfftDiffOpDiscretize = 2
+gr_mgDiffOpDiscretize = 2
+
+# HYPRE-Poisson solver settings:
+gr_hyprePrintSolveInfo  = .FALSE.
+gr_hypreInfoLevel       = 1
+gr_hypreMaxIter         = 10000
+#gr_hypreRelTol          = 1.0e-11
+gr_hypreRelTol          = 1.0e-6
+gr_hypreFloor           = 1.0e-16
+#gr_hyprePCType          = "HYPRE_PARASAILS"
+#gr_hyprePCType          = "HYPRE_ILU"
+gr_hyprePCType          = "HYPRE_AMG"
+gr_hypreSolverType      = "HYPRE_PCG"
+#gr_hypreSolverType      = "HYPRE_BICGSTAB"
+#gr_hypreSolverType      = "HYPRE_GMRES"
+#gr_hypreSolverType      = "HYPRE_AMG"
+#gr_hypreSolverType      = "HYPRE_SPLIT"
+

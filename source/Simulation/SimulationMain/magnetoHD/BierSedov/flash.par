@@ -1,0 +1,140 @@
+# Runtime parameters for the Sedov explosion problem for testing
+# Biermann Battery term.
+#
+# This parfile is hydro-only. It has no Biermann Battery term, and
+# thus the field remains almost zero throughout the simulation.
+
+##########################
+#                        #
+#     I/O PARAMETERS     #
+#                        #
+##########################
+basenm      = "sedov_"
+restart     = .false.
+run_comment = "Biermann Battery Sedov explosion"
+log_file    = "sedov.log"
+
+# CHECKPOINT FILE PARAMETERS:
+checkpointFileIntervalTime = 0.01
+checkpointFileIntervalStep = 20
+checkpointFileNumber       = 0
+
+# PLOT FILE PARAMETERS:
+plotfileIntervalTime = 0.
+plotfileIntervalStep = 0
+plotfileNumber       = 0
+eintSwitch           = 1.e-4
+plot_var_1           = "dens"
+plot_var_2           = "pres"
+plot_var_3           = "temp"
+
+
+##########################
+#                        #
+#     EOS PARAMETERS     #
+#                        #
+##########################
+
+# These parameters correspond to a plasma of fully ionized
+# Helium. Since we are running in 1T mode we have to set:
+#
+#   A = A / (1 + Z) = 4/3
+#
+# To fake the 1T EOS to think this is a fully ionized plasma.
+
+eos_singleSpeciesA = 1.33333333333333
+eos_singleSpeciesZ = 1.0
+
+
+################################
+#                              #
+#     HYDRO/MHD PARAMETERS     #
+#                              #
+################################
+
+# Use second order hybrid solver with minmod slope limiter. This
+# essentially eliminates any Carbuncle instability.
+ 
+order            = 2        # Interpolation order (first/second/third/fifth order)
+slopeLimiter     = "minmod" # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta = 1.       # Slope parameter for the "limited" slope by Toro
+charLimiting     = .true.   # Characteristic limiting vs. Primitive limiting
+use_avisc        = .true.   # use artificial viscosity (originally for PPM)
+cvisc            = 0.1      # coefficient for artificial viscosity
+use_flattening   = .false.  # use flattening (dissipative) (originally for PPM)
+use_steepening   = .false.  # use contact steepening (originally for PPM)
+use_upwindTVD    = .false.  # use upwind biased TVD slope for PPM (need nguard=6)
+RiemannSolver    = "hybrid" # Roe, HLL, HLLC, LLF, Marquina, hybrid
+entropy          = .false.  # Entropy fix for the Roe solver
+shockDetect      = .false.  # Shock Detect for numerical stability
+addThermalFlux   = .false.
+
+# MHD/BIERMANN BATTERY OPTIONS:
+hy_biermannSource = .false.
+use_biermann      = .true.
+use_biermann1T    = .true.
+hy_bier1TA        = 4.0
+hy_bier1TZ        = 2.0
+hy_biermannCoef   = 1.0
+
+# BOUNDARY CONDITIONS:
+xl_boundary_type = "reflect"
+xr_boundary_type = "reflect"
+yl_boundary_type = "reflect"
+yr_boundary_type = "reflect"
+
+
+###################################
+#                                 #
+#     SET INIITIAL CONDITIONS     #
+#                                 #
+###################################
+
+# The abient pressure is set to correspond to a 1 eV, fully ionized
+# Helium plasma at 1.0e-04 g/cc. The central hot spot contains 0.1 J
+# of energy in a 100 micron radius cylinder.
+
+sim_pAmbient   = 72364003.2873
+sim_rhoAmbient = 1.0e-04
+sim_expEnergy  = 1.0e+06
+sim_rInit      = 0.01
+sim_xctr       = 0.0
+sim_yctr       = 0.0
+sim_zctr       = 0.0
+
+# DOMAIN:
+geometry = "cartesian"
+xmin     = 0.
+xmax 	 = 0.03
+ymin 	 = 0.
+ymax 	 = 0.03
+
+# SET VORTICITY SLOPE LIMITER:
+sim_vortSlopeLimit = "vanLeer"
+
+################################
+#                              #
+#     TIME STEP PARAMETERS     #
+#                              #
+################################
+tstep_change_factor = 1.10
+cfl                 = 0.8
+nend                = 10000000
+tmax                = 3.0e-09
+tinitial            = 0.000
+dtmin               = 1.0e-16
+dtinit              = 1.0e-13
+
+
+###########################
+#                         #
+#     GRID PARAMETERS     #
+#                         #
+###########################
+
+# NOFBS PARAMETERS:
+iGridSize = 100
+jGridSize = 100
+iProcs    = 1
+jProcs    = 1
+ 

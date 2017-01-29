@@ -1,0 +1,104 @@
+run_comment = "Biermann Battery Test Problem"
+log_file    = "bier.log"
+basenm      = "bier_"
+
+######################
+#   I/O PARAMETERS   #
+######################
+restart                    = .false.
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 1
+checkpointFileNumber       = 0
+plotFileNumber             = 0
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+useDiffuse      = .false.
+
+# Material and EOS parameters:
+eosModeInit        = "dens_temp_gather"
+eosMode            = "dens_ie_gather"
+gamma              = 1.6666666666666666
+eos_singleSpeciesA = 4.0026032497
+eos_singleSpeciesZ = 2.0
+
+# Initial conditions:
+sim_ptot = 1.0e+12
+sim_nele1 = 0.1e+21
+sim_nele2 = 1.0e+21
+sim_pele1 = 0.1e+11
+sim_pele2 = 1.0e+11
+	  
+# Set boundary conditions:
+xl_boundary_type = "extrapolate"
+xr_boundary_type = "extrapolate"
+yl_boundary_type = "extrapolate"
+yr_boundary_type = "extrapolate"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+### Hydro options ###
+useHydro         = .true.
+charLimiting     = .true.    # Characteristic limiting vs. Primitive limiting
+order            = 2         # Interpolation order (First/Second order)
+use_avisc        = .false.   # MH solver already dissipative, no visc. needed
+use_steepening   = .false.   # Steepening not needed with MH
+use_flattening   = .false.   # Flattening not needed with MH
+slopeLimiter     = "vanLeer" # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta = 1.        # Slope parameter for the "limited" slope by Toro
+charLimiting     = .true.    # Characteristic limiting vs. Primitive limiting
+RiemannSolver    = "hllc"
+shockDetect      = .false.   # Shock Detect for numerical stability
+eintSwitch       = 1.e-4
+eint1Switch      = 1e30
+eint2Switch      = 1e30
+eint3Switch      = 1e30
+ForceHydroLimit  = .false.
+use_biermann     = .true.
+addThermalFlux   = .false.
+
+# Activate RAGE-like hydro:
+hy_eosModeAfter = "dens_ie_gather"
+hy_3Ttry_B = 1
+hy_3Ttry_D = 2.0
+hy_3Ttry_E = 1
+hy_3Ttry_F = 2
+hy_3Ttry_G = 0
+
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+dt_diff_factor = 1.0e+10 # Disable diffusion dt
+tmax           = 0.03e-09
+dtmin          = 1.0e-15
+dtinit         = 1.0e-14
+dtmax          = 1.0e-14
+nend           = 10
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+meshCopyCount = 1
+
+# Total number of blocks:
+nblockx = 1
+nblocky = 1
+nblockz = 1
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 200
+jGridSize = 200
+kGridSize = 1
+
+xmin = 0.0
+xmax = 0.01
+ymin = 0.0
+ymax = 0.01

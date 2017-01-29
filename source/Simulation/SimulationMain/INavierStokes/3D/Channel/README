@@ -1,0 +1,6 @@
+# Setup line:
+
+./setup INavierStokes/3D/ChannelLam  -3d -auto +ug  -nxb=256 -nyb=64 -nzb=32 -opt -objdir=CHANNELLAM -site=archimedes.uchicago.edu
+
+# A unitary body force on the x direction is used, where periodic boundary conditions are prescribed. 
+

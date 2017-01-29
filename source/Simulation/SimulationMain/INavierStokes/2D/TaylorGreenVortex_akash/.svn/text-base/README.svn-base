@@ -1,0 +1,27 @@
+# Taylor Green Vortex problem using uniform grid
+# 4 processors are used distributed in pencils along y axis, the whole domain is covered by a 64^2 grid.
+
+# Setup line:
+/setup INavierStokes/2D/TaylorGreenVortex  -2d -auto +ug  -nxb=64 -nyb=32 -debug PfftSolver=HomBcTrigSolver -objdir=TAYLOR_GREEN_UG -site=(Your SITE)
+
+# Make directory IOData within the object directory.
+
+# The last timestep screen output and errors respect to the analytical solution are shown below:
+
+
+ ###############################################################################
+  
+ Min , Max  Divergence = -0.122125E-14  0.144329E-14
+ Total AB Step Time =  2.00000000000000004E-003
+  
+  1000, TimeStep=   0.10000000E-04, SimTime=   0.10000000E-01
+ ###############################################################################
+ 
+ *** Wrote plotfile to ./IOData/data.0010.**.plt ****
+ *** Wrote plotfile to INS_Taylor_Green_hdf5_plt_cnt_0010 ****
+ *** Wrote checkpoint file to INS_Taylor_Green_hdf5_chk_0001 ****
+ *** Wrote plotfile to INS_Taylor_Green_forced_hdf5_plt_cnt_0000 ****
+ Nux,Nvy,Npp=        2080        2112        2048
+           0 einf U=  1.57216403283699790E-005 eL2 U=  7.93060998166230653E-006
+           0 einf V=  1.57216403282589567E-005 eL2 U=  7.98865730693339747E-006
+           0 einf P=  1.12619767716576336E-003 eL2 P=  5.65823432859286521E-004

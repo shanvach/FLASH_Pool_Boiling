@@ -1,0 +1,25 @@
+Only in .: diff.rcd
+diff ./ins_ab2rk3.F90 ../IsoTurb_mD_particle-tmp/ins_ab2rk3.F90
+403c403
+< !      if(ins_meshMe == MASTER_PE) write(*,*) 'tke0,  tke0/tke:', sim_turbkin_expect, sim_scaleForce
+---
+>       if(ins_meshMe == MASTER_PE) write(*,*) 'tke0, tke, tke0/tke:', sim_turbkin_expect, turbkin, sim_scaleForce
+diff ./ins_turbstats.F90 ../IsoTurb_mD_particle-tmp/ins_turbstats.F90
+7,8d6
+< #define CONST_INPUT_ENG
+< 
+349,351d346
+< #ifdef CONST_INPUT_ENG
+<   sim_scaleForce = 1.0
+< #else
+353d347
+< #endif
+Common subdirectories: ./ISOTURB_files and ../IsoTurb_mD_particle-tmp/ISOTURB_files
+diff ./IsoTurb_mD_particle.sh ../IsoTurb_mD_particle-tmp/IsoTurb_mD_particle.sh
+1c1
+< ./setup INavierStokes/3D/wangsz/IsoTurb_mD_particle -3d -auto +ug -nxb=256 -nyb=32 -nzb=16 -opt -objdir=ISOTURB_MD_PARTICLE PfftSolver=HomBcTrigSolver -site=colonialone.gwu.edu -noclobber
+---
+> ./setup INavierStokes/3D/wangsz/IsoTurb_mD_particle -3d -auto +ug -nxb=64 -nyb=32 -nzb=32 -opt -objdir=ISOTURB_MD_PARTICLE PfftSolver=HomBcTrigSolver -site=splash.seas.gwu.edu -noclobber
+Only in ../IsoTurb_mD_particle-tmp/: sm_iouttotecplot.F90
+Common subdirectories: ./.svn and ../IsoTurb_mD_particle-tmp/.svn
+Common subdirectories: ./working_ao096-k17-SPH18 and ../IsoTurb_mD_particle-tmp/working_ao096-k17-SPH18

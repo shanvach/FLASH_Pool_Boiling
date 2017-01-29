@@ -1,0 +1,113 @@
+
+
+Responsibilities for Code Sections
+Driver/     Dongwook
+
+Grid/GridMain/ Paramesh -- Klaus
+Grid/GridBoundaryConditions -- Klaus
+Grid/GridSolvers -- Peter and Anshu
+Grid/GridParticles -- Chris and Anshu
+
+IO -- Paul
+
+monitors -- Klaus 
+
+Particles -- John Zuhone/Lynn
+
+MHD/RHD -- Dongwook
+
+Code sections being worked on 
+
+MHD/RHD -- Dongwook/Lynn
+GridSolvers/pfft and mapGrid -- Anshu
+GridSolvers/multigrid -- Peter
+GridParticles -- Chris
+
+Active Particles -- Chris,John,Lynn
+
+Grid/Paramesh -- Klaus
+Ionize -- Paul
+
+
+Simulations to be included in the release
+Advect
+Blast2
+Cellular
+DustCollapse
+IsentropicVortex
+Jeans (Zuhone move from 2.5)
+Maclaurin
+magnetoHD/CurrentSheet
+magnetoHD/OrszagTang
+magnetoHD/Rotor
+magnetoHD/BlastBS
+Orbit
+Pancake
+Sedov
+SedovSelfGravity
+Sod
+SodRHD
+SodSpherical
+SodStep
+StirTurb
+unitTest/* except Gravity, pick one
+WindTunnel
+
+
+Simulations to be fixed
+Flash2Convert (Paul)
+NeiTest
+Noh (Aamer)
+SBlast (Aamer)
+TwoGamma (Alan/Lynn)
+
+
+Mysterious simulations -- find owner and ask
+AdvectMassScalars (Dan Sheeler?)
+CDMHalo  (John Zuhone?)
+CellularParametricBurn (Casey)
+CollShock (Zuhone?)
+GalaxyCluster (Zuhone?)
+ProtoPD (Zuhone)
+
+
+Things to be merged and removed
+DustCollapseCart
+
+
+
+Things not to be included in the release, and who is responsible.
+Grid/*/Samrai
+Grid/GridSolvers/BarnesHutTree
+Simulation/SimulationMain/BubLab
+...
+Flame1Stagenoise
+Flame*
+Layer3
+RTFlame
+SamraiTest
+ShockCyl
+Soundwave
+TestEOSLite
+VortexRings
+WD_*
+Library/GSL
+MaterialProperties
+Heat/Cool ? 
+physics/Eos/Helmholtz/Ye
+
+Possibly not, depending on completion status
+Grid/GridSolvers/MapGrid
+
+
+
+Lynn should
+1) Speak to John ZuHone about particle organizatoin
+2) Ask Aamer if he wants Noh released
+3) Ask Alan if he wants TwoGamma
+4) Split Helmholtz into Ye (Conflicts Multispecies?) and SpeciesBased (Default)
+5) aSK dAN ABOUT AdvectMassScalars
+
+Klaus will
+1) speak to Cal about particle bugs
+2) Handle Bugzilla

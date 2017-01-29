@@ -1,0 +1,76 @@
+useParticles= .true.
+writeStatSummary=.true.
+pt_numX = 2
+pt_numY = 2
+#pt_numZ = 2 
+pt_maxPerProc=50000
+pt_maxPerBlock=50000
+sim_vx_amb = 1.0
+sim_seed = 1.0
+sim_vz_pert=1.0
+sim_vy_pert=1.0
+sim_vx_pert=1.0
+pt_NumPart=4022
+pt_NumBodies=160
+pt_BodyTypes=1 
+pt_NumBTypes=4
+
+
+dtinit = 0.06
+dtmin =  0.06
+dtmax =  0.06
+tmax  = 10000
+nend  = 1 #0
+
+xmin            = -9.300300
+xmax            =  9.300000
+ymin            = -4.600000
+ymax            =  4.530000
+zmin            = -6.200000
+zmax            =  6.210000
+
+#		Boundary conditions
+
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+#xl_boundary_type = "reflecting"
+#xr_boundary_type = "reflecting"
+
+#yl_boundary_type = "reflecting"
+#yr_boundary_type = "reflecting"
+
+#zl_boundary_type = "reflecting"
+#zr_boundary_type = "reflecting"
+
+basenm		= "partUnitTest_"
+
+#lrefine_min = 2
+#lrefine_max = 2
+lrefine_min = 1
+lrefine_max = 1
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+#iProcs = 1	#number or procs in the i direction	
+#jProcs = 1
+#kProcs = 1
+
+#nblocky=1
+nblockx=2
+nblocky=1
+nblockz=1
+
+
+#CD: Increase the buffer space so that we can hold at max 2000 particles per MPI rank.
+#pt_maxperproc=2000
+
+#CD: We don't care about creating HDF5 checkpoint files e.t.c. for the time being.
+summaryoutputonly = .true.

@@ -1,0 +1,298 @@
+# Runtime parameters for the laser quadratic tube unit test.
+
+basenm                        = "LaserTubeTestI_"
+useEnergyDeposition           = .true.
+useHydro                      = .false.
+
+#######################
+#  LASER PARAMETERS   #
+#######################
+
+ed_maxRayCount      = 8
+ed_gradOrder        = 2
+ed_printBeams       = .true.
+ed_printMain        = .true.
+ed_printPulses      = .true.
+ed_printRays        = .false.
+
+ed_numPulses = 8
+
+ed_numSections_1 = 2
+ed_time_1_1      = 0.e+00     # in seconds
+ed_time_1_2      = 1.e-08     # in seconds
+ed_power_1_1     = 1.e-07     # in Watt (J/s)
+ed_power_1_2     = 1.e-07     # in Watt (J/s)
+
+ed_numSections_2 = 2
+ed_time_2_1      = 1.e-08
+ed_time_2_2      = 2.e-08
+ed_power_2_1     = 1.e-07
+ed_power_2_2     = 1.e-07
+
+ed_numSections_3 = 2
+ed_time_3_1      = 2.e-08
+ed_time_3_2      = 3.e-08
+ed_power_3_1     = 1.e-07
+ed_power_3_2     = 1.e-07
+
+ed_numSections_4 = 2
+ed_time_4_1      = 3.e-08
+ed_time_4_2      = 4.e-08
+ed_power_4_1     = 1.e-07
+ed_power_4_2     = 1.e-07
+
+ed_numSections_5 = 2
+ed_time_5_1      = 4.e-08
+ed_time_5_2      = 5.e-08
+ed_power_5_1     = 1.e-07
+ed_power_5_2     = 1.e-07
+
+ed_numSections_6 = 2
+ed_time_6_1      = 5.e-08
+ed_time_6_2      = 6.e-08
+ed_power_6_1     = 1.e-07
+ed_power_6_2     = 1.e-07
+
+ed_numSections_7 = 2
+ed_time_7_1      = 6.e-08
+ed_time_7_2      = 7.e-08
+ed_power_7_1     = 1.e-07
+ed_power_7_2     = 1.e-07
+
+ed_numSections_8 = 2
+ed_time_8_1      = 7.e-08
+ed_time_8_2      = 8.e-08
+ed_power_8_1     = 1.e-07
+ed_power_8_2     = 1.e-07
+
+ed_numBeams = 8
+
+ed_lensX_1              =  8.0        # lens X coordinate
+ed_lensY_1              = -2.0        # lens Y coordinate
+ed_lensZ_1              =  5.0        # lens Z coordinate
+ed_targetX_1            =  8.0        # target X coordinate
+ed_targetY_1            =  0.0        # target Y coordinate
+ed_targetZ_1            =  5.0        # target Z coordinate
+ed_semiaxis1_1          =  1.e-02     # target 1st semiaxis length (since 1 ray only -> not relevant)
+ed_semiaxis2_1          =  1.e-02     # target 2nd semiaxis length (since 1 ray only -> not relevant)
+ed_torsionAngle_1       =  0.0        # 1st semiaxis torsion angle (point target -> not relevant)
+ed_torsionAxis_1        =  "z"        # 1st semiaxis torsion axis
+ed_pulseNumber_1        =  1          # pulse ID number
+ed_wavelength_1         =  1.0        # wavelength in microns
+ed_initialSpeed_1       =  1.0        # initial ray speed (units of c), is = 1 here
+ed_ignoreBC_1           =  .true.     # ignore domain boundary condition ?
+ed_crossSectionID_1     =  1          # beam cross section function ID number
+ed_decayExponent_1      =  1.0        # gaussian decay exponent (point target -> not relevant)
+ed_decayRadius1_1       =  1.0        # gaussian decay 1st radius (point target -> not relevant)
+ed_decayRadius2_1       =  1.0        # gaussian decay 2nd radius (point target -> not relevant)
+ed_lensEqualsTarget_1   =  .true.     # is lens are = target area size ?
+ed_lensApertureAngle1_1 =  1.5e01     # lens aperture angle in degrees (lens = target size -> not relevant)
+ed_numRays_1            =  1          # number of rays wanted
+
+ed_lensX_2              =  2.0
+ed_lensY_2              = -2.0
+ed_lensZ_2              =  5.0
+ed_targetX_2            =  2.0
+ed_targetY_2            =  0.0
+ed_targetZ_2            =  5.0
+ed_semiaxis1_2          =  1.e-02
+ed_semiaxis2_2          =  1.e-02
+ed_torsionAngle_2       =  0.0
+ed_torsionAxis_2        =  "z"
+ed_pulseNumber_2        =  2
+ed_wavelength_2         =  1.0
+ed_initialSpeed_2       =  1.0
+ed_ignoreBC_2           =  .true.
+ed_crossSectionID_2     =  1
+ed_decayExponent_2      =  1.0
+ed_decayRadius1_2       =  1.0
+ed_decayRadius2_2       =  1.0
+ed_lensEqualsTarget_2   =  .true.
+ed_lensApertureAngle1_2 =  1.5e01
+ed_numRays_2            =  1
+
+ed_lensX_3              =  5.0
+ed_lensY_3              = -2.0
+ed_lensZ_3              =  8.0
+ed_targetX_3            =  5.0
+ed_targetY_3            =  0.0
+ed_targetZ_3            =  8.0
+ed_semiaxis1_3          =  1.e-02
+ed_semiaxis2_3          =  1.e-02
+ed_torsionAngle_3       =  0.0
+ed_torsionAxis_3        =  "z"
+ed_pulseNumber_3        =  3
+ed_wavelength_3         =  1.0
+ed_initialSpeed_3       =  1.0
+ed_ignoreBC_3           =  .true.
+ed_crossSectionID_3     =  1
+ed_decayExponent_3      =  1.0
+ed_decayRadius1_3       =  1.0
+ed_decayRadius2_3       =  1.0
+ed_lensEqualsTarget_3   =  .true.
+ed_lensApertureAngle1_3 =  1.5e01
+ed_numRays_3            =  1
+
+ed_lensX_4              =  5.0
+ed_lensY_4              = -2.0
+ed_lensZ_4              =  2.0
+ed_targetX_4            =  5.0
+ed_targetY_4            =  0.0
+ed_targetZ_4            =  2.0
+ed_semiaxis1_4          =  1.e-02
+ed_semiaxis2_4          =  1.e-02
+ed_torsionAngle_4       =  0.0
+ed_torsionAxis_4        =  "z"
+ed_pulseNumber_4        =  4
+ed_wavelength_4         =  1.0
+ed_initialSpeed_4       =  1.0
+ed_ignoreBC_4           =  .true.
+ed_crossSectionID_4     =  1
+ed_decayExponent_4      =  1.0
+ed_decayRadius1_4       =  1.0
+ed_decayRadius2_4       =  1.0
+ed_lensEqualsTarget_4   =  .true.
+ed_lensApertureAngle1_4 =  1.5e01
+ed_numRays_4            =  1
+
+ed_lensX_5              =  7.121320343560    # this is = 5 + 3/sqrt(2) 
+ed_lensY_5              = -2.0
+ed_lensZ_5              =  7.121320343560
+ed_targetX_5            =  7.121320343560
+ed_targetY_5            =  0.0
+ed_targetZ_5            =  7.121320343560
+ed_semiaxis1_5          =  1.e-02
+ed_semiaxis2_5          =  1.e-02
+ed_torsionAngle_5       =  0.0
+ed_torsionAxis_5        =  "z"
+ed_pulseNumber_5        =  5
+ed_wavelength_5         =  1.0
+ed_initialSpeed_5       =  1.0
+ed_ignoreBC_5           =  .true.
+ed_crossSectionID_5     =  1
+ed_decayExponent_5      =  1.0
+ed_decayRadius1_5       =  1.0
+ed_decayRadius2_5       =  1.0
+ed_lensEqualsTarget_5   =  .true.
+ed_lensApertureAngle1_5 =  1.5e01
+ed_numRays_5            =  1
+
+ed_lensX_6              =  7.121320343560
+ed_lensY_6              = -2.0
+ed_lensZ_6              =  2.878679656440    # this is = 5 - 3/sqrt(2) 
+ed_targetX_6            =  7.121320343560
+ed_targetY_6            =  0.0
+ed_targetZ_6            =  2.878679656440
+ed_semiaxis1_6          =  1.e-02
+ed_semiaxis2_6          =  1.e-02
+ed_torsionAngle_6       =  0.0
+ed_torsionAxis_6        =  "z"
+ed_pulseNumber_6        =  6
+ed_wavelength_6         =  1.0
+ed_initialSpeed_6       =  1.0
+ed_ignoreBC_6           =  .true.
+ed_crossSectionID_6     =  1
+ed_decayExponent_6      =  1.0
+ed_decayRadius1_6       =  1.0
+ed_decayRadius2_6       =  1.0
+ed_lensEqualsTarget_6   =  .true.
+ed_lensApertureAngle1_6 =  1.5e01
+ed_numRays_6            =  1
+
+ed_lensX_7              =  2.878679656440
+ed_lensY_7              = -2.0
+ed_lensZ_7              =  7.121320343560
+ed_targetX_7            =  2.878679656440
+ed_targetY_7            =  0.0
+ed_targetZ_7            =  7.121320343560
+ed_semiaxis1_7          =  1.e-02
+ed_semiaxis2_7          =  1.e-02
+ed_torsionAngle_7       =  0.0
+ed_torsionAxis_7        =  "z"
+ed_pulseNumber_7        =  7
+ed_wavelength_7         =  1.0
+ed_initialSpeed_7       =  1.0
+ed_ignoreBC_7           =  .true.
+ed_crossSectionID_7     =  1
+ed_decayExponent_7      =  1.0
+ed_decayRadius1_7       =  1.0
+ed_decayRadius2_7       =  1.0
+ed_lensEqualsTarget_7   =  .true.
+ed_lensApertureAngle1_7 =  1.5e01
+ed_numRays_7            =  1
+
+ed_lensX_8              =  2.878679656440
+ed_lensY_8              = -2.0
+ed_lensZ_8              =  2.878679656440
+ed_targetX_8            =  2.878679656440
+ed_targetY_8            =  0.0
+ed_targetZ_8            =  2.878679656440
+ed_semiaxis1_8          =  1.e-02
+ed_semiaxis2_8          =  1.e-02
+ed_torsionAngle_8       =  0.0
+ed_torsionAxis_8        =  "z"
+ed_pulseNumber_8        =  8
+ed_wavelength_8         =  1.0
+ed_initialSpeed_8       =  1.0
+ed_ignoreBC_8           =  .true.
+ed_crossSectionID_8     =  1
+ed_decayExponent_8      =  1.0
+ed_decayRadius1_8       =  1.0
+ed_decayRadius2_8       =  1.0
+ed_lensEqualsTarget_8   =  .true.
+ed_lensApertureAngle1_8 =  1.5e01
+ed_numRays_8            =  1
+
+##########################
+# SIMMULATION PARAMETERS #
+##########################
+
+sim_printBlockVariables = .false.
+
+#######################
+#    EOS PARAMETERS   #
+#######################
+eos_singleSpeciesA  = 1.0
+eos_singleSpeciesZ  = 1.0
+eosmodeInit         = "dens_temp"
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+
+checkpointFileIntervalStep = 1
+plotFileNumber             = 0
+plot_var_1                 = "dens"
+plot_var_2                 = "depo"
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+tmax           = 1.0e-08
+dtmin          = 1.0e-15
+dtinit         = 1.0e-14
+dtmax          = 1.0e-11
+nend           = 1
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+
+geometry = cartesian
+
+xmin =  0.0
+xmax = 10.0
+ymin =  0.0
+ymax = 11.1072073450784486          # this is 5pi/sqrt(2)
+zmin =  0.0
+zmax = 10.0
+
+xl_boundary_type  = "reflecting"    # has to be set, otherwise error for 2D cylindrical
+xr_boundary_type  = "outflow"
+yl_boundary_type  = "outflow"
+yr_boundary_type  = "outflow"
+zl_boundary_type  = "outflow"
+zr_boundary_type  = "outflow"
+
+lrefine_min = 4
+lrefine_max = 4

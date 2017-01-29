@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/wangsz/IB_cyl_testSlipError/  -2d -auto -opt +ug -nxb=200 -nyb=200 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_TESTSLIPERROR_UG -site=colonialone.gwu.edu

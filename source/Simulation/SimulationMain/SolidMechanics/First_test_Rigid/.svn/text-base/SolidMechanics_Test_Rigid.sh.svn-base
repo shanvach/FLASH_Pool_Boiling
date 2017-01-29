@@ -1,0 +1,1 @@
+./setup SolidMechanics/First_Test_Rigid -3d -auto -nxb=4 -nyb=4 -nzb=4 -debug -maxblocks=1 +pm4dev -gridinterpolation=native -objdir=SolidMechanics_Test_Rigid -site=SEAS10927.gwu.edu -noclobber Bittree=1

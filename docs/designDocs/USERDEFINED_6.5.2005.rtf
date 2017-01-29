@@ -1,0 +1,28 @@
+{\rtf1\mac\ansicpg10000\cocoartf824
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0 Notes 6.5.2005\
+\
+Discussion about user defined functions.  In Flash2 the user can put in any subroutine into the Simulations directory and that subroutine will override the subroutines in other modules.\
+\
+This is very necessary for the scientists who use this functionality.\
+\
+In Flash3 though we ran into a slight problem.  In ShockCyl for example, there is a unique Grid_markRefineDerefine.F90 that is used with Paramesh.  If this is put into the setups directory though and the user wants to use UG -- (which doesn't refine and derefine) then there is a problem because the setup script will pick up the wrong Grid_markRefineDerefine\
+\
+To solve this problem we have added a keyword to the Config file.\
+\
+USERDEFINED\
+\
+It will be implemented as below\
+\
+USERDEFINED filename path\
+\
+example\
+\
+USERDEFINED Grid_markRefineDerefine.F90 source/Grid/common/paramesh\
+\
+\
+if there are 2 different files whose names will conflict the file can be given the extension Grid_markRefineDerefine.F90.paramesh or Grid_markRefineDerefine.F90.UG  }

@@ -1,0 +1,79 @@
+# Parameters for burning tests
+
+# constant temperature and density
+
+tempMin = .09
+tempMax = .12
+compA = "fuel"
+compB = "ash "
+rhoMin = 1.
+rhoMax = 1.
+
+# names of files
+basenm      = "kpp_burn_test_"
+run_comment = "kpp burn source term test"
+
+# we just want one burning step
+
+restart  = .false.
+cpnumber = 0
+ptnumber = 0
+
+nrstrt = 0
+nend   = 1
+
+dtini = 1.0e-7
+dtmax = 1.0e2
+
+
+# Grid geometry
+
+geometry = "cartesian"
+
+# Size of computational volume
+
+xmin		= 0.0
+xmax		= 1.0
+ymin		= 0.0
+ymax		= 1.0
+zmin		= 0.0
+zmax		= 1.0
+
+# Boundary conditions
+
+xl_boundary_type      = "outflow"
+xr_boundary_type      = "outflow"
+yl_boundary_type      = "outflow"
+yr_boundary_type      = "outflow"
+zl_boundary_type      = "outflow"
+zr_boundary_type      = "outflow"
+
+# refinement levels
+
+lrefine_max = 1
+lrefine_min = 1
+
+nblockx = 4
+nblocky = 4
+nblockz = 1
+
+
+# control when the burner is called, dont call it in the cold stuff
+nuclearTempMin = 1.0e6
+nuclearTempMax = 1.0e12 
+nuclearDensMin = 1.0e-10
+nuclearDensMax = 1.0e14
+
+# others
+cfl		    = 1.00
+useBurn		= 1
+useShockBurn		= 1
+
+ nuclearTempMin              =  1.0000000000000E-06
+ nuclearTempMax              =  1.0000000000000E+12
+ nuclearDensMin              =  1.0000000000000E-10
+ nuclearDensMax              =  1.0000000000000E+14
+
+kpp_t_ignite = .1
+kpp_eburn    = 2.1542831e-6
+eintSwitch     = 1.e-4

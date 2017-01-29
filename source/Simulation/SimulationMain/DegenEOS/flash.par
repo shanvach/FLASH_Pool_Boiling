@@ -1,0 +1,109 @@
+#	Runtime parameters for the 1d shock-tube problem using the Helmholtz Eos.
+#	Please also look at default.par for more runtime parameters in the object directory
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#	Size of computational volume
+xmin		= -1.e+5
+xmax		=  1.e+5
+ymin		= -1.e+5
+ymax		=  1.e+5
+
+
+#	Boundary conditions
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+
+
+#	Parameters for initial model
+dens0		= 2.e+9
+Atwood		= 0.08
+Mach		= 1.
+pres0		= 1.2123952e+27
+posn		= 0.0
+eos_maxNewton	= 100
+eintSwitch     = 1.e-4
+#eos_coulombMult = 0
+smallt		= 1.e7
+eos_tolerance	= 1.e-4
+eosModeInit	= dens_pres
+
+
+#	Simulation (grid, time, I/O) parameters
+run_comment	= "1D Degenerate EOS test"
+log_file        = "dgenEOS_1d.log"
+basenm          = "dgenEOS_1d_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 200
+tmax            = 0.1
+cfl		= 0.8
+plot_var_1	= "dens"
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 0.01
+checkpointFileIntervalStep = 1
+
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 1
+lrefine_max     = 6
+nrefs		= 2
+refine_var_1	= "dens"
+
+
+#	DivB control switch
+killdivb	= .false.
+
+#	Flux Conservation for AMR
+flux_correct    = .false.
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second/Third order)
+use_steepening	= .true. # Contact steepening for the third order PPM
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+entropy         = .false.     # Entropy fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+#	The parameters below are only necessary for the Uniform Grid
+
+iGridSize	= 512	#defined as nxb * iprocs
+#jGridSize	= 8	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+iProcs		= 1	#num procs in i direction
+jProcs		= 1	#num procs in j direction
+kProcs		= 1	#num procs in k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

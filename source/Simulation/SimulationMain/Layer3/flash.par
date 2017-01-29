@@ -1,0 +1,76 @@
+# initialization file for simple thermal diffusion -- flame
+
+# AMR parameters
+lrefine_max = 6
+lrefine_min = 3
+
+# simulation parameters
+basenm   = "3lay_"
+restart  = .false.
+trstrt   = 4.e-09
+tplot    = 1.0e-9
+nend     = 150
+tmax     = 65.0e-9
+cpnumber = 0
+ptnumber = 0
+
+dtini = 1.e-20
+dtmin = 1.e-20
+
+cfl = .5
+cvisc = .1
+#irenorm = 1   #renorms abundances
+
+smlrho = 1.e-10
+smallt = 1.e-10
+
+xmin = 0.0e0
+xmax = 0.18796898e0
+ymin = 0.0e0
+ymax = 0.1e0
+
+geometry = "cartesian"
+
+igrav = 0
+iburn = 0
+ichem = 0
+
+# variables for plotting
+plot_var_1 = "dens"
+plot_var_2 = "temp"
+plot_var_3 = "ener"
+plot_var_4 = "pres"
+plot_var_5 = "velx"
+plot_var_6 = "cu"
+plot_var_7 = "ch"
+plot_var_8 = "cf"
+
+
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+nblockx = 1
+nblocky = 1
+
+eintSwitch     = 1.e-4
+
+ 
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##

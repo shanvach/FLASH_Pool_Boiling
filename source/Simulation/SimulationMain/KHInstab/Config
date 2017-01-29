@@ -1,0 +1,17 @@
+REQUIRES Driver
+REQUIRES Grid
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Gamma
+
+PARAMETER perturbDens	REAL 1.0
+PARAMETER perturbTemp	REAL 1.0
+PARAMETER perturbVelx	REAL 0.0
+
+PARAMETER ambientDens	REAL 1.0
+PARAMETER ambientTemp	REAL 1.0
+PARAMETER ambientVelx	REAL 1.0
+
+PARAMETER perturbRadius REAL 0.0
+
+SPECIES ONE
+SPECIES	TWO

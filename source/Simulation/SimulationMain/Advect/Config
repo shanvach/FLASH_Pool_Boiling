@@ -1,0 +1,50 @@
+#       Configuration file for the advection problem
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+
+D sim_rhoIn           Density inside pulse
+PARAMETER sim_rhoIn         REAL    1.
+
+D sim_rhoOut           Density outside pulse
+PARAMETER sim_rhoOut        REAL    1.E-5
+
+D sim_pressure        Pressure
+PARAMETER sim_pressure      REAL    1.
+
+D sim_velocity        Fluid velocity
+PARAMETER sim_velocity      REAL    10.
+
+D sim_width    Width of the shape function
+PARAMETER sim_width         REAL    0.1
+
+D sim_xAngle          Angle made by diaphragm normal w/x-axis (deg)
+PARAMETER sim_xAngle        REAL    0.
+
+D sim_yAngle          Angle made by diaphragm normal w/y-axis (deg)
+PARAMETER sim_yAngle        REAL    90.
+
+D sim_posn  Point of intersection between the pulse mid-plane and x-axis
+PARAMETER sim_posn          REAL    0.25
+
+D sim_pulseFunctn  pulse shape function to use: 1 = square wave 2 = Gaussian
+PARAMETER sim_pulseFunctn    INTEGER 1
+
+
+# The setup script generates defines in Flash.h for all declared VARIABLEs.
+# The declarations below duplicate whats already declared elsewhere,
+# mostly in Hydro. This is unnecessary (as long as those declarations
+# stay in place), but shouldn't hurt.
+
+VARIABLE dens TYPE: PER_VOLUME EOSMAP: DENS  # density
+VARIABLE velx TYPE: PER_MASS   EOSMAPIN:VELX # x-velocity
+VARIABLE vely TYPE: PER_MASS   EOSMAPIN:VELY # y-velocity
+VARIABLE velz TYPE: PER_MASS   EOSMAPIN:VELZ # z-velocity
+VARIABLE pres                  EOSMAP: PRES  # pressure
+VARIABLE ener TYPE: PER_MASS   EOSMAP: ENER  # specific total energy (T+U)
+VARIABLE temp                  EOSMAP: TEMP  # temperature
+VARIABLE eint TYPE: PER_MASS   EOSMAP: EINT  # specific internal energy
+VARIABLE gamc                  EOSMAP: GAMC  # sound-speed gamma
+VARIABLE game                 EOSMAPOUT:GAME # energy gamma
+

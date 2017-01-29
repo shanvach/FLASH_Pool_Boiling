@@ -1,0 +1,2 @@
+./setup INavierStokes/2D/wangsz/FallCylinder_repeat/  -2d -auto -opt +ug -nxb=192 -nyb=144 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=FALLCYL_2D_24D_REPEAT -site=colonialone.gwu.edu
+#./setup INavierStokes/2D/wangsz/FallCylinder/  -2d -auto -opt +ug -nxb=200 -nyb=150 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=FALLCYLINDER -site=colonialone.gwu.edu

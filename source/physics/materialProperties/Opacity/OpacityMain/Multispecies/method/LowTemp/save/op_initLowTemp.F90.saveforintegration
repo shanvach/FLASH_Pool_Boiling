@@ -1,0 +1,115 @@
+!!****f* source/physics/materialProperties/Opacity/OpacityMain/method/LowTemp/op_initLowTemp
+!!
+!! NAME
+!!
+!!  op_initLowTemp
+!!
+!! SYNOPSIS
+!!
+!!  call op_initLowTemp ()
+!!
+!! DESCRIPTION
+!!
+!!  Inititalizes the section of the low temperature opacity unit. It is here where
+!!  several constants are set to enable smooth integrations without dangers of
+!!  computational over- or underflow. Several arrays are allocated here according to
+!!  specific needs.
+!!
+!! ARGUMENTS
+!!
+!!***
+subroutine op_initLowTemp ()
+
+  use Opacity_dataLowTemp, ONLY : zero,one,                &
+                                  op_atomName,             &
+                                  op_Aij4,                 &
+                                  op_Jmax,                 &
+                                  op_PEenergyRange,        &
+                                  op_eBaseLowestExponent,  &
+                                  op_eBaseLargestExponent, &
+                                  op_eBaseRescaleExponent
+                                  
+
+  implicit none
+
+# include "Opacity.h"
+
+  integer :: base
+  integer :: decimalPrecision
+  integer :: status
+
+  real    :: ln10,lnbase
+  real    :: rescale1,rescale2
+!
+!
+!   ...Set the following constants:
+!
+!        i) eBaseLowestExponent  = the lowest -x for which e^(-x) is still representable on the machine
+!       ii) eBaseLargestExponent = the largest x for which e^(+x) is still representable on the machine
+!      iii) eBaseRescaleExponent = the limiting x in e^(+x) above which rescaling of integrals is done.
+!
+!
+  base                    = radix (one)
+  ln10                    = log (real (10))
+  lnbase                  = log (real (base))
+  decimalPrecision        = precision (one)
+
+  op_eBaseLowestExponent  = real (int ( lnbase * real (minexponent (one)) ))
+  op_eBaseLargestExponent = real (int ( lnbase * real (maxexponent (one)) ))
+
+  rescale1                = zero
+!  rescale1                = op_eBaseLargestExponent / 3
+  rescale2                = real (int (ln10 * real (decimalPrecision))) + one         ! + 1 added for safety
+  op_eBaseRescaleExponent = max (rescale1,rescale2)
+
+  write (*,*) ' op_eBaseLowestExponent  = ',op_eBaseLowestExponent
+  write (*,*) ' op_eBaseLargestExponent = ',op_eBaseLargestExponent
+  write (*,*) ' op_eBaseRescaleExponent = ',op_eBaseRescaleExponent
+
+!
+!
+!   ...Allocate the atomic element name array.
+!
+!
+  allocate ( op_atomName (1:100), stat = status)
+
+  if (status > 0) then
+      call Driver_abortFlash ('[op_initLowTemp] ERROR: op_atomName () allocate failed')
+  end if
+!
+!
+!   ...Allocate the photoelectric cross section A(i,j,4) coefficient array.
+!
+!
+  allocate ( op_Aij4 (1:4,1:12,1:100), stat = status)
+
+  if (status > 0) then
+      call Driver_abortFlash ('[op_initLowTemp] ERROR: op_Aij4 () allocate failed')
+  end if
+!
+!
+!   ...Allocate the j-index delimiter array.
+!
+!
+  allocate ( op_Jmax (1:100), stat = status)
+
+  if (status > 0) then
+      call Driver_abortFlash ('[op_initLowTemp] ERROR: op_Jmax () allocate failed')
+  end if
+!
+!
+!   ...Allocate the photoelectronic energy range array.
+!
+!
+  allocate ( op_PEenergyRange (LOW:HIGH,1:12,1:100), stat = status)
+
+  if (status > 0) then
+      call Driver_abortFlash ('[op_initLowTemp] ERROR: op_PEenergyRange () allocate failed')
+  end if
+!
+!
+!   ...Ready! 
+!
+!
+  return
+end subroutine op_initLowTemp

@@ -1,0 +1,91 @@
+#	Runtime parameters for the Huang & Greengard Poisson test problem.
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = "cartesian"
+
+#		Size of computational volume
+
+xmin		= 0
+xmax		= 8.0e9
+ymin		= -2.
+ymax		= 2.
+zmin		= -2.
+zmax		= 2.
+
+#		Boundary conditions
+
+basenm          = "phoenix_input_"
+#restart         = .true.
+
+#checkpointFileNumber = 12
+
+nend            = 4
+tmax            = 999.
+
+plot_var_1 = "pden"
+plot_var_2 = "dens"
+plot_var_3 = "temp"
+plot_var_4 = "eint"
+plot_var_5 = "velx"
+plot_var_6 = "nump"
+plot_var_7 = "gaus"
+plot_var_8 = "velx"
+plot_var_9 = "c12"
+plot_var_10 = "o16"
+#plot_var_11 = "Ni56"
+#plot_var_12 = "Si28"
+#plot_var_13 = "Fe54"
+#plot_var_14 = "Ca40"
+#plot_var_15 = "S32"
+plot_var_16 = "rpv1"
+plot_var_17 = "rpv2"
+plot_var_18 = "rpv3"
+plot_var_19 = "nup0"
+
+run_comment     = "creating input for phoenix"
+log_file        = "phoenix_input.log"
+
+pt_maxPerProc = 10000
+io_ptMaxReadPerProc = -1
+sim_ptMass = 2.8e29
+
+convoSmearWidI = -4
+convertToConsvdInMeshInterp = FALSE
+
+lrefine_min = 4
+lrefine_max = 4
+#lrefine_max = 8
+
+radTranDataFile = "PhoenixInputData"
+radTranGridSizeI = 100
+radTranGridSizeJ = 1
+radTranGridSizeK = 1
+
+
+# These parameters are used only for the uniform grid
+
+
+#iGridSize = 8   #defined as nxb * iprocs
+#jGridSize = 8
+#kGridSize = 1
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+#FIXEDBLOCKSIZE mode ::
+# When using fixed blocksize, iGridSize etc are redundant in
+# runtime parameters. These quantities are calculated as 
+# iGridSize = NXB*iprocs
+# jGridSize = NYB*jprocs
+# kGridSize = NZB*kprocs
+#NONFIXEDBLOCKSIZE mode ::
+# iGridSize etc must be specified. They constitute the global
+# number of grid points in the physical domain without taking 
+# the guard cell into account. The local blocksize is calculated
+# as iGridSize/iprocs  etc.
+

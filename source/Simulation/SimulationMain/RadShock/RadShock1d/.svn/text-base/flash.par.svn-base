@@ -1,0 +1,148 @@
+# Paramaters for the MGD inifinite medium simulation
+run_comment = "1D Radiative Shock test using a shifted driver"
+log_file    = "radshock.log"
+basenm      = "radshock_"
+restart     = .false.
+
+
+#########################
+#   OUTPUT PARAMETERS   #
+#########################
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 50
+checkpointFileNumber       = 0
+plotFileNumber             = 0
+plot_var_1                 = "dens"
+
+
+##########################
+#   PHYSICS PARAMETERS   #
+##########################
+useDiffuse      = .false.
+
+# Conduction parameters:
+useConductivity = .true.
+diff_useEleCond = .true.
+diff_eleFlMode  = "fl_harmonic"
+diff_eleFlCoef  = 0.06
+
+# Heat-Exchange parameters:
+useHeatexchange = .true.
+
+# Material and EOS parameters:
+eosModeInit        = "dens_temp_gather"
+eosMode            = "dens_ie_gather"
+eos_singleSpeciesA = 131.293
+eos_singleSpeciesZ = 54.0
+sim_abar           = 131.293
+sim_zbar           = 54.0
+gamma              = 1.6666666
+
+# Multigroup diffusion options:
+rt_useMGD       = .false.
+rt_mgdNumGroups = 5
+rt_mgdBounds_1  = 1.0e-01
+rt_mgdBounds_2  = 1.0e+00
+rt_mgdBounds_3  = 1.0e+01
+rt_mgdBounds_4  = 1.0e+02
+rt_mgdBounds_5  = 1.0e+03
+rt_mgdBounds_6  = 1.0e+04
+rt_mgdFlMode    = "fl_harmonic"
+rt_mgdFlCoef    = 1.0
+
+
+
+# Initial conditions:
+sim_rho  = 0.006
+sim_tele = 116049.0 # 10 eV
+sim_tion = 116049.0 # 10 eV
+sim_trad = 116049.0 # 10 eV
+sim_velx = -100.0e+05 # 150 km/s
+
+xl_boundary_type = "reflect"
+xr_boundary_type = "outflow"
+yl_boundary_type = "reflect"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+rt_mgdXlBoundaryType           = "vacuum"
+rt_mgdXrBoundaryType           = "vacuum"
+rt_mgdYlBoundaryType           = "outflow"
+rt_mgdYrBoundaryType           = "outflow"
+rt_mgdZlBoundaryType           = "outflow"
+rt_mgdZrBoundaryType           = "outflow"
+
+diff_eleXlBoundaryType         = "outflow"
+diff_eleXrBoundaryType         = "outflow"
+diff_eleYlBoundaryType         = "outflow"
+diff_eleYrBoundaryType         = "outflow"
+diff_eleZlBoundaryType         = "outflow"
+diff_eleZrBoundaryType         = "outflow"
+
+
+# Hydro options:
+useHydro            = .true.
+order               = 2      # Interpolation order (First/Second order)
+slopeLimiter        = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta    = 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting        = .true. # Characteristic limiting vs. Primitive limiting
+RiemannSolver       = "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+shockDetect         = .false.     # Shock Detect for numerical stability
+cvisc               = 0.1
+use_steepening      = .FALSE.
+ppmEintFluxConstructionMeth     = 0
+ppmEintCompFluxConstructionMeth = 5
+ppmEnerFluxConstructionMeth     = 0
+eintSwitch      = 1.e-4
+eint1Switch     = 1e30 #1000000.
+eint2Switch     = 1e30 #1000000.
+eint3Switch     = 1e30
+hy_eosModeAfter = "dens_ie_sele_gather"
+
+#######################
+#   TIME PARAMETERS   #
+#######################
+cfl            = 0.8
+dt_diff_factor = 1.0e+10 # Disable diffusion dt
+rt_dtFactor    = 1.0e+100 # Disable MGD dt
+hx_dtFactor    = 50.0
+tstep_change_factor = 1.01
+tmax           = 10.0e-09
+dtmin          = 1.0e-19
+dtinit         = 1.0e-16
+dtmax          = 1.0e-11
+nend           = 999999999
+
+
+#######################
+#   MESH PARAMETERS   #
+#######################
+geometry = cartesian
+
+# Domain size:
+xmin = 0.0
+xmax = 4000.0e-04 # 1000 microns, 1 mm
+ymin = 0.0
+ymax = 400.0e-04  # 400 microns
+
+# Total number of blocks:
+nblockx = 4
+nblocky = 1
+nblockz = 1
+
+lrefine_min  = 1
+lrefine_max  = 3
+refine_var_1 = "dens"
+refine_var_2 = "pres"
+
+# Number of processes in each logical direction:
+iProcs = 1
+jProcs = 1
+kProcs = 1
+
+# Number of cells (only used in non-fixed blocksize mode):
+iGridSize = 1000
+jGridSize = 1
+kGridSize = 1

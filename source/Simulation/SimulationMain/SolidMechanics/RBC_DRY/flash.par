@@ -1,0 +1,85 @@
+# 	Runtime parameters for the Solid Mech First Test.
+
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#       Size of computational volume
+xmin		=  -10.000000000000000
+xmax		=   10.000000000000000
+ymin		=  -5.000000000000000
+ymax		=   5.000000000000000
+zmin 		=  -5.000000000000000
+zmax		=   5.000000000000000
+
+# No. of Rbcs
+sm_NumBodies =  2
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "Hussein test"
+log_file	= "sm_rbc_test.log"
+basenm		= "sm_rbc_test_"
+restart         = .false.
+
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend             = 1000 
+tmax             = 300. 
+#dtmax           = 1.e-4
+#dtmin		 = 1.e-4
+dtinit		 = 1.e-4
+
+rbcplotOutputInterval = 1
+sm_solidinteg         = SOLIDINTEG_MODVVERLET 
+
+#Parameters for Integration Scheme:
+#intschm            = 2
+
+#Parameters of Newtons Method:
+
+#Parameters for Linear System solution:
+
+stretching_exp = 0
+Fext = 50.
+
+xl_boundary_type = "reflecting"
+xr_boundary_type = "reflecting"
+
+yl_boundary_type = "reflecting"
+yr_boundary_type = "reflecting"
+
+zl_boundary_type = "reflecting"
+zr_boundary_type = "reflecting"
+
+basenm          = "partUnitTest_"
+
+#lrefine_min = 2
+#lrefine_max = 2
+lrefine_min = 1
+lrefine_max = 1
+
+ 
+
+#-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
+#	The parameters below are only necessary for the Uniform Grid
+#iGridSize	= 8	#defined as nxb * iprocs
+#jGridSize	= 8	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+#iProcs		= 1	#number of procs in the i direction
+#jProcs		= 1	#number of procs in the j direction
+#kProcs		= 1	#number of procs in the k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

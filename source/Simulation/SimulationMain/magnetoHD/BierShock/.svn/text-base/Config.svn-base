@@ -1,0 +1,32 @@
+REQUIRES Driver
+REQUIRES physics/Hydro
+
+REQUESTS physics/Eos/EosMain/multiTemp/Gamma
+REQUESTS physics/sourceTerms/Heatexchange/HeatexchangeMain/Spitzer
+REQUESTS physics/materialProperties/Conductivity/ConductivityMain/SpitzerHighZ
+
+MASS_SCALAR sele EOSMAP: SELE
+MASS_SCALAR srad EOSMAP: SRAD
+
+##########################
+#                        #
+#   RUNTIME PARAMETERS   #
+#                        #
+##########################
+
+D sim_rho Initial density
+PARAMETER sim_rho   REAL 1.0
+
+D sim_eint Initial specific internal energy
+PARAMETER sim_eint  REAL 1.0
+
+D sim_erad Initial specific radiation energy
+PARAMETER sim_erad  REAL 1.0
+
+D sim_velx Initial fluid velocity
+PARAMETER sim_velx  REAL 1.0
+
+D sim_skewFactor How steep the electron pressure gradient will be. Zero means 
+D                no gradient and 1.0 is maximum gradient where the pressure 
+D                goes to zero at ymin
+PARAMETER sim_skewFactor REAL 0.0

@@ -1,0 +1,48 @@
+#       Configuration file for Jet problem
+#	* Y. Ha, C.L. Gardner, A. Gelb and C.-W. Shu, 
+#	  Numerical simulation of high Mach number astrophysical jets with radiative cooling, 
+#	  J. Sci. Comput., 24(1) (2005) 29-44
+#	* Balsara, JCP, 2012
+
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Gamma
+
+D   d_ambient   Density in left and right parts of grid
+D   p_ambient   Pressure in left and right parts of grid
+D   u_ambient   Fluid x-velocity in left and right parts of grid
+D   v_ambient   Fluid y-velocity in left and right parts of grid
+D   w_ambient   Fluid z-velocity in left and right parts of grid
+D   bx_ambient  Magnetic x-field component
+D   by_ambient  Magnetic y-field component
+D   bz_ambient  Magnetic z-field component
+D   jetRadius      Radius of a high density jet
+D   jetXCtr        Center x-coord of a jet
+D   jetYCtr	   Center y-coord of a jet
+D   jetZCtr	   Center z-coord of a jet
+D   jetDensity     Density of jet
+D   tiny	   Threshold value used for numerical zero
+
+# ADD DESCRIPTION HERE
+PARAMETER d_ambient	REAL	1.
+PARAMETER p_ambient	REAL	1.
+PARAMETER u_ambient	REAL	10.
+PARAMETER v_ambient	REAL	0.
+PARAMETER w_ambient	REAL	0.
+PARAMETER bx_ambient	REAL	0.
+PARAMETER by_ambient	REAL	0.55
+PARAMETER bz_ambient	REAL	0.
+
+PARAMETER jetRadius	REAL	0.1
+PARAMETER jetXCtr	REAL   -0.75
+PARAMETER jetYCtr	REAL	0.0
+PARAMETER jetZCtr	REAL	0.0
+PARAMETER jetDensity	REAL	1.4
+PARAMETER jetVelocity   REAL    800.
+
+PARAMETER tiny 		REAL    1.e-16
+VARIABLE  vecz		# vector potential Az
+VARIABLE fast		# fast mode
+VARIABLE slow		# slow mode
+
+SPECIES HEAV
+SPECIES LIGH

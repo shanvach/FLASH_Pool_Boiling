@@ -1,0 +1,135 @@
+## Parameters file for jet-drive core-collapse SN
+
+# Simulation basics
+basenm			       = "kelvinHelmholtzUHD_HLLC_ref_"
+log_file  		       = "kelvinHelmholtzUHD_HLLC_ref.log"
+stats_file                     = "kelvinHelmholtzUHD_HLLC_ref.dat"
+restart			       = .FALSE.
+checkpointFileNumber           = 0
+plotFileNumber                 = 0
+run_comment                    = "Kelvin Helmholtz Instability"
+
+# IO 
+checkpointFileIntervalStep     = 100
+checkpointFileIntervalTime     = 0.
+plotFileIntervalStep           = 0
+plotFileIntervalTime           = 0.
+# wall_clock_checkpoint          = 43200.
+# wall_clock_time_limit          = 604800.
+
+# Time 
+tinitial                       = 0.0
+tmax                           = 1.0
+nend                           = 100000
+tstep_change_factor            = 2.0
+dtinit                         = 1.E-10
+dtmax                          = 1.E5
+dtmin                          = 1.E-20
+
+# Domain 
+geometry                       = "cartesian"
+xmax                           = 4.0
+xmin                           = 0.0
+ymax                           = 4.0
+ymin                           = 0.0
+zmax                           = 1.
+zmin                           = 0.
+xl_boundary_type               = "periodic"
+xr_boundary_type               = "periodic"
+yl_boundary_type               = "periodic"
+yr_boundary_type               = "periodic"
+zl_boundary_type               = "periodic"
+zr_boundary_type               = "periodic"
+
+# Grid/Refinement
+nblockx                        = 8
+nblocky                        = 8
+nblockz                        = 1
+
+gr_lrefineMaxRedDoByLogR       = .FALSE.
+gr_lrefineMaxRedDoByTime       = .FALSE.
+gr_lrefineMaxRedLogBase        = 10.0
+gr_lrefineMaxRedRadiusFact     = 0.15
+gr_lrefineMaxRedTRef           = 2.0
+gr_lrefineMaxRedTimeScale      = 0.5
+
+lrefine_max                    = 3
+lrefine_min                    = 1
+refine_var_1                   = "dens"
+refine_var_2                   = "temp"
+refine_var_3                   = "none"
+refine_var_4                   = "none"
+refine_cutoff_1		       = 0.8
+refine_cutoff_2		       = 0.8
+refine_cutoff_3		       = 0.8
+refine_cutoff_4		       = 0.8
+
+# Simulation
+perturbRadius		       = 0.5
+perturbDens		       = 2.0
+perturbVelx		       = -1.e1
+perturbTemp		       = 1.e-4
+ambientDens		       = 1.0
+ambientVelx		       = 1.e1
+ambientTemp		       = 2.e-4
+
+# Hydro
+useHydro                       = .TRUE.
+useHLLC			       = .FALSE.
+cfl                            = 0.5
+cvisc                          = 0.1
+eintSwitch                     = -1.0e100 
+flux_correct                   = .TRUE.
+hybrid_riemann                 = .FALSE.
+igodu                          = 0
+interpol_order                 = 2
+iplm                           = 0
+irenorm                        = 0
+leveque                        = .FALSE.
+ppm_modifystates               = .FALSE. 
+updateHydroFluxes              = .TRUE.
+use_cma_advection              = .FALSE.
+use_cma_flattening             = .FALSE.
+use_cma_steepening             = .FALSE.
+use_steepening                 = .FALSE.
+#rieman_tol                     = 1.0e-10
+nriem                          = 20
+charLimiting		       = .TRUE.
+
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#       I. INTERPOLATION SCHEME:
+order           = 2      # Interpolation order (first/second/third/fifth order)
+slopeLimiter    = "minmod"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting    = .true. # Characteristic limiting vs. Primitive limiting
+
+use_avisc       = .false. # use artificial viscosity (originally for PPM)
+#cvisc          = 0.1     # coefficient for artificial viscosity
+use_flattening  = .false. # use flattening (dissipative) (originally for PPM)
+use_steepening  = .false. # use contact steepening (originally for PPM)
+use_upwindTVD   = .false. # use upwind biased TVD slope for PPM (need nguard=6)
+
+#       II. RIEMANN SOLVERS:
+RiemannSolver   = "HLLC"       # Roe, HLL, HLLC, LLF, Marquina
+entropy         = .false.     # Entropy fix for the Roe solver
+
+#       III. STRONG SHOCK HANDELING SCHEME:
+shockDetect     = .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+#EOS
+eosMode                        = "dens_ie"
+eosModeInit                    = "dens_temp"
+eos_singleSpeciesA             = 1.00
+eos_singleSpeciesZ             = 1.00
+gamma                          = 1.4
+
+# Small numbers
+smallt                         = 1.0e4
+smlrho                         = 1.E-20
+smallp                         = 1.E-20
+smalle                         = -1.E30
+smallu                         = 1.E-10
+smallx                         = 1.E-100
+small                          = 1.E-100
+

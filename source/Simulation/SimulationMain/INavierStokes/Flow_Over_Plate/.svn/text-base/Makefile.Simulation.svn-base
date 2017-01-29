@@ -1,0 +1,14 @@
+Simulation += Simulation_initSpecies.o Simulation_mapIntToStr.o \
+              Simulation_mapParticlesVar.o Simulation_defineDomain.o \
+              Simulation_mapStrToInt.o Simulation_init.o \
+              Simulation_initBlock.o Simulation_finalize.o \
+              Simulation_getRenormGroup.o Simulation_sendOutputData.o \
+              Simulation_getVarnameType.o Simulation_initRestart.o \
+	      Simulation_interface.o Simulation_customizeProlong.o \
+	      Simulation_computeAnalytical.o Simulation_adjustEvolution.o \
+	      Simulation_data.o
+Grid += amr_1blk_fc_prol_divpres.o
+Grid += mpi_amr_1blk_restrictFaces.o mpi_amr_restrictFaces.o
+
+Grid += Grid_markRefineSpecialized_KPD.o gr_markVarThreshold_KPD.o gr_markVarThreshold_KPDvort.o gr_markVarThreshold_KPDvortLS.o
+

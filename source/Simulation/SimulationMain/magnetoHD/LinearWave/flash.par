@@ -1,0 +1,151 @@
+# 	Runtime parameters for the linearized MHD wave problem.
+#	Please also look at default.par for more runtime parameters in the object directory
+
+#	Specific heats ratio
+gamma           = 1.66666666666666667
+
+
+#       Grid dimensionality and geometry
+geometry       = "cartesian"
+
+
+#       Size of computational volume
+xmin            = 0.
+xmax            = 0.89442719 #(= 2/sqrt(5))
+ymin            = 0.
+ymax            = 0.44721360 #(= 1/sqrt(5))
+
+
+#	Field loop advection angle
+nx		= 2.
+ny		= 1.
+
+
+#	Initial strength of the velocity fields : advection or steady
+steady		= .true.
+#choice		= "Alfven"
+choice		= "Fast"
+#choice		= "Slow"
+#choice		= "Entropy"
+
+#	Initial strength of primitive variables
+dens0	= 1.
+B0	= 1.
+pres0	= 1.
+delperturb = 1.e-6
+
+#       Boundary conditions (code -22 is periodic)
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+
+#       Simulation (grid, time, I/O) parameters
+run_comment     = "2D Linear wave MHD problem"
+log_file        = "LinearWaveFastSteady.log"
+basenm          = "LinearWaveFastSteady_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 1000000
+tmax            = 2.9455
+cfl             = 0.8
+plot_var_1	= "dens"
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 0.1
+#checkpointFileIntervalStep = 10
+
+#-------------------------------------------#
+#	Time scale (Grid-crossing time t)   #
+#-------------------------------------------#
+# Flow speeds:
+# a = sqrt(gamma*p0/d0) = sqrt(5/3)
+# ca= 1
+# cf2=0.5*(5/3+1+sqrt(25/9+1))
+# cs2=0.5*(5/3+1-sqrt(25/9+1))
+#
+#
+# 1. n=(1,0) or (0,1): length = 1
+#	t_ca = 1/ca = 1.0
+#       t_cf = 1/cf = 0.65864
+#       c_cs = 1/cs = 1.6632
+#
+# 2. n=(1,1): length = sqrt(2)
+#	t_ca = sqrt(2)/ca = 1.4142
+#	t_cf = sqrt(2)/cf = 0.93146
+#	t_ca = sqrt(2)/ca = 2.3521
+#
+# 3. n=(2,1): length = sqrt(5)
+#	t_ca = sqrt(5)/ca = 2.2361
+#	t_cf = sqrt(5)/cf = 1.4728
+#	t_cs = sqrt(5)/cs = 3.7190
+#
+#-------------------------------------------#
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 1
+lrefine_max     = 6 
+nrefs           = 2
+refine_var_1    = "dens"
+refine_var_2	= "magx"
+refine_var_3	= "magy"
+eintSwitch	= 1.e-6
+
+
+#	DivB control switch
+killdivb	= .true.
+
+
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+
+## -------------------------------------------------------##
+##	Switches specific to the StaggeredMesh Solver     ##
+order		= 2 #(first / second order scheme)
+slopeLimiter    = "mc" #(minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.   # only needed for the limited slope by Toro
+charLimiting	= .true.
+E_modification	= .true.
+energyFix	= .true.
+
+#	Riemann Solver
+RiemannSolver	= "Roe"
+
+#	CTU integrator
+CTU		= .false.
+
+#	Pure Hydro Limit
+ForceHydroLimit	= .false.
+
+#	Prolongation method of Facevars
+prolMethod      = "injection_prol" #(injecton_prol, balsara_prol)
+## -------------------------------------------------------##
+
+
+
+#	The parameters below are only necessary for the Uniform Grid
+iGridSize	= 200	#defined as nxb * iprocs
+jGridSize	= 200	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+iProcs		= 2	#number or procs in the i direction
+jProcs		= 2	#number or procs in the j direction
+kProcs		= 1	#number or procs in the k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

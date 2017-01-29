@@ -1,0 +1,162 @@
+
+#	Runtime parameters for the ConductionDeltaSaDiff problem.
+#       That is ConductionDelta with standalone diffusion.
+
+smallP = 1.0e-50
+smallE = 1e-22
+
+#               Artificial viscosity
+cvisc           = 0.
+
+# Grid dimensionality and geometry
+geometry = spherical
+
+# Size of computational volume
+xmin		= 0.
+xmax		= 20.
+ymin		= 0.
+ymax		= 1.
+zmin		= 0.
+zmax		= 1.
+
+
+#	Simulation (grid, time, I/O) parameters
+
+basenm          = "suolson_"
+restart         = .false.
+checkpointFileIntervalTime  = 0
+checkpointFileIntervalStep  = 25
+nend            = 75
+
+checkpointFileNumber    = 1
+plotFileNumber          = 0
+
+run_comment = "Su Olson problem."
+log_file        = "suolson.log"
+eintSwitch     = 1.e-4
+
+plot_var_1 = "temp"
+plot_var_2 = "dens"
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+gamma    = 1.4
+gammaEle = 1.4
+gammaIon = 1.4
+gammaRad = 1.4
+
+
+eos_singleSpeciesA = 1.0
+eos_singleSpeciesZ = 1.0
+
+eos_combinedTempRule = 0
+
+diff_useEleCond = .true.
+useDiffuse = .true.
+dt_diff_factor  = 0.8
+diff_eleXlBoundaryType  = "outflow"
+diff_eleXrBoundaryType  = "outflow"
+diff_eleylBoundaryType  = "outflow"
+diff_eleyrBoundaryType  = "outflow"
+diff_elezlBoundaryType  = "outflow"
+diff_elezrBoundaryType  = "outflow"
+
+useHeatexchange = .true.
+hx_relTol = 1.0E-8
+hx_couplingConst12 = 1.13408e-004
+hx_couplingConst13 = 0.0
+hx_couplingConst23 = 0.0
+hx_dtFactor = 0.5
+
+useHeat = .true.
+
+rt_useMGD        = .true.
+rt_mgdNumGroups  = 1
+rt_mgdBoundEntry = "grbd_manual"
+rt_mgdBounds_1   = 0.0
+rt_mgdBounds_2   = 100000.0
+	
+rt_mgdXlBoundaryType = "outflow"
+rt_mgdXrBoundaryType = "outflow"
+rt_mgdYlBoundaryType = "outflow"
+rt_mgdYrBoundaryType = "outflow"
+rt_mgdZlBoundaryType = "outflow"
+rt_mgdZrBoundaryType = "outflow"
+
+op_absorbConst = 1.0
+op_emitConst   = 1.0
+op_transConst  = 1.0
+
+
+useHydro = .false.
+cfl = 0.8
+xl_boundary_type = "reflecting"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+
+useConductivity = .true.
+## K0 = 4ac/6.0
+cond_K0 = 1.512106666666667e-004
+cond_DensityExponent = 0.0
+cond_TemperatureExponent = 3.0
+
+# 0.1     => 3.335668301E-012
+# 0.31623 => 1.054838387E-011
+# 1.0     => 3.335668301E-011
+# 2.0     => 6.671336600E-011
+# 3.16228 => 1.054831716E-010
+# 10.0    => 3.335668301E-010
+# 31.6228 => 1.054831716E-009
+# 100.0   => 3.335668301E-009
+
+tmax = 3.335668301E-012
+
+dtinit = 1.E-30
+dtmax  = 1.601E-14
+dtmin  = 1.E-30
+
+dr_shortenLastStepBeforeTMax = .TRUE.
+
+# AMR refinement parameters
+lrefine_min   = 1
+lrefine_max   = 6
+refine_var_1  = "temp"
+
+nblockx = 8
+nblocky = 1
+nblockz = 1
+
+iGridSize = 1000
+jGridSize = 1
+kGridSize = 1
+
+iProcs = 2
+jProcs = 1
+kProcs = 1
+
+gr_hypreMaxIter    = 10000
+gr_hypreRelTol     = 1.0e-12
+gr_hyprePCType     = "HYPRE_AMG"
+gr_hypreSolverType = "HYPRE_PCG"
+
+

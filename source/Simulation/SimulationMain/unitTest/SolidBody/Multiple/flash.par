@@ -1,0 +1,42 @@
+useParticles = .true.
+
+#Number of solid bodies
+sb_NumBodies = 1000
+
+#Number of particles to create within the solid body
+sb_ptNumX = 9
+sb_ptNumY = 9
+sb_ptNumZ = 9
+
+#Turn off debugging output (when .true. we get 1 logfile / MPI process)
+sb_debug = .false.
+
+#Physical domain
+xmin = 0.
+xmax = 1.
+ymin = 0.
+ymax = 1.
+zmin = 0.
+zmax = 1.
+
+xl_boundary_type = "outflow"
+xr_boundary_type = "outflow"
+yl_boundary_type = "outflow"
+yr_boundary_type = "outflow"
+zl_boundary_type = "outflow"
+zr_boundary_type = "outflow"
+
+basenm = "solidBodyUnitTest_"
+
+# For UG (2D only)
+iGridSize = 16
+jGridSize = 16
+kGridSize = 1
+
+iProcs = 2
+jProcs = 2
+kProcs = 1
+
+# For Paramesh (1D, 2D & 3D)
+lrefine_min = 1
+lrefine_max = 4

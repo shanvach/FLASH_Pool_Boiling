@@ -1,0 +1,95 @@
+# 	Runtime parameters for the Solid Mech First Test Rigid Bodies.
+gr_pmRpDivergenceFree = 1
+gr_pmRpNfieldDivf = 2
+gr_pmRpConsvFluxes = .TRUE.
+gr_pmRpConsvFluxDensities = .FALSE.
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+#       Size of computational volume
+xmin		= -3.000000000000000
+xmax		=  3.000000000000000
+ymin		= -3.000000000000000
+ymax		=  3.000000000000000
+zmin            = -3.000000000000000
+zmax            =  3.000000000000000
+
+# Bodies:
+sm_NumBodies   =  1
+gr_sbNumBodies =  1
+
+# Particles
+pt_maxPerProc=55000
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "Marcos test"
+log_file	= "SM_test_rigid.log"
+basenm		= "SM_test_rigid_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 2
+tmax            = 300. 
+dtspec          = 5.e-5
+dtinit          = 0.005
+
+#Parameters for Integration Scheme:
+intschm            = 2
+
+# SolidMechanics Integration method
+sm_solidinteg = 2
+
+# Checkpoint file
+checkpointFileIntervalTime = 500.
+checkpointFileIntervalStep =1
+
+plotFileIntervalTime = 500.
+plotFileIntervalStep = 1
+
+
+
+##      AMR parameters
+nblockx = 8
+nblocky = 8
+nblockz = 8
+lrefine_min     = 1
+lrefine_max     = 3
+
+nrefs           = 10
+#refine_var_1    = "pres"
+#refine_cutoff_1 = .42
+#derefine_cutoff_1 = .37
+
+
+##      Flux Conservation for AMR
+flux_correct    = .true.
+enableMaskedGCFill=.true.
+convertToConsvdInMeshInterp = .false.
+
+# Timers vars:
+eachProcWritesSummary = .false.
+ 
+
+#-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
+#	The parameters below are only necessary for the Uniform Grid
+#iGridSize	= 8	#defined as nxb * iprocs
+#jGridSize	= 8	#defined as nyb * jprocs
+#kGridSize	= 1	#defined as nzb * kprocs
+#iProcs		= 1	#number of procs in the i direction
+#jProcs		= 1	#number of procs in the j direction
+#kProcs		= 1	#number of procs in the k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

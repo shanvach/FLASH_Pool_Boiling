@@ -1,0 +1,147 @@
+#       Runtime parameter file for the 1-cylinder problem
+#       
+
+#              simulation parameters
+
+basenm          = "1cyl_rz_"
+log_file        = "1cyl_rz.log"
+run_comment     = "RZ IC: case 128x64l"
+
+# cpnumber        = 0
+# ptnumber        = 0
+
+restart         = .true.
+cpnumber        = 2
+ptnumber        = 22 
+pptnumber       = 21
+
+
+trstrt          = 100.e-6
+tplot           = 3.e-6
+ptplot          = 3.e-6
+
+wall_clock_checkpoint = 20700.
+
+nend            = 999999
+tmax            = 900.e-6
+dtini           = 1.0e-7
+cfl             = 0.2
+nrefs           = 4
+
+plot_var_1      = "dens"
+plot_var_2      = "sf6"
+plot_var_3      = "pres"
+plot_var_4      = "velx"
+plot_var_5      = "vely"
+plot_var_6      = "velz"
+plot_var_7      = "vrtz"
+
+
+igeomx          = 0
+igeomy          = 0
+igeomz          = 0
+
+xmin            = 15.5
+xmax            = 30.5
+ymin            = 0.
+ymax            = 7.5
+zmin            = 0.
+zmax            = 7.5
+
+nblockx         = 2
+nblocky         = 1
+nblockz         = 1
+xl_boundary_type  = "outflow"
+xr_boundary_type  = "outflow"
+yl_boundary_type  = "reflecting"
+yr_boundary_type  = "reflecting"
+zl_boundary_type  = "reflecting"
+zr_boundary_type  = "reflecting"
+
+#              AMR parameters
+
+lrefine_min     = 2
+lrefine_max     = 7
+
+refine_var_2    = "none"
+refine_var_1    = "none"
+
+use_steepening  = .false.
+cvisc           = 0.0
+igrav           = 0
+useShockBurn          = 0
+ichem           = 0
+
+# shock parameters
+
+mach    = 1.2
+
+#  Pre-shock parameters
+
+rho_amb  = 0.95e-3
+p_amb    = 8.e5
+vx_amb   = -8700.0
+
+#  Perturbation Parameters
+
+#d_pert   = 1.0e-2  # Amplitude of perturbations
+#n_pert   = 43465   # Random seed 
+
+d_pert    = 0.0 
+n_pert    = 0
+
+# Other experiment-related data
+xshock  = 20.0
+xctr    = 22.0
+yctr    = 3.75
+ref_rect_x      = 0.
+ref_rect_y      = 0.
+
+# radial fit only
+use_radial_fit = .false.
+fit_radius     = 0.6
+vz_sf6         = 20.0
+
+# both radial fit and expt. image
+maxconc         = 0.6
+rpix            = 150.
+pixsize = 0.0038
+
+# expt. image only
+use_raw_data    = .false.
+nimgx   = 608
+nimgy   = 468
+ximgmin = 22.
+yimgmin = 3.1
+
+# rz_sim_ic only
+use_rz_sim_data = .true.
+rz_rmax      = 3.2
+rz_zmax      = 7.5       # Should match zmax if 3d sim
+nr_c         = 64
+nz_c         = 128
+rz_zplane     = 5.5
+sf6_file_cc     =  "128x64l_sf6"
+press_file_cc   =  "128x64l_press"
+rvel_file_ec    =  "128x64l_rvel"
+zvel_file_ce    =  "128x64l_zvel"
+nx_subint       = 4
+ny_subint       = 4
+nz_subint       =  4
+
+# Particle Parameters
+
+ipart                   = 1
+MaxParticlesPerProc     = 1000000
+MaxParticlesPerBlock    = 1000000
+
+NumXParticles        = 100
+PartXMin             = 18.e0		
+PartXMax             = 23.e0
+NumYParticles        = 50
+PartYMin             = 2.5e0		
+PartYMax             = 5.0e0
+NumZParticles        = 150
+PartZMin             = 0.0e0
+PartZMax             = 7.5e0
+

@@ -1,0 +1,5 @@
+#This will create a global grid of size 16*32*16.
+iProcs = 2
+jProcs = 4
+kProcs = 2
+output_grid_data = .true.

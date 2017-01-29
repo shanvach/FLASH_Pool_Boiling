@@ -1,0 +1,6 @@
+Only in ./: diff.rcd
+Only in ./: gr_shiftData.F90
+Common subdirectories: ./ISOTURB_files and ../IsoTurb_mD/ISOTURB_files
+Only in ./: IsoTurb_mD2.sh
+Only in ../IsoTurb_mD: IsoTurb_mD.sh
+Common subdirectories: ./.svn and ../IsoTurb_mD/.svn

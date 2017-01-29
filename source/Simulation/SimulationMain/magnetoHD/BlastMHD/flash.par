@@ -1,0 +1,146 @@
+#       Runtime parameters for the MHD Blast wave problem.
+#	Please also look at default.par for more runtime parameters in the object directory
+
+#	Specific heats ratio
+gamma           = 1.66666666666666667
+
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#       Problem parameters for 2D
+radius          = 0.1
+beta_inner      = 20.
+beta_outer      = 0.2
+
+#       Problem parameters for 3D
+#radius          = 0.125
+#beta_inner      = 2.
+#beta_outer      = 0.02
+
+
+#       Initial Conditions for 2D
+velx_init       = 0.
+vely_init       = 0.
+velz_init       = 0.
+magx_init       = 0.70710678118655  #1/sqrt(2)
+magy_init       = 0.70710678118655  #1/sqrt(2)
+magz_init	= 0.
+
+#       Initial Conditions for 3D
+#velx_init       = 0.
+#vely_init       = 0.
+#velz_init       = 0.
+#magx_init       = 7.0710678118655  #10/sqrt(2)
+#magy_init	= 0.
+#magz_init       = 7.0710678118655  #10/sqrt(2)
+
+
+#       Size of computational volume for 2D
+xmin            = -0.5
+xmax            =  0.5
+ymin            = -0.75
+ymax            =  0.75
+
+#       Size of computational volume for 3D
+#xmin            = -0.5
+#xmax            =  0.5
+#ymin            = -0.5
+#ymax            =  0.5
+#zmin            = -0.5
+#zmax            =  0.5
+
+
+#       Boundary conditions
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+zl_boundary_type = "periodic"
+zr_boundary_type = "periodic"
+
+
+#       Simulation (grid, time, I/O) parameters
+run_comment     = "2D MHD Blast Wave problem"
+log_file        = "blast_mhd_2d.log"
+basenm          = "blast_mhd_2d_"
+restart         = .false.
+#checkPointFileNumber=1
+#plotFileNumber  = 1
+nend            = 10000000
+tmax            = 2.0 #for 2D
+#tmax		= 0.02 #for 3D
+cfl             = 0.8
+
+convertToConsvdInMeshInterp = .true.
+checkpointFileIntervalTime = 0.01
+#checkpointFileIntervalStep = 10
+
+
+#	AMR parameters
+#nblockx	= 1
+#nblocky	= 1
+lrefine_min	= 2
+lrefine_max     = 6
+nrefs		= 2
+refine_var_1	= "dens"
+refine_var_1	= "pres"
+eintSwitch      = 1.e-6
+
+
+#	DivB control switch
+killdivb	= .true.
+
+#	Flux Conservation for AMR
+flux_correct    = .true.
+
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT STAGGERED MESH MHD SOLVER  ##
+#	I. INTERPOLATION SCHEME:
+order		= 3      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+use_steepening	= .true.
+
+#	II. MAGNETIC(B) AND ELECTRIC(E) FIELDS:
+E_modification	= .true.           # High order algorithm for E-field construction
+energyFix	= .true.           # Update magnetic energy using staggered B-fields
+ForceHydroLimit	= .false.          # Pure Hydro Limit (B=0)
+prolMethod      = "injection_prol" # Prolongation method (injecton_prol, balsara_prol)
+
+
+#	III. RIEMANN SOLVERS:
+RiemannSolver	= "hlld"       # Roe, HLL, HLLC, HLLD, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+entropy         = .false.     # Entropy fix for the Roe solver
+EOSforRiemann	= .true.
+
+#	IV. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##
+
+
+#	The parameters below are only necessary for the Uniform Grid
+
+iGridSize	= 32	#defined as nxb * iprocs
+jGridSize	= 32	#defined as nyb * jprocs
+kGridSize	= 32	#defined as nzb * kprocs
+iProcs		= 2	#num procs in i direction
+jProcs		= 2	#num procs in j direction
+kProcs		= 1	#num procs in k direction
+
+# When using UG, iProcs, jProcs and kProcs must be specified.
+# These are the processors along each of the dimensions
+# FIXEDBLOCKSIZE mode ::
+#	When using fixed blocksize, iGridSize etc are redundant in
+#	runtime parameters. These quantities are calculated as 
+#	iGridSize = NXB*iprocs
+#	jGridSize = NYB*jprocs
+#	kGridSize = NZB*kprocs
+# NONFIXEDBLOCKSIZE mode ::
+#	iGridSize etc must be specified. They constitute the global
+#	number of grid points in the physical domain without taking 
+#	the guard cell into account. The local blocksize is calculated
+#	as iGridSize/iprocs  etc.

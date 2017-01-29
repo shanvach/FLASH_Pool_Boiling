@@ -1,0 +1,130 @@
+!!****if* source/Simulation/SimulationMain/INavierStokes/3D/Snorkel_mcHYPRE_VD_wFS/Grid_markRefineDerefine
+!!
+!! NAME
+!!  Grid_markRefineDerefine
+!!
+!! SYNOPSIS
+!!
+!!  Grid_markRefineDerefine()
+!!  
+!! DESCRIPTION 
+!!  Mark blocks for refinement or derefinement
+!!  This routine is used with AMR only where individual 
+!!  blocks are marked for refinement or derefinement based upon
+!!  some refinement criterion. The Uniform Grid does not need
+!!  this routine, and uses the stub.
+!!
+!! ARGUMENTS
+!! 
+!! NOTES
+!!
+!! Every unit uses a few unit scope variables that are
+!! accessible to all routines within the unit, but not to the
+!! routines outside the unit. For Grid unit these variables begin with "gr_"
+!! like, gr_myPE or gr_eosMode, and are stored in fortran
+!! module Grid_data (in file Grid_data.F90). The other variables
+!! are local to the specific routines and do not have the prefix "gr_"
+!!
+!!
+!!***
+
+subroutine Grid_markRefineDerefine()
+
+#include "Flash.h"
+
+#ifdef FLASH_GRID_PARAMESH
+  use Grid_data, ONLY : gr_refine_cutoff, gr_derefine_cutoff,&
+                        gr_refine_filter,&
+                        gr_numRefineVars,gr_refine_var
+  use tree, ONLY : newchild, refine, derefine, stay,lrefine_max
+  use Grid_interface, ONLY : Grid_markRefineSpecialized,Grid_fillGuardCells
+  use Simulation_data
+
+
+  implicit none
+
+#include "constants.h"
+!#include "MHD.h"
+
+  real :: ref_cut,deref_cut,ref_filter
+  integer       :: l,i,iref
+
+
+  logical :: gcMask(NUNK_VARS)
+
+  !! Special refinement criteria -----------------
+  real, dimension(7) :: specs
+  integer :: lref,specsSize
+  !! End of special refinement treatment ---------
+
+  call Grid_fillGuardCells(CENTER,ALLDIR)
+
+  newchild(:) = .FALSE.
+  refine(:)   = .FALSE.
+  derefine(:) = .FALSE.
+  stay(:)     = .FALSE.
+
+! do l = 1,gr_numRefineVars
+!     iref = gr_refine_var(l)
+!     ref_cut = gr_refine_cutoff(l)
+!     deref_cut = gr_derefine_cutoff(l)
+!     ref_filter = gr_refine_filter(l)
+!     call gr_markRefineDerefine(iref,ref_cut,deref_cut,ref_filter)
+! end do
+
+#define SPECIAL_REFINEMENT 1
+
+#ifdef SPECIAL_REFINEMENT
+  !! Call for the specialized refinement
+  specsSize=7
+
+  specs(1) =  -100.
+  specs(2) =   100.
+  specs(3) =  -100.
+  specs(4) =   100.
+  specs(5) =  -1000.
+  specs(6) =   1000.
+
+  specs(7) = 0.0
+
+  !write(*,*) 'Specs=',specs(1:7)
+
+  !! Bring all qualifying blocks to this level of refinement
+  lref = lrefine_max-1
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+#endif
+
+
+#ifdef SPECIAL_REFINEMENT
+  !! Call for the specialized refinement
+  specsSize=7
+
+  specs(1) =  14. 
+  specs(2) =  16.0 
+  specs(3) =  -100. 
+  specs(4) =   100. 
+  specs(5) =  -1000. 
+  specs(6) =   1000. 
+
+  specs(7) = 0.0
+
+  !write(*,*) 'Specs=',specs(1:7)
+
+  !! Bring all qualifying blocks to this level of refinement
+  lref = lrefine_max
+
+  call Grid_markRefineSpecialized (RECTANGLE,specsSize,specs,lref)
+#endif
+
+
+#ifdef FLASH_GRID_PARAMESH2
+  ! Make sure lrefine_min and lrefine_max are obeyed - KW
+  if (gr_numRefineVars .LE. 0) then
+     call gr_markRefineDerefine(-1, 0.0, 0.0, 0.0)
+  end if
+#endif
+  return
+#endif
+
+end subroutine Grid_markRefineDerefine

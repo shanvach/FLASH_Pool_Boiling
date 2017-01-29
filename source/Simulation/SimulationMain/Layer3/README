@@ -1,0 +1,22 @@
+The problem in this setup directory is that of an intense
+laser hitting a 3-layer target of decreasing density. The
+three materials in the target are copper, CH plastic, and 
+C-foam. The first interface, between the copper and plastic
+has a sinusoidal perturbation, and this perturbation is
+imprinted on the shock that passes through the interface. As
+the shock propagates toward the second interface, the perturbation
+oscillates. When the shock hits the second interface, it
+is almost planar, but the perturbation is still imprinted on
+to the interface. The interfaces are subject to fluid instabitlites
+resulting from the passage of the shock, and instability growth
+(fingers of copper and bubbles of C-foam) may is observed.
+
+Reference: Kane et al., Phys. Rev. E, 63 055401(R) 2001
+
+To run the problem, set up the problem and compile the code
+as usual. By default the problem is set up as a 2-d problem.
+Copy the executable from the object directory and the files 
+"flash.par" and "3lay_1d.dat" found in the setup directory
+to the directory in which you want to run the problem and it
+should be ready to go. The simulation is set to run only 100
+steps (for testing) but setting 

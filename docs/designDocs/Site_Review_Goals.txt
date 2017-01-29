@@ -1,0 +1,36 @@
+### GOALS for Site Review (OCT 18th-19th 2005)
+### GOALS SET on Thursday August 18th 2005
+### Attendees: Anshu, Dan, Katie, Jignesh
+
+
+**Potential Talks
+
+-Noel's Test Suite
+-Eric (leiden) stuff -w/TAU / sameer
+-Performance benchmarks
+
+**Potential Posters
+
+-Shock Cylinder
+-MHD Dongwook OR in OVERVIEW
+
+**Overview
+
+-Samrai (whatever new happens)
+-Unit Tests
+
+**Mention
+
+-Flash module HOW TO
+-Developers guide
+-Setup script enhanced capabilities
+
+
+**GOALS:
+
+-TAU / with F3
+-Benchmarks Database with graphing capabilities
+-Developer's Guide accessible on the web (something to show)
+-Poisson solve with pfft
+
+

@@ -1,0 +1,1 @@
+./setup INavierStokes/3D/cylinderBeneathSurface/  -3d -auto -opt -nxb=16 -nyb=16 -nzb=16 -maxblocks=50 -gridinterpolation=native +pm4dev -objdir=CYL_3d_wFS_8_OPT -site=splash.seas.gwu.edu_KPD Bittree=1

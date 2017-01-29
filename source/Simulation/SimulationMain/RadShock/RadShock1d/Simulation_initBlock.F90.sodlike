@@ -1,0 +1,167 @@
+!!****if* source/Simulation/SimulationMain/RadShock/RadShock1d/Simulation_initBlock
+!!
+!! NAME
+!!
+!!  Simulation_initBlock
+!!
+!!
+!! SYNOPSIS
+!!
+!!  Simulation_initBlock(integer(IN) :: blockID)
+!!
+!!
+!!
+!! DESCRIPTION
+!!
+!!  Initializes fluid data (density, pressure, velocity, etc.) for
+!!  a specified block.
+!! 
+!! ARGUMENTS
+!!
+!!  blockID -        the number of the block to initialize
+!!
+!!
+!!***
+
+subroutine Simulation_initBlock(blockId)
+  use Simulation_data
+  use Eos_interface, ONLY : Eos, Eos_wrapped
+  use Grid_interface, ONLY : Grid_getBlkIndexLimits, &
+       Grid_getCellCoords, Grid_putPointData
+  use Driver_interface, ONLY: Driver_abortFlash
+  use PhysicalConstants_interface, ONLY: PhysicalConstants_get
+  use RadTrans_interface, ONLY: RadTrans_mgdEFromT
+
+  implicit none
+
+#include "constants.h"
+#include "Flash.h"
+#include "Eos.h"   
+
+  ! compute the maximum length of a vector in each coordinate direction 
+  ! (including guardcells)
+
+  integer, intent(in) :: blockId
+  integer :: i, j, k, n
+  integer :: blkLimits(2, MDIM)
+  integer :: blkLimitsGC(2, MDIM)
+  integer :: axis(MDIM)
+  real, allocatable :: xcent(:), ycent(:)
+
+  real :: urad  ! Radiation energy density
+  real :: urad_tot, trad
+
+  ! get the coordinate information for the current block from the database
+  call Grid_getBlkIndexLimits(blockId,blkLimits,blkLimitsGC)
+
+  ! get the coordinate information for the current block from the database
+  call Grid_getBlkIndexLimits(blockId,blkLimits,blkLimitsGC)
+  allocate(xcent(blkLimitsGC(HIGH, IAXIS)))
+  call Grid_getCellCoords(IAXIS, blockId, CENTER, .true., &
+       xcent, blkLimits(HIGH, IAXIS))
+
+  allocate(ycent(blkLimitsGC(HIGH, JAXIS)))
+  call Grid_getCellCoords(JAXIS, blockId, CENTER, .true., &
+       ycent, blkLimits(HIGH, JAXIS))
+
+  !------------------------------------------------------------------------------
+
+  ! Loop over cells and set the initial state
+  do k = blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+     do j = blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i = blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+           axis(IAXIS) = i
+           axis(JAXIS) = j
+           axis(KAXIS) = k
+
+           ! Setup state in Sod-like version of the shifted
+           ! simulation. This exists to examine the ion temperature
+           ! oscillations.
+           !
+           ! Note that when using this Simulation_initBlock, the
+           ! sim_rho, sim_tion/ele/rad, and sim_velx variables no
+           ! longer do anything. You have to manually specify them below:
+           !
+           ! For the lab frame: Set upstream velocity to 0.0 and
+           ! downstream to 100e+05 cm/s
+           !
+           ! For the shifted frame: Set upstream velocity to
+           ! -100.0e+05 and downstream to 0.0 cm/s.
+           if(xcent(i) < 100.0e-04) then
+              ! Downstream region:
+              call Grid_putPointData(blockId, CENTER, VELX_VAR, EXTERIOR, axis, 100.0e+05)
+
+              call Grid_putPointData(blockId, CENTER, DENS_VAR, EXTERIOR, axis, 0.023)
+
+              call Grid_putPointData(blockId, CENTER, TEMP_VAR, EXTERIOR, axis, 161.0 * 11604.55)
+#ifdef TION_VAR
+              call Grid_putPointData(blockId, CENTER, TION_VAR, EXTERIOR, axis, 161.0 * 11604.55)
+#endif
+#ifdef TELE_VAR
+              call Grid_putPointData(blockId, CENTER, TELE_VAR, EXTERIOR, axis, 161.0 * 11604.55)
+#endif
+           else
+              ! Upstream region:
+              call Grid_putPointData(blockId, CENTER, VELX_VAR, EXTERIOR, axis, 0.0e+05)
+
+              call Grid_putPointData(blockId, CENTER, DENS_VAR, EXTERIOR, axis, 0.006)
+
+              call Grid_putPointData(blockId, CENTER, TEMP_VAR, EXTERIOR, axis, 10.0 * 11604.55)
+#ifdef TION_VAR
+              call Grid_putPointData(blockId, CENTER, TION_VAR, EXTERIOR, axis, 10.0 * 11604.55)
+#endif
+#ifdef TELE_VAR
+              call Grid_putPointData(blockId, CENTER, TELE_VAR, EXTERIOR, axis, 10.0 * 11604.55)
+#endif        
+           end if
+
+#ifdef YE_MSCALAR
+           call Grid_putPointData(blockId, CENTER, YE_MSCALAR, EXTERIOR, axis, sim_zbar/sim_abar)
+#endif
+#ifdef SUMY_MSCALAR
+           call Grid_putPointData(blockId, CENTER, SUMY_MSCALAR, EXTERIOR, axis, 1/sim_abar)
+#endif
+           if (NSPECIES > 0) then
+              ! Fill mass fractions in solution array if we have any SPECIES defined.
+              ! We put nearly all the mass into either the Xe material if XE_SPEC is defined,
+              ! or else into the first species.
+#ifdef XE_SPEC
+#define SPECIESTOFILL XE_SPEC
+#else
+#define SPECIESTOFILL SPECIES_BEGIN
+#endif
+              do n = SPECIES_BEGIN,SPECIES_END
+                 if (n==SPECIESTOFILL) then
+                    call Grid_putPointData(blockID, CENTER, n, EXTERIOR, axis, 1.0e0-(NSPECIES-1)*sim_smallX)
+                 else
+                    call Grid_putPointData(blockID, CENTER, n, EXTERIOR, axis, sim_smallX)
+                 end if
+              enddo
+           end if
+
+           ! Set up radiation energy density:
+#ifdef MGD_NGROUPS
+           if(sim_useMGD) then
+              urad_tot = 0.0
+
+              do n = 1, MGD_NGROUPS
+                 call RadTrans_mgdEFromT(n, sim_trad, urad)
+                 urad_tot = urad_tot + urad
+                 call Grid_putPointData(blockId, CENTER, R001_MSCALAR+n-1, EXTERIOR, axis, urad/sim_rho)
+              end do
+
+              trad = (urad_tot/sim_radconst)**0.25
+              call Grid_putPointData(blockId, CENTER, TRAD_VAR, EXTERIOR, axis, trad)
+           end if
+#endif           
+        enddo
+     enddo
+  enddo
+
+  deallocate(xcent)
+  deallocate(ycent)
+
+  return
+
+end subroutine Simulation_initBlock

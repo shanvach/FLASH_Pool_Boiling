@@ -1,0 +1,21 @@
+This directory contains the data and routines for flow around a circular cylinder at Re = 100.
+This simulation is modified from the case IB_RotCyl_Black.
+- The stationary cylinder is set by modifying the kinematics in the bodyinfo.
+- The initial field has an uniform flow along y direction.
+
+Shizhao Wang
+
+Jul 15, 2014
+
+- To setup a Uniform Grid calculation use IB_cyl_stationary_ug.sh 
+  in the base dir of FLASH and copy MANUALLY the files from
+  this simulation directory:
+  flash_ug.par -> OBJDIR/flash.par
+  sm_body.00001_stationary_ug.h5 -> OBJDIR/sm_body.00001.h5
+
+- To setup an AMR calculation use IB_cyl_stationary_amr.sh 
+  in the base dir of FLASH and copy MANUALLY the files from
+  this simulation directory:
+  flash_amr.par -> OBJDIR/flash.par
+  sm_body.00001_stationary_amr.h5 -> OBJDIR/sm_body.00001.h5
+

@@ -1,0 +1,357 @@
+Index: machines.cfg
+===================================================================
+--- machines.cfg	(revision 1350)
++++ machines.cfg	(working copy)
+@@ -6,6 +6,51 @@
+ # To be used by PreFlash/build.py
+ 
+ 
++## hplaptop - GCC 4.3.1
++
++[ hplaptop_gcc : GCC 4.3.1 ]
++
++MAKE make -j 3
++
++LIB_INSTALL_DIR .
++
++CXX g++
++
++CCFLAGS -W -Wall -Wextra -g  -DMPICH_IGNORE_CXX_SEEK
++LDFLAGS -W -Wall -Wextra -g
++
++CCFLAGS_SHARED 
++LDFLAGS_SHARED -shared
++
++CCFLAGS_NOSHARED 
++LDFLAGS_NOSHARED 
++
++SO_EXT so
++
++RANLIB ranlib
++AR ar
++ARFLAGS rsc
++
++CCFLAGS_HDF5 -I/opt/hdf5-1.8.1/include -I/opt/mpich2/include/
++LDFLAGS_HDF5 -L/opt/hdf5-1.8.1/lib -lhdf5
++
++
++#Not required
++#SWIG swig -Wall
++
++#PYTHON_INSTALL_DIR ./python
++
++#CCFLAGS_PYTHON -I /usr/include/python -W -Wall -Wextra -O3 -g -mcpu=pentium4 \
++#    -mtune=pentium4 -ftree-vectorize -msse2 -msse -mmmx
++#LDFLAGS_PYTHON -W -Wall -Wextra -O3 -g -mcpu=pentium4 -mtune=pentium4
++
++#CCFLAGS_GSL -I /usr/include
++#LDFLAGS_GSL -L /usr/lib -lgsl -lgslcblas
++
++
++
++
++
+ ## fornax - GCC 4.2.0
+ 
+ [ fornax_gcc : GCC 4.2.0 ]
+Index: src_lib/preflash_file_parameters.cpp
+===================================================================
+--- src_lib/preflash_file_parameters.cpp	(revision 1389)
++++ src_lib/preflash_file_parameters.cpp	(working copy)
+@@ -146,6 +146,9 @@
+ 
+   valid_mesh = true;  // Until it isn't
+ 
++  //Effect of read_mesh_dims call: stores value in private 
++  //class variable = mesh_dims.  We may overwrite this value later 
++  //if we have a FLASH3.1 HDF5 file.
+   if (read_mesh_dims(file_id) < 0)
+     {
+     valid_mesh = false;
+@@ -355,6 +358,7 @@
+ 	break;
+ 
+       case Flash3 :
++      case Flash3_1 :
+ 	read_simulation_params_flash3(file_id);
+ 	break;
+       }
+@@ -576,6 +580,18 @@
+ 
+     step_count = static_cast<unsigned int>(int_params[work_str]);
+ 
++    
++    //A Flash3_1 simulation only differs from a Flash3(beta/alpha)
++    //simulation in that there is a dimensionality scalar in the hdf5 file.
++    //We use this scalar to update the value of mesh_dims.
++    if (flash_version == Flash3_1)
++    {
++      work_str = Dimensionality_Scalar_Name;
++      mesh_dims = static_cast<unsigned int>(int_params[work_str]);
++      std::cout << "PREFLASH: Flash 3.1 so adjusting mesh_dims to " << mesh_dims << std::endl;
++    }
++
++
+     if (valid_mesh)
+       {
+       // Zones per block
+Index: src_lib/preflash_file_flashdefs.cpp
+===================================================================
+--- src_lib/preflash_file_flashdefs.cpp	(revision 1389)
++++ src_lib/preflash_file_flashdefs.cpp	(working copy)
+@@ -21,7 +21,8 @@
+ {
+ 
+ const int Flash2_FileVersion = 7;
+-const int Flash3_FileVersion = 8;
++const int Flash3_FileVersion = 8;    //Only applicable to FLASH3.0 alpha & beta.
++const int Flash3_1_FileVersion = 9;  //Applicable to FLASH3.0 & FLASH3.1.
+ 
+ const char Sim_Params_Name_Flash2[] = "simulation parameters";
+ const char Sim_Info_Name_Flash3[] = "sim info";
+@@ -77,6 +78,8 @@
+ 
+ const char Dataset_Attribute_MinValue_Name[] = "minimum";
+ const char Dataset_Attribute_MaxValue_Name[] = "maximum";
++const char Dimensionality_Scalar_Name[] = "dimensionality";
++const char File_Format_Version_Name[] = "file format version";
+ 
+ 
+ int get_flash_version(const hid_t file_id, FlashVersion & version)
+@@ -99,6 +102,10 @@
+ 	version = Flash3;
+ 	break;
+ 
++      case Flash3_1_FileVersion :
++	version = Flash3_1;
++	break;
++
+       default :
+ 	ret_val = -2;  // Not good!
+       }
+@@ -128,9 +135,9 @@
+     else
+       {
+       // WE NEED TO VERIFY THE VERSION NUMBER IN "sim info"
+-      // ... BUT FOR NOW, ASSUME FLASH3
++      // THIS HELPS US DISTINGUISH BETWEEN FLASH3 RELEASES.
+ 
+-      file_version = Flash3_FileVersion;
++      file_version = read_flash3_file_version(file_id);
+ 
+       ret_val = 0;  // OK
+       }
+@@ -140,6 +147,53 @@
+   }
+ 
+ 
++  int read_flash3_file_version(const hid_t file_id)
++  {    
++    bool ok = false;
++    int flash_version;
++    
++    const int num_ints = 1;
++    const size_t num_int_bytes = sizeof(int) * num_ints;
++
++    hid_t dataset_id = H5Dopen(file_id, Sim_Info_Name_Flash3);    
++    if (dataset_id >= 0)
++    {
++      hid_t datatype_int_id = H5Tcreate(H5T_COMPOUND, num_int_bytes);  
++
++      if (datatype_int_id >= 0)
++      {
++	H5Tinsert(datatype_int_id, File_Format_Version_Name, 0, 
++		  H5T_NATIVE_INT);
++      
++	int int_array[num_ints];
++	herr_t status = H5Dread(dataset_id, datatype_int_id, H5S_ALL, H5S_ALL,
++				H5P_DEFAULT, int_array);
++	
++	if (status >= 0)
++	{
++	  flash_version = int_array[0];
++	  if ( flash_version == Flash3_FileVersion || 
++	       flash_version == Flash3_1_FileVersion )
++	    ok = true;
++	}
++	
++	H5Tclose(datatype_int_id);
++	datatype_int_id = -1;
++      }
++      
++      H5Dclose(dataset_id);
++      dataset_id = -1;      
++    }
++    
++    
++    if (!ok)
++      throw Except("Unable to read FLASH3 integer simulation parameters", 
++		   __FILE__, __LINE__);
++    
++    return flash_version;
++  }
++  
++  
+ int pad_variable_name(const std::string & orig_name, std::string & new_name)
+   { 
+   int ret_val = 1;  // Name length exceeds official variable name length
+Index: src_lib/preflash_file_meshinfo.hpp
+===================================================================
+--- src_lib/preflash_file_meshinfo.hpp	(revision 1389)
++++ src_lib/preflash_file_meshinfo.hpp	(working copy)
+@@ -42,7 +42,8 @@
+   public:
+ 
+     MeshInfo();
+-    MeshInfo(const FlashVersion flash_version, const hid_t file_id);
++    MeshInfo(const FlashVersion flash_version, const hid_t file_id, 
++      const unsigned int actual_dims);
+     MeshInfo(const MeshInfo & source);
+     ~MeshInfo() { }
+ 
+@@ -53,7 +54,8 @@
+       }
+ 
+     void reset();
+-    void reset(const FlashVersion flash_version, const hid_t file_id);
++    void reset(const FlashVersion flash_version, const hid_t file_id, 
++      const unsigned int actual_dims);
+     void reset(const MeshInfo & source);
+ 
+     unsigned int get_dims() const { return dims; }
+Index: src_lib/preflash_file_flashdefs.hpp
+===================================================================
+--- src_lib/preflash_file_flashdefs.hpp	(revision 1389)
++++ src_lib/preflash_file_flashdefs.hpp	(working copy)
+@@ -21,10 +21,11 @@
+ namespace File
+ {
+ 
+-enum FlashVersion { Flash2, Flash3 };
++enum FlashVersion { Flash2, Flash3, Flash3_1 };
+ 
+ extern const int Flash2_FileVersion;
+ extern const int Flash3_FileVersion;
++extern const int Flash3_1_FileVersion;
+ 
+ extern const char Sim_Params_Name_Flash2[];
+ extern const char Sim_Info_Name_Flash3[];
+@@ -80,11 +81,14 @@
+ 
+ extern const char Dataset_Attribute_MinValue_Name[];
+ extern const char Dataset_Attribute_MaxValue_Name[];
++extern const char Dimensionality_Scalar_Name[];
++extern const char File_Format_Version_Name[];
+ 
+ 
+ int get_flash_version(const hid_t file_id, FlashVersion & version);
+ 
+ int read_file_version(const hid_t file_id, int & file_version);
++int read_flash3_file_version(const hid_t dataset_id);
+ 
+ 
+ int pad_variable_name(const std::string & orig_name, std::string & new_name);
+Index: src_lib/preflash_siminfo.cpp
+===================================================================
+--- src_lib/preflash_siminfo.cpp	(revision 1389)
++++ src_lib/preflash_siminfo.cpp	(working copy)
+@@ -509,7 +509,7 @@
+ 
+   // Get information about the mesh topology
+ 
+-  const MeshInfo mesh_info(flash_version, file_id);
++  const MeshInfo mesh_info(flash_version, file_id, dims);
+ 
+   if (mesh_info.get_num_blocks() != num_blocks)
+     throw Except("Block count disagreement with mesh_info", __FILE__, 
+Index: src_lib/preflash_file_meshinfo.cpp
+===================================================================
+--- src_lib/preflash_file_meshinfo.cpp	(revision 1389)
++++ src_lib/preflash_file_meshinfo.cpp	(working copy)
+@@ -42,7 +42,8 @@
+   { reset(); }
+ 
+ 
+-MeshInfo::MeshInfo(const FlashVersion flash_version, const hid_t file_id) : 
++MeshInfo::MeshInfo(const FlashVersion flash_version, const hid_t file_id, 
++		   const unsigned int actual_dims) : 
+   dims(0), num_blocks(0), block_center(), block_width(), block_parent_index(), 
+   block_neighbor_indexes_lo(), block_neighbor_indexes_hi(), 
+   block_neighbor_types_lo(), block_neighbor_types_hi(), 
+@@ -50,7 +51,7 @@
+   block_child_indexes(), block_type(),
+   block_refine_level(), min_refine_level(0), max_refine_level(0),
+   block_process_id()
+-  { reset(flash_version, file_id); }
++  { reset(flash_version, file_id, actual_dims); }
+ 
+ 
+ MeshInfo::MeshInfo(const MeshInfo & source) : 
+@@ -96,10 +97,15 @@
+   }
+ 
+ 
+-void MeshInfo::reset(const FlashVersion flash_version, const hid_t file_id)
++void MeshInfo::reset(const FlashVersion flash_version, const hid_t file_id, 
++  const unsigned int actual_dims)
+   {
+   reset();
+ 
++  //We pass a dimensionality variable because we can no longer 
++  //deduce dimensionality from the array size of HDF5 datasets.
++  dims = actual_dims;
++
+   if (file_id >= 0)
+     {
+     read_block_info(file_id);
+@@ -151,6 +157,7 @@
+ void MeshInfo::read_block_info(const hid_t file_id)
+   {
+   using HDF5::read_data;
++  unsigned int implied_dims;
+ 
+   // Get the block centers
+ 
+@@ -162,15 +169,27 @@
+   if (num_blocks < 1)
+     throw Except("No blocks present in file", __FILE__, __LINE__);
+ 
+-  dims = block_center[0].size();
+-
+-  if (dims < 1)
+-    throw Except("Zero spatial dimensions in file", __FILE__, __LINE__);
+-
+   // Get the block widths
+ 
+   if (read_data(file_id, BlockWidth_label, block_width) < 0)
+     throw Except("Unable to read block widths", __FILE__, __LINE__);
++
++  implied_dims = block_center[0].size();
++
++  if (implied_dims < 1)
++    throw Except("Zero spatial dimensions in file", __FILE__, __LINE__);
++
++  //Eliminate vector elements for dimensions appearing in the following
++  //HDF5 arrays, but not in the actual simulation.  Only happens 
++  //in FLASH3.0 (full release) and FLASH3.1.
++  if (implied_dims != dims) 
++    {
++    for (unsigned int i = 0; i < num_blocks; ++i)
++      {
++      block_center[i].resize(dims);
++      block_width[i].resize(dims);
++      }
++    }
+   }
+ 
+ 
+@@ -296,7 +315,8 @@
+ 
+ 	  break;
+ 
+-	case Flash3 :
++	case Flash3 : 
++	case Flash3_1 :
+ 
+ 	  if (Mesh::get_neighbor_type_flash3(lo_neighbor, 
+ 					     lo_neighbor_type,

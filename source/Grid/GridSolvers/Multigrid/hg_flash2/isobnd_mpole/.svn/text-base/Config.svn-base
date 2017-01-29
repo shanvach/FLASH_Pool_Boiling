@@ -1,0 +1,13 @@
+# Configuration file for the multipole Poisson solver, modified for use in
+# computing image-potential boundary values
+
+# Parameters:
+
+D  mpole_lmax	Maximum multipole moment to use
+
+PARAMETER mpole_lmax	INTEGER	0
+
+# Variables needed for isolated boundary calculations
+
+VARIABLE hgw3 NOADVECT NORENORM NOCONSERVE
+VARIABLE hgw4 NOADVECT NORENORM NOCONSERVE

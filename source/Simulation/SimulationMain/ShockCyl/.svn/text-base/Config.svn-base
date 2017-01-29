@@ -1,0 +1,173 @@
+#            Configuration file for shock interacting with dense gas column
+# [source/Simulation/SimulationMain/ShockCyl]
+#            Ambient gas - air
+#            Dense gas - SF6
+#            Conditions to match LANL experiment
+
+REQUIRES Driver
+REQUIRES physics/Hydro
+REQUIRES physics/Eos/EosMain/Multigamma
+REQUIRES Multispecies
+REQUESTS IO
+
+USESETUPVARS withParticles
+
+# if you want to include particles, add withParticles=TRUE to setup line
+IF withParticles
+   PARTICLETYPE passive INITMETHOD lattice MAPMETHOD quadratic ADVMETHOD rungekutta
+   REQUIRES Particles/ParticlesMain
+   REQUESTS Particles/ParticlesMapping/Quadratic
+   REQUESTS Particles/ParticlesInitialization/Lattice
+   REQUESTS IO/IOMain/
+   REQUESTS IO/IOParticles
+ENDIF
+
+#a setup line that works for Cal's configuration is
+# ./setup ShockCyl -auto -3d -objdir=tShockCylParticles +ugio -unit=Particles -unit=IO/IOParticles -debug
+
+#only include these files IF unit is included in simulation
+LINKIF Grid_markRefineDerefine.F90 Grid/GridMain/paramesh/
+LINKIF Particles_updateAttributes.F90 Particles/ParticlesMain
+#LINKIF sim_derivedVariables.F90 Particles/ParticlesMain
+
+# number of species (ionmax)
+SPECIES AIR
+SPECIES SF6
+
+# extra variables that don't seem to be used
+#VARIABLE vrtz
+#PARAMETER       dydeta_wall     REAL   0.25
+
+# white noise parameters that Cal added recently
+D  n_pert    Something to do with white noise -- ask Cal
+D  d_pert    Something to do with white noise -- ask Cal
+PARAMETER    n_pert       INTEGER 0
+PARAMETER    d_pert       REAL    0.e0
+
+
+#  Pre-shock parameters
+D rho_amb    Pre-shock parameter: density of air
+D vx_amb     Pre-shock parameter: x-velocity of air
+D p_amb      Pre-shock parameter: pressure of air
+PARAMETER    rho_amb      REAL    0.95e-3
+PARAMETER    p_amb        REAL    8.e5
+PARAMETER    vx_amb       REAL    0.0
+
+# Parameters describing SF6 concentrations
+#  Assume only SF6 has velocity in the z direction
+D maxconc	maximum mole fraction concentration of SF6
+D vz_sf6	z-velocity of SF6 
+PARAMETER    maxconc      REAL    0.8
+PARAMETER    vz_sf6       REAL    0.0
+
+# Parameters relating to shock
+D sim_xShock shock location in x direction 
+D mach       shock speed Mach number
+PARAMETER    sim_xShock       REAL    20.0
+PARAMETER    mach         REAL    1.2
+
+# Parameters for nozzle location
+D xctr       location of gas influx nozzle in x direction
+D yctr       location of gas influx nozzle in y direction
+PARAMETER    xctr         REAL    25.0
+PARAMETER    yctr         REAL    4.
+
+
+#DEV don't know what ref_rect_x/y are -- Cal thought something to do with reflection? LBR votes reference
+D ref_rect_x
+D ref_rect_y
+PARAMETER    ref_rect_x   REAL    0.
+PARAMETER    ref_rect_y   REAL    0.
+
+#There are three mutually-exclusive methods for initializing the simulation
+# sim_useRadialFit -- use a radial fit of the experimental image
+# use_raw_data -- use the experimental image directly
+# use_rz_sim_data -- interpolate simulations of initial conditions -- this is the method Cal uses
+
+# These parameters below only used if radial fit of experimental image used for initializations
+D sim_useRadialFit 	Use a radial fit of the experimental image to determine SF6 initial conditions?
+D sim_radialFitRadius 	[sim_useRadialFit=TRUE] fitting radius (not used, hard coded in sim_radialFit)
+D sim_radialNumPixels	[sim_useRadialFit=TRUE] use a radius of sim_radialNumPixels pixels for fitting (not used, hardcoded in sim_radialFit)	
+PARAMETER    sim_useRadialFit        BOOLEAN FALSE
+PARAMETER    sim_radialFitRadius     REAL    0.6
+PARAMETER    sim_radialNumPixels     REAL    150.
+# end of initialization with sim_useRadialFit = TRUE
+
+# These parameters only used if use_raw_data is TRUE -- initial conditions from experiments
+PARAMETER    sim_useRawData          BOOLEAN FALSE
+D sim_useRawData		Determine initial conditions from the experimental image results?
+D sim_rawNumPixelsX		[sim_useRawData=TRUE] number of pixels in the x direction
+D sim_rawNumPixelsY		[sim_useRawData=TRUE] number of pixels in the y direction
+D sim_rawMinX			[sim_useRawData=TRUE] x location of image edge
+D sim_rawMinY			[sim_useRawData=TRUE] y location of image edge
+D sim_rawPixelSize		[sim_useRawData=TRUE] physical size of the pixels in centimeters
+PARAMETER    sim_rawNumPixelsX        INTEGER 608
+PARAMETER    sim_rawNumPixelsY        INTEGER 468
+PARAMETER    sim_rawMinX      	      REAL    22.
+PARAMETER    sim_rawMinY              REAL    3.1
+PARAMETER    sim_rawPixelSize         REAL    0.0038
+# end of sim_useRawData=TRUE
+
+
+# Below only apply when use_rz_sim_data is true -- Cal is using this method in 3d
+PARAMETER    use_rz_sim_data          BOOLEAN TRUE
+D use_rz_sim_data   Read in simulated profile data for initial conditions?
+D nr_c				[rz_sim_data=TRUE] number of grid cells in the radial direction
+D nz_c				[rz_sim_data=TRUE] number of grid cells in the z direction
+D rz_fileSF6_cc		[rz_sim_data=TRUE] initial conditions profile data for sf6
+D rz_filePres_cc		[rz_sim_data=TRUE] initial conditions profile data for pressure (not used)
+D rz_fileRVel_ec		[rz_sim_data=TRUE] initial conditions profile data for radial velocity
+D rz_fileZVel_ce		[rz_sim_data=TRUE] initial conditions profile data for vertical velocity (not used in 3d)
+PARAMETER    nr_c            INTEGER 128
+PARAMETER    nz_c            INTEGER 64
+PARAMETER    rz_fileSF6_cc     STRING  "massfr0200000"
+PARAMETER    rz_filePres_cc   STRING  "press00200000"
+PARAMETER    rz_fileRVel_ec    STRING  "rvel000200000"
+PARAMETER    rz_fileZVel_ce    STRING  "zvel000200000"
+D rz_rmax			[rz_sim_data=TRUE] maximum radial extent  of simulation data
+D rz_zmax			[rz_sim_data=TRUE] maximum vertical extent of simulation data
+D rz_zplane			[rz_sim_data=TRUE] location of 2D horizontal slice in vertical z direction
+PARAMETER    rz_rmax         REAL 3.2
+PARAMETER    rz_zmax         REAL 7.5
+PARAMETER    rz_zplane       REAL 5.5
+
+D rz_3d_use_sym		[rz_sim_data=TRUE]
+D rz_pert_amp		[rz_sim_data=TRUE] amplitude of perturbation in radial interpolation location
+D rz_pert_zlen		[rz_sim_data=TRUE] z length scale of perturbation; current value is 4dx at 146 microns
+PARAMETER    rz_3d_use_sym   BOOLEAN FALSE
+PARAMETER    rz_pert_amp     REAL -1.00
+PARAMETER    rz_pert_zlen    REAL 0.05859375
+
+D rz_subintNX			[rz_sim_data=TRUE] Something to do with integration over a subregion to 
+D  &                                               calculate initial concentration
+D rz_subintNY			[rz_sim_data=TRUE]   
+D rz_subintNZ			[rz_sim_data=TRUE]
+PARAMETER    rz_subintNX       INTEGER  10
+PARAMETER    rz_subintNY       INTEGER  10
+PARAMETER    rz_subintNZ       INTEGER  10
+# end of use_rz_sim_data = TRUE
+
+# For including particles in the simulation
+#DEV: kda these particle props were p_dens, p_pres ...
+PARTICLEPROP        dens          REAL
+PARTICLEPROP        pres          REAL
+PARTICLEPROP        sf6           REAL
+PARTICLEPROP        simtime       REAL
+PARTICLEPROP        nstep         REAL
+PARTICLEPROP        p_temp        REAL 
+PARTICLEPROP	omegax	          REAL
+PARTICLEPROP	omegay	          REAL
+PARTICLEPROP	omegaz	          REAL 
+PARTICLEPROP	gammaxy	          REAL
+PARTICLEPROP	gammaxz	          REAL
+PARTICLEPROP	gammayz	          REAL
+PARTICLEPROP	dvxdx		  REAL
+PARTICLEPROP	dvydy		  REAL
+PARTICLEPROP	dvzdz		  REAL
+
+
+# to control Particles_initPositions for Lattice, use that modules Config parameters
+
+# use this keyword to get the appropriate datafiles copied into your simulations
+DATAFILES InitialConditions/128x64*
+

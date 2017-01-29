@@ -1,0 +1,8 @@
+# Configuration file for Sutherland & Dopita (1993) table-based cooling
+
+# cool_fctn_file          Name of file to take cooling curve data from
+
+PARAMETER cool_fctn_file   STRING   "mzero.cie"
+PARAMETER useCool   BOOLEAN  TRUE    
+
+REQUIRES flashUtilities/interpolation/oneDim

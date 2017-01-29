@@ -1,0 +1,53 @@
+#
+
+PARAMETER rho1              REAL     1.0      # Density of fluid 1.
+PARAMETER rho2              REAL     1.0      # Density of fluid 2.
+
+PARAMETER vis1              REAL     1.0      # Density of fluid 1.
+PARAMETER vis2              REAL     1.0      # Density of fluid 2.
+
+PARAMETER sten              REAL     1.0      # Surface tension among two fluids.
+
+PARAMETER lsit              INTEGER    2      # Level Set redistance iterations...
+                                              #   Over-written in Simulation flash.par 
+PARAMETER inls              INTEGER    5000   # Level Set redistance iterations...
+
+PARAMETER thco1             REAL     1.0
+PARAMETER thco2	            REAL     1.0
+
+PARAMETER cp1               REAL     1.0
+PARAMETER cp2               REAL     1.0
+
+# THIS PART IS FOR PHYSICS CONFIG
+# Variables required by the MPH module
+VARIABLE dfun                   # Level set distance function
+##VARIABLE dens                   # Fluid Density
+VARIABLE visc                   # Fluid Viscosity 
+VARIABLE curv                   # Curvature
+VARIABLE sigp                   # Sigma * Kappa source at interface.
+VARIABLE pfun                   # Phase function.
+VARIABLE cprs                   # Specific Heat - Akash
+VARIABLE thco                   # Thermal Conductivity - Akash
+VARIABLE mdot                   # (Capital) M dot (scalar) - Akash
+VARIABLE tnlq                   # Tn liquid - Akash
+VARIABLE tnvp                   # Tn vapor - Akash
+VARIABLE nrmx                   # Normal x - Akash
+VARIABLE nrmy                   # Normal y - Akash
+
+VARIABLE smhv                   # Smeared Heaviside Function - mslee (Akash)
+VARIABLE smrh                   # Smeared density - mslee (Akash)
+
+VARIABLE TESTVAL
+# Use FACEVAR for cell interface velocity fields
+FACEVAR sigm                   # Sigma * Kappa source at interface.
+FACEVAR rh1f
+FACEVAR rh2f
+#FACEVAR tliq                  # gradient of Temp liquid - Akash 
+#FACEVAR tvap                  # gradient of Temp vapor - Akash
+
+
+FACEVAR veli                  # Interface Velocity - mslee (Akash)
+# Fluxes
+FLUX rh1f
+FLUX rh2f
+

@@ -1,0 +1,105 @@
+#	Runtime parameters for the linear advection problem.
+
+#	Parameters for initial model
+
+sim_rhoin		= 1.	# density inside pulse
+sim_rhoout		= 1.E-5	# density outside
+sim_pressure	= 1.
+sim_velocity	= 10.
+sim_width		= 0.1
+sim_pulseFunctn	= 1	# pulse shape:  1 = square, 2 = Gaussian
+
+#		Angle and position of interface relative to x and y axes
+
+sim_xangle		= 0.
+sim_yangle		= 90.
+sim_posn		= 0.25
+
+#		Gas ratio of specific heats
+
+gamma           = 1.4
+
+#	Computational volume parameters
+
+#		Grid dimensionality and geometry
+
+geometry = "cartesian"
+#		Size of computational volume
+
+xmin		= 0.
+xmax		= 8.
+ymin		= 0.
+ymax		= 8.
+
+#		Boundary conditions
+
+xl_boundary_type      = "outflow"
+xr_boundary_type      = "outflow"
+yl_boundary_type      = "outflow"
+yr_boundary_type      = "outflow"
+
+#	Simulatio time and I/O parameters
+
+cfl		= 0.8
+nend            = 5000
+tmax            = 0.4
+
+basenm          = "advect_"
+restart         = .false.
+
+
+#	checkpoint file output parameters
+checkpointFileIntervalTime = 0.4
+checkpointFileIntervalStep = 0
+checkpointFileNumber = 0
+
+#	plotfile output parameters
+plotfileIntervalTime = 0.
+plotfileIntervalStep = 0
+plotfileNumber = 0
+
+
+plot_var_1 = "dens"
+plot_var_2 = "pres"
+plot_var_3 = "temp"
+
+
+run_comment     = "2D linear advection problem, parallel to x-axis"
+log_file        = "advect_0deg_4lev.log"
+eintSwitch     = 1.e-4
+
+#  Grid Refinement Parameters
+
+lrefine_max     = 4
+refine_var_1 = "dens"
+
+#  Uniform Grid specific Parameterrs
+# see note below for more explanation
+
+iProcs = 1	#number or procs in the i direction	
+jProcs = 1
+kProcs = 1
+
+# UG Parameters used only with non-fixed block size
+#iGridSize = 16
+#jGridSize = 16
+#kGridSize = 16
+
+ 
+## -------------------------------------------------------------##
+##  SWITCHES SPECIFIC TO THE UNSPLIT HYDRO SOLVER               ##
+#	I. INTERPOLATION SCHEME:
+order		= 2      # Interpolation order (First/Second order)
+slopeLimiter    = "mc"   # Slope limiters (minmod, mc, vanLeer, hybrid, limited)
+LimitedSlopeBeta= 1.     # Slope parameter for the "limited" slope by Toro
+charLimiting	= .true. # Characteristic limiting vs. Primitive limiting
+
+
+#	II. RIEMANN SOLVERS:
+RiemannSolver	= "Roe"       # Roe, HLL, HLLC, LF
+shockInstabilityFix = .false. # Carbuncle instability fix for the Roe solver
+
+
+#	III. STRONG SHOCK HANDELING SCHEME:
+shockDetect	= .false.     # Shock Detect for numerical stability
+## -------------------------------------------------------------##

@@ -1,0 +1,58 @@
+#       Configuration file for Isotropic Turbulence Problem
+#       Linearly Forced Isotropic Turbulence problem in a
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens
+
+USESETUPVARS Grid
+
+IF Grid =='UG' 
+  REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+ELSE
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens/poisson/PfftTopLevelSolve
+ENDIF 
+
+#/Generic_Direct
+
+#DATAFILES libtecio.a
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+#D   invRe  inverse Reynolds number
+#PARAMETER invRe         REAL     1.
+
+#D   isgs   Subgrid scale model flag
+#PARAMETER isgs          INTEGER  0
+
+
+
+## ----------------------------------------------
+## THIS PART IS FOR PHYSICS CONFIG
+## Variables required by the INS module
+#VARIABLE pres                	# pressure
+#VARIABLE delp            	# pressure correction
+#VARIABLE dust                 	# divergence of ustar, poissons equation source term
+#VARIABLE tvis               	# turbulent viscosity
+
+## Fluxes
+#FLUX velx
+#FLUX vely
+
+
+## Use GRIDVAR for temporary storages
+#GRIDVAR divv
+
+
+
+## Use FACEVAR for cell interface velocity fields
+#FACEVAR velc
+#FACEVAR rhds
+
+
+## Number of guardcells at each boundary
+#GUARDCELLS 2
