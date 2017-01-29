@@ -78,7 +78,7 @@ subroutine Heat_AD_init(blockCount,blockList)
      !call MPI_Allreduce(maxdfun_local, maxdfun_global, 1, FLASH_REAL,&
      !                MPI_MAX, MPI_COMM_WORLD, ierr)
 
-goto 100
+!goto 100
 
      do k=1,blkLimitsGC(HIGH,KAXIS)
       do j=1,blkLimitsGC(HIGH,JAXIS)
@@ -121,7 +121,7 @@ goto 100
        end do
      end do
 
-100 continue
+!100 continue
 
      !solnData(TEMP_VAR,:,:,:) = 0.0
      solnData(THCO_VAR,:,:,:) = 0.0
