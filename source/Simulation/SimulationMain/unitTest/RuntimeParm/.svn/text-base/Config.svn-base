@@ -1,7 +1,0 @@
-#	Configuration file for the null implementation
-
-
-REQUIRES Driver
-REQUIRES RuntimeParameters/RuntimeParametersMain
-
-

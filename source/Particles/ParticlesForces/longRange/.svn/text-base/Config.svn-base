@@ -1,4 +1,0 @@
-#  Configuration file for long-range active particle forces
-# [/source/Particles/timeIntegration/active/longRange]
-
-DEFAULT gravity

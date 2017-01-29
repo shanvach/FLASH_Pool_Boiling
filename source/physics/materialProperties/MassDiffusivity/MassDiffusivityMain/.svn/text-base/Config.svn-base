@@ -1,4 +1,0 @@
-DEFAULT Constant
-
-D	  useMassDiffusivity flags whether the mass diffusivity material property is being used
-PARAMETER useMassDiffusivity 		BOOLEAN TRUE

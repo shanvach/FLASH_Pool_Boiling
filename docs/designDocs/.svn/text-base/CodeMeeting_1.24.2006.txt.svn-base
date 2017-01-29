@@ -1,9 +1,0 @@
-Code Meeting 1.24.2006
-
-Unit Test -- Particles Should we do a diff on the particles dump file.  
-
-test suite
-setup
-gmake
-./flash3
-dosomething.py (sfocu, diff)

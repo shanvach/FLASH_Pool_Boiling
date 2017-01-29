@@ -1,8 +1,0 @@
-#	Config file for the Poisson Multigrid module.  
-#  [source/physics/Gravity/Poisson/Multigrid]
-
-REQUESTS Grid/GridSolvers/Multigrid
-
-# Runtime parameters
-REQUESTS Grid/GridSolvers/IsoBndMultipole
-

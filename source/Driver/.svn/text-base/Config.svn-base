@@ -1,6 +1,0 @@
-# Config file for source/Driver unit
-# Driver stub Config requires no other units
-
-
-DEFAULT DriverMain
-

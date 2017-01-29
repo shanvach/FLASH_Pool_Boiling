@@ -1,6 +1,0 @@
-hydro_block	hy_block
-hydro_detectShock	Hydro_detectShock
-hydro_sweep		hy_sweep
-hydro_updateSoln	hy_updateSoln
-hydro_renormAbundance	hy_renormAbundance
-hydro_restrictAbundance	hy_restrictAbundance

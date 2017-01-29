@@ -1,5 +1,0 @@
-# Config file for Grid/GridParticles/Paramesh
-
-
-REQUIRES flashUtilities/sorting
-PPDEFINE FLASH_PARTICLES_PTOP

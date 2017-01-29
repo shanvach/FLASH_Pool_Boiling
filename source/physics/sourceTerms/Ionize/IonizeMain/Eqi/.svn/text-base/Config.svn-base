@@ -1,4 +1,0 @@
-#       Configuration file for the "eqi" 
-
-KERNEL
-REQUIRES Simulation/SimulationComposition/Ionize

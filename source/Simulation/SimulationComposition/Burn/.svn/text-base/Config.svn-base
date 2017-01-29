@@ -1,4 +1,0 @@
-# Config file for all network species composition
-# [Simulation/SimulationComposition/Burn]
-
-DATAFILES SpeciesList.txt
