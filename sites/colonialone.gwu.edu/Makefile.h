@@ -5,8 +5,8 @@
 #----------------------------------------------------------------------------
 
 # Programming environment GNU or INTEL:
-#PE_ENV =GNU
-PE_ENV =INTEL
+PE_ENV =GNU
+#PE_ENV =INTEL
 
 
 LIB_BASE   =/groups/balarasgrp/Software/$(PE_ENV)
