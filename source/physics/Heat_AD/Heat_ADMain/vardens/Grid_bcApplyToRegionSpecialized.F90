@@ -284,15 +284,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                  regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
                end do
   
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else
@@ -320,8 +320,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
   
                !counter = counter +1
@@ -334,24 +334,25 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
              case default
 
-               !if(ivar == VELC_FACE_VAR) then
+               if(ivar == VELC_FACE_VAR) then
                
-               !if (isFace) then 
-               !  k = 2*guard+2
-               !  do i = 1,guard
-               !     regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
+               if (isFace) then 
+                 k = 2*guard+2
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
                     !regionData(i,1:je,1:ke,ivar) = 0.
-               !  end do
-               !  regionData(guard+1,1:je,1:ke,ivar)= 0.
+                 end do
+                 regionData(guard+1,1:je,1:ke,ivar)= 0.
                
-               !else          
-               !  k = 2*guard+1
-               !  do i = 1,guard
-               !  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
-               !  end do
-               !endif
+               else          
+                 k = 2*guard+1
+                 do i = 1,guard
+                 !regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+               endif
 
-               !else
+               else
 
                k = 2*guard+1
                if (isFace) k = k+1
@@ -359,7 +360,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
-               !end if
+               end if
 
            end select
  
@@ -398,8 +399,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else
@@ -426,8 +427,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
 
                !counter = counter + 1
@@ -440,21 +441,22 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
              case default
 
-               !if(ivar == VELC_FACE_VAR) then
+               if(ivar == VELC_FACE_VAR) then
                
-               !if (isFace) then 
-               !  k = 2*guard+2
-               !  do i = 1,guard
-               !     regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
-               !  end do
-               !  regionData(guard+1,1:je,1:ke,ivar)= 0.
+               if (isFace) then 
+                 k = 2*guard+2
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
+                    !regionData(i,1:je,1:ke,ivar)=0.
+                 end do
+                 regionData(guard+1,1:je,1:ke,ivar)= 0.
                
-               !else          
-               !  k = 2*guard+1
-               !  do i = 1,guard
-               !  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
-               !  end do
-               !endif
+               else          
+                 k = 2*guard+1
+                 do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                 end do
+               endif
 
                !!if (ivar == VELC_FACE_VAR) then
 
@@ -465,7 +467,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                !  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                !!end do
 
-               !else
+               else
 
                k = 2*guard+1
                if (isFace) k = k+1
@@ -473,7 +475,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
-               !end if
+               end if
 
            end select 
   
@@ -492,15 +494,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                 !regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                 !regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                 regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
                end do
 
                else
@@ -527,8 +529,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                 !regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                 regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
                end do
 
                !counter = counter + 1
@@ -541,23 +543,25 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
              case default
 
-              !if (ivar == VELC_FACE_VAR) then
+              if (ivar == VELC_FACE_VAR) then
               
-              ! if (isFace) then
-              !   k = 2*guard+2
-              !   do i = 1,guard
-              !      regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
-              !   end do
-              !   regionData(guard+1,1:je,1:ke,ivar)= 0.
+               if (isFace) then
+                 k = 2*guard+2
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
+                    !regionData(k-i,1:je,1:ke,ivar)= 0.
+                 end do
+                 regionData(guard+1,1:je,1:ke,ivar)= 0.
               
-              ! else
-              !   k = 2*guard+1
-              !   do i = 1,guard
-              !      regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
-              !   end do
-              ! endif
+               else
+                 k = 2*guard+1
+                 do i = 1,guard
+                    !regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    regionData(k-i,1:je,1:ke,ivar)=regionData(i,1:je,1:ke,ivar)
+                 end do
+               endif
 
-              !else
+              else
 
               k = 2*guard+1
               if(isFace)k=k+1
@@ -566,7 +570,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               end do
 
 
-              !end if
+              end if
 
               !k = 2*guard+1
               !if(isFace) then
