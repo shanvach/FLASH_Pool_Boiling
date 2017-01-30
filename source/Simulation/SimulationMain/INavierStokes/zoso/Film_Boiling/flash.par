@@ -9,7 +9,7 @@ gr_pmRpConsvFluxDensities = .FALSE.
 pt_maxPerProc=3500
 
 # Inverse of Reynolds Number
-invRe = 0.02
+invRe = 0.0072
 
 # Prandtl Number
 Pr = 1.0
@@ -43,7 +43,7 @@ gravY = -1.0
 gravZ =  0.0
 
 # Inverse Weber Number
-sten = 1.0
+sten = 0.0082
 
 # Number of level-set redistancing iterations
 inls = 10
@@ -82,13 +82,13 @@ restart         = .false.
 #plotFileNumber  = 1
 #nend            = 10000000
 #nend = 2
-nend = 800000
+nend = 200000
 tmax            = 2.00
 cflflg          = 0
 cfl             = 0.1
 sigma		= 0.05
-dtspec          = 0.25d-5
-dtinit          = 0.25d-5
+dtspec          = 1.0d-6
+dtinit          = 1.0d-6
 tstep_change_factor=1.00
 
 
@@ -112,11 +112,11 @@ plotFileIntervalTime = 0.05
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 10000
 #plotFileIntervalStep = 100
-plotFileIntervalStep = 10000
+plotFileIntervalStep = 500
 
 ##	AMR parameters
-nblockx	= 2 #4
-nblocky	= 2 #8
+nblockx	= 4 #4
+nblocky	= 4 #8
 lrefine_min	= 1
 lrefine_max     = 1
 mgrid_solveLevelKPD = 1
