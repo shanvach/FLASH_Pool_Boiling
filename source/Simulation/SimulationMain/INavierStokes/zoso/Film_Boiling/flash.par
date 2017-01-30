@@ -15,7 +15,7 @@ invRe = 0.0072
 Pr = 1.0
 
 # Stefan Number
-St = 0.04
+St = 0.4
 
 #iConvU = 1
 
@@ -111,8 +111,8 @@ checkpointFileIntervalStep = 10000
 plotFileIntervalTime = 0.05
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 10000
-#plotFileIntervalStep = 100
-plotFileIntervalStep = 10000
+plotFileIntervalStep = 5000
+#plotFileIntervalStep = 10000
 
 ##	AMR parameters
 nblockx	= 4 #4
