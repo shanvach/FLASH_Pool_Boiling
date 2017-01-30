@@ -82,13 +82,13 @@ restart         = .false.
 #plotFileNumber  = 1
 #nend            = 10000000
 #nend = 2
-nend = 200000
-tmax            = 2.00
+nend = 2000000
+tmax            = 20.00
 cflflg          = 0
 cfl             = 0.1
 sigma		= 0.05
-dtspec          = 1.0d-6
-dtinit          = 1.0d-6
+dtspec          = 1.0d-5
+dtinit          = 1.0d-5
 tstep_change_factor=1.00
 
 
@@ -112,7 +112,7 @@ plotFileIntervalTime = 0.05
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 10000
 #plotFileIntervalStep = 100
-plotFileIntervalStep = 500
+plotFileIntervalStep = 10000
 
 ##	AMR parameters
 nblockx	= 4 #4
