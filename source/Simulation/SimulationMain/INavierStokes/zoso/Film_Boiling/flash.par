@@ -43,7 +43,7 @@ gravY = -1.0
 gravZ =  0.0
 
 # Inverse Weber Number
-sten = 0.0082
+sten = 1.0
 
 # Number of level-set redistancing iterations
 inls = 10
