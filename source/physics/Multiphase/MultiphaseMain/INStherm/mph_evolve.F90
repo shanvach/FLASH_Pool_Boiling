@@ -34,7 +34,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
                             mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
                             mph_KPDadvectWENO3_3D,mph_KPDlsRedistance_3D,&
-                            mph_getSmearedProperties2D
+                            mph_getSmearedProperties2D,mph_getSmearedProperties3D
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -144,9 +144,9 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
 
         call mph_KPDlsRedistance_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
+                          facexData(VELI_FACE_VAR,:,:,:), &
+                          faceyData(VELI_FACE_VAR,:,:,:), &
+                          facezData(VELI_FACE_VAR,:,:,:), &
                           del(DIR_X),del(DIR_Y),del(DIR_Z),  &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
@@ -170,8 +170,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
 
         call mph_KPDlsRedistance(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:),  &
-                          faceyData(VELC_FACE_VAR,:,:,:),  &
+                          facexData(VELI_FACE_VAR,:,:,:),  &
+                          faceyData(VELI_FACE_VAR,:,:,:),  &
                           del(DIR_X),del(DIR_Y),  &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
@@ -306,7 +306,11 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            facezData(RH2F_FACE_VAR,:,:,:),             &
                            solnData(PFUN_VAR,:,:,:),                   &
                            mph_rho1,mph_rho2,                          &
-                           solnData(VISC_VAR,:,:,:), mph_vis1,mph_vis2 )
+                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2 ,&
+                           solnData(THCO_VAR,:,:,:),solnData(CPRS_VAR,:,:,:),&
+                           mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
+                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
+                           solnData(NRMZ_VAR,:,:,:))
         !----------------------------------------------------------
 
 #endif
@@ -341,6 +345,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   gcMask(CPRS_VAR) = .TRUE.                 ! Specific heat - Akash
   gcMask(NRMX_VAR) = .TRUE. 
   gcMask(NRMY_VAR) = .TRUE.
+  gcMask(NRMZ_VAR) = .TRUE.
 
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
@@ -431,7 +436,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                            facezData(RH1F_FACE_VAR,:,:,:)   , &
                            facezData(RH2F_FACE_VAR,:,:,:)   , &
-                           facezData(SIGM_FACE_VAR,:,:,:) )
+                           facezData(SIGM_FACE_VAR,:,:,:) ,&
+                           solnData(MDOT_VAR,:,:,:))
 
 #endif
      !-----------------------------------------------
@@ -508,10 +514,14 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      !----------------------------------------------------------
      !- ML - Call mph_getSmearedProperties2D
      !----------------------------------------------------------
+
+#if NDIM == 2
+
      call mph_getSmearedProperties2D(solnData(DFUN_VAR,:,:,:), &
                           del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -519,11 +529,28 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                           solnData(NRMX_VAR,:,:,:),&
                           solnData(NRMY_VAR,:,:,:),&
                           solnData(SMHV_VAR,:,:,:),&
-                          solnData(SMRH_VAR,:,:,:) )
+                          solnData(SMRH_VAR,:,:,:))
+#endif
+
+#if NDIM == 3
+
+     call mph_getSmearedProperties3D(solnData(DFUN_VAR,:,:,:), &
+                          del(DIR_X),del(DIR_Y),del(DIR_Z),mph_rho1,mph_rho2, &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                          solnData(NRMX_VAR,:,:,:),&
+                          solnData(NRMY_VAR,:,:,:),&
+                          solnData(NRMZ_VAR,:,:,:),&
+                          solnData(SMHV_VAR,:,:,:),&
+                          solnData(SMRH_VAR,:,:,:))
+
+#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
 

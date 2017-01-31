@@ -68,7 +68,9 @@ interface
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                                rho2y,pf,w,sigx,sigy,mdot
+                                                rho2y,pf,w,sigx,sigy
+
+        real, dimension(:,:,:), intent(in) :: mdot
         end subroutine mph_KPDcurvature2DC
 end interface
 
@@ -101,16 +103,18 @@ end interface
 interface
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
-           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2)
+           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2,thco,cprs,&
+           thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz)
 
         implicit none
 
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
-        real, intent(in) :: dx, dy, dz, rho1, rho2, vis1, vis2
+        real, intent(in) :: dx, dy, dz, rho1, rho2, vis1, vis2,thco1,thco2,cp1,cp2
         real, dimension(:,:,:), intent(inout):: s,crv, &
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
-                                                rho1z,rho2z, visc
+                                                rho1z,rho2z, visc, thco,cprs,&
+                                                nrmx,nrmy,nrmz
 
         end subroutine mph_KPDcurvature3DAB
 end interface
@@ -120,7 +124,7 @@ interface
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz)
+                                       rho2z,sigz,mdot)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(in) :: dx, dy, dz, rho1, rho2, xit
@@ -128,6 +132,8 @@ interface
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz
+
+        real, dimension(:,:,:), intent(in) :: mdot
 
         end subroutine mph_KPDcurvature3DC
 end interface
@@ -211,6 +217,18 @@ interface
 end interface
 
 interface
+       subroutine mph_getSmearedProperties3D(s,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz1,kz2,xnorm,ynorm,znorm,smhv,smrh) 
+
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        real, intent(in) :: dx,dy,rho1,rho2,dz
+        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,znorm
+        real, dimension(:,:,:), intent(inout) :: smhv,smrh
+
+      end subroutine
+end interface
+
+
+interface
         subroutine mph_getInterfaceVelocity(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy, &
                            visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
                            mdot,smrh,xnorm,ynorm,uint,vint)
@@ -221,6 +239,21 @@ interface
         REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
         REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh
         REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint
+
+        end subroutine
+end interface
+
+interface
+        subroutine mph_getInterfaceVelocity_3D(uni,vni,wni,ru1,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz,&
+                           visc,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,gravX,gravY,gravZ,&
+                           mdot,smrh,xnorm,ynorm,znorm,uint,vint,wint)
+
+        implicit none
+        INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2,kz1,kz2
+        REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
+        REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, visc, rho1x, rho2x, rho1y, rho2y, rho1z, rho2z
+        REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,znorm,mdot,smrh
+        REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint, wint
 
         end subroutine
 end interface

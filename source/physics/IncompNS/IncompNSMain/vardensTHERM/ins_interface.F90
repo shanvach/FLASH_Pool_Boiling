@@ -345,7 +345,7 @@ Module ins_interface
   end interface
 
  interface
-    SUBROUTINE ins_rhs2d_VD_ML(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
+    SUBROUTINE ins_rhs2d_PC(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
                            mdot,smrh,xnorm,ynorm)
 
@@ -360,9 +360,28 @@ Module ins_interface
  end interface
 
  interface
-    SUBROUTINE ins_divergence_VD_ML(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
+      SUBROUTINE ins_rhs3d_PC(uni,vni,wni,tv,ru1,      &
+                           ix1,ix2,jy1,jy2,kz1,kz2, &
+                           dx,dy,dz,ru,rv,rw,visc,  &
+                           rho1x,rho2x,rho1y,rho2y, &
+                           rho1z,rho2z,gravX, gravY, gravZ,&
+                           mdot,smrh,xnorm,ynorm,znorm)
+
+      implicit none
+      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
+      REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x,rho2x, rho1y, rho2y
+      REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z
+      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,smrh,xnorm,ynorm,znorm
+      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
+
+      END SUBROUTINE
+ end interface
+
+ interface
+    SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
                                 ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc,&
-                                       dx,dy,dz,divv,s,pf,xnorm,ynorm,smrh,mdot,rho1,rho2,testval,rho1x,rho2x,rho1y,rho2y)
+                                       dx,dy,dz,divv,s,pf,xnorm,ynorm,znorm,smrh,mdot,rho1,rho2,rho1x,rho2x,rho1y,rho2y)
 
       INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
       REAL, INTENT(IN) :: dx,dy,dz
@@ -372,8 +391,7 @@ Module ins_interface
       INTEGER, INTENT(IN) :: ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc
       real, dimension(:,:,:), intent(in) :: s,pf
       real, intent(in) :: rho1,rho2
-      real, dimension(:,:,:), intent(in) :: xnorm,ynorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y
-      real, dimension(:,:,:), intent(out) :: testval
+      real, dimension(:,:,:), intent(in) :: xnorm,ynorm,znorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y
 
     END SUBROUTINE
  end interface

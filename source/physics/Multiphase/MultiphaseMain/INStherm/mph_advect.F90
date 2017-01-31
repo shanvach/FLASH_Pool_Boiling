@@ -24,7 +24,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                              Grid_fillGuardCells,    &
                              Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
-  use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe
+  use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
@@ -33,7 +33,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
                             mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
                             mph_KPDadvectWENO3_3D, mph_KPDlsRedistance_3D,&
-                            mph_getInterfaceVelocity 
+                            mph_getInterfaceVelocity,mph_getInterfaceVelocity_3D 
 
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
@@ -107,6 +107,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
         !---------------------------------------------------------------------
         !- mslee -  get interface velocity for level set advection
+
+#if NDIM == 2
+
         call mph_getInterfaceVelocity( facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
@@ -125,6 +128,37 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       solnData(NRMY_VAR,:,:,:),&
                       facexData(VELI_FACE_VAR,:,:,:),            &
                       faceyData(VELI_FACE_VAR,:,:,:))
+
+#endif
+
+#if NDIM == 3
+
+        call mph_getInterfaceVelocity_3D( facexData(VELC_FACE_VAR,:,:,:),            &
+                      faceyData(VELC_FACE_VAR,:,:,:),            &
+                      facezData(VELC_FACE_VAR,:,:,:),            &
+                      ins_invRe,                                 &
+                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                      blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                      del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                      solnData(VISC_VAR,:,:,:), &
+                      facexData(RH1F_FACE_VAR,:,:,:),            &
+                      facexData(RH2F_FACE_VAR,:,:,:),            &
+                      faceyData(RH1F_FACE_VAR,:,:,:),            &
+                      faceyData(RH2F_FACE_VAR,:,:,:),            &
+                      facezData(RH1F_FACE_VAR,:,:,:),            &
+                      facezData(RH2F_FACE_VAR,:,:,:),            &
+                      ins_gravX, ins_gravY, ins_gravZ,&
+                      solnData(MDOT_VAR,:,:,:),&
+                      solnData(SMRH_VAR,:,:,:),&
+                      solnData(NRMX_VAR,:,:,:),&
+                      solnData(NRMY_VAR,:,:,:),&
+                      solnData(NRMZ_VAR,:,:,:),&
+                      facexData(VELI_FACE_VAR,:,:,:),            &
+                      faceyData(VELI_FACE_VAR,:,:,:),            &
+                      facezData(VELI_FACE_VAR,:,:,:))
+
+#endif
          !---------------------------------------------------------------------
 
 
@@ -138,6 +172,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   gcMask = .FALSE.
   gcMask(NUNK_VARS+VELI_FACE_VAR) = .TRUE.                 ! mslee - interface velocity
   gcMask(NUNK_VARS+1*NFACE_VARS+VELI_FACE_VAR) = .TRUE.    ! mslee - interface velocity
+
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VELI_FACE_VAR) = .TRUE.
+#endif
 
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
@@ -167,6 +205,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,solnData,CENTER)
         call Grid_getBlkPtr(blockID,facexData,FACEX)
         call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
 #if NDIM == 3
 
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
@@ -179,11 +218,14 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         !------------------------------------
         !! Call DFUN advection routine for 3D:
         !------------------------------------
+
+       ! put ins_alfa*dt for RK2 ~~ Akash
+
         call mph_KPDadvectWENO3_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
-                          ins_alfa*dt, &
+                          facexData(VELI_FACE_VAR,:,:,:), &
+                          faceyData(VELI_FACE_VAR,:,:,:), &
+                          facezData(VELI_FACE_VAR,:,:,:), &
+                          dt, &
                           del(DIR_X), &
                           del(DIR_Y), &
                           del(DIR_Z), &
@@ -355,9 +397,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
 
         call mph_KPDlsRedistance_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
+                          facexData(VELI_FACE_VAR,:,:,:), &
+                          faceyData(VELI_FACE_VAR,:,:,:), &
+                          facezData(VELI_FACE_VAR,:,:,:), &
                           del(DIR_X),del(DIR_Y),del(DIR_Z),  &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
@@ -379,8 +421,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
 
         call mph_KPDlsRedistance(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:),  &
-                          faceyData(VELC_FACE_VAR,:,:,:),  &
+                          facexData(VELI_FACE_VAR,:,:,:),  &
+                          faceyData(VELI_FACE_VAR,:,:,:),  &
                           del(DIR_X),del(DIR_Y),  &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &

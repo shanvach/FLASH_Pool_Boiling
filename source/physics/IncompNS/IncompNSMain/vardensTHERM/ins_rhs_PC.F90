@@ -1,5 +1,6 @@
-      SUBROUTINE ins_rhs2d_VD(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
-                           visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY)
+    SUBROUTINE ins_rhs2d_PC(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
+                           visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
+                           mdot,smrh,xnorm,ynorm)
 
   !***************************************************************
   ! This subroutine computes the discretization of the RHS of the 
@@ -21,11 +22,17 @@
       use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
       use IncompNS_data, ONLY : ins_iConvU
+ 
+      use Multiphase_data, ONLY: mph_rho2
+
+#include "Flash.h"
+!#include "constants.h"
 
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
 
       INTEGER:: i, j
@@ -49,6 +56,19 @@
       INTEGER :: iConvU
       REAL :: rConvU
 
+      !ML - ghost fluid for u and v
+      INTEGER:: ig, jg
+      !INTEGER:: NXB,NYB,NGUARD
+      REAL:: rhox,rhoy,mdotx,mdoty,normx,normy,rhoxc,rhoyc 
+      REAL, DIMENSION(NXB+2*NGUARD+1,NYB+2*NGUARD,NZB+2*NGUARD) :: unig
+      REAL, DIMENSION(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD) :: vnig
+
+      !INTEGER, DIMENSION(3) :: udim, vdim
+      !real, allocatable :: unig(:,:,:),vnig(:,:,:)
+      !udim = shape(uni)
+      !vdim = shape(vni)
+      !allocate( unig(udim(1),udim(2),udim(3)), vnig(udim(1),udim(2),udim(3)) )
+
       !KPD - Choose Convection Scheme 1=1st order upwind, 2=2nd order central, 3=3rd order upwind
       !iConvU = 4
       iConvU = ins_iConvU
@@ -58,39 +78,87 @@
       dx1 = 1.0/dx
       dy1 = 1.0/dy
 
+      !print *, "test",ix1,ix2,jy1,jy2
+      !print *, NXB,NYB,NGUARD
+      !stop
+
+      !ML - calculate ghost fluid velocity
+      unig = 0. 
+      vnig = 0.
+
+      do j = jy1,jy2
+       do i = ix1,ix2+1
+
+         
+
+       end do
+      end do
+!      unig(ix1:ix2+1,jy1:jy2) = uni(ix1:ix2+1,jy1:jy2)
+!      vnig(ix1:ix2,jy1:jy2+1) = vni(ix1:ix2,jy1:jy2+1)
+
+!      print *, "smrh,mdot,normx,normy,unig,vnig"
+!      !print *, shape(smrh),shape(mdot),shape(xnorm),shape(ynorm),shape(unig),shape(vnig)
+!      print *, "test smrh"
+!      print *, "test smrh"
+!      print *, shape(uni)
+!      print *, shape(smrh)
+!      print *, shape(mdot)
+!      print *, "test smrh"
+
       !++++++++++  U-COMPONENT  ++++++++++
        do j = jy1,jy2
           do i = ix1,ix2+1
 
+             !ML - calculate ghost fluid velocity
+             rhoxc = 2.d0/(smrh(i-1,j,kz1)+smrh(i,j,kz1))
+             !rhoyc = 2.d0/(smrh(i,j-1,kz1)+smrh(i,j,kz1))
+             !rhoxc = ((rho1x(i,j,kz1) + rho2x(i,j,kz1))/mph_rho2)
+
+             do jg = j-2,j+2 ! CHECK
+             do ig = i-2,i+2
+             rhox  = 2.d0/(smrh(ig-1,jg,kz1)+smrh(ig,jg,kz1))
+             rhoy  = 2.d0/(smrh(ig,jg-1,kz1)+smrh(ig,jg,kz1))
+             !rhox = ((rho1x(ig,jg,kz1)+rho2x(ig,jg,kz1))/mph_rho2)
+             !rhoy = ((rho1y(ig,jg,kz1)+rho2y(ig,jg,kz1))/mph_rho2)
+             mdotx = (mdot(ig-1,jg,kz1)+mdot(ig,jg,kz1))/2.d0
+             mdoty = (mdot(ig,jg-1,kz1)+mdot(ig,jg,kz1))/2.d0
+             normx = (xnorm(ig-1,jg,kz1)+xnorm(ig,jg,kz1))/2.d0
+             normy = (ynorm(ig,jg-1,kz1)+ynorm(ig,jg,kz1))/2.d0
+             unig(ig,jg,kz1) = uni(ig,jg,kz1) + (mdotx * normx *(rhox - rhoxc))!/mph_rho2)
+             vnig(ig,jg,kz1) = vni(ig,jg,kz1) + (mdoty * normy *(rhoy - rhoxc))!/mph_rho2)
+             end do
+             end do                
+
+
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
-             uu   = uni(i,j,kz1)
+             uu   = unig(i,j,kz1)
 
-             uxp  = uni(i+1,j,kz1)
-             uxm  = uni(i-1,j,kz1)
-             uxpp = uni(i+2,j,kz1)
-             uxmm = uni(i-2,j,kz1)
+             uxp  = unig(i+1,j,kz1)
+             uxm  = unig(i-1,j,kz1)
+             uxpp = unig(i+2,j,kz1)
+             uxmm = unig(i-2,j,kz1)
 
-             uyp  = uni(i,j+1,kz1)
-             uym  = uni(i,j-1,kz1)
-             uypp = uni(i,j+2,kz1)
-             uymm = uni(i,j-2,kz1)
+             uyp  = unig(i,j+1,kz1)
+             uym  = unig(i,j-1,kz1)
+             uypp = unig(i,j+2,kz1)
+             uymm = unig(i,j-2,kz1)
 
-             uy   = 0.25*( uni(i,j,kz1) + uni(i+1,j,kz1) + uni(i,j-1,kz1) + uni(i+1,j-1,kz1) ) 
+             uy   = 0.25*( unig(i,j,kz1) + unig(i+1,j,kz1) + unig(i,j-1,kz1) + unig(i+1,j-1,kz1) ) 
 
-             vv   = vni(i,j,kz1)
+             vv   = vnig(i,j,kz1)
 
-             vxp  = vni(i+1,j,kz1)
-             vxm  = vni(i-1,j,kz1)
-             vxpp = vni(i+2,j,kz1)
-             vxmm = vni(i-2,j,kz1)
+             vxp  = vnig(i+1,j,kz1)
+             vxm  = vnig(i-1,j,kz1)
+             vxpp = vnig(i+2,j,kz1)
+             vxmm = vnig(i-2,j,kz1)
 
-             vyp  = vni(i,j+1,kz1)
-             vym  = vni(i,j-1,kz1)
-             vypp = vni(i,j+2,kz1)
-             vymm = vni(i,j-2,kz1)
+             vyp  = vnig(i,j+1,kz1)
+             vym  = vnig(i,j-1,kz1)
+             vypp = vnig(i,j+2,kz1)
+             vymm = vnig(i,j-2,kz1)
 
-             vx  = 0.25*( vni(i,j,kz1) + vni(i-1,j,kz1) + vni(i,j+1,kz1) + vni(i-1,j+1,kz1) )
+             vx  = 0.25*( vnig(i,j,kz1) + vnig(i-1,j,kz1) + vnig(i,j+1,kz1) + vnig(i-1,j+1,kz1) )
 
              !=============================================================
              ! u.grad(u) = uj*dui/dxj = [ u*du/dx + v*du/dy ] (i) + [ u*dv/dx + v*dv/dy ] (j)
@@ -137,22 +205,22 @@
              !=============================================================
 
              ! get velocities at 1/2 locations
-             uxplus = (uni(i+1,j,kz1) + uni(i,j,kz1))*0.5
-             uxminus = (uni(i,j,kz1) + uni(i-1,j,kz1))*0.5
+             uxplus = (unig(i+1,j,kz1) + unig(i,j,kz1))*0.5
+             uxminus = (unig(i,j,kz1) + unig(i-1,j,kz1))*0.5
 
-             vxplus = (vni(i,j+1,kz1) + vni(i-1,j+1,kz1))*0.5
-             vxminus = (vni(i,j,kz1) + vni(i-1,j,kz1))*0.5
+             vxplus = (vnig(i,j+1,kz1) + vnig(i-1,j+1,kz1))*0.5
+             vxminus = (vnig(i,j,kz1) + vnig(i-1,j,kz1))*0.5
 
-             uyplus = (uni(i,j+1,kz1) + uni(i,j,kz1))*0.5
-             uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
+             uyplus = (unig(i,j+1,kz1) + unig(i,j,kz1))*0.5
+             uyminus = (unig(i,j,kz1) + unig(i,j-1,kz1))*0.5
 
              ! get derivatives at 1/2 locations
-             dudxp = (uni(i+1,j,kz1) - uni(i,j,kz1))*dx1
-             dudxm = (uni(i,j,kz1) - uni(i-1,j,kz1))*dx1
-             dudyp = (uni(i,j+1,kz1) - uni(i,j,kz1))*dy1
-             dudym = (uni(i,j,kz1) - uni(i,j-1,kz1))*dy1
-             dvdxp = (vni(i,j+1,kz1) - vni(i-1,j+1,kz1))*dx1    !- kpd - Not Used?
-             dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))*dx1        !- kpd - Not Used?
+             dudxp = (unig(i+1,j,kz1) - unig(i,j,kz1))*dx1
+             dudxm = (unig(i,j,kz1) - unig(i-1,j,kz1))*dx1
+             dudyp = (unig(i,j+1,kz1) - unig(i,j,kz1))*dy1
+             dudym = (unig(i,j,kz1) - unig(i,j-1,kz1))*dy1
+             dvdxp = (vnig(i,j+1,kz1) - vnig(i-1,j+1,kz1))*dx1    !- kpd - Not Used?
+             dvdxm = (vnig(i,j,kz1) - vnig(i-1,j,kz1))*dx1        !- kpd - Not Used?
 
              ! flux of normal total stresses
              !------------------------------
@@ -198,8 +266,7 @@
                           rConvU                                    &
                           + Mdens*(txxp - txxm)*dx1                 & ! diffusion - normal terms 
                           + Mdens*(tyyp - tyym)*dy1                 &
-                          + gravX     ! Shizhao changed the sign of gravity to keep the consistence with solid bodies     
-                          !- gravX     
+                          + gravX     
              !!ru(i,j,kz1) = 0.0 
           enddo
        enddo
@@ -210,35 +277,55 @@
        do j = jy1,jy2+1
           do i = ix1,ix2
 
+             !ML - calculate ghost fluid velocity
+             rhoyc = 2.d0/(smrh(i,j-1,kz1)+smrh(i,j,kz1))
+             !rhoxc = 2.d0/(smrh(i-1,j,kz1)+smrh(i,j,kz1))
+             !rhoyc = ((rho1y(i,j,kz1)+rho2y(i,j,kz1))/mph_rho2)
+
+             do jg = j-2,j+2 ! CHECK
+             do ig = i-2,i+2
+             rhox =  2.d0/(smrh(ig-1,jg,kz1)+smrh(ig,jg,kz1))
+             rhoy =  2.d0/(smrh(ig,jg-1,kz1)+smrh(ig,jg,kz1))
+             !rhox = ((rho1x(ig,jg,kz1)+rho2x(ig,jg,kz1))/mph_rho2)
+             !rhoy = ((rho1y(ig,jg,kz1)+rho2y(ig,jg,kz1))/mph_rho2)
+             mdotx = (mdot(ig-1,jg,kz1)+mdot(ig,jg,kz1))/2.d0
+             mdoty = (mdot(ig,jg-1,kz1)+mdot(ig,jg,kz1))/2.d0
+             normx = (xnorm(ig-1,jg,kz1)+xnorm(ig,jg,kz1))/2.d0
+             normy = (ynorm(ig,jg-1,kz1)+ynorm(ig,jg,kz1))/2.d0
+             unig(ig,jg,kz1) = uni(ig,jg,kz1) + (mdotx * normx *(rhox - rhoyc))!/mph_rho2)
+             vnig(ig,jg,kz1) = vni(ig,jg,kz1) + (mdoty * normy *(rhoy - rhoyc))!/mph_rho2)
+             end do
+             end do                
+
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
-             uu   = uni(i,j,kz1)
+             uu   = unig(i,j,kz1)
 
-             uxp  = uni(i+1,j,kz1)
-             uxm  = uni(i-1,j,kz1)
-             uxpp = uni(i+2,j,kz1)
-             uxmm = uni(i-2,j,kz1)
+             uxp  = unig(i+1,j,kz1)
+             uxm  = unig(i-1,j,kz1)
+             uxpp = unig(i+2,j,kz1)
+             uxmm = unig(i-2,j,kz1)
 
-             uyp  = uni(i,j+1,kz1)
-             uym  = uni(i,j-1,kz1)
-             uypp = uni(i,j+2,kz1)
-             uymm = uni(i,j-2,kz1)
+             uyp  = unig(i,j+1,kz1)
+             uym  = unig(i,j-1,kz1)
+             uypp = unig(i,j+2,kz1)
+             uymm = unig(i,j-2,kz1)
 
-             uy   = 0.25*( uni(i,j,kz1) + uni(i+1,j,kz1) + uni(i,j-1,kz1) + uni(i+1,j-1,kz1) ) 
+             uy   = 0.25*( unig(i,j,kz1) + unig(i+1,j,kz1) + unig(i,j-1,kz1) + unig(i+1,j-1,kz1) ) 
 
-             vv   = vni(i,j,kz1)
+             vv   = vnig(i,j,kz1)
 
-             vxp  = vni(i+1,j,kz1)
-             vxm  = vni(i-1,j,kz1)
-             vxpp = vni(i+2,j,kz1)
-             vxmm = vni(i-2,j,kz1)
+             vxp  = vnig(i+1,j,kz1)
+             vxm  = vnig(i-1,j,kz1)
+             vxpp = vnig(i+2,j,kz1)
+             vxmm = vnig(i-2,j,kz1)
 
-             vyp  = vni(i,j+1,kz1)
-             vym  = vni(i,j-1,kz1)
-             vypp = vni(i,j+2,kz1)
-             vymm = vni(i,j-2,kz1)
+             vyp  = vnig(i,j+1,kz1)
+             vym  = vnig(i,j-1,kz1)
+             vypp = vnig(i,j+2,kz1)
+             vymm = vnig(i,j-2,kz1)
 
-             vx  = 0.25*( vni(i,j,kz1) + vni(i-1,j,kz1) + vni(i,j+1,kz1) + vni(i-1,j+1,kz1) )
+             vx  = 0.25*( vnig(i,j,kz1) + vnig(i-1,j,kz1) + vnig(i,j+1,kz1) + vnig(i-1,j+1,kz1) )
 
 
              !=============================================================
@@ -286,22 +373,22 @@
              !=============================================================
 
              ! get velocities at 1/2 locations
-             vxplus = (vni(i+1,j,kz1) + vni(i,j,kz1))*0.5
-             vxminus = (vni(i,j,kz1) + vni(i-1,j,kz1))*0.5
+             vxplus = (vnig(i+1,j,kz1) + vnig(i,j,kz1))*0.5
+             vxminus = (vnig(i,j,kz1) + vnig(i-1,j,kz1))*0.5
 
-             vyplus = (vni(i,j+1,kz1) + vni(i,j,kz1))*0.5
-             vyminus = (vni(i,j,kz1) + vni(i,j-1,kz1))*0.5
+             vyplus = (vnig(i,j+1,kz1) + vnig(i,j,kz1))*0.5
+             vyminus = (vnig(i,j,kz1) + vnig(i,j-1,kz1))*0.5
 
-             uyplus = (uni(i+1,j,kz1) + uni(i+1,j-1,kz1))*0.5
-             uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
+             uyplus = (unig(i+1,j,kz1) + unig(i+1,j-1,kz1))*0.5
+             uyminus = (unig(i,j,kz1) + unig(i,j-1,kz1))*0.5
 
              ! get derivatives at 1/2 locations
-             dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1))*dx1
-             dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))*dx1
-             dvdyp = (vni(i,j+1,kz1) - vni(i,j,kz1))*dy1
-             dvdym = (vni(i,j,kz1) - vni(i,j-1,kz1))*dy1
-             dudyp = (uni(i+1,j,kz1) - uni(i+1,j-1,kz1))*dy1   !- kpd - Not Used?
-             dudym = (uni(i,j,kz1) - uni(i,j-1,kz1))*dy1       !- kpd - Not Used?
+             dvdxp = (vnig(i+1,j,kz1) - vnig(i,j,kz1))*dx1
+             dvdxm = (vnig(i,j,kz1) - vnig(i-1,j,kz1))*dx1
+             dvdyp = (vnig(i,j+1,kz1) - vnig(i,j,kz1))*dy1
+             dvdym = (vnig(i,j,kz1) - vnig(i,j-1,kz1))*dy1
+             dudyp = (unig(i+1,j,kz1) - unig(i+1,j-1,kz1))*dy1   !- kpd - Not Used?
+             dudym = (unig(i,j,kz1) - unig(i,j-1,kz1))*dy1       !- kpd - Not Used?
 
              ! flux of normal total stresses
              !------------------------------
@@ -342,24 +429,25 @@
                           rConvU                                     &
                           + Mdens* (txxp - txxm)*dx1                 &! diffusion - normal terms
                           + Mdens* (tyyp - tyym)*dy1                 &
-                          + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
-                          !- gravY                                      ! kpd - gravity term 
+                          + gravY                                      ! kpd - gravity term 
              !rv(i,j,kz1) = -grav
           enddo
        enddo
 
+       !deallocate(unig,vnig)
 
-       END SUBROUTINE ins_rhs2d_VD
+       END SUBROUTINE ins_rhs2d_PC
 
 !*****************************************************************************************************
 !*****************************************************************************************************
 !*****************************************************************************************************
 
-      SUBROUTINE ins_rhs3d_VD(uni,vni,wni,tv,ru1,      &
+      SUBROUTINE ins_rhs3d_PC(uni,vni,wni,tv,ru1,      &
                            ix1,ix2,jy1,jy2,kz1,kz2, &
                            dx,dy,dz,ru,rv,rw,visc,  &
                            rho1x,rho2x,rho1y,rho2y, &
-                           rho1z,rho2z,gravX, gravY, gravZ)
+                           rho1z,rho2z,gravX, gravY, gravZ,&
+                           mdot,smrh,xnorm,ynorm,znorm)
 
   !*****************************************************************
   ! This subroutine computes the centered discretization of the RHS 
@@ -391,6 +479,7 @@
       REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x, rho2x, rho1y, rho2y 
       REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z 
+      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,xnorm,ynorm,znorm,smrh
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
 
 !!$      REAL, DIMENSION(nx+1,ny,nz), INTENT(IN):: uni
@@ -1098,5 +1187,5 @@
          enddo
       enddo
 
-      END SUBROUTINE ins_rhs3d_VD
+      END SUBROUTINE ins_rhs3d_PC
 

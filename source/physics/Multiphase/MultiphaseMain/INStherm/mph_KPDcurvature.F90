@@ -246,7 +246,9 @@
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                               rho2y,pf,w,sigx,sigy,mdot
+                                               rho2y,pf,w,sigx,sigy
+
+        real, dimension(:,:,:), intent(in) :: mdot
 
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
@@ -283,7 +285,6 @@
         sigy = 0.
         w = 0.
         icrv = 0
-        !bb = (1./(rho1/rho2)) - 1.0
 
         !- kpd - Need to loop through one guard cell on each side to set jumps 
         !           when they cross block boundaries

@@ -89,9 +89,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
               ins_setInterpValsGcell,&
                            ins_rhs3d_VD,&
                            ins_rhs2d_VD,&
-                           ins_rhs2d_VD_ML,&
+                           ins_rhs2d_PC,&
+                           ins_rhs3d_PC,&
                        ins_predictor_VD,&
-                      ins_divergence_VD_ML,&
+                      ins_divergence_PC,&
                        ins_corrector_VD
                      !ins_fluxfix_phi,&
 
@@ -450,7 +451,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      !- kpd - For Predictor Step (newu, newv & neww are RHS)
-     call ins_rhs3d_VD (  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs3d_PC (  facexData(VELC_FACE_VAR,:,:,:),            &
                        faceyData(VELC_FACE_VAR,:,:,:),            &
                        facezData(VELC_FACE_VAR,:,:,:),            &
                        solnData(TVIS_VAR,:,:,:),                  &
@@ -466,7 +467,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                        faceyData(RH2F_FACE_VAR,:,:,:),            &
                        facezData(RH1F_FACE_VAR,:,:,:),            &
                        facezData(RH2F_FACE_VAR,:,:,:),            &
-                       ins_gravX, ins_gravY, ins_gravZ )
+                       ins_gravX, ins_gravY, ins_gravZ,           &
+                       solnData(MDOT_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
+                       solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
+                       solnData(NRMZ_VAR,:,:,:))
 
      !- kpd - I added this, still a ???
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
@@ -488,7 +492,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
 
      ! ML - GFM for velocity jump condition
-     call ins_rhs2d_VD_ML(  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs2d_PC(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -687,7 +691,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      ! compute divergence of intermediate velocities
 
      !-- modified by mslee
-     call ins_divergence_VD_ML(facexData(VELC_FACE_VAR,:,:,:),&
+     call ins_divergence_PC(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -702,9 +706,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                        solnData(PFUN_VAR,:,:,:),&
                        solnData(NRMX_VAR,:,:,:),&
                        solnData(NRMY_VAR,:,:,:),&
+                       solnData(NRMZ_VAR,:,:,:),&
                        solnData(SMRH_VAR,:,:,:),&
                        solnData(MDOT_VAR,:,:,:),&
-                       mph_rho1,mph_rho2,solnData(TESTVAL_VAR,:,:,:),&
+                       mph_rho1,mph_rho2,&
                        facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
                        faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
      !-- end modified by mslee
@@ -722,15 +727,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
           blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))/(dt*ins_alfa) &
      + &
      solnData(SIGP_VAR,                                   &
-          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
-          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
-          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
-
-     solnData(TESTVAL_VAR,                                   &
-          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
-          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
-          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) =   &
-     solnData(DUST_VAR,                                   &
           blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
           blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
           blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
@@ -1160,7 +1156,7 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 
 #elif NDIM == 2
 
-     call ins_divergence_VD_ML(facexData(VELC_FACE_VAR,:,:,:),&
+     call ins_divergence_PC(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -1175,9 +1171,10 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
                        solnData(PFUN_VAR,:,:,:),&
                        solnData(NRMX_VAR,:,:,:),&
                        solnData(NRMY_VAR,:,:,:),&
+                       solnData(NRMZ_VAR,:,:,:),&
                        solnData(SMRH_VAR,:,:,:),&
                        solnData(MDOT_VAR,:,:,:),&
-                       mph_rho1,mph_rho2,solnData(TESTVAL_VAR,:,:,:),&
+                       mph_rho1,mph_rho2,&
                        facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
                        faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
 

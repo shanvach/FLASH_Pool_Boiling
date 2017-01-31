@@ -5,7 +5,8 @@
 
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
-           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2)
+           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2, &
+           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz)
 
         implicit none
 
@@ -17,11 +18,12 @@
         !- kpd - Data from routine call...
         !---------------------------------
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
-        real, intent(in) :: dx, dy, dz, rho1, rho2, vis1, vis2
+        real, intent(in) :: dx, dy, dz, rho1, rho2, vis1, vis2, thco1, thco2, cp1, cp2
         real, dimension(:,:,:), intent(inout):: s,crv, &
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
-                                                rho1z,rho2z, visc
+                                                rho1z,rho2z,visc,thco, &
+                                                cprs,nrmx,nrmy,nrmz
 
         !--------------------------
         !- kpd - Local variables...
@@ -123,8 +125,12 @@
                  if(s(i,j,k).ge.0.) then
                     pf(i,j,k) = 1.                       
                     visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
+                    thco(i,j,k) = thco1/thco2
+                    cprs(i,j,k) = cp1/cp2
                  else
                     visc(i,j,k) = vis2/vis2
+                    thco(i,j,k) = thco2/thco2
+                    cprs(i,j,k) = cp2/cp2
                  end if
 
               end do
@@ -206,6 +212,36 @@
            end do
         end do
 
+       nrmx(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+           (( s(ix1+1:ix2+1,jy1:jy2,kz1:kz2) -   &
+             s(ix1-1:ix2-1,jy1:jy2,kz1:kz2) )/2./dx)/ &
+             sqrt( ((s(ix1+1:ix2+1,jy1:jy2,kz1:kz2) - &
+             s(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/2./dx)**2 &
+             + ((s(ix1:ix2,jy1+1:jy2+1,kz1:kz2) - &
+             s(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/2./dy)**2 &
+             + ((s(ix1:ix2,jy1:jy2,kz1+1:kz2+1) - &
+             s(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/2./dz)**2  )
+
+        nrmy(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+           (( s(ix1:ix2,jy1+1:jy2+1,kz1:kz2) -   &
+             s(ix1:ix2,jy1-1:jy2-1,kz1:kz2) )/2./dy)/ &
+             sqrt( ((s(ix1+1:ix2+1,jy1:jy2,kz1:kz2) - &
+             s(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/2./dx)**2 &
+             + ((s(ix1:ix2,jy1+1:jy2+1,kz1:kz2) - &
+             s(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/2./dy)**2 &
+             + ((s(ix1:ix2,jy1:jy2,kz1+1:kz2+1) - &
+             s(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/2./dz)**2  )
+
+        nrmz(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+           (( s(ix1:ix2,jy1:jy2,kz1+1:kz2+1) -   &
+             s(ix1:ix2,jy1:jy2,kz1-1:kz2-1) )/2./dz)/ &
+             sqrt( ((s(ix1+1:ix2+1,jy1:jy2,kz1:kz2) - &
+             s(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/2./dx)**2 &
+             + ((s(ix1:ix2,jy1+1:jy2+1,kz1:kz2) - &
+             s(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/2./dy)**2 &
+             + ((s(ix1:ix2,jy1:jy2,kz1+1:kz2+1) - &
+             s(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/2./dz)**2  )
+
       end subroutine mph_KPDcurvature3DAB
 
 !=========================================================================
@@ -231,7 +267,7 @@
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz)
+                                       rho2z,sigz,mdot)
 
 
         implicit none
@@ -245,6 +281,8 @@
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz
 
+        real, dimension(:,:,:), intent(in) :: mdot
+
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
 
@@ -254,6 +292,7 @@
                 zijl,zijr,zid,zij,zidl,zidr
         integer :: i,j,k
         real, parameter :: eps = 1.0E-13
+        real :: bb,mT
 
 
         sigx = 0.
@@ -275,7 +314,8 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i+1,j,k)*(1.-th) + crv(i,j,k)*th
-
+                 mT  = mdot(i+1,j,k)*(1.-th) + mdot(i,j,k)*th
+                 
                  xijl = xit*crv(i,j,k)                    !- kpd - sigma*K. Used for jump in pressure
                  xijr = xit*crv(i+1,j,k)                  !- kpd - sigma*K. Used for jump in pressure
                  xidl = 0.                                !- kpd - Used for jump in gradient
@@ -292,14 +332,17 @@
                  rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2/rho2)/aa  !- kpd - Density IS SMEARED HERE
                  !--------------------------------------------------------------------------
 
+
+                 bb = (1./aa) - 1
+
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   - xij/aa/dx**2 - xid*th*(rho1/rho2)/aa/dx
-                 w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx
+                 w(i,j,k)   = w(i,j,k)   - xij/aa/dx**2 - xid*th*(rho1/rho2)/aa/dx + (bb*mT*mT)/aa/dx**2
+                 w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx - (bb*mT*mT)/aa/dx**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx
+                 sigx(i+1,j,k) = - xij/aa/dx + (bb*mT*mT)/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -316,7 +359,8 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i,j,k)*(1.-th) + crv(i+1,j,k)*th
-
+                 mT  = mdot(i,j,k)*(1.-th) + mdot(i+1,j,k)*th
+ 
                  xijl = xit*crv(i,j,k)
                  xijr = xit*crv(i+1,j,k)
                  xidl = 0.
@@ -333,15 +377,16 @@
                  rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2/rho2)/aa  !- kpd - Density IS SMEARED HERE
                  !--------------------------------------------------------------------------
 
+                 bb = (1./aa) - 1
 
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   + xij/aa/dx**2 + xid*(1.-th)*(rho2/rho2)/aa/dx
-                 w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx
+                 w(i,j,k)   = w(i,j,k)   + xij/aa/dx**2 + xid*(1.-th)*(rho2/rho2)/aa/dx - (bb*mT*mT)/aa/dx**2
+                 w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx + (bb*mT*mT)/aa/dx**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx
+                 sigx(i+1,j,k) = xij/aa/dx - (bb*mT*mT)/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -358,6 +403,7 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i,j+1,k)*(1.-th) + crv(i,j,k)*th
+                 mT = mdot(i,j+1,k)*(1.-th) + mdot(i,j,k)*th
 
                  yijl = xit*crv(i,j,k)
                  yijr = xit*crv(i,j+1,k)
@@ -374,15 +420,16 @@
                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa   !- kpd - Density IS SMEARED HERE
                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa   !- kpd - Density IS SMEARED HERE
 
+                 bb = (1./aa) - 1
 
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k) - yij/aa/dy**2 - yid*th*(rho1/rho2)/aa/dy
-                 w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy
+                 w(i,j,k)   = w(i,j,k) - yij/aa/dy**2 - yid*th*(rho1/rho2)/aa/dy + (bb*mT*mT)/aa/dy**2
+                 w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy - (bb*mT*mT)/aa/dy**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy
+                 sigy(i,j+1,k) = - yij/aa/dy + (bb*mT*mT)/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -399,6 +446,7 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i,j,k)*(1.-th) + crv(i,j+1,k)*th
+                 mT = mdot(i,j,k)*(1.-th) + mdot(i,j+1,k)*th
 
                  yijl = xit*crv(i,j,k)
                  yijr = xit*crv(i,j+1,k)
@@ -416,14 +464,16 @@
                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa  !- kpd - Density IS SMEARED HERE
 
 
+                 bb = (1./aa) - 1
+
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   + yij/aa/dy**2 + yid*(1.-th)*(rho2/rho2)/aa/dy
-                 w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy
+                 w(i,j,k)   = w(i,j,k)   + yij/aa/dy**2 + yid*(1.-th)*(rho2/rho2)/aa/dy - (bb*mT*mT)/aa/dy**2
+                 w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy + (bb*mT*mT)/aa/dy**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy
+                 sigy(i,j+1,k) = yij/aa/dy - (bb*mT*mT)/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -440,6 +490,7 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i,j,k+1)*(1.-th) + crv(i,j,k)*th
+                 mT  = mdot(i,j,k+1)*(1.-th) + mdot(i,j,k)*th
 
                  zijl = xit*crv(i,j,k)                    !- kpd - sigma*K. Used for jump in pressure
                  zijr = xit*crv(i,j,k+1)                  !- kpd - sigma*K. Used for jump in pressure
@@ -456,14 +507,16 @@
                  rho1z(i,j,k+1) = rho1z(i,j,k+1)*(rho1/rho2)/aa  !- kpd - Density IS SMEARED HERE  
                  rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho2/rho2)/aa  !- kpd - Density IS SMEARED HERE
 
+                 bb = (1./aa) - 1
+
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   - zij/aa/dz**2 - zid*th*(rho1/rho2)/aa/dz
-                 w(i,j,k+1) = w(i,j,k+1) + zij/aa/dz**2 - zid*(1.-th)*(rho2/rho2)/aa/dz
+                 w(i,j,k)   = w(i,j,k)   - zij/aa/dz**2 - zid*th*(rho1/rho2)/aa/dz + (bb*mT*mT)/aa/dz**2
+                 w(i,j,k+1) = w(i,j,k+1) + zij/aa/dz**2 - zid*(1.-th)*(rho2/rho2)/aa/dz - (bb*mT*mT)/aa/dz**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = - zij/aa/dz
+                 sigz(i,j,k+1) = - zij/aa/dz + (bb*mT*mT)/aa/dz
 
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
@@ -479,6 +532,7 @@
 
                  !- kpd - Unused in FLASH, needs to be phased out
                  cri = crv(i,j,k)*(1.-th) + crv(i,j,k+1)*th
+                 mT  = mdot(i,j,k)*(1.-th) + mdot(i,j,k+1)*th
 
                  zijl = xit*crv(i,j,k)
                  zijr = xit*crv(i,j,k+1)
@@ -495,14 +549,16 @@
                  rho1z(i,j,k+1) = rho1z(i,j,k+1)*(rho1/rho2)/aa  !- kpd - Density IS SMEARED HERE
                  rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho2/rho2)/aa  !- kpd - Density IS SMEARED HERE
 
+                 bb = (1./aa) - 1
+
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   + zij/aa/dz**2 + zid*(1.-th)*(rho2/rho2)/aa/dz
-                 w(i,j,k+1) = w(i,j,k+1) - zij/aa/dz**2 + zid*th*(rho1/rho2)/aa/dz
+                 w(i,j,k)   = w(i,j,k)   + zij/aa/dz**2 + zid*(1.-th)*(rho2/rho2)/aa/dz - (bb*mT*mT)/aa/dz**2
+                 w(i,j,k+1) = w(i,j,k+1) - zij/aa/dz**2 + zid*th*(rho1/rho2)/aa/dz + (bb*mT*mT)/aa/dz**2
 
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = zij/aa/dz
+                 sigz(i,j,k+1) = zij/aa/dz - (bb*mT*mT)/aa/dz
 
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1

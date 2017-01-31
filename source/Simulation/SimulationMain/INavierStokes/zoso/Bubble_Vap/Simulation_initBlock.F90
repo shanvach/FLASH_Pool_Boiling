@@ -217,6 +217,7 @@ subroutine Simulation_initBlock(blockId)
   !solnData(DFUN_VAR,:,:,:) = 0.0
   solnData(NRMX_VAR,:,:,:) = 0.0
   solnData(NRMY_VAR,:,:,:) = 0.0
+  solnData(NRMZ_VAR,:,:,:) = 0.0
   solnData(SMHV_VAR,:,:,:) = 0.0
   solnData(SMRH_VAR,:,:,:) = 0.0
   solnData(MDOT_VAR,:,:,:) = 0.0

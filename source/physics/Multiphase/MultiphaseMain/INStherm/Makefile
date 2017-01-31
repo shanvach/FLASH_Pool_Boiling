@@ -8,6 +8,7 @@ Multiphase += Multiphase_data.o \
               mph_KPDlsRedistance_3D.o \
               mph_getInterfaceVelocity.o \
               mph_getSmearedProperties.o \
+              mph_getInterfaceVelocity_3D.o \
               mph_evolve.o \
               mph_advect.o \
               mph_extrapVars.o
