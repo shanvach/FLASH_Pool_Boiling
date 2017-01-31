@@ -9,15 +9,15 @@ gr_pmRpConsvFluxDensities = .FALSE.
 pt_maxPerProc=3500
 
 # Inverse of Reynolds Number
-invRe = 0.005
-#invRe = 0.007
+#invRe = 0.005
+invRe = 0.007
 
 # Prandtl Number
 Pr = 1.0
 
 # Stefan Number
-St = 0.1
-#St = 0.04
+#St = 0.1
+St = 0.04
 
 #iConvU = 1
 
@@ -45,8 +45,8 @@ gravY = -1.0
 gravZ =  0.0
 
 # Inverse Weber Number
-sten = 0.005
-#sten = 0.008
+#sten = 0.005
+sten = 0.008
 
 # Number of level-set redistancing iterations
 inls = 10
