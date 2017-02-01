@@ -84,6 +84,8 @@ enddo
 ! For periodic or Neumann boundary conditions, we must subtract off the
 ! average value of the source.
 
+goto 100
+
 if (mg_bnd_cond == 0) then ! Substract source mean.
 
 !!$  lvol = 0.
@@ -222,6 +224,8 @@ else if (mg_bnd_cond == 1) then
   enddo
 
 endif
+
+100 continue
 
 !===============================================================================
 
