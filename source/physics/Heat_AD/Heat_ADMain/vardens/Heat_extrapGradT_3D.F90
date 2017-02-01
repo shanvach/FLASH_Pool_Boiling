@@ -37,8 +37,8 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
     Tnv_o = Tnv
 
     do k=kz1,kz2
-    do i=ix1,ix2
-     do j=jy1,jy2
+    do j=jy1,jy2
+     do i=ix1,ix2
 
       if(pf(i,j,k) .eq. 1.) then
 

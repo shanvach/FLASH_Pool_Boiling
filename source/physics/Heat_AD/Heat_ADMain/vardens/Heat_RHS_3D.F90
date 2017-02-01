@@ -108,7 +108,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
 
        th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
-       Tx_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+       Tx_plus = (ht_Tsat-Tij)/th + Tij
 
        else
 
@@ -117,7 +117,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        !Tx_plus = (ht_Tsat-T_o(i-1,j,1))/th + Tij
 
        th = tol
-       Tx_plus = (ht_Tsat-T_o(i,j,1))/th + Tij  
+       Tx_plus = (ht_Tsat-Tij)/th + Tij  
 
        end if 
      end if
@@ -130,7 +130,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))) .gt. tol) then
 
        th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))
-       Tx_mins = (ht_Tsat-T_o(i,j,1))/th + Tij
+       Tx_mins = (ht_Tsat-Tij)/th + Tij
 
        else
 
@@ -139,7 +139,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        !Tx_mins = (ht_Tsat-T_o(i+1,j,1))/th + Tij
  
        th = tol
-       Tx_mins = (ht_Tsat-T_o(i,j,1))/th + Tij
+       Tx_mins = (ht_Tsat-Tij)/th + Tij
 
        
        end if
@@ -152,7 +152,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
-      Ty_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Ty_plus = (ht_Tsat-Tij)/th + Tij
 
       else
 
@@ -161,7 +161,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       !Ty_plus = (ht_Tsat-T_o(i,j-1,1))/th + Tij
 
       th = tol
-      Ty_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Ty_plus = (ht_Tsat-Tij)/th + Tij
 
       end if
    end if
@@ -173,7 +173,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
-      Ty_mins = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Ty_mins = (ht_Tsat-Tij)/th + Tij
 
       else
 
@@ -182,7 +182,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       !Ty_mins = (ht_Tsat-T_o(i,j+1,1))/th + Tij
 
       th = tol
-      Ty_mins = (ht_Tsat-T_o(i,j,1))/th + Tij      
+      Ty_mins = (ht_Tsat-Tij)/th + Tij      
 
       end if
     end if
@@ -194,12 +194,12 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1)))
-      Tz_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Tz_plus = (ht_Tsat-Tij)/th + Tij
 
       else
 
       th = tol
-      Tz_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Tz_plus = (ht_Tsat-Tij)/th + Tij
 
       end if
    end if
@@ -211,12 +211,12 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1)))
-      Tz_mins = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Tz_mins = (ht_Tsat-Tij)/th + Tij
 
       else
 
       th = tol
-      Tz_mins = (ht_Tsat-T_o(i,j,1))/th + Tij      
+      Tz_mins = (ht_Tsat-Tij)/th + Tij      
 
       end if
     end if

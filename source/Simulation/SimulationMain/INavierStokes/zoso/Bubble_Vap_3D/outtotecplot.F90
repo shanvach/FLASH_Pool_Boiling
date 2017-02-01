@@ -302,7 +302,7 @@
                              solnData(TNLQ_VAR,:,:,:),tnlp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(TNLP_VAR,:,:,:),tnvp)
+                             solnData(TNVP_VAR,:,:,:),tnvp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(NRMX_VAR,:,:,:),nxp)
@@ -511,25 +511,25 @@
 
 
      arraylb = sngl(tempp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(mdotp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(tnlp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(tnvp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(nxp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(nyp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(nzp)
-     i = TecData(ijk,arraylb,0)
+     i = TecDat(ijk,arraylb,0)
 
      ! Write Div Ustar:
 !!$     do k=1,NZB+1
