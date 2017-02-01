@@ -104,6 +104,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,solnData,CENTER)
         call Grid_getBlkPtr(blockID,facexData,FACEX)
         call Grid_getBlkPtr(blockID,faceyData,FACEY)
+        call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
         !---------------------------------------------------------------------
         !- mslee -  get interface velocity for level set advection
@@ -166,6 +167,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
          call Grid_releaseBlkPtr(blockID,solnData,CENTER)
          call Grid_releaseBlkPtr(blockID,facexData,FACEX)
          call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+         call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
  

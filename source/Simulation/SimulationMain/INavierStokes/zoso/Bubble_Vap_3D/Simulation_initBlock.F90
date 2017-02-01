@@ -62,11 +62,11 @@ subroutine Simulation_initBlock(blockId)
   real ::  boundBox(2,MDIM)
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData
 
-  real :: xcell,xedge,ycell,yedge
+  real :: xcell,xedge,ycell,yedge,zcell
 
   real :: A0
 
-  real :: A, B, emp, fs, x0, y0, r0, solnX
+  real :: A, B, emp, fs, x0, y0, r0, solnX, z0
 
   !----------------------------------------------------------------------
   
@@ -113,6 +113,10 @@ subroutine Simulation_initBlock(blockId)
            ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
+
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
 
           !if (ycell .LE. 0.0) then
           !   solnData(DFUN_VAR,i,j,k) = 0.0 - ycell
@@ -175,9 +179,9 @@ subroutine Simulation_initBlock(blockId)
            r0 = 0.005
            x0 = 0.0d0
            y0 = 0.0d0
+           z0 = 0.0d0
 
-
-           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
 
         enddo
      enddo

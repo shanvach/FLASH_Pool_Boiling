@@ -128,7 +128,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   character(len=32) :: matfile
   integer :: numGraph, iter
 !  real, allocatable :: BoxVal(:)
-  real, dimension(28672) :: temp_BoxVal
+  real, dimension(100000) :: temp_BoxVal
   integer, parameter :: nFluxVars = 2**(NDIM-1)
 
   !- kpd - 
@@ -504,7 +504,6 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
               !*******************************************
               temp_BoxVal(iter) = temp_BoxVal(iter) + 1./(del(JAXIS)**2.0) * (MdensYL + MdensYR) 
 
-              
 #if NDIM == 3
               condkmh = 0.
               condkph = 0.              
@@ -534,13 +533,14 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+5) = 0.0
+                       !temp_BoxVal(iter+5) = 0.0
                     end if
                  end if
 
               else  !- kpd - Boundary Node
 
-                 MdensZL = 0.0
+                 !MdensZL = 0.0
+                 MdensZL = facevarz(RH1F_FACE_VAR,i  ,j  ,k)+facevarz(RH2F_FACE_VAR,i  ,j  ,k)
                  temp_BoxVal(iter+5) = 0.0
 
               end if
@@ -569,13 +569,14 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+6) = 0.0
+                       !temp_BoxVal(iter+6) = 0.0
                     end if
                  end if
 
               else  !- kpd - Boundary Node
 
-                 MdensZR = 0.0
+                 !MdensZR = 0.0
+                 MdensZR = facevarz(RH1F_FACE_VAR,i,j,k+1)+facevarz(RH2F_FACE_VAR,i  ,j,k+1)
                  temp_BoxVal(iter+6) = 0.0
 
               end if
@@ -594,7 +595,6 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
         end do
      end do     
      
-
 !    if (NDIM .eq. 2) then
      !call HYPRE_SStructMatrixSetBoxValues(gr_hypreMatA, mypart, gr_hypreLower(lb,1:NDIM), &
      !     gr_hypreUpper(lb,1:NDIM), var, nentries, stencil_indices(1:nentries), BoxVal(:), ierr)
