@@ -49,7 +49,8 @@
             tpdvdxcorn, tpdvdycorn, tpdvdzcorn,&
             tpdwdxcorn, tpdwdycorn, tpdwdzcorn,&
             vortx,vorty,vortz,omg,             &
-            Sxy,Syz,Sxz,Oxy,Oyz,Oxz,Qcr,divpp,TVtpp
+            Sxy,Syz,Sxz,Oxy,Oyz,Oxz,Qcr,divpp,TVtpp,&
+            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp
 
 
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
@@ -138,7 +139,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p wx wy wz Q div Phi'//NULLCHR,  &
+             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -275,7 +276,7 @@
      ! P pressure: p(NXB+1,NYB+1,NZB+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
-                             solnData(TEMP_VAR,:,:,:),tpp)
+                             solnData(PRES_VAR,:,:,:),tpp)
 
 
      ! Divergence: ! Ojo Intermediate velocities: unk(3, for div(u) unk(5 !!!!!!!
@@ -289,6 +290,28 @@
      !                        solnData(TVIS_VAR,:,:,:),TVtpp)
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(DFUN_VAR,:,:,:),TVtpp)
+
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(TEMP_VAR,:,:,:),tempp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(MDOT_VAR,:,:,:),mdotp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(TNLQ_VAR,:,:,:),tnlp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(TNLP_VAR,:,:,:),tnvp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(NRMX_VAR,:,:,:),nxp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(NRMY_VAR,:,:,:),nyp)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(NRMZ_VAR,:,:,:),nzp)
 
 
      ! Divergence: 
@@ -485,6 +508,28 @@
      ! Write TV:
      arraylb = sngl(TVtpp)
      i = TecDat(ijk,arraylb,0)
+
+
+     arraylb = sngl(tempp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(mdotp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(tnlp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(tnvp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(nxp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(nyp)
+     i = TecData(ijk,arraylb,0)
+
+     arraylb = sngl(nzp)
+     i = TecData(ijk,arraylb,0)
 
      ! Write Div Ustar:
 !!$     do k=1,NZB+1

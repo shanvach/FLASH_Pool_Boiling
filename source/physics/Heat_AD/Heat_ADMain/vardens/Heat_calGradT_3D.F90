@@ -25,16 +25,23 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
          Timj = T(i-1,j,k)
          Tijp = T(i,j+1,k)
          Tijm = T(i,j-1,k)
+         Tkm  = T(i,j,k-1)
+         Tkp  = T(i,j,k+1)
+
          Tij  = T(i,j,k)
          Tmx  = T(i,j,k)
          Tpx  = T(i,j,k)
          Tmy  = T(i,j,k)
          Tpy  = T(i,j,k)
+         Tmz  = T(i,j,k)
+         Tpz  = T(i,j,k)
 
          dxp = dx
          dxm = dx
          dym = dy
          dyp = dy
+         dzm = dz
+         dzp = dz
 
          if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
 
@@ -116,7 +123,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             end if
 
-            dzp = th*dy
+            dzp = th*dz
             Tkp = ht_Tsat
 
          end if
@@ -133,7 +140,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             end if
 
-            dzm = th*dy
+            dzm = th*dz
             Tkm = ht_Tsat
 
          end if
