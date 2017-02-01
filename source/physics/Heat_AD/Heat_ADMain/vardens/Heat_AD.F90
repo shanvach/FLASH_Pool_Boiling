@@ -309,7 +309,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        mph_thco2,mph_thco1,&
                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
 
     ! Release pointers
     call Grid_releaseBlkPtr(blockID,solnData,CENTER)

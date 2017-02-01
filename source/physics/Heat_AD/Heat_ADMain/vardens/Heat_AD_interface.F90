@@ -73,11 +73,11 @@ module Heat_AD_interface
    end interface
 
    interface
-      subroutine Heat_calMdot(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2)
+      subroutine Heat_calMdot(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2,kz1,kz2)
         implicit none
         real, dimension(:,:,:), intent(inout) :: mdot
         real, dimension(:,:,:), intent(in) :: Tnl,Tnv,nx,ny
-        integer, intent(in) :: ix1,ix2,jy1,jy2
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(in) :: alpha_l,alpha_v
       end subroutine Heat_calMdot
    end interface
@@ -126,16 +126,6 @@ module Heat_AD_interface
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(out) :: Tnl_res,Tnv_res
       end subroutine Heat_extrapGradT_3D
-   end interface
-
-   interface
-      subroutine Heat_calMdot_3D(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2)
-        implicit none
-        real, dimension(:,:,:), intent(inout) :: mdot
-        real, dimension(:,:,:), intent(in) :: Tnl,Tnv,nx,ny
-        integer, intent(in) :: ix1,ix2,jy1,jy2
-        real, intent(in) :: alpha_l,alpha_v
-      end subroutine Heat_calMdot_3D
    end interface
 
 end module Heat_AD_interface
