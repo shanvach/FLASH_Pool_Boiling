@@ -189,7 +189,7 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
            (uni(i,j,k)   + aixl) )/dx +  &       
          ( (vni(i,j+1,k) + aiyr) -   &
            (vni(i,j,k)   + aiyl) )/dy +  &
-         ( (wni(i,j+1,k) + aizr) -   &
+         ( (wni(i,j,k+1) + aizr) -   &
            (wni(i,j,k)   + aizl))/dz
 #endif
       end do
