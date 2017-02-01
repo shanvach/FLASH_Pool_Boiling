@@ -1,18 +1,18 @@
-subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res)
+subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,kz1,kz2,Tnl_res,Tnv_res)
 
 #include "Flash.h"
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz
     real, intent(in) :: dx,dy,dz
-    integer, intent(in) :: ix1,ix2,jy1,jy2
+    integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
     real, intent(out) :: Tnl_res,Tnv_res
 
     integer :: i,j,k
-    real :: nxconv,nyconv,nx_plus,nx_mins,ny_plus,ny_mins
-    real :: Tlx_plus, Tlx_mins, Tly_plus, Tly_mins
-    real :: Tvx_plus, Tvx_mins, Tvy_plus, Tvy_mins
+    real :: nxconv,nyconv,nzconv,nx_plus,nx_mins,ny_plus,ny_mins,nz_plus,nz_mins
+    real :: Tlx_plus, Tlx_mins, Tly_plus, Tly_mins, Tlz_plus, Tlz_mins
+    real :: Tvx_plus, Tvx_mins, Tvy_plus, Tvy_mins, Tvz_plus, Tvz_mins
 
     real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: Tnl_o,Tnv_o,Tnl_i,Tnv_i
 
@@ -36,7 +36,7 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl
 
     Tnv_o = Tnv
 
-    k = 1
+    do k=kz1,kz2
     do i=ix1,ix2
      do j=jy1,jy2
 
@@ -44,12 +44,16 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl
 
           nxconv = nx(i,j,k)
           nyconv = ny(i,j,k)
+          nzconv = nz(i,j,k)
 
           nx_plus = max(nxconv,0.)
           nx_mins = min(nxconv,0.)
 
           ny_plus = max(nyconv,0.)
           ny_mins = min(nyconv,0.)
+
+          nz_plus = max(nzconv,0.)
+          nz_mins = min(nzconv,0.)
 
           Tlx_plus = (Tnl_o(i+1,j,k) - Tnl_o(i,j,k))/dx
           Tlx_mins = (Tnl_o(i,j,k) - Tnl_o(i-1,j,k))/dx
@@ -57,13 +61,18 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl
           Tly_plus = (Tnl_o(i,j+1,k) - Tnl_o(i,j,k))/dy
           Tly_mins = (Tnl_o(i,j,k) - Tnl_o(i,j-1,k))/dy
 
+          Tlz_plus = (Tnl_o(i,j,k+1) - Tnl_o(i,j,k))/dz
+          Tlz_mins = (Tnl_o(i,j,k) - Tnl_o(i,j,k-1))/dz
+
           Tnl(i,j,k) = Tnl_i(i,j,k) + dt_ext*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
-                                                    -ny_mins*Tly_plus-ny_plus*Tly_mins)
+                                              -ny_mins*Tly_plus-ny_plus*Tly_mins &
+                                              -nz_mins*Tlz_plus-nz_plus*Tlz_mins)
 
       else if(pf(i,j,k) .eq. 0.) then
 
           nxconv = -nx(i,j,k)
           nyconv = -ny(i,j,k)
+          nzconv = -nz(i,j,k)
 
           nx_plus = max(nxconv,0.)
           nx_mins = min(nxconv,0.)
@@ -71,44 +80,28 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl
           ny_plus = max(nyconv,0.)
           ny_mins = min(nyconv,0.)
 
+          nz_plus = max(nzconv,0.)
+          nz_mins = min(nzconv,0.)
+
           Tvx_plus = (Tnv_o(i+1,j,k) - Tnv_o(i,j,k))/dx
           Tvx_mins = (Tnv_o(i,j,k) - Tnv_o(i-1,j,k))/dx
 
           Tvy_plus = (Tnv_o(i,j+1,k) - Tnv_o(i,j,k))/dy
           Tvy_mins = (Tnv_o(i,j,k) - Tnv_o(i,j-1,k))/dy
 
+          Tvz_plus = (Tnv_o(i,j,k+1) - Tnv_o(i,j,k))/dz
+          Tvz_mins = (Tnv_o(i,j,k) - Tnv_o(i,j,k-1))/dz
+
           Tnv(i,j,k) = Tnv_i(i,j,k) + dt_ext*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
-                                                    -ny_mins*Tvy_plus-ny_plus*Tvy_mins)
+                                              -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
+                                              -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
 
        end if
 
-          !nx_plus = max(nxconv,0.)
-          !nx_mins = min(nxconv,0.)
-
-          !ny_plus = max(nyconv,0.)
-          !ny_mins = min(nyconv,0.)
-
-          !Tlx_plus = (Tnl_o(i+1,j,k) - Tnl_o(i,j,k))/dx
-          !Tlx_mins = (Tnl_o(i,j,k) - Tnl_o(i-1,j,k))/dx
-
-          !Tly_plus = (Tnl_o(i,j+1,k) - Tnl_o(i,j,k))/dy
-          !Tly_mins = (Tnl_o(i,j,k) - Tnl_o(i,j-1,k))/dy
-
-          !Tvx_plus = (Tnv_o(i+1,j,k) - Tnv_o(i,j,k))/dx
-          !Tvx_mins = (Tnv_o(i,j,k) - Tnv_o(i-1,j,k))/dx
-
-          !Tvy_plus = (Tnv_o(i,j+1,k) - Tnv_o(i,j,k))/dy
-          !Tvy_mins = (Tnv_o(i,j,k) - Tnv_o(i,j-1,k))/dy
-
-          !Tnl(i,j,k) = Tnl_i(i,j,k) + dt_ext*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins&
-          !                                          -ny_mins*Tly_plus-ny_plus*Tly_mins)
-
-          !Tnv(i,j,k) = Tnv_i(i,j,k) + dt_ext*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins&
-          !                                          -ny_mins*Tvy_plus-ny_plus*Tvy_mins)
-
      end do
    end do
-  
+   end do  
+
    Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
    Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
 

@@ -5,7 +5,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "Flash.h"
 
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS,Heat_calGradT,&
-                                Heat_extrapGradT, Heat_calMdot
+                                Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,&
+                                Heat_extrapGradT_3D,Heat_calGradT_3D
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -70,9 +71,11 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      if (step == 1) solnData(TOLD_VAR,:,:,:) = solnData(TEMP_VAR,:,:,:)
 
+#if NDIM == 2
      call Heat_RHS(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
@@ -86,6 +89,25 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(SMRH_VAR,:,:,:))
+#endif
+
+#if NDIM == 3
+     call Heat_RHS_3D(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+                     facexData(VELC_FACE_VAR,:,:,:),&
+                     faceyData(VELC_FACE_VAR,:,:,:),&
+                     facezData(VELC_FACE_VAR,:,:,:),&
+                     del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                     ins_invRe,&
+                     blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                     blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                     facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
+                     faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:),&
+                     solnData(THCO_VAR,:,:,:),solnData(CPRS_VAR,:,:,:),&
+                     solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
+                     solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
+                     solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),solnData(SMRH_VAR,:,:,:))
+#endif
 
      if (step == 1) then
 
@@ -96,7 +118,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(RHST_VAR,:,:,:),&
                      dt,&
                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                     blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),T_res1)
 
 
      else
@@ -105,7 +128,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(RHST_VAR,:,:,:),&
                      dt,&
                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                     blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),T_res1)
 
      ! uncomment for RK-2 
      !T_resBlock = T_resBlock + T_res1
@@ -124,6 +148,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
     end do
 
@@ -181,12 +206,24 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      !                  real(j - NGUARD - 1)*del(JAXIS)  +  &
      !                  0.5*del(JAXIS)
 
+#if NDIM == 2
      call Heat_calGradT(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                         solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:))
+#endif
+
+#if NDIM == 3
+     call Heat_calGradT_3D(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
+                        solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
+                        solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:))
+#endif
 
 
      !         if(solnData(PFUN_VAR,i,j,k) .eq. 0.) solnData(TNLQ_VAR,i,j,k) = cos(xcell)*sin(ycell)
@@ -233,6 +270,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
      ! Extrapolation subroutine
+
+#if NDIM == 2
      call Heat_extrapGradT(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                            solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                            solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
@@ -240,6 +279,19 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                            Tnl_res1,Tnv_res1)
+#endif
+
+#if NDIM == 3
+     call Heat_extrapGradT_3D(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
+                           solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
+                           solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
+                           solnData(NRMZ_VAR,:,:,:),&
+                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                           Tnl_res1,Tnv_res1)
+#endif
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 

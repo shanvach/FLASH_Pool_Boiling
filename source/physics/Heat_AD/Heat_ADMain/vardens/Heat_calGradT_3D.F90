@@ -1,12 +1,12 @@
-subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
+subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz)
         
     use Heat_AD_data
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz
     real, intent(in) :: dx,dy,dz
-    integer, intent(in) :: ix1,ix2,jy1,jy2
+    integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
     real :: th,tol
     integer :: i,j,k

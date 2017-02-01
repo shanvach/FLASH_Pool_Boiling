@@ -1,4 +1,4 @@
-subroutine Heat_Solve(T_p,T_o,T_rhs,dt,ix1,ix2, jy1,jy2,T_res)
+subroutine Heat_Solve(T_p,T_o,T_rhs,dt,ix1,ix2,jy1,jy2,kz1,kz2,T_res)
 
   use Heat_AD_data
 
@@ -9,12 +9,10 @@ subroutine Heat_Solve(T_p,T_o,T_rhs,dt,ix1,ix2, jy1,jy2,T_res)
   real, dimension(:,:,:), intent(in) :: T_o
   real, dimension(:,:,:), intent(in) :: T_rhs
   real, intent(in) :: dt
-  integer, intent(in) :: ix1, ix2, jy1, jy2
+  integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
  
   real, intent(inout) :: T_res
   integer :: i,j,k
-
-  k = 1
 
   !do j=jy1,jy2
   ! do i=ix1,ix2
@@ -22,7 +20,7 @@ subroutine Heat_Solve(T_p,T_o,T_rhs,dt,ix1,ix2, jy1,jy2,T_res)
   ! end do
   !end do
 
-  T_p(ix1:ix2,jy1:jy2,k) = T_o(ix1:ix2,jy1:jy2,k) + dt*T_rhs(ix1:ix2,jy1:jy2,k)
+  T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_o(ix1:ix2,jy1:jy2,kz1:kz2) + dt*T_rhs(ix1:ix2,jy1:jy2,kz1:kz2)
 
   T_res = sum(sum(sum((T_o(:,:,:)-T_p(:,:,:))**2,1),1))
 
