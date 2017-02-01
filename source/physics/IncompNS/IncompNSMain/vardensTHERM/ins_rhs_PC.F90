@@ -521,6 +521,12 @@
       INTEGER :: iConvU
       REAL :: rConvU
 
+      INTEGER:: ig, jg, kg
+      REAL:: rhox,rhoy,rhoz,mdotx,mdoty,mdotz,normx,normy,normz,rhoxc,rhoyc,rhozc
+      REAL, DIMENSION(NXB+2*NGUARD+1,NYB+2*NGUARD,NZB+2*NGUARD) :: unig
+      REAL, DIMENSION(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD) :: vnig
+      REAL, DIMENSION(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD+1) :: wnig
+
       !KPD - Choose Convection Scheme 1=1st order upwind, 2=2nd order central, 3=3rd order upwind
       !iConvU = 4
       iConvU = ins_iConvU
@@ -536,68 +542,95 @@
          do j = jy1,jy2
             do i = ix1,ix2+1
 
+             rhoxc = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k))
+
+             do kg = k-2,k+2
+             do jg = j-2,j+2
+             do ig = i-2,i+2
+
+             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
+             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
+             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
+
+             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
+             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
+             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
+
+             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
+             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
+             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
+
+             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhoxc))
+             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhoxc))
+             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhoxc))
+
+             end do
+             end do
+             end do
+            
+
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
              !=============================================================
-             uu   = uni(i,j,k)
+             uu   = unig(i,j,k)
 
-             uxp  = uni(i+1,j,k)
-             uxm  = uni(i-1,j,k)
-             uxpp = uni(i+2,j,k)
-             uxmm = uni(i-2,j,k)
+             uxp  = unig(i+1,j,k)
+             uxm  = unig(i-1,j,k)
+             uxpp = unig(i+2,j,k)
+             uxmm = unig(i-2,j,k)
 
-             uyp  = uni(i,j+1,k)
-             uym  = uni(i,j-1,k)
-             uypp = uni(i,j+2,k)
-             uymm = uni(i,j-2,k)
+             uyp  = unig(i,j+1,k)
+             uym  = unig(i,j-1,k)
+             uypp = unig(i,j+2,k)
+             uymm = unig(i,j-2,k)
 
-             uzp  = uni(i,j,k+1)
-             uzm  = uni(i,j,k-1)
-             uzpp = uni(i,j,k+2)
-             uzmm = uni(i,j,k-2)
+             uzp  = unig(i,j,k+1)
+             uzm  = unig(i,j,k-1)
+             uzpp = unig(i,j,k+2)
+             uzmm = unig(i,j,k-2)
 
-             uy   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j-1,k) + uni(i+1,j-1,k) ) 
-             uz   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j,k-1) + uni(i+1,j,k-1) )
+             uy   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j-1,k) + unig(i+1,j-1,k) ) 
+             uz   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j,k-1) + unig(i+1,j,k-1) )
 
-             vv   = vni(i,j,k)
+             vv   = vnig(i,j,k)
 
-             vxp  = vni(i+1,j,k)
-             vxm  = vni(i-1,j,k)
-             vxpp = vni(i+2,j,k)
-             vxmm = vni(i-2,j,k)
+             vxp  = vnig(i+1,j,k)
+             vxm  = vnig(i-1,j,k)
+             vxpp = vnig(i+2,j,k)
+             vxmm = vnig(i-2,j,k)
 
-             vyp  = vni(i,j+1,k)
-             vym  = vni(i,j-1,k)
-             vypp = vni(i,j+2,k)
-             vymm = vni(i,j-2,k)
+             vyp  = vnig(i,j+1,k)
+             vym  = vnig(i,j-1,k)
+             vypp = vnig(i,j+2,k)
+             vymm = vnig(i,j-2,k)
 
-             vzp  = vni(i,j,k+1)
-             vzm  = vni(i,j,k-1)
-             vzpp = vni(i,j,k+2)
-             vzmm = vni(i,j,k-2)
+             vzp  = vnig(i,j,k+1)
+             vzm  = vnig(i,j,k-1)
+             vzpp = vnig(i,j,k+2)
+             vzmm = vnig(i,j,k-2)
 
-             vx  = 0.25*( vni(i,j,k) + vni(i-1,j,k) + vni(i,j+1,k) + vni(i-1,j+1,k) )
-             vz  = 0.25*( vni(i,j,k) + vni(i,j,k-1) + vni(i,j+1,k) + vni(i,j+1,k-1) )
+             vx  = 0.25*( vnig(i,j,k) + vnig(i-1,j,k) + vnig(i,j+1,k) + vnig(i-1,j+1,k) )
+             vz  = 0.25*( vnig(i,j,k) + vnig(i,j,k-1) + vnig(i,j+1,k) + vnig(i,j+1,k-1) )
 
-             ww   = wni(i,j,k)
+             ww   = wnig(i,j,k)
 
-             wxp  = wni(i+1,j,k)
-             wxm  = wni(i-1,j,k)
-             wxpp = wni(i+2,j,k)
-             wxmm = wni(i-2,j,k)
+             wxp  = wnig(i+1,j,k)
+             wxm  = wnig(i-1,j,k)
+             wxpp = wnig(i+2,j,k)
+             wxmm = wnig(i-2,j,k)
 
-             wyp  = wni(i,j+1,k)
-             wym  = wni(i,j-1,k)
-             wypp = wni(i,j+2,k)
-             wymm = wni(i,j-2,k)
+             wyp  = wnig(i,j+1,k)
+             wym  = wnig(i,j-1,k)
+             wypp = wnig(i,j+2,k)
+             wymm = wnig(i,j-2,k)
 
-             wzp  = wni(i,j,k+1)
-             wzm  = wni(i,j,k-1)
-             wzpp = wni(i,j,k+2)
-             wzmm = wni(i,j,k-2)
+             wzp  = wnig(i,j,k+1)
+             wzm  = wnig(i,j,k-1)
+             wzpp = wnig(i,j,k+2)
+             wzmm = wnig(i,j,k-2)
 
-             wx  = 0.25*( wni(i,j,k) + wni(i-1,j,k) + wni(i,j,k+1) + wni(i-1,j,k+1) )
-             wy  = 0.25*( wni(i,j,k) + wni(i,j-1,k) + wni(i,j,k+1) + wni(i,j-1,k+1) )
+             wx  = 0.25*( wnig(i,j,k) + wnig(i-1,j,k) + wnig(i,j,k+1) + wnig(i-1,j,k+1) )
+             wy  = 0.25*( wnig(i,j,k) + wnig(i,j-1,k) + wnig(i,j,k+1) + wnig(i,j-1,k+1) )
 
              !=============================================================
              ! u.grad(u) = uj*dui/dxj 
@@ -662,32 +695,32 @@
              !=============================================================
 
                ! get velocities at 1/2 locations
-               uxplus  = (uni(i+1,j  ,k  ) + uni(i  ,j  ,k  ))*0.5
-               uxminus = (uni(i  ,j  ,k  ) + uni(i-1,j  ,k  ))*0.5
+               uxplus  = (unig(i+1,j  ,k  ) + unig(i  ,j  ,k  ))*0.5
+               uxminus = (unig(i  ,j  ,k  ) + unig(i-1,j  ,k  ))*0.5
 
-               uyplus  = (uni(i  ,j+1,k  ) + uni(i  ,j  ,k  ))*0.5
-               uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
+               uyplus  = (unig(i  ,j+1,k  ) + unig(i  ,j  ,k  ))*0.5
+               uyminus = (unig(i  ,j  ,k  ) + unig(i  ,j-1,k  ))*0.5
 
-               uzplus  = (uni(i  ,j  ,k+1) + uni(i  ,j  ,k  ))*0.5
-               uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
+               uzplus  = (unig(i  ,j  ,k+1) + unig(i  ,j  ,k  ))*0.5
+               uzminus = (unig(i  ,j  ,k  ) + unig(i  ,j  ,k-1))*0.5
 
-               vxplus  = (vni(i  ,j+1,k  ) + vni(i-1,j+1,k  ))*0.5
-               vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
+               vxplus  = (vnig(i  ,j+1,k  ) + vnig(i-1,j+1,k  ))*0.5
+               vxminus = (vnig(i  ,j  ,k  ) + vnig(i-1,j  ,k  ))*0.5
 
-               wxplus  = (wni(i  ,j  ,k+1) + wni(i-1,j  ,k+1))*0.5
-               wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
+               wxplus  = (wnig(i  ,j  ,k+1) + wnig(i-1,j  ,k+1))*0.5
+               wxminus = (wnig(i  ,j  ,k  ) + wnig(i-1,j  ,k  ))*0.5
 
                ! get derivatives at 1/2 locations
-               dudxp = (uni(i+1,j  ,k  ) - uni(i  ,j  ,k  ))*dx1
-               dudxm = (uni(i  ,j  ,k  ) - uni(i-1,j  ,k  ))*dx1
-               dudyp = (uni(i  ,j+1,k  ) - uni(i  ,j  ,k  ))*dy1
-               dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  ))*dy1
-               dudzp = (uni(i  ,j  ,k+1) - uni(i  ,j  ,k  ))*dz1
-               dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1))*dz1
-               dvdxp = (vni(i  ,j+1,k  ) - vni(i-1,j+1,k  ))*dx1
-               dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  ))*dx1
-               dwdxp = (wni(i  ,j  ,k+1) - wni(i-1,j  ,k+1))*dx1
-               dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  ))*dx1
+               dudxp = (unig(i+1,j  ,k  ) - unig(i  ,j  ,k  ))*dx1
+               dudxm = (unig(i  ,j  ,k  ) - unig(i-1,j  ,k  ))*dx1
+               dudyp = (unig(i  ,j+1,k  ) - unig(i  ,j  ,k  ))*dy1
+               dudym = (unig(i  ,j  ,k  ) - unig(i  ,j-1,k  ))*dy1
+               dudzp = (unig(i  ,j  ,k+1) - unig(i  ,j  ,k  ))*dz1
+               dudzm = (unig(i  ,j  ,k  ) - unig(i  ,j  ,k-1))*dz1
+               dvdxp = (vnig(i  ,j+1,k  ) - vnig(i-1,j+1,k  ))*dx1
+               dvdxm = (vnig(i  ,j  ,k  ) - vnig(i-1,j  ,k  ))*dx1
+               dwdxp = (wnig(i  ,j  ,k+1) - wnig(i-1,j  ,k+1))*dx1
+               dwdxm = (wnig(i  ,j  ,k  ) - wnig(i-1,j  ,k  ))*dx1
 
                !- kpd - Eddy viscosity (Cell Center value) at diagonals
                tvjp = 0.25*(tv(i-1,j  ,k  ) + tv(i  ,j  ,k  ) + &
@@ -756,7 +789,7 @@
                            + Mdens*(tzzp - tzzm)*dz1                &
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
-                           - gravX   
+                           + gravX   
 
             enddo
          enddo
@@ -768,68 +801,95 @@
          do j = jy1,jy2+1
             do i = ix1,ix2
 
+
+             rhoyc = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k))
+
+             do kg = k-2,k+2
+             do jg = j-2,j+2
+             do ig = i-2,i+2
+
+             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
+             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
+             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
+
+             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
+             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
+             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
+
+             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
+             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
+             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
+
+             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhoyc))
+             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhoyc))
+             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhoyc))
+
+             end do
+             end do
+             end do
+
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
              !=============================================================
-             uu   = uni(i,j,k)
+             uu   = unig(i,j,k)
 
-             uxp  = uni(i+1,j,k)
-             uxm  = uni(i-1,j,k)
-             uxpp = uni(i+2,j,k)
-             uxmm = uni(i-2,j,k)
+             uxp  = unig(i+1,j,k)
+             uxm  = unig(i-1,j,k)
+             uxpp = unig(i+2,j,k)
+             uxmm = unig(i-2,j,k)
 
-             uyp  = uni(i,j+1,k)
-             uym  = uni(i,j-1,k)
-             uypp = uni(i,j+2,k)
-             uymm = uni(i,j-2,k)
+             uyp  = unig(i,j+1,k)
+             uym  = unig(i,j-1,k)
+             uypp = unig(i,j+2,k)
+             uymm = unig(i,j-2,k)
 
-             uzp  = uni(i,j,k+1)
-             uzm  = uni(i,j,k-1)
-             uzpp = uni(i,j,k+2)
-             uzmm = uni(i,j,k-2)
+             uzp  = unig(i,j,k+1)
+             uzm  = unig(i,j,k-1)
+             uzpp = unig(i,j,k+2)
+             uzmm = unig(i,j,k-2)
 
-             uy   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j-1,k) + uni(i+1,j-1,k) ) 
-             uz   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j,k-1) + uni(i+1,j,k-1) )
+             uy   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j-1,k) + unig(i+1,j-1,k) ) 
+             uz   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j,k-1) + unig(i+1,j,k-1) )
 
-             vv   = vni(i,j,k)
+             vv   = vnig(i,j,k)
 
-             vxp  = vni(i+1,j,k)
-             vxm  = vni(i-1,j,k)
-             vxpp = vni(i+2,j,k)
-             vxmm = vni(i-2,j,k)
+             vxp  = vnig(i+1,j,k)
+             vxm  = vnig(i-1,j,k)
+             vxpp = vnig(i+2,j,k)
+             vxmm = vnig(i-2,j,k)
 
-             vyp  = vni(i,j+1,k)
-             vym  = vni(i,j-1,k)
-             vypp = vni(i,j+2,k)
-             vymm = vni(i,j-2,k)
+             vyp  = vnig(i,j+1,k)
+             vym  = vnig(i,j-1,k)
+             vypp = vnig(i,j+2,k)
+             vymm = vnig(i,j-2,k)
 
-             vzp  = vni(i,j,k+1)
-             vzm  = vni(i,j,k-1)
-             vzpp = vni(i,j,k+2)
-             vzmm = vni(i,j,k-2)
+             vzp  = vnig(i,j,k+1)
+             vzm  = vnig(i,j,k-1)
+             vzpp = vnig(i,j,k+2)
+             vzmm = vnig(i,j,k-2)
 
-             vx  = 0.25*( vni(i,j,k) + vni(i-1,j,k) + vni(i,j+1,k) + vni(i-1,j+1,k) )
-             vz  = 0.25*( vni(i,j,k) + vni(i,j,k-1) + vni(i,j+1,k) + vni(i,j+1,k-1) )
+             vx  = 0.25*( vnig(i,j,k) + vnig(i-1,j,k) + vnig(i,j+1,k) + vnig(i-1,j+1,k) )
+             vz  = 0.25*( vnig(i,j,k) + vnig(i,j,k-1) + vnig(i,j+1,k) + vnig(i,j+1,k-1) )
 
-             ww   = wni(i,j,k)
+             ww   = wnig(i,j,k)
 
-             wxp  = wni(i+1,j,k)
-             wxm  = wni(i-1,j,k)
-             wxpp = wni(i+2,j,k)
-             wxmm = wni(i-2,j,k)
+             wxp  = wnig(i+1,j,k)
+             wxm  = wnig(i-1,j,k)
+             wxpp = wnig(i+2,j,k)
+             wxmm = wnig(i-2,j,k)
 
-             wyp  = wni(i,j+1,k)
-             wym  = wni(i,j-1,k)
-             wypp = wni(i,j+2,k)
-             wymm = wni(i,j-2,k)
+             wyp  = wnig(i,j+1,k)
+             wym  = wnig(i,j-1,k)
+             wypp = wnig(i,j+2,k)
+             wymm = wnig(i,j-2,k)
 
-             wzp  = wni(i,j,k+1)
-             wzm  = wni(i,j,k-1)
-             wzpp = wni(i,j,k+2)
-             wzmm = wni(i,j,k-2)
+             wzp  = wnig(i,j,k+1)
+             wzm  = wnig(i,j,k-1)
+             wzpp = wnig(i,j,k+2)
+             wzmm = wnig(i,j,k-2)
 
-             wx  = 0.25*( wni(i,j,k) + wni(i-1,j,k) + wni(i,j,k+1) + wni(i-1,j,k+1) )
-             wy  = 0.25*( wni(i,j,k) + wni(i,j-1,k) + wni(i,j,k+1) + wni(i,j-1,k+1) )
+             wx  = 0.25*( wnig(i,j,k) + wnig(i-1,j,k) + wnig(i,j,k+1) + wnig(i-1,j,k+1) )
+             wy  = 0.25*( wnig(i,j,k) + wnig(i,j-1,k) + wnig(i,j,k+1) + wnig(i,j-1,k+1) )
 
              !=============================================================
              ! u.grad(u) = uj*dui/dxj 
@@ -882,32 +942,32 @@
              !=============================================================
 
                ! get velocities at 1/2 locations
-               vxplus  = (vni(i+1,j  ,k  ) + vni(i  ,j  ,k  ))*0.5
-               vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
+               vxplus  = (vnig(i+1,j  ,k  ) + vnig(i  ,j  ,k  ))*0.5
+               vxminus = (vnig(i  ,j  ,k  ) + vnig(i-1,j  ,k  ))*0.5
 
-               vyplus  = (vni(i  ,j+1,k  ) + vni(i  ,j  ,k  ))*0.5
-               vyminus = (vni(i  ,j  ,k  ) + vni(i  ,j-1,k  ))*0.5
+               vyplus  = (vnig(i  ,j+1,k  ) + vnig(i  ,j  ,k  ))*0.5
+               vyminus = (vnig(i  ,j  ,k  ) + vnig(i  ,j-1,k  ))*0.5
 
-               vzplus  = (vni(i  ,j  ,k+1) + vni(i  ,j  ,k  ))*0.5
-               vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
+               vzplus  = (vnig(i  ,j  ,k+1) + vnig(i  ,j  ,k  ))*0.5
+               vzminus = (vnig(i  ,j  ,k  ) + vnig(i  ,j  ,k-1))*0.5
 
-               uyplus  = (uni(i+1,j  ,k  ) + uni(i+1,j-1,k  ))*0.5
-               uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
+               uyplus  = (unig(i+1,j  ,k  ) + unig(i+1,j-1,k  ))*0.5
+               uyminus = (unig(i  ,j  ,k  ) + unig(i  ,j-1,k  ))*0.5
 
-               wyplus  = (wni(i  ,j  ,k+1) + wni(i  ,j-1,k+1))*0.5
-               wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
+               wyplus  = (wnig(i  ,j  ,k+1) + wnig(i  ,j-1,k+1))*0.5
+               wyminus = (wnig(i  ,j  ,k  ) + wnig(i  ,j-1,k  ))*0.5
 
                ! get derivatives at 1/2 locations
-               dvdxp = (vni(i+1,j  ,k  ) - vni(i  ,j  ,k  ))*dx1
-               dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  ))*dx1
-               dvdyp = (vni(i  ,j+1,k  ) - vni(i  ,j  ,k  ))*dy1
-               dvdym = (vni(i  ,j  ,k  ) - vni(i  ,j-1,k  ))*dy1
-               dvdzp = (vni(i  ,j  ,k+1) - vni(i  ,j  ,k  ))*dz1
-               dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1))*dz1
-               dudyp = (uni(i+1,j  ,k  ) - uni(i+1,j-1,k  ))*dy1
-               dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  ))*dy1
-               dwdyp = (wni(i  ,j  ,k+1) - wni(i  ,j-1,k+1))*dy1
-               dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  ))*dy1
+               dvdxp = (vnig(i+1,j  ,k  ) - vnig(i  ,j  ,k  ))*dx1
+               dvdxm = (vnig(i  ,j  ,k  ) - vnig(i-1,j  ,k  ))*dx1
+               dvdyp = (vnig(i  ,j+1,k  ) - vnig(i  ,j  ,k  ))*dy1
+               dvdym = (vnig(i  ,j  ,k  ) - vnig(i  ,j-1,k  ))*dy1
+               dvdzp = (vnig(i  ,j  ,k+1) - vnig(i  ,j  ,k  ))*dz1
+               dvdzm = (vnig(i  ,j  ,k  ) - vnig(i  ,j  ,k-1))*dz1
+               dudyp = (unig(i+1,j  ,k  ) - unig(i+1,j-1,k  ))*dy1
+               dudym = (unig(i  ,j  ,k  ) - unig(i  ,j-1,k  ))*dy1
+               dwdyp = (wnig(i  ,j  ,k+1) - wnig(i  ,j-1,k+1))*dy1
+               dwdym = (wnig(i  ,j  ,k  ) - wnig(i  ,j-1,k  ))*dy1
 
 
                !- kpd - Eddy viscosity (Cell Center value) at diagonals
@@ -969,7 +1029,7 @@
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
-                          + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
+                           + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
                           ! - gravY
             enddo
          enddo
@@ -981,68 +1041,95 @@
          do j = jy1,jy2
             do i = ix1,ix2
 
+
+             rhozc = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k))
+
+             do kg = k-2,k+2
+             do jg = j-2,j+2
+             do ig = i-2,i+2
+
+             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
+             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
+             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
+
+             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
+             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
+             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
+
+             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
+             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
+             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
+
+             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhozc))
+             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhozc))
+             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhozc))
+
+             end do
+             end do
+             end do
+
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
              !=============================================================
-             uu   = uni(i,j,k)
+             uu   = unig(i,j,k)
 
-             uxp  = uni(i+1,j,k)
-             uxm  = uni(i-1,j,k)
-             uxpp = uni(i+2,j,k)
-             uxmm = uni(i-2,j,k)
+             uxp  = unig(i+1,j,k)
+             uxm  = unig(i-1,j,k)
+             uxpp = unig(i+2,j,k)
+             uxmm = unig(i-2,j,k)
 
-             uyp  = uni(i,j+1,k)
-             uym  = uni(i,j-1,k)
-             uypp = uni(i,j+2,k)
-             uymm = uni(i,j-2,k)
+             uyp  = unig(i,j+1,k)
+             uym  = unig(i,j-1,k)
+             uypp = unig(i,j+2,k)
+             uymm = unig(i,j-2,k)
 
-             uzp  = uni(i,j,k+1)
-             uzm  = uni(i,j,k-1)
-             uzpp = uni(i,j,k+2)
-             uzmm = uni(i,j,k-2)
+             uzp  = unig(i,j,k+1)
+             uzm  = unig(i,j,k-1)
+             uzpp = unig(i,j,k+2)
+             uzmm = unig(i,j,k-2)
 
-             uy   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j-1,k) + uni(i+1,j-1,k) ) 
-             uz   = 0.25*( uni(i,j,k) + uni(i+1,j,k) + uni(i,j,k-1) + uni(i+1,j,k-1) )
+             uy   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j-1,k) + unig(i+1,j-1,k) ) 
+             uz   = 0.25*( unig(i,j,k) + unig(i+1,j,k) + unig(i,j,k-1) + unig(i+1,j,k-1) )
 
-             vv   = vni(i,j,k)
+             vv   = vnig(i,j,k)
 
-             vxp  = vni(i+1,j,k)
-             vxm  = vni(i-1,j,k)
-             vxpp = vni(i+2,j,k)
-             vxmm = vni(i-2,j,k)
+             vxp  = vnig(i+1,j,k)
+             vxm  = vnig(i-1,j,k)
+             vxpp = vnig(i+2,j,k)
+             vxmm = vnig(i-2,j,k)
 
-             vyp  = vni(i,j+1,k)
-             vym  = vni(i,j-1,k)
-             vypp = vni(i,j+2,k)
-             vymm = vni(i,j-2,k)
+             vyp  = vnig(i,j+1,k)
+             vym  = vnig(i,j-1,k)
+             vypp = vnig(i,j+2,k)
+             vymm = vnig(i,j-2,k)
 
-             vzp  = vni(i,j,k+1)
-             vzm  = vni(i,j,k-1)
-             vzpp = vni(i,j,k+2)
-             vzmm = vni(i,j,k-2)
+             vzp  = vnig(i,j,k+1)
+             vzm  = vnig(i,j,k-1)
+             vzpp = vnig(i,j,k+2)
+             vzmm = vnig(i,j,k-2)
 
-             vx  = 0.25*( vni(i,j,k) + vni(i-1,j,k) + vni(i,j+1,k) + vni(i-1,j+1,k) )
-             vz  = 0.25*( vni(i,j,k) + vni(i,j,k-1) + vni(i,j+1,k) + vni(i,j+1,k-1) )
+             vx  = 0.25*( vnig(i,j,k) + vnig(i-1,j,k) + vnig(i,j+1,k) + vnig(i-1,j+1,k) )
+             vz  = 0.25*( vnig(i,j,k) + vnig(i,j,k-1) + vnig(i,j+1,k) + vnig(i,j+1,k-1) )
 
-             ww   = wni(i,j,k)
+             ww   = wnig(i,j,k)
 
-             wxp  = wni(i+1,j,k)
-             wxm  = wni(i-1,j,k)
-             wxpp = wni(i+2,j,k)
-             wxmm = wni(i-2,j,k)
+             wxp  = wnig(i+1,j,k)
+             wxm  = wnig(i-1,j,k)
+             wxpp = wnig(i+2,j,k)
+             wxmm = wnig(i-2,j,k)
 
-             wyp  = wni(i,j+1,k)
-             wym  = wni(i,j-1,k)
-             wypp = wni(i,j+2,k)
-             wymm = wni(i,j-2,k)
+             wyp  = wnig(i,j+1,k)
+             wym  = wnig(i,j-1,k)
+             wypp = wnig(i,j+2,k)
+             wymm = wnig(i,j-2,k)
 
-             wzp  = wni(i,j,k+1)
-             wzm  = wni(i,j,k-1)
-             wzpp = wni(i,j,k+2)
-             wzmm = wni(i,j,k-2)
+             wzp  = wnig(i,j,k+1)
+             wzm  = wnig(i,j,k-1)
+             wzpp = wnig(i,j,k+2)
+             wzmm = wnig(i,j,k-2)
 
-             wx  = 0.25*( wni(i,j,k) + wni(i-1,j,k) + wni(i,j,k+1) + wni(i-1,j,k+1) )
-             wy  = 0.25*( wni(i,j,k) + wni(i,j-1,k) + wni(i,j,k+1) + wni(i,j-1,k+1) )
+             wx  = 0.25*( wnig(i,j,k) + wnig(i-1,j,k) + wnig(i,j,k+1) + wnig(i-1,j,k+1) )
+             wy  = 0.25*( wnig(i,j,k) + wnig(i,j-1,k) + wnig(i,j,k+1) + wnig(i,j-1,k+1) )
 
              !=============================================================
              ! u.grad(u) = uj*dui/dxj 
@@ -1095,32 +1182,32 @@
              !=============================================================
 
                ! get velocities at 1/2 locations
-               wxplus  = (wni(i+1,j  ,k  ) + wni(i  ,j  ,k  ))*0.5
-               wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
+               wxplus  = (wnig(i+1,j  ,k  ) + wnig(i  ,j  ,k  ))*0.5
+               wxminus = (wnig(i  ,j  ,k  ) + wnig(i-1,j  ,k  ))*0.5
                
-               wyplus  = (wni(i  ,j+1,k  ) + wni(i  ,j  ,k  ))*0.5
-               wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
+               wyplus  = (wnig(i  ,j+1,k  ) + wnig(i  ,j  ,k  ))*0.5
+               wyminus = (wnig(i  ,j  ,k  ) + wnig(i  ,j-1,k  ))*0.5
                
-               wzplus  = (wni(i  ,j  ,k+1) + wni(i  ,j  ,k  ))*0.5
-               wzminus = (wni(i  ,j  ,k  ) + wni(i  ,j  ,k-1))*0.5
+               wzplus  = (wnig(i  ,j  ,k+1) + wnig(i  ,j  ,k  ))*0.5
+               wzminus = (wnig(i  ,j  ,k  ) + wnig(i  ,j  ,k-1))*0.5
 
-               uzplus  = (uni(i+1,j  ,k  ) + uni(i+1,j  ,k-1))*0.5
-               uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
+               uzplus  = (unig(i+1,j  ,k  ) + unig(i+1,j  ,k-1))*0.5
+               uzminus = (unig(i  ,j  ,k  ) + unig(i  ,j  ,k-1))*0.5
 
-               vzplus  = (vni(i  ,j+1,k  ) + vni(i  ,j+1,k-1))*0.5
-               vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
+               vzplus  = (vnig(i  ,j+1,k  ) + vnig(i  ,j+1,k-1))*0.5
+               vzminus = (vnig(i  ,j  ,k  ) + vnig(i  ,j  ,k-1))*0.5
 
                ! get derivatives at 1/2 locations
-               dwdxp = (wni(i+1,j  ,k  ) - wni(i  ,j  ,k  ))*dx1
-               dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  ))*dx1
-               dwdyp = (wni(i  ,j+1,k  ) - wni(i  ,j  ,k  ))*dy1
-               dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  ))*dy1
-               dwdzp = (wni(i  ,j  ,k+1) - wni(i  ,j  ,k  ))*dz1
-               dwdzm = (wni(i  ,j  ,k  ) - wni(i  ,j  ,k-1))*dz1
-               dudzp = (uni(i+1,j  ,k  ) - uni(i+1,j  ,k-1))*dz1
-               dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1))*dz1
-               dvdzp = (vni(i  ,j+1,k  ) - vni(i  ,j+1,k-1))*dz1
-               dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1))*dz1
+               dwdxp = (wnig(i+1,j  ,k  ) - wnig(i  ,j  ,k  ))*dx1
+               dwdxm = (wnig(i  ,j  ,k  ) - wnig(i-1,j  ,k  ))*dx1
+               dwdyp = (wnig(i  ,j+1,k  ) - wnig(i  ,j  ,k  ))*dy1
+               dwdym = (wnig(i  ,j  ,k  ) - wnig(i  ,j-1,k  ))*dy1
+               dwdzp = (wnig(i  ,j  ,k+1) - wnig(i  ,j  ,k  ))*dz1
+               dwdzm = (wnig(i  ,j  ,k  ) - wnig(i  ,j  ,k-1))*dz1
+               dudzp = (unig(i+1,j  ,k  ) - unig(i+1,j  ,k-1))*dz1
+               dudzm = (unig(i  ,j  ,k  ) - unig(i  ,j  ,k-1))*dz1
+               dvdzp = (vnig(i  ,j+1,k  ) - vnig(i  ,j+1,k-1))*dz1
+               dvdzm = (vnig(i  ,j  ,k  ) - vnig(i  ,j  ,k-1))*dz1
 
 
                !- kpd - Eddy viscosity (Cell Center value) at diagonals
@@ -1182,7 +1269,7 @@
                           + Mdens* (tzzp - tzzm)*dz1                &
                           + Mdens* (txzp - txzm)*dx1                &! diffusion - cross terms
                           + Mdens* (tyzp - tyzm)*dy1                &
-                          - gravZ                   
+                          + gravZ                   
             enddo
          enddo
       enddo

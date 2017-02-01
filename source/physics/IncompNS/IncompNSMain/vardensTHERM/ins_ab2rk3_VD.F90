@@ -1109,37 +1109,31 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-!       rhoxr  = 2./(smrh(ix1+1,jy1,kz1)+smrh(ix1,jy1,kz1))
-!       rhoxl  = 2./(smrh(ix1-1,jy1,kz1)+smrh(ix1,jy1,kz1))
-!       rhoyr  = 2./(smrh(ix1,jy1+1,kz1)+smrh(ix1,jy1,kz1))
-!       rhoyl  = 2./(smrh(ix1,jy1-1,kz1)+smrh(ix1,jy1,kz1))
-!       aixr = (mdot(ix1,jy1,kz1)*xnorm(ix1,jy1,kz1)) * (rhoxr - 1./smrh(ix1,jy1,kz1))
-!       aixl = (mdot(ix1,jy1,kz1)*xnorm(ix1,jy1,kz1)) * (rhoxl - 1./smrh(ix1,jy1,kz1)) 
-!       aiyr = (mdot(ix1,jy1,kz1)*ynorm(ix1,jy1,kz1)) * (rhoyr - 1./smrh(ix1,jy1,kz1))
-!       aiyl = (mdot(ix1,jy1,kz1)*ynorm(ix1,jy1,kz1)) * (rhoyl - 1./smrh(ix1,jy1,kz1))
-! 
-!       divv(ix1:ix2,jy1:jy2,kz1:kz2) =           & 
-!          ( (uni(ix1+1:ix2+1,jy1:jy2,kz1:kz2) + aixr) -   &
-!            (uni(ix1:ix2,jy1:jy2,kz1:kz2)     + aixl) )/dx +  &       
-!          ( (vni(ix1:ix2,jy1+1:jy2+1,kz1:kz2) + aiyr) -   &
-!            (vni(ix1:ix2,jy1:jy2,kz1:kz2)     + aiyl) )/dy
- 
+     call ins_divergence_PC(facexData(VELC_FACE_VAR,:,:,:),&
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         facezData(VELC_FACE_VAR,:,:,:),&
+             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+             blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS),&
+             blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS),&
+             blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       new_div,&
+                       solnData(DFUN_VAR,:,:,:),&
+                       solnData(PFUN_VAR,:,:,:),&
+                       solnData(NRMX_VAR,:,:,:),&
+                       solnData(NRMY_VAR,:,:,:),&
+                       solnData(NRMZ_VAR,:,:,:),&
+                       solnData(SMRH_VAR,:,:,:),&
+                       solnData(MDOT_VAR,:,:,:),&
+                       mph_rho1,mph_rho2,&
+                       facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
+                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
 
+  mxdivv = max( mxdivv,maxval(new_div))
 
-  mxdivv = max( mxdivv,maxval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,NGUARD+1:nzc-1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,NGUARD+1:nzc-1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Y) + &
-                   (facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+2:nzc) - &
-                    facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Z) ))
-
-  mndivv = min( mndivv,minval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,NGUARD+1:nzc-1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,NGUARD+1:nzc-1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Y) + &
-                   (facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+2:nzc) - &
-                    facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Z) ))
-
+  mndivv = min( mndivv,minval(new_div))
 
   maxu = max(maxu,maxval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minu = min(minu,minval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
