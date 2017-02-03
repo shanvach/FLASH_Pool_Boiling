@@ -143,15 +143,15 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
       !rhoyr = ((rho1y(i,j+1,k)+rho2y(i,j+1,k))/rho2)
       !rhoyl = ((rho1y(i,j,k)+rho2y(i,j,k))/rho2)
 
-      aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
-      aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
-      aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
-      aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
+      !aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
+      !aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
+      !aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
+      !aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
 
-      !aixr = (mdot(i,j,k)+mdot(i+1,j,k)) * (xnorm(i,j,k)+xnorm(i+1,j,k)) * 0.25d0 * (rhoxr - 1./smrh(i,j,k))
-      !aixl = (mdot(i,j,k)+mdot(i-1,j,k)) * (xnorm(i,j,k)+xnorm(i-1,j,k)) * 0.25d0 * (rhoxl - 1./smrh(i,j,k))
-      !aiyr = (mdot(i,j,k)+mdot(i,j+1,k)) * (ynorm(i,j,k)+ynorm(i,j+1,k)) * 0.25d0 * (rhoyr - 1./smrh(i,j,k))
-      !aiyl = (mdot(i,j,k)+mdot(i,j-1,k)) * (ynorm(i,j,k)+ynorm(i,j-1,k)) * 0.25d0 * (rhoyl - 1./smrh(i,j,k))
+      aixr = (mdot(i,j,k)+mdot(i+1,j,k)) * (xnorm(i,j,k)+xnorm(i+1,j,k)) * 0.25d0 * (rhoxr - 1./smrh(i,j,k))
+      aixl = (mdot(i,j,k)+mdot(i-1,j,k)) * (xnorm(i,j,k)+xnorm(i-1,j,k)) * 0.25d0 * (rhoxl - 1./smrh(i,j,k))
+      aiyr = (mdot(i,j,k)+mdot(i,j+1,k)) * (ynorm(i,j,k)+ynorm(i,j+1,k)) * 0.25d0 * (rhoyr - 1./smrh(i,j,k))
+      aiyl = (mdot(i,j,k)+mdot(i,j-1,k)) * (ynorm(i,j,k)+ynorm(i,j-1,k)) * 0.25d0 * (rhoyl - 1./smrh(i,j,k))
 
       divv(i,j,k) =           & 
          ( (uni(i+1,j,k) + aixr) -   &
@@ -177,12 +177,20 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
       rhozl = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k))
 
 
-      aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
-      aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
-      aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
-      aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
-      aizr = (mdot(i,j,k)*znorm(i,j,k)) * (rhozr - 1./smrh(i,j,k))
-      aizl = (mdot(i,j,k)*znorm(i,j,k)) * (rhozl - 1./smrh(i,j,k))
+      !aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
+      !aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
+      !aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
+      !aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
+      !aizr = (mdot(i,j,k)*znorm(i,j,k)) * (rhozr - 1./smrh(i,j,k))
+      !aizl = (mdot(i,j,k)*znorm(i,j,k)) * (rhozl - 1./smrh(i,j,k))
+
+      aixr = (mdot(i,j,k)+mdot(i+1,j,k)) * (xnorm(i,j,k)+xnorm(i+1,j,k)) * 0.25d0 * (rhoxr - 1./smrh(i,j,k))
+      aixl = (mdot(i,j,k)+mdot(i-1,j,k)) * (xnorm(i,j,k)+xnorm(i-1,j,k)) * 0.25d0 * (rhoxl - 1./smrh(i,j,k))
+      aiyr = (mdot(i,j,k)+mdot(i,j+1,k)) * (ynorm(i,j,k)+ynorm(i,j+1,k)) * 0.25d0 * (rhoyr - 1./smrh(i,j,k))
+      aiyl = (mdot(i,j,k)+mdot(i,j-1,k)) * (ynorm(i,j,k)+ynorm(i,j-1,k)) * 0.25d0 * (rhoyl - 1./smrh(i,j,k))
+      aizr = (mdot(i,j,k)+mdot(i,j,k+1)) * (znorm(i,j,k)+znorm(i,j,k+1)) * 0.25d0 * (rhozr - 1./smrh(i,j,k))
+      aizl = (mdot(i,j,k)+mdot(i,j,k-1)) * (znorm(i,j,k)+znorm(i,j,k-1)) * 0.25d0 * (rhozl - 1./smrh(i,j,k))
+
 
       divv(i,j,k) =           & 
          ( (uni(i+1,j,k) + aixr) -   &
