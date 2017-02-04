@@ -206,22 +206,22 @@ interface
 end interface
 
 interface
-        subroutine mph_getSmearedProperties2D(s,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm,ynorm,smhv,smrh)
+        subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm,ynorm,smhv,smrh)
 
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx,dy,rho1,rho2
-        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s
+        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,pf
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
 
         end subroutine
 end interface
 
 interface
-       subroutine mph_getSmearedProperties3D(s,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz1,kz2,xnorm,ynorm,znorm,smhv,smrh) 
+       subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz1,kz2,xnorm,ynorm,znorm,smhv,smrh) 
 
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(in) :: dx,dy,rho1,rho2,dz
-        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,znorm
+        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,znorm,pf
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
 
       end subroutine

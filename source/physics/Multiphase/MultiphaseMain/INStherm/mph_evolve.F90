@@ -523,6 +523,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #if NDIM == 2
 
      call mph_getSmearedProperties2D(solnData(DFUN_VAR,:,:,:), &
+                          solnData(PFUN_VAR,:,:,:),&
                           del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
@@ -535,6 +536,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #if NDIM == 3
 
      call mph_getSmearedProperties3D(solnData(DFUN_VAR,:,:,:), &
+                          solnData(PFUN_VAR,:,:,:),&
                           del(DIR_X),del(DIR_Y),del(DIR_Z),mph_rho1,mph_rho2, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
