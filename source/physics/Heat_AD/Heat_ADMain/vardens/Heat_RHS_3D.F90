@@ -42,22 +42,6 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      rhozp = 2.d0/(smrh(i,j,k+1)+smrh(i,j,k)) - 1./smrh(i,j,k)
      rhozm = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k)) - 1./smrh(i,j,k)
 
-     !mdotxm = (mdot(i,j,k)+mdot(i-1,j,k))/2.
-     !mdotym = (mdot(i,j,k)+mdot(i,j-1,k))/2.
-     !mdotzm = (mdot(i,j,k)+mdot(i,j,k-1))/2.
-
-     !nxm = (nrmx(i,j,k)+nrmx(i-1,j,k))/2.
-     !nym = (nrmy(i,j,k)+nrmy(i,j-1,k))/2. 
-     !nzm = (nrmz(i,j,k)+nrmz(i,j,k-1))/2.
-
-     !mdotxp = (mdot(i,j,k)+mdot(i+1,j,k))/2.
-     !mdotyp = (mdot(i,j,k)+mdot(i,j+1,k))/2.
-     !mdotzp = (mdot(i,j,k)+mdot(i,j,k+1))/2.
-
-     !nxp = (nrmx(i,j,k)+nrmx(i+1,j,k))/2.
-     !nyp = (nrmy(i,j,k)+nrmy(i,j+1,k))/2.
-     !nzp = (nrmz(i,j,k)+nrmz(i,j,k+1))/2.
-
      mdotxm = mdot(i,j,k)
      mdotym = mdot(i,j,k)
      mdotzm = mdot(i,j,k)
@@ -214,7 +198,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
     alphaz_mins = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
     alphaz_plus = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
 
-!_____________RHS TERM_______________________________________________!
+!_________________________________RHS TERM____________________________________!
 
     Txx = (alphax_plus*(Tx_plus-Tij)/dx - alphax_mins*(Tij-Tx_mins)/dx)/dx
     Tyy = (alphay_plus*(Ty_plus-Tij)/dy - alphay_mins*(Tij-Ty_mins)/dy)/dy

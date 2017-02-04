@@ -40,18 +40,6 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      rhoxp = 2.d0/(smrh(i+1,j,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
      rhoyp = 2.d0/(smrh(i,j+1,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
 
-     !mdotxm = (mdot(i,j,k)+mdot(i-1,j,k))/2.
-     !mdotym = (mdot(i,j,k)+mdot(i,j-1,k))/2.
-
-     !nxm = (nrmx(i,j,k)+nrmx(i-1,j,k))/2.
-     !nym = (nrmy(i,j,k)+nrmy(i,j-1,k))/2. 
-
-     !mdotxp = (mdot(i,j,k)+mdot(i+1,j,k))/2.
-     !mdotyp = (mdot(i,j,k)+mdot(i,j+1,k))/2.
-
-     !nxp = (nrmx(i,j,k)+nrmx(i+1,j,k))/2.
-     !nyp = (nrmy(i,j,k)+nrmy(i,j+1,k))/2.
-
      mdotxm = mdot(i,j,k)
      mdotym = mdot(i,j,k)
     
@@ -94,7 +82,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
        end if 
 
-       Tx_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+       Tx_plus = (ht_Tsat-Tij)/th + Tij
 
      end if
      ! End of Case 1 !
@@ -113,7 +101,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       
        end if
 
-       Tx_mins = (ht_Tsat-T_o(i,j,1))/th + Tij
+       Tx_mins = (ht_Tsat-Tij)/th + Tij
 
      end if
      ! End of Case 2 !
@@ -131,7 +119,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
       end if
   
-      Ty_plus = (ht_Tsat-T_o(i,j,1))/th + Tij
+      Ty_plus = (ht_Tsat-Tij)/th + Tij
 
    end if
     ! End of Case 3 !
@@ -149,7 +137,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
       end if
 
-      Ty_mins = (ht_Tsat-T_o(i,j,1))/th + Tij 
+      Ty_mins = (ht_Tsat-Tij)/th + Tij 
 
     end if
     ! End of Case 4 !
@@ -159,7 +147,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
     alphay_plus = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
     alphay_mins = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
 
-!_____________RHS TERM_______________________________________________!
+!_______________________________RHS TERM______________________________________!
 
     Txx = (alphax_plus*(Tx_plus-Tij)/dx - alphax_mins*(Tij-Tx_mins)/dx)/dx
     Tyy = (alphay_plus*(Ty_plus-Tij)/dy - alphay_mins*(Tij-Ty_mins)/dy)/dy
