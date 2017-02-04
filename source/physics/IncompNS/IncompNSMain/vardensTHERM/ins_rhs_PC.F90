@@ -78,58 +78,32 @@
       dx1 = 1.0/dx
       dy1 = 1.0/dy
 
-      !print *, "test",ix1,ix2,jy1,jy2
-      !print *, NXB,NYB,NGUARD
-      !stop
-
       !ML - calculate ghost fluid velocity
       unig = 0. 
       vnig = 0.
-
-      do j = jy1,jy2
-       do i = ix1,ix2+1
-
-         
-
-       end do
-      end do
-!      unig(ix1:ix2+1,jy1:jy2) = uni(ix1:ix2+1,jy1:jy2)
-!      vnig(ix1:ix2,jy1:jy2+1) = vni(ix1:ix2,jy1:jy2+1)
-
-!      print *, "smrh,mdot,normx,normy,unig,vnig"
-!      !print *, shape(smrh),shape(mdot),shape(xnorm),shape(ynorm),shape(unig),shape(vnig)
-!      print *, "test smrh"
-!      print *, "test smrh"
-!      print *, shape(uni)
-!      print *, shape(smrh)
-!      print *, shape(mdot)
-!      print *, "test smrh"
 
       !++++++++++  U-COMPONENT  ++++++++++
        do j = jy1,jy2
           do i = ix1,ix2+1
 
-             !ML - calculate ghost fluid velocity
+
+             ! AVD - Calculating Ghost Fluid Velocities
+             ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
+             ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+  
              rhoxc = 2.d0/(smrh(i-1,j,kz1)+smrh(i,j,kz1))
-             !rhoyc = 2.d0/(smrh(i,j-1,kz1)+smrh(i,j,kz1))
-             !rhoxc = ((rho1x(i,j,kz1) + rho2x(i,j,kz1))/mph_rho2)
-
-             do jg = j-2,j+2 ! CHECK
-             do ig = i-2,i+2
-             rhox  = 2.d0/(smrh(ig-1,jg,kz1)+smrh(ig,jg,kz1))
-             rhoy  = 2.d0/(smrh(ig,jg-1,kz1)+smrh(ig,jg,kz1))
-             !rhox = ((rho1x(ig,jg,kz1)+rho2x(ig,jg,kz1))/mph_rho2)
-             !rhoy = ((rho1y(ig,jg,kz1)+rho2y(ig,jg,kz1))/mph_rho2)
-             mdotx = (mdot(ig-1,jg,kz1)+mdot(ig,jg,kz1))/2.d0
-             mdoty = (mdot(ig,jg-1,kz1)+mdot(ig,jg,kz1))/2.d0
-             normx = (xnorm(ig-1,jg,kz1)+xnorm(ig,jg,kz1))/2.d0
-             normy = (ynorm(ig,jg-1,kz1)+ynorm(ig,jg,kz1))/2.d0
-             unig(ig,jg,kz1) = uni(ig,jg,kz1) + (mdotx * normx *(rhox - rhoxc))!/mph_rho2)
-             vnig(ig,jg,kz1) = vni(ig,jg,kz1) + (mdoty * normy *(rhoy - rhoxc))!/mph_rho2)
-             end do
-             end do                
+           
+             unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
+                                        (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+                                        ((2.d0/(smrh(i-3:i+1,j-2:j+2,kz1)+smrh(i-2:i+2,j-2:j+2,kz1)))-rhoxc)
 
 
+             vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
+                                        (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-3:j+1,kz1)+smrh(i-2:i+2,j-2:j+2,kz1)))-rhoxc)
+ 
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
              uu   = unig(i,j,kz1)
@@ -274,29 +248,28 @@
 
     !++++++++++  V-COMPONENT  ++++++++++
 
+       unig = 0.
+       vnig = 0.
+
        do j = jy1,jy2+1
           do i = ix1,ix2
 
-             !ML - calculate ghost fluid velocity
+             ! AVD - Calculating Ghost Fluid Velocities
+             ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
+             ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+ 
              rhoyc = 2.d0/(smrh(i,j-1,kz1)+smrh(i,j,kz1))
-             !rhoxc = 2.d0/(smrh(i-1,j,kz1)+smrh(i,j,kz1))
-             !rhoyc = ((rho1y(i,j,kz1)+rho2y(i,j,kz1))/mph_rho2)
 
-             do jg = j-2,j+2 ! CHECK
-             do ig = i-2,i+2
-             rhox =  2.d0/(smrh(ig-1,jg,kz1)+smrh(ig,jg,kz1))
-             rhoy =  2.d0/(smrh(ig,jg-1,kz1)+smrh(ig,jg,kz1))
-             !rhox = ((rho1x(ig,jg,kz1)+rho2x(ig,jg,kz1))/mph_rho2)
-             !rhoy = ((rho1y(ig,jg,kz1)+rho2y(ig,jg,kz1))/mph_rho2)
-             mdotx = (mdot(ig-1,jg,kz1)+mdot(ig,jg,kz1))/2.d0
-             mdoty = (mdot(ig,jg-1,kz1)+mdot(ig,jg,kz1))/2.d0
-             normx = (xnorm(ig-1,jg,kz1)+xnorm(ig,jg,kz1))/2.d0
-             normy = (ynorm(ig,jg-1,kz1)+ynorm(ig,jg,kz1))/2.d0
-             unig(ig,jg,kz1) = uni(ig,jg,kz1) + (mdotx * normx *(rhox - rhoyc))!/mph_rho2)
-             vnig(ig,jg,kz1) = vni(ig,jg,kz1) + (mdoty * normy *(rhoy - rhoyc))!/mph_rho2)
-             end do
-             end do                
+             unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
+                                        (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+                                        ((2.d0/(smrh(i-3:i+1,j-2:j+2,kz1)+smrh(i-2:i+2,j-2:j+2,kz1)))-rhoyc)
 
+             vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
+                                        (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-3:j+1,kz1)+smrh(i-2:i+2,j-2:j+2,kz1)))-rhoyc)
+ 
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
              uu   = unig(i,j,kz1)
@@ -537,37 +510,35 @@
       dy1 = 1.0/dy
       dz1 = 1.0/dz
 
+      unig = 0.
+      vnig = 0.
+      wnig = 0.
+
       !++++++++++  U-COMPONENT (Variable Density)  ++++++++++
       do k = kz1,kz2
          do j = jy1,jy2
             do i = ix1,ix2+1
 
+             ! AVD - Calculating Ghost Fluid Velocities
+             ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
+             ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+ 
              rhoxc = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k))
 
-             do kg = k-2,k+2
-             do jg = j-2,j+2
-             do ig = i-2,i+2
+             unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+                                        (xnorm(i-1,j,k) +xnorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-3:i+1,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoxc)
 
-             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
-             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
-             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
-
-             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
-             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
-             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
-
-             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
-             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
-             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
-
-             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhoxc))
-             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhoxc))
-             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhoxc))
-
-             end do
-             end do
-             end do
-            
+             vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+                                        (ynorm(i-1,j,k) +ynorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-3:j+1,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoxc)
+ 
+             wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+                                        (znorm(i-1,j,k) +znorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-2:j+2,k-3:k+1)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoxc)
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
@@ -797,36 +768,34 @@
 
       !++++++++++  V-COMPONENT  ++++++++++
 
+      unig = 0.
+      vnig = 0.
+      wnig = 0.
+
       do k = kz1,kz2
          do j = jy1,jy2+1
             do i = ix1,ix2
 
-
+             ! AVD - Calculating Ghost Fluid Velocities
+             ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
+             ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+ 
              rhoyc = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k))
 
-             do kg = k-2,k+2
-             do jg = j-2,j+2
-             do ig = i-2,i+2
+             unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+                                        (xnorm(i,j-1,k) +xnorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-3:i+1,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoyc)
 
-             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
-             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
-             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
-
-             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
-             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
-             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
-
-             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
-             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
-             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
-
-             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhoyc))
-             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhoyc))
-             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhoyc))
-
-             end do
-             end do
-             end do
+             vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+                                        (ynorm(i,j-1,k) +ynorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-3:j+1,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoyc)
+ 
+             wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+                                        (znorm(i,j-1,k) +znorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-2:j+2,k-3:k+1)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhoyc)
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
@@ -1037,36 +1006,35 @@
 
       !++++++++++  W-COMPONENT  ++++++++++
       
+      unig = 0.
+      vnig = 0.
+      wnig = 0.
+
       do k = kz1,kz2+1
          do j = jy1,jy2
             do i = ix1,ix2
 
-
+             ! AVD - Calculating Ghost Fluid Velocities
+             ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
+             ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+ 
              rhozc = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k))
 
-             do kg = k-2,k+2
-             do jg = j-2,j+2
-             do ig = i-2,i+2
 
-             rhox  = 2.d0/(smrh(ig-1,jg,kg)+smrh(ig,jg,kg))
-             rhoy  = 2.d0/(smrh(ig,jg-1,kg)+smrh(ig,jg,kg))
-             rhoz  = 2.d0/(smrh(ig,jg,kg-1)+smrh(ig,jg,kg))
+             unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+                                        (xnorm(i,j,k-1) +xnorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-3:i+1,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhozc)
 
-             mdotx = (mdot(ig-1,jg,kg)+mdot(ig,jg,kg))/2.d0
-             mdoty = (mdot(ig,jg-1,kg)+mdot(ig,jg,kg))/2.d0
-             mdotz = (mdot(ig,jg,kg-1)+mdot(ig,jg,kg))/2.d0
-
-             normx = (xnorm(ig-1,jg,kg)+xnorm(ig,jg,kg))/2.d0
-             normy = (ynorm(ig,jg-1,kg)+ynorm(ig,jg,kg))/2.d0
-             normz = (znorm(ig,jg,kg-1)+znorm(ig,jg,kg))/2.d0
-
-             unig(ig,jg,kg) = uni(ig,jg,kg) + (mdotx * normx *(rhox - rhozc))
-             vnig(ig,jg,kg) = vni(ig,jg,kg) + (mdoty * normy *(rhoy - rhozc))
-             wnig(ig,jg,kg) = wni(ig,jg,kg) + (mdotz * normz *(rhoz - rhozc))
-
-             end do
-             end do
-             end do
+             vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+                                        (ynorm(i,j,k-1) +ynorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-3:j+1,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhozc)
+ 
+             wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+                                        (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+                                        (znorm(i,j,k-1) +znorm(i,j,k))/2.0d0 * &
+                                        ((2.d0/(smrh(i-2:i+2,j-2:j+2,k-3:k+1)+smrh(i-2:i+2,j-2:j+2,k-2:k+2)))-rhozc)
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================

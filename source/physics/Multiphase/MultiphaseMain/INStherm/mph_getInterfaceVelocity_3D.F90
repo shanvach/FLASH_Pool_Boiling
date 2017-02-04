@@ -44,42 +44,29 @@
       REAL:: rhoz,mdotz,normz
 
 
+      !____________________________U component________________________________________!
 
-      !++++++++++  U-COMPONENT  ++++++++++
-        do k = kz1,kz2
-        do j = jy1,jy2
-        do i = ix1,ix2+1
-             rhox  = 2.0d0/(smrh(i-1,j,kz1)+smrh(i,j,k))
-             mdotx = (mdot(i-1,j,k)+mdot(i,j,k))/2.d0
-             normx = (xnorm(i-1,j,k)+xnorm(i,j,k))/2.d0
-             uint(i,j,k)=uni(i,j,k) + mdotx*normx*rhox
-        end do
-        end do
-        end do
+      uint(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
+                                      (mdot(ix1-1:ix2,jy1:jy2,kz1:kz2) + mdot(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
+                                      (xnorm(ix1-1:ix2,jy1:jy1,kz1:kz2) + xnorm(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
+                                      (2.0d0/(smrh(ix1-1:ix2,jy1:jy2,kz1:kz2) + smrh(ix1:ix2+1,jy1:jy2,kz1:kz2)))
 
-      !++++++++++  V-COMPONENT  ++++++++++
-        do k = kz1,kz2
-        do j = jy1,jy2+1
-        do i = ix1,ix2
-             rhoy  = 2.0d0/(smrh(i,j-1,k)+smrh(i,j,k))
-             mdoty = (mdot(i,j-1,k)+mdot(i,j,k))/2.d0
-             normy = (ynorm(i,j-1,k)+ynorm(i,j,k))/2.d0
-             vint(i,j,k)=vni(i,j,k) + mdoty*normy*rhoy
-        enddo
-        enddo
-        enddo
 
-      !++++++++++  W-COMPONENT  ++++++++++
-        do k = kz1,kz2+1
-        do j = jy1,jy2
-        do i = ix1,ix2
-             rhoz  = 2.0d0/(smrh(i,j,k-1)+smrh(i,j,k))
-             mdotz = (mdot(i,j,k-1)+mdot(i,j,k))/2.d0
-             normz = (znorm(i,j,k-1)+znorm(i,j,k))/2.d0
-             wint(i,j,k)=wni(i,j,k) + mdotz*normz*rhoz
-        enddo
-        enddo
-        enddo
+      !____________________________V component________________________________________!
+
+      vint(ix1:ix2+1,jy1:jy2,kz1:kz2) = vni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
+                                      (mdot(ix1:ix2,jy1-1:jy2,kz1:kz2) + mdot(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
+                                      (ynorm(ix1:ix2,jy1-1:jy1,kz1:kz2) + ynorm(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
+                                      (2.0d0/(smrh(ix1:ix2,jy1-1:jy2,kz1:kz2) + smrh(ix1:ix2,jy1:jy2+1,kz1:kz2)))
+
+
+      !____________________________W component________________________________________!
+
+      wint(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
+                                      (mdot(ix1:ix2,jy1:jy2,kz1-1:kz2) + mdot(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
+                                      (znorm(ix1:ix2,jy1:jy1,kz1-1:kz2) + znorm(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
+                                      (2.0d0/(smrh(ix1:ix2,jy1:jy2,kz1-1:kz2) + smrh(ix1:ix2,jy1:jy2,kz1:kz2+1)))
+
 
 END SUBROUTINE mph_getInterfaceVelocity_3D
 

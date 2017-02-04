@@ -1,5 +1,10 @@
 subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
+! This subroutine solves the heat advection diffusion equation, calculates
+! heat and mass flux for phase change simulations
+
+! Author - A.V. Dhruv
+
 #include "constants.h"
 #include "Heat_AD.h"
 #include "Flash.h"
@@ -52,7 +57,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    max_iter = 300
    iter_count = 0
 
-!_____Energy Equation_________________________________________________________________!
+!______________________________________Energy Equation____________________________________________!
 
    T_resBlock   = 0.0
 
@@ -75,6 +80,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      if (step == 1) solnData(TOLD_VAR,:,:,:) = solnData(TEMP_VAR,:,:,:)
 
+     ! Calculate RHS for advections diffusion
 #if NDIM == 2
      call Heat_RHS(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
@@ -113,6 +119,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! RK-1 dt/2.0
      ! RK-2 dt/1.0
+
+     ! Calculate temperature at new time-step
 
      call Heat_Solve(solnData(TEMP_VAR,:,:,:),solnData(TOLD_VAR,:,:,:),&
                      solnData(RHST_VAR,:,:,:),&
@@ -170,9 +178,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    if(mph_meshMe .eq. MASTER_PE) print *,"T_res:",T_res
 
-!______End Energy Equation_________________________________________________________!
+!___________________________________End of Energy Equation____________________________________________!
 
-!______Heat Flux calculation_______________________________________________________!
+!____________________________________Heat Flux calculation____________________________________________!
 
    do lb = 1,blockCount
 
@@ -194,18 +202,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     
      ! Calculate Heat Flux in known phase
 
-     !do k=1,blkLimits(HIGH,KAXIS)
-     !   do j=1,blkLimits(HIGH,JAXIS)
-     !      do i=1,blkLimits(HIGH,IAXIS)
-
-     !         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-     !                 real(i - NGUARD - 1)*del(IAXIS) +   &
-     !                 0.5*del(IAXIS)
-
-     !         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-     !                  real(j - NGUARD - 1)*del(JAXIS)  +  &
-     !                  0.5*del(JAXIS)
-
 #if NDIM == 2
      call Heat_calGradT(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                         solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
@@ -225,15 +221,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:))
 #endif
 
-
-     !         if(solnData(PFUN_VAR,i,j,k) .eq. 0.) solnData(TNLQ_VAR,i,j,k) = cos(xcell)*sin(ycell)
-     !         if(solnData(PFUN_VAR,i,j,k) .eq. 1.) solnData(TNVP_VAR,i,j,k) = cos(xcell)*sin(ycell)
-
-
-     !      end do
-     !   end do
-     !end do
-
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
   
@@ -247,9 +234,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-!______End Heat Flux calculation____________________________________________________!
+!_________________________________End of Heat Flux calculation_____________________________!
 
-!______Heat Flux extrapolation sub iterations_______________________________________!
+!__________________________Heat Flux extrapolation sub iterations__________________________!
 
    do while(iter_count <= max_iter)
 
@@ -269,7 +256,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      ! Lock pointers
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-     ! Extrapolation subroutine
+     ! Extrapolation of heat flux into unknown phase
 
 #if NDIM == 2
      call Heat_extrapGradT(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
@@ -322,8 +309,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
      ! Convergence check
-     if (Tnl_res < 1E-6 .and. Tnv_res < 1E-6 .and. &
-         Tnl_res .ne. 0. .and. Tnv_res .ne. 0.) exit
+     if ((Tnl_res+Tnv_res)/2.d0 < 1E-6 ) exit
 
      ! Increment counter
      iter_count = iter_count + 1

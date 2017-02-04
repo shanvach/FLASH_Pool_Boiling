@@ -46,9 +46,6 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
       
             if(th .lt. tol) then
 
-               !th = abs(s(i-1,j,k))/(abs(s(i-1,j,k))+abs(s(i+1,j,k)))
-               !Tpx = T(i-1,j,k)
-
                th = tol
 
             end if
@@ -66,9 +63,6 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
 
             if(th .lt. tol) then
 
-               !th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i-1,j,k)))
-               !Tmx = T(i+1,j,k)
-
                th = tol
 
             end if
@@ -85,10 +79,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
             th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
 
             if(th .lt. tol) then
-
-                !th = abs(s(i,j-1,k))/(abs(s(i,j-1,k))+abs(s(i,j+1,k)))
-                !Tpy = T(i,j-1,k)
-                
+               
                 th = tol
 
             end if
@@ -105,9 +96,6 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
             th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
 
             if(th .lt. tol) then
-
-                !th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j-1,k)))
-                !Tmy = T(i,j+1,k)
 
                 th = tol
 

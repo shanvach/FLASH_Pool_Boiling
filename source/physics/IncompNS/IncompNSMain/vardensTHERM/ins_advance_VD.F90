@@ -97,7 +97,9 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
                                 ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc,&
                                        dx,dy,dz,divv,s,pf,xnorm,ynorm,znorm,smrh,mdot,rho1,rho2,rho1x,rho2x,rho1y,rho2y)
 
-      ! This routine computes the divergence of the velocity field.
+      ! AVD -  This routine computes the divergence of the velocity field for phase
+      ! change simulations, use ins_divergence_VD when solving for multiphase
+      ! flow without phase change.
 
       implicit none
 
@@ -109,100 +111,48 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
       REAL, DIMENSION(:,:,:), INTENT(OUT) :: divv
 
       integer :: i,j,k
-      real :: sp,rhoxr,rhoxl,rhoyr,rhoyl,rhozr,rhozl,aixr,aixl,aiyr,aiyl,aizr,aizl
+      real :: sp
       INTEGER, INTENT(IN) :: ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc
       real, dimension(:,:,:), intent(in) :: s,pf
       real, intent(in) :: rho1,rho2
       real, dimension(:,:,:), intent(in) :: xnorm,ynorm,znorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y
+      real, dimension(NXB,NYB,NZB) :: rhoxr,rhoxl,rhoyr,rhoyl,rhozl,rhozr,&
+                                       aixr, aixl, aiyr, aiyl, aizl, aizr
 
-      aixr = 0.
-      aixl = 0.
-      aiyr = 0.
-      aiyl = 0.
-      aizr = 0.
-      aizl = 0.
-
-      do i=ix1,ix2
-      do j=jy1,jy2
-      do k=kz1,kz2
-
-#if NDIM == 2
-
-      !rhoxr = (smrh(i+1,j,k)+smrh(i,j,k))/2.d0
-      !rhoxl = (smrh(i-1,j,k)+smrh(i,j,k))/2.d0
-      !rhoyr = (smrh(i,j+1,k)+smrh(i,j,k))/2.d0
-      !rhoyl = (smrh(i,j-1,k)+smrh(i,j,k))/2.d0
-      
-      rhoxr = 2.d0/(smrh(i+1,j,k)+smrh(i,j,k))
-      rhoxl = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k))
-      rhoyr = 2.d0/(smrh(i,j+1,k)+smrh(i,j,k))
-      rhoyl = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k))
-
-      !rhoxr = ((rho1x(i+1,j,k)+rho2x(i+1,j,k))/rho2)
-      !rhoxl = ((rho1x(i,j,k)+rho2x(i,j,k))/rho2)
-      !rhoyr = ((rho1y(i,j+1,k)+rho2y(i,j+1,k))/rho2)
-      !rhoyl = ((rho1y(i,j,k)+rho2y(i,j,k))/rho2)
-
-      !aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
-      !aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
-      !aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
-      !aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
-
-      aixr = (mdot(i,j,k)+mdot(i+1,j,k)) * (xnorm(i,j,k)+xnorm(i+1,j,k)) * 0.25d0 * (rhoxr - 1./smrh(i,j,k))
-      aixl = (mdot(i,j,k)+mdot(i-1,j,k)) * (xnorm(i,j,k)+xnorm(i-1,j,k)) * 0.25d0 * (rhoxl - 1./smrh(i,j,k))
-      aiyr = (mdot(i,j,k)+mdot(i,j+1,k)) * (ynorm(i,j,k)+ynorm(i,j+1,k)) * 0.25d0 * (rhoyr - 1./smrh(i,j,k))
-      aiyl = (mdot(i,j,k)+mdot(i,j-1,k)) * (ynorm(i,j,k)+ynorm(i,j-1,k)) * 0.25d0 * (rhoyl - 1./smrh(i,j,k))
-
-      divv(i,j,k) =           & 
-         ( (uni(i+1,j,k) + aixr) -   &
-           (uni(i,j,k)   + aixl) )/dx +  &       
-         ( (vni(i,j+1,k) + aiyr) -   &
-           (vni(i,j,k)   + aiyl) )/dy
-
-     ! divv(i,j,k) =           &
-     !    (uni(i+1,j,k) - uni(i,j,k))/dx +  &
-     !    (vni(i,j+1,k) - vni(i,j,k))/dy +  &
-     !    (aixr         - aixl      )/dx +  &
-     !    (aiyr         - aiyl      )/dy
-
-#endif
+      rhoxr = 2.d0/(smrh(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      rhoxl = 2.d0/(smrh(ix1-1:ix2-1,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      rhoyr = 2.d0/(smrh(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      rhoyl = 2.d0/(smrh(ix1:ix2,jy1-1:jy2-1,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
 
 #if NDIM == 3
-     
-      rhoxr = 2.d0/(smrh(i+1,j,k)+smrh(i,j,k))
-      rhoxl = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k))
-      rhoyr = 2.d0/(smrh(i,j+1,k)+smrh(i,j,k))
-      rhoyl = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k))
-      rhozr = 2.d0/(smrh(i,j,k+1)+smrh(i,j,k))
-      rhozl = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k))
-
-
-      !aixr = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxr - 1./smrh(i,j,k))
-      !aixl = (mdot(i,j,k)*xnorm(i,j,k)) * (rhoxl - 1./smrh(i,j,k))
-      !aiyr = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyr - 1./smrh(i,j,k))
-      !aiyl = (mdot(i,j,k)*ynorm(i,j,k)) * (rhoyl - 1./smrh(i,j,k))
-      !aizr = (mdot(i,j,k)*znorm(i,j,k)) * (rhozr - 1./smrh(i,j,k))
-      !aizl = (mdot(i,j,k)*znorm(i,j,k)) * (rhozl - 1./smrh(i,j,k))
-
-      aixr = (mdot(i,j,k)+mdot(i+1,j,k)) * (xnorm(i,j,k)+xnorm(i+1,j,k)) * 0.25d0 * (rhoxr - 1./smrh(i,j,k))
-      aixl = (mdot(i,j,k)+mdot(i-1,j,k)) * (xnorm(i,j,k)+xnorm(i-1,j,k)) * 0.25d0 * (rhoxl - 1./smrh(i,j,k))
-      aiyr = (mdot(i,j,k)+mdot(i,j+1,k)) * (ynorm(i,j,k)+ynorm(i,j+1,k)) * 0.25d0 * (rhoyr - 1./smrh(i,j,k))
-      aiyl = (mdot(i,j,k)+mdot(i,j-1,k)) * (ynorm(i,j,k)+ynorm(i,j-1,k)) * 0.25d0 * (rhoyl - 1./smrh(i,j,k))
-      aizr = (mdot(i,j,k)+mdot(i,j,k+1)) * (znorm(i,j,k)+znorm(i,j,k+1)) * 0.25d0 * (rhozr - 1./smrh(i,j,k))
-      aizl = (mdot(i,j,k)+mdot(i,j,k-1)) * (znorm(i,j,k)+znorm(i,j,k-1)) * 0.25d0 * (rhozl - 1./smrh(i,j,k))
-
-
-      divv(i,j,k) =           & 
-         ( (uni(i+1,j,k) + aixr) -   &
-           (uni(i,j,k)   + aixl) )/dx +  &       
-         ( (vni(i,j+1,k) + aiyr) -   &
-           (vni(i,j,k)   + aiyl) )/dy +  &
-         ( (wni(i,j,k+1) + aizr) -   &
-           (wni(i,j,k)   + aizl))/dz
+      rhozr = 2.d0/(smrh(ix1:ix2,jy1:jy2,kz1+1:kz2+1)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      rhozl = 2.d0/(smrh(ix1:ix2,jy1:jy2,kz1-1:kz2-1)+smrh(ix1:ix2,jy1:jy2,kz1:kz2))
 #endif
-      end do
-      end do
-      end do
+
+      aixr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxr - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aixl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxl - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aiyr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyr - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aiyl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyl - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+#if NDIM == 3
+      aizr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozr - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aizl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozl - 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+#endif
+
+
+
+      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+         ( uni(ix1+1:ix2+1,jy1:jy2,kz1:kz2) + aixr -   &
+           uni(ix1:ix2,jy1:jy2,kz1:kz2) - aixl )/dx +  &
+         ( vni(ix1:ix2,jy1+1:jy2+1,kz1:kz2) + aiyr -   &
+           vni(ix1:ix2,jy1:jy2,kz1:kz2) - aiyl)/dy
+
+#if NDIM == 3
+      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+           divv(ix1:ix2,jy1:jy2,kz1:kz2)     +  &
+         ( wni(ix1:ix2,jy1:jy2,kz1+1:kz2+1) + aizr -   &
+           wni(ix1:ix2,jy1:jy2,kz1:kz2) - aizl)/dz
+#endif
 
 END SUBROUTINE ins_divergence_PC
 

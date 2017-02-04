@@ -10,9 +10,10 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
     real, intent(out) :: Tnl_res,Tnv_res
 
     integer :: i,j,k
-    real :: nxconv,nyconv,nzconv,nx_plus,nx_mins,ny_plus,ny_mins,nz_plus,nz_mins
-    real :: Tlx_plus, Tlx_mins, Tly_plus, Tly_mins, Tlz_plus, Tlz_mins
-    real :: Tvx_plus, Tvx_mins, Tvy_plus, Tvy_mins, Tvz_plus, Tvz_mins
+
+    real, dimension(NXB,NYB,NZB) :: nxconv,nyconv,nzconv,nx_plus,nx_mins,ny_plus,ny_mins,nz_plus,nz_mins
+    real, dimension(NXB,NYB,NZB) :: Tlx_plus, Tlx_mins, Tly_plus, Tly_mins, Tlz_plus, Tlz_mins
+    real, dimension(NXB,NYB,NZB) :: Tvx_plus, Tvx_mins, Tvy_plus, Tvy_mins, Tvz_plus, Tvz_mins
 
     real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: Tnl_o,Tnv_o,Tnl_i,Tnv_i
 
@@ -36,76 +37,49 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
 
     Tnv_o = Tnv
 
-    do k=kz1,kz2
-    do j=jy1,jy2
-     do i=ix1,ix2
+    nxconv = sign(1.,s(ix1:ix2,jy1:jy2,kz1:kz2))*nx(ix1:ix2,jy1:jy2,kz1:kz2)
+    nyconv = sign(1.,s(ix1:ix2,jy1:jy2,kz1:kz2))*ny(ix1:ix2,jy1:jy2,kz1:kz2)
+    nzconv = sign(1.,s(ix1:ix2,jy1:jy2,kz1:kz2))*nz(ix1:ix2,jy1:jy2,kz1:kz2)
 
-      if(pf(i,j,k) .eq. 1.) then
+    nx_plus = max(nxconv,0.)
+    nx_mins = min(nxconv,0.)
 
-          nxconv = nx(i,j,k)
-          nyconv = ny(i,j,k)
-          nzconv = nz(i,j,k)
+    ny_plus = max(nyconv,0.)
+    ny_mins = min(nyconv,0.)
 
-          nx_plus = max(nxconv,0.)
-          nx_mins = min(nxconv,0.)
+    nz_plus = max(nzconv,0.)
+    nz_mins = min(nzconv,0.)
 
-          ny_plus = max(nyconv,0.)
-          ny_mins = min(nyconv,0.)
+    Tlx_plus = (Tnl_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)-Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2))/dx
+    Tlx_mins = (Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnl_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/dx
 
-          nz_plus = max(nzconv,0.)
-          nz_mins = min(nzconv,0.)
+    Tly_plus = (Tnl_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)-Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2))/dy
+    Tly_mins = (Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnl_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/dy
 
-          Tlx_plus = (Tnl_o(i+1,j,k) - Tnl_o(i,j,k))/dx
-          Tlx_mins = (Tnl_o(i,j,k) - Tnl_o(i-1,j,k))/dx
+    Tlz_plus = (Tnl_o(ix1:ix2,jy1:jy2,kz1+1:kz2+1)-Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2))/dz
+    Tlz_mins = (Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnl_o(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/dz
 
-          Tly_plus = (Tnl_o(i,j+1,k) - Tnl_o(i,j,k))/dy
-          Tly_mins = (Tnl_o(i,j,k) - Tnl_o(i,j-1,k))/dy
+    Tvx_plus = (Tnv_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)-Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2))/dx
+    Tvx_mins = (Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnv_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/dx
 
-          Tlz_plus = (Tnl_o(i,j,k+1) - Tnl_o(i,j,k))/dz
-          Tlz_mins = (Tnl_o(i,j,k) - Tnl_o(i,j,k-1))/dz
+    Tvy_plus = (Tnv_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)-Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2))/dy
+    Tvy_mins = (Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnv_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/dy
 
-          Tnl(i,j,k) = Tnl_i(i,j,k) + dt_ext*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
-                                              -ny_mins*Tly_plus-ny_plus*Tly_mins &
-                                              -nz_mins*Tlz_plus-nz_plus*Tlz_mins)
+    Tvz_plus = (Tnv_o(ix1:ix2,jy1:jy2,kz1+1:kz2+1)-Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2))/dz
+    Tvz_mins = (Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnv_o(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/dz
 
-      else if(pf(i,j,k) .eq. 0.) then
+    Tnl(ix1:ix2,jy1:jy2,kz1:kz2) = Tnl_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*pf(ix1:ix2,jy1:jy2,kz1:kz2)*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
+                                                                                                        -ny_mins*Tly_plus-ny_plus*Tly_mins &
+                                                                                                        -nz_mins*Tlz_plus-nz_plus*Tlz_mins)
 
-          nxconv = -nx(i,j,k)
-          nyconv = -ny(i,j,k)
-          nzconv = -nz(i,j,k)
+    Tnv(ix1:ix2,jy1:jy2,kz1:kz2) = Tnv_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*(1.-pf(ix1:ix2,jy1:jy2,kz1:kz2))*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
+                                                                                                             -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
+                                                                                                             -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
 
-          nx_plus = max(nxconv,0.)
-          nx_mins = min(nxconv,0.)
+    Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
+    Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
 
-          ny_plus = max(nyconv,0.)
-          ny_mins = min(nyconv,0.)
-
-          nz_plus = max(nzconv,0.)
-          nz_mins = min(nzconv,0.)
-
-          Tvx_plus = (Tnv_o(i+1,j,k) - Tnv_o(i,j,k))/dx
-          Tvx_mins = (Tnv_o(i,j,k) - Tnv_o(i-1,j,k))/dx
-
-          Tvy_plus = (Tnv_o(i,j+1,k) - Tnv_o(i,j,k))/dy
-          Tvy_mins = (Tnv_o(i,j,k) - Tnv_o(i,j-1,k))/dy
-
-          Tvz_plus = (Tnv_o(i,j,k+1) - Tnv_o(i,j,k))/dz
-          Tvz_mins = (Tnv_o(i,j,k) - Tnv_o(i,j,k-1))/dz
-
-          Tnv(i,j,k) = Tnv_i(i,j,k) + dt_ext*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
-                                              -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
-                                              -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
-
-       end if
-
-     end do
-   end do
-   end do  
-
-   Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
-   Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
-
-   Tnl_res = sqrt(Tnl_res/size(Tnl))
-   Tnv_res = sqrt(Tnv_res/size(Tnv))
+    Tnl_res = sqrt(Tnl_res/size(Tnl))
+    Tnv_res = sqrt(Tnv_res/size(Tnv))
 
 end subroutine Heat_extrapGradT_3D

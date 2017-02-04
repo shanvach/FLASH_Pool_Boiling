@@ -29,20 +29,6 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
   tol = 0.01
 
-!#ifdef HEAT_CENTRAL
-!
-!  ! with Loop Vectorization ! (Second Order Central)
-!
-!  T_rhs(ix1:ix2,jy1:jy2,1) = ((inRe)/(ht_Pr*dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)+T_o(ix1-1:ix2-1,jy1:jy2,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
-!  +((inRe)/(ht_Pr*dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)+T_o(ix1:ix2,jy1-1:jy2-1,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
-!  -(((u(ix1+1:ix2+1,jy1:jy2,1) + u(ix1:ix2,jy1:jy2,1))/2)/(2*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)-T_o(ix1-1:ix2-1,jy1:jy2,1))&
-!  -(((v(ix1:ix2,jy1+1:jy2+1,1) + v(ix1:ix2,jy1:jy2,1))/2)/(2*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)-T_o(ix1:ix2,jy1-1:jy2-1,1))
-!
-!#endif
-
-!#ifdef HEAT_UPWIND
-  ! without Loop Vectorization ! (First Order Upwind)
-
  do k=kz1,kz2
   do j=jy1,jy2
      do i=ix1,ix2
@@ -56,21 +42,37 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      rhozp = 2.d0/(smrh(i,j,k+1)+smrh(i,j,k)) - 1./smrh(i,j,k)
      rhozm = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k)) - 1./smrh(i,j,k)
 
-     mdotxm = (mdot(i,j,k)+mdot(i-1,j,k))/2.
-     mdotym = (mdot(i,j,k)+mdot(i,j-1,k))/2.
-     mdotzm = (mdot(i,j,k)+mdot(i,j,k-1))/2.
+     !mdotxm = (mdot(i,j,k)+mdot(i-1,j,k))/2.
+     !mdotym = (mdot(i,j,k)+mdot(i,j-1,k))/2.
+     !mdotzm = (mdot(i,j,k)+mdot(i,j,k-1))/2.
 
-     nxm = (nrmx(i,j,k)+nrmx(i-1,j,k))/2.
-     nym = (nrmy(i,j,k)+nrmy(i,j-1,k))/2. 
-     nzm = (nrmz(i,j,k)+nrmz(i,j,k-1))/2.
+     !nxm = (nrmx(i,j,k)+nrmx(i-1,j,k))/2.
+     !nym = (nrmy(i,j,k)+nrmy(i,j-1,k))/2. 
+     !nzm = (nrmz(i,j,k)+nrmz(i,j,k-1))/2.
 
-     mdotxp = (mdot(i,j,k)+mdot(i+1,j,k))/2.
-     mdotyp = (mdot(i,j,k)+mdot(i,j+1,k))/2.
-     mdotzp = (mdot(i,j,k)+mdot(i,j,k+1))/2.
+     !mdotxp = (mdot(i,j,k)+mdot(i+1,j,k))/2.
+     !mdotyp = (mdot(i,j,k)+mdot(i,j+1,k))/2.
+     !mdotzp = (mdot(i,j,k)+mdot(i,j,k+1))/2.
 
-     nxp = (nrmx(i,j,k)+nrmx(i+1,j,k))/2.
-     nyp = (nrmy(i,j,k)+nrmy(i,j+1,k))/2.
-     nzp = (nrmz(i,j,k)+nrmz(i,j,k+1))/2.
+     !nxp = (nrmx(i,j,k)+nrmx(i+1,j,k))/2.
+     !nyp = (nrmy(i,j,k)+nrmy(i,j+1,k))/2.
+     !nzp = (nrmz(i,j,k)+nrmz(i,j,k+1))/2.
+
+     mdotxm = mdot(i,j,k)
+     mdotym = mdot(i,j,k)
+     mdotzm = mdot(i,j,k)
+
+     mdotxp = mdot(i,j,k)
+     mdotyp = mdot(i,j,k)
+     mdotzp = mdot(i,j,k)
+
+     nxm    = nrmx(i,j,k)
+     nym    = nrmy(i,j,k)
+     nzm    = nrmz(i,j,k)
+     
+     nxp    = nrmx(i,j,k)
+     nyp    = nrmy(i,j,k)
+     nzp    = nrmz(i,j,k)
 
      u_conv = (u(i+1,j,k)+u(i,j,k)+(mdotxm*nxm*rhoxm)+(mdotxp*nxp*rhoxp))/2.
      v_conv = (v(i,j+1,k)+v(i,j,k)+(mdotym*nym*rhoym)+(mdotyp*nyp*rhoyp))/2.
@@ -94,12 +96,6 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      Tz_plus = T_o(i,j,k+1)
      Tz_mins = T_o(i,j,k-1)
 
-     !Tipj = T_o(i+1,j,k)
-     !Timj = T_o(i-1,j,k)
-
-     !Tijp = T_o(i,j+1,k)
-     !Tijm = T_o(i,j-1,k)
-
      Tij = T_o(i,j,k)
 
      ! Case 1 !
@@ -108,18 +104,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
 
        th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
-       Tx_plus = (ht_Tsat-Tij)/th + Tij
 
        else
 
-       !th = abs(s(i-1,j,k))/(abs(s(i-1,j,k))+abs(s(i+1,j,k)))
-       !Tx_plus = (ht_Tsat-T_o(i-1,j,1))/th + T_o(i-1,j,1)
-       !Tx_plus = (ht_Tsat-T_o(i-1,j,1))/th + Tij
-
        th = tol
-       Tx_plus = (ht_Tsat-Tij)/th + Tij  
 
        end if 
+
+       Tx_plus = (ht_Tsat-Tij)/th + Tij
+
      end if
      ! End of Case 1 !
 
@@ -130,19 +123,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
        if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))) .gt. tol) then
 
        th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))
-       Tx_mins = (ht_Tsat-Tij)/th + Tij
 
        else
 
-       !th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i-1,j,k)))
-       !Tx_mins = (ht_Tsat-T_o(i+1,j,1))/th + T_o(i+1,j,1)
-       !Tx_mins = (ht_Tsat-T_o(i+1,j,1))/th + Tij
- 
        th = tol
+      
+       end if
+
        Tx_mins = (ht_Tsat-Tij)/th + Tij
 
-       
-       end if
      end if
      ! End of Case 2 !
 
@@ -152,18 +141,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
-      Ty_plus = (ht_Tsat-Tij)/th + Tij
 
       else
 
-      !th = abs(s(i,j-1,k))/(abs(s(i,j-1,k))+abs(s(i,j+1,k)))
-      !Ty_plus = (ht_Tsat-T_o(i,j-1,1))/th + T_o(i,j-1,1)  
-      !Ty_plus = (ht_Tsat-T_o(i,j-1,1))/th + Tij
-
       th = tol
-      Ty_plus = (ht_Tsat-Tij)/th + Tij
 
       end if
+
+      Ty_plus = (ht_Tsat-Tij)/th + Tij
+
    end if
     ! End of Case 3 !
  
@@ -173,18 +159,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
-      Ty_mins = (ht_Tsat-Tij)/th + Tij
 
       else
 
-      !th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j-1,k)))
-      !Ty_mins = (ht_Tsat-T_o(i,j+1,1))/th + T_o(i,j+1,1)
-      !Ty_mins = (ht_Tsat-T_o(i,j+1,1))/th + Tij
-
       th = tol
-      Ty_mins = (ht_Tsat-Tij)/th + Tij      
 
       end if
+
+      Ty_mins = (ht_Tsat-Tij)/th + Tij
+
     end if
     ! End of Case 4 !
 
@@ -194,14 +177,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1)))
-      Tz_plus = (ht_Tsat-Tij)/th + Tij
 
       else
 
       th = tol
-      Tz_plus = (ht_Tsat-Tij)/th + Tij
 
       end if
+
+      Tz_plus = (ht_Tsat-Tij)/th + Tij
+
    end if
     ! End of Case 5 !
  
@@ -211,14 +195,15 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
       if (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1))) .gt. tol) then
 
       th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1)))
-      Tz_mins = (ht_Tsat-Tij)/th + Tij
 
       else
 
       th = tol
-      Tz_mins = (ht_Tsat-Tij)/th + Tij      
 
       end if
+
+      Tz_mins = (ht_Tsat-Tij)/th + Tij
+
     end if
     ! End of Case 6 !
 
