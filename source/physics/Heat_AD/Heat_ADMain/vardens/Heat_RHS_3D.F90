@@ -25,13 +25,17 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real :: alphax_plus, alphax_mins, alphay_plus, alphay_mins, alphaz_mins, alphaz_plus, alpha_interface
   real :: alpha
   real :: tol
-  real :: rhoxm,rhoym,rhozm,rhoxp,rhoyp,rhozp,mdotxm,mdotym,mdotzm,nxm,nym,nzm,mdotxp,mdotyp,mdotzp,nxp,nyp,nzp
+  real :: rhoc,rhoxm,rhoym,rhozm,rhoxp,rhoyp,rhozp,mdotxm,mdotym,mdotzm,nxm,nym,nzm,mdotxp,mdotyp,mdotzp,nxp,nyp,nzp
 
   tol = 0.01
 
  do k=kz1,kz2
   do j=jy1,jy2
      do i=ix1,ix2
+
+     !rhoc = (rho1x(i+1,j,k)+rho1x(i,j,k)+&
+     !        rho1y(i,j+1,k)+rho2y(i,j,k)+&
+     !        rho1z(i,j,k+1)+rho2z(i,j,k))/3.0
 
      rhoxm = rho1x(i,j,k) + rho2x(i,j,k) - smrh(i,j,k)
      rhoym = rho1y(i,j,k) + rho2y(i,j,k) - smrh(i,j,k)

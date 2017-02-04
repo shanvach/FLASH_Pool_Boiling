@@ -13,7 +13,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
     real :: Tij,Tipj,Timj,Tijp,Tijm,dxp,dxm,dyp,dym,Tx,Ty,Tax,Tbx,Tay,Tby,dyc,dxc,Tpx,Tmx,Tpy,Tmy
     real :: Tmz,Tpz,dzp,dzm,Tkm,Tkp,Tz
 
-    tol = 0.01
+   tol = 0.01
 
    do k=kz1,kz2
     do j=jy1,jy2

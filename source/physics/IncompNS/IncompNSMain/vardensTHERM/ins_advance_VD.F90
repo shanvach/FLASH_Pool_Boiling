@@ -118,7 +118,16 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
       real, intent(in) :: rho1,rho2
       real, dimension(:,:,:), intent(in) :: xnorm,ynorm,znorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z
       real, dimension(NXB,NYB,NZB) :: rhoxr,rhoxl,rhoyr,rhoyl,rhozl,rhozr,&
-                                       aixr, aixl, aiyr, aiyl, aizl, aizr
+                                       aixr, aixl, aiyr, aiyl, aizl, aizr, rhoc
+
+      !rhoc = (rho1x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+rho1x(ix1:ix2,jy1:jy2,kz1:kz2)+&
+      !         rho1y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+rho2y(ix1:ix2,jy1:jy2,kz1:kz2))/2.0
+
+#if NDIM == 3
+      !rhoc = (rho1x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+rho1x(ix1:ix2,jy1:jy2,kz1:kz2)+&
+      !         rho1y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+rho2y(ix1:ix2,jy1:jy2,kz1:kz2)+&
+      !         rho1z(ix1:ix2,jy1:jy2,kz1+1:kz2+1)+rho2z(ix1:ix2,jy1:jy2,kz1:kz2))/3.0
+#endif
 
       rhoxr = rho1x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+rho2x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)
       rhoxl = rho1x(ix1:ix2,jy1:jy2,kz1:kz2)+rho2x(ix1:ix2,jy1:jy2,kz1:kz2)
