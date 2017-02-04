@@ -310,7 +310,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
      ! Convergence check
-     if ((Tnl_res+Tnv_res)/2.d0 < 1E-6 ) exit
+     if ((Tnl_res+Tnv_res)/2.d0 < 1E-9 ) exit
 
      ! Increment counter
      iter_count = iter_count + 1
