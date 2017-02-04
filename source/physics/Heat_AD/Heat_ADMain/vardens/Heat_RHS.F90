@@ -34,11 +34,11 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   do j=jy1,jy2
      do i=ix1,ix2
 
-     rhoxm = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
-     rhoym = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
+     rhoxm = rho1x(i,j,k) + rho2x(i,j,k) - smrh(i,j,k)
+     rhoym = rho1y(i,j,k) + rho2y(i,j,k) - smrh(i,j,k)
 
-     rhoxp = 2.d0/(smrh(i+1,j,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
-     rhoyp = 2.d0/(smrh(i,j+1,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
+     rhoxp = rho1x(i+1,j,k) + rho2x(i+1,j,k) - smrh(i,j,k)
+     rhoyp = rho1y(i,j+1,k) + rho2y(i,j+1,k) - smrh(i,j,k)
 
      mdotxm = mdot(i,j,k)
      mdotym = mdot(i,j,k)

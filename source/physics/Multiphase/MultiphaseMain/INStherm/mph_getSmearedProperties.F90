@@ -24,7 +24,7 @@ subroutine mph_getSmearedProperties2D(s,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm,yn
                  (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1)/sp))/2.d0
 
          smrh(ix1:ix2,jy1:jy2,kz1) = &
-                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
+                 (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
 
 end subroutine mph_getSmearedProperties2D
 
@@ -53,7 +53,7 @@ subroutine mph_getSmearedProperties3D(s,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz1,k
                  (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1:kz2)/sp))/2.d0
 
          smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
-                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+                 (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
 
 end subroutine mph_getSmearedProperties3D
 

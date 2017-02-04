@@ -378,6 +378,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   ! TURBULENT VISCOSITY COMPUTATION:
   ! --------- --------- -----------
+
 #if NDIM == 3
   if (ins_isgs .NE. 0) then
      do lb = 1,blockCount
@@ -450,7 +451,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     !- kpd - For Predictor Step (newu, newv & neww are RHS)
+     !- avd - For Predictor Step (newu, newv & neww are RHS)
      call ins_rhs3d_PC (  facexData(VELC_FACE_VAR,:,:,:),            &
                        faceyData(VELC_FACE_VAR,:,:,:),            &
                        facezData(VELC_FACE_VAR,:,:,:),            &
@@ -489,8 +490,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
         call Driver_abortFlash('Cell Spacing Not Equal in X,Y,Z... ins_ab2rk3.f90')
      end if
 
-
-
      ! ML - GFM for velocity jump condition
      call ins_rhs2d_PC(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
@@ -508,20 +507,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                       solnData(SMRH_VAR,:,:,:),&
                       solnData(NRMX_VAR,:,:,:),&
                       solnData(NRMY_VAR,:,:,:) )
-
-
-!     call ins_rhs2d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
-!                      faceyData(VELC_FACE_VAR,:,:,:),            &
-!                      ins_invRe,                                 &
-!                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                      del(DIR_X),del(DIR_Y),newu,newv, &
-!                      solnData(VISC_VAR,:,:,:), &
-!                      facexData(RH1F_FACE_VAR,:,:,:),            &
-!                      facexData(RH2F_FACE_VAR,:,:,:),            &
-!                      faceyData(RH1F_FACE_VAR,:,:,:),            &
-!                      faceyData(RH2F_FACE_VAR,:,:,:),            &
-!                      ins_gravX, ins_gravY)
 
      
 #endif
@@ -690,7 +675,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)    !kpd - I moved this
      ! compute divergence of intermediate velocities
 
-     !-- modified by mslee
+     !-avd-compute divergence for phase problems
      call ins_divergence_PC(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
@@ -711,9 +696,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                        solnData(MDOT_VAR,:,:,:),&
                        mph_rho1,mph_rho2,&
                        facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
-                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
-     !-- end modified by mslee
-
+                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:),&
+                       facezData(RH1F_FACE_VAR,:,:,:),facezData(RH2F_FACE_VAR,:,:,:))
 
      ! Poisson RHS source vector
 
@@ -1129,7 +1113,8 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
                        solnData(MDOT_VAR,:,:,:),&
                        mph_rho1,mph_rho2,&
                        facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
-                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
+                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:),&
+                       facezData(RH1F_FACE_VAR,:,:,:),facezData(RH2F_FACE_VAR,:,:,:))
 
   mxdivv = max( mxdivv,maxval(new_div))
 
@@ -1170,7 +1155,8 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
                        solnData(MDOT_VAR,:,:,:),&
                        mph_rho1,mph_rho2,&
                        facexData(RH1F_FACE_VAR,:,:,:),facexData(RH2F_FACE_VAR,:,:,:),&
-                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:))
+                       faceyData(RH1F_FACE_VAR,:,:,:),faceyData(RH2F_FACE_VAR,:,:,:),&
+                       facezData(RH1F_FACE_VAR,:,:,:),facezData(RH2F_FACE_VAR,:,:,:))
 
   mxdivv = max( mxdivv,maxval(new_div))
 

@@ -85,14 +85,14 @@ module Heat_AD_interface
 
    interface
        subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, kz1, kz2,&
-                              rho1x,rho2x,rho1y,rho2y,thco,cp,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
+                              rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,thco,cp,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
          real, dimension(:,:,:), intent(in) :: T_o
          real, dimension(:,:,:), intent(in) :: u,v,w
          real, intent(in) :: dx, dy, dz, inRe
          integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
-         real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,thco,cp
+         real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,thco,cp,rho1z,rho2z
          real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh
        end subroutine Heat_RHS_3D
    end interface

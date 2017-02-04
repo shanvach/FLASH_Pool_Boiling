@@ -1,5 +1,5 @@
 subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,thco,cp,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
+                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,thco,cp,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -12,7 +12,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real, dimension(:,:,:), intent(in) :: u,v,w
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
-  real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,thco,cp
+  real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,thco,cp,rho1z,rho2z
   real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh
 
   real :: T_res,Mdensx,Mdensy,th,dxp,dxm,dyp,dym,dzp,dzm
@@ -33,14 +33,13 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   do j=jy1,jy2
      do i=ix1,ix2
 
-     rhoxm = 2.d0/(smrh(i-1,j,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
-     rhoym = 2.d0/(smrh(i,j-1,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
+     rhoxm = rho1x(i,j,k) + rho2x(i,j,k) - smrh(i,j,k)
+     rhoym = rho1y(i,j,k) + rho2y(i,j,k) - smrh(i,j,k)
+     rhozm = rho1z(i,j,k) + rho2z(i,j,k) - smrh(i,j,k)
 
-     rhoxp = 2.d0/(smrh(i+1,j,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
-     rhoyp = 2.d0/(smrh(i,j+1,k)+smrh(i,j,k)) - 1./smrh(i,j,k)
-
-     rhozp = 2.d0/(smrh(i,j,k+1)+smrh(i,j,k)) - 1./smrh(i,j,k)
-     rhozm = 2.d0/(smrh(i,j,k-1)+smrh(i,j,k)) - 1./smrh(i,j,k)
+     rhoxp = rho1x(i+1,j,k) + rho2x(i+1,j,k) - smrh(i,j,k)
+     rhoyp = rho1y(i,j+1,k) + rho2y(i,j+1,k) - smrh(i,j,k)
+     rhozp = rho1z(i,j,k+1) + rho2z(i,j,k+1) - smrh(i,j,k)
 
      mdotxm = mdot(i,j,k)
      mdotym = mdot(i,j,k)

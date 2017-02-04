@@ -381,7 +381,8 @@ Module ins_interface
  interface
     SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
                                 ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc,&
-                                       dx,dy,dz,divv,s,pf,xnorm,ynorm,znorm,smrh,mdot,rho1,rho2,rho1x,rho2x,rho1y,rho2y)
+                                dx,dy,dz,divv,s,pf,xnorm,ynorm,znorm,smrh,mdot,&
+                                rho1,rho2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z)
 
       INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
       REAL, INTENT(IN) :: dx,dy,dz
@@ -391,7 +392,7 @@ Module ins_interface
       INTEGER, INTENT(IN) :: ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc
       real, dimension(:,:,:), intent(in) :: s,pf
       real, intent(in) :: rho1,rho2
-      real, dimension(:,:,:), intent(in) :: xnorm,ynorm,znorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y
+      real, dimension(:,:,:), intent(in) :: xnorm,ynorm,znorm,smrh,mdot,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z
 
     END SUBROUTINE
  end interface
