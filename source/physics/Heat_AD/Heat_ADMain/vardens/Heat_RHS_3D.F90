@@ -205,7 +205,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
     Txx = (alphax_plus*(Tx_plus-Tij)/dx - alphax_mins*(Tij-Tx_mins)/dx)/dx
     Tyy = (alphay_plus*(Ty_plus-Tij)/dy - alphay_mins*(Tij-Ty_mins)/dy)/dy
-    Tzz = (alphaz_plus*(Tx_plus-Tij)/dz - alphaz_mins*(Tij-Tx_mins)/dz)/dz
+    Tzz = (alphaz_plus*(Tz_plus-Tij)/dz - alphaz_mins*(Tij-Tz_mins)/dz)/dz
 
     T_rhs(i,j,k) = ((-(u_plus*(Tij-Tx_mins)/dx+u_mins*(Tx_plus-Tij)/dx)&
                      -(v_plus*(Tij-Ty_mins)/dy+v_mins*(Ty_plus-Tij)/dy)&
