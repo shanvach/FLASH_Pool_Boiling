@@ -52,14 +52,14 @@
 
        uint(ix1:ix2+1,jy1:jy2,kz1) =  uni(ix1:ix2+1,jy1:jy2,kz1) + &
                                       (mdot(ix1-1:ix2,jy1:jy2,kz1) + mdot(ix1:ix2+1,jy1:jy2,kz1))/2.d0 * &
-                                      (xnorm(ix1-1:ix2,jy1:jy1,kz1) + xnorm(ix1:ix2+1,jy1:jy2,kz1))/2.d0 * &
+                                      (xnorm(ix1-1:ix2,jy1:jy2,kz1) + xnorm(ix1:ix2+1,jy1:jy2,kz1))/2.d0 * &
                                       (rho1x(ix1:ix2+1,jy1:jy2,kz1) + rho2x(ix1:ix2+1,jy1:jy2,kz1))
 
       !++++++++++  V-COMPONENT  ++++++++++
 
        vint(ix1:ix2,jy1:jy2+1,kz1) =  vni(ix1:ix2,jy1:jy2+1,kz1) + &
                                       (mdot(ix1:ix2,jy1-1:jy2,kz1) + mdot(ix1:ix2,jy1:jy2+1,kz1))/2.d0 * &
-                                      (ynorm(ix1:ix2,jy1-1:jy1,kz1) + ynorm(ix1:ix2,jy1:jy2+1,kz1))/2.d0 * &
+                                      (ynorm(ix1:ix2,jy1-1:jy2,kz1) + ynorm(ix1:ix2,jy1:jy2+1,kz1))/2.d0 * &
                                       (rho1y(ix1:ix2,jy1:jy2+1,kz1) + rho2y(ix1:ix2,jy1:jy2+1,kz1))
 
        END SUBROUTINE mph_getInterfaceVelocity
