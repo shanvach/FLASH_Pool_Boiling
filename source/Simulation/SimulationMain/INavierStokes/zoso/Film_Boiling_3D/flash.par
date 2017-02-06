@@ -60,8 +60,8 @@ geometry	= "cartesian"
 #       Size of computational volume
 xmin =   -0.04
 xmax =    0.04
-ymin =   -0.04
-ymax =    0.04
+ymin =    0.00
+ymax =    0.08
 zmin =   -0.04
 zmax =    0.04
 
@@ -70,6 +70,8 @@ xl_boundary_type = "neumann_ins"
 xr_boundary_type = "neumann_ins"
 yl_boundary_type = "neumann_ins"
 yr_boundary_type = "neumann_ins"
+zl_boundary_type = "neumann_ins"
+zr_boundary_type = "neumann_ins"
 
 #      Poisson Solver Boundary Conditions
 xl_mg_boundary_type = "outflow"
