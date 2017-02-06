@@ -72,8 +72,10 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = (1.0/max(1.0,(mph_vis1/mph_vis2)/(mph_rho1/mph_rho2))) * (ins_sigma / (ins_invRe*( 1.0/(dx*dx)+1.0/(dy*dy)+1.0/(dz*dz) )))
+  dtv = (1.0/max(1.0,(mph_vis1/mph_vis2)/(mph_rho1/mph_rho2))) * (ins_sigma / (ins_invRe*( 3.0/(dx*dx)+3.0/(dy*dy)+3.0/(dz*dz) )))
          
+  dth = (1.0/max(1.0,(mph_thco1/mph_cp1)/(mph_thco2/mph_cp2)))*((ins_sigma*ht_Pr)/(ins_invRe*(3.0/(dx*dx)+3.0/(dy*dy)+3.0/(dz*dz))))
+
 # elif NDIM == 2
 
   velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,:,:,:))/dx), &
@@ -85,11 +87,12 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps  
   endif
   
-  dtv = (1.0/max(1.0,(mph_vis1/mph_vis2)/(mph_rho1/mph_rho2))) * (ins_sigma / (ins_invRe*( 1.0/(dx*dx)+1.0/(dy*dy))))
+  dtv = (1.0/max(1.0,(mph_vis1/mph_vis2)/(mph_rho1/mph_rho2))) * (ins_sigma / (ins_invRe*( 2.0/(dx*dx)+2.0/(dy*dy))))
+
+  dth = (1.0/max(1.0,(mph_thco1/mph_cp1)/(mph_thco2/mph_cp2)))*((ins_sigma*ht_Pr)/(ins_invRe*(2.0/(dx*dx)+2.0/(dy*dy))))
 
 # endif
 
-  dth = (1.0/max(1.0,(mph_thco1/mph_cp1)/(mph_thco2/mph_cp2)))*((ins_sigma*ht_Pr)/(ins_invRe*( 1.0/(dx*dx)+1.0/(dy*dy))))
   !dtl = 0.5*MIN(dtc,dtv,dth)
   dtl = MIN(dtc,dtv,dth)
 
