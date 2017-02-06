@@ -68,13 +68,16 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
     Tvz_plus = (Tnv_o(ix1:ix2,jy1:jy2,kz1+1:kz2+1)-Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2))/dz
     Tvz_mins = (Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2)-Tnv_o(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/dz
 
-    Tnl(ix1:ix2,jy1:jy2,kz1:kz2) = Tnl_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*pf(ix1:ix2,jy1:jy2,kz1:kz2)*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
-                                                                                                        -ny_mins*Tly_plus-ny_plus*Tly_mins &
-                                                                                                        -nz_mins*Tlz_plus-nz_plus*Tlz_mins)
+    Tnl(ix1:ix2,jy1:jy2,kz1:kz2) = Tnl_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*pf(ix1:ix2,jy1:jy2,kz1:kz2)*&
+                                                                  (-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
+                                                                   -ny_mins*Tly_plus-ny_plus*Tly_mins &
+                                                                   -nz_mins*Tlz_plus-nz_plus*Tlz_mins)
 
-    Tnv(ix1:ix2,jy1:jy2,kz1:kz2) = Tnv_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*(1.0-pf(ix1:ix2,jy1:jy2,kz1:kz2))*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
-                                                                                                             -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
-                                                                                                             -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
+
+    Tnv(ix1:ix2,jy1:jy2,kz1:kz2) = Tnv_i(ix1:ix2,jy1:jy2,kz1:kz2) + dt_ext*(1.0-pf(ix1:ix2,jy1:jy2,kz1:kz2))*&
+                                                                  (-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
+                                                                   -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
+                                                                   -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
 
     Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
     Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
