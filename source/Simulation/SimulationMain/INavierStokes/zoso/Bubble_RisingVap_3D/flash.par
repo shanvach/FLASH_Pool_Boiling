@@ -39,7 +39,7 @@ cp2   = 1.0
 
 # Gravity in the +y direction
 gravX = 0.0
-gravY = 1.0
+gravY = -1.0
 gravZ = 0.0
 
 # sten is the inverse of the Weber number
