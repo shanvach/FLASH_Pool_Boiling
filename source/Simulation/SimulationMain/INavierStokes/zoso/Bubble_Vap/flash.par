@@ -83,13 +83,13 @@ restart         = .false.
 #plotFileNumber  = 1
 #nend            = 10000000
 #nend = 2
-nend = 2500000
+nend = 75000
 tmax            = 0.025
-cflflg          = 0
-cfl             = 0.03
+cflflg          = 1
+cfl             = 0.1
 sigma		= 0.05
-dtspec          = 1.00d-8
-dtinit          = 1.00d-8
+dtspec          = 1.00
+dtinit          = 1.00
 tstep_change_factor=1.00
 
 
@@ -113,11 +113,11 @@ plotFileIntervalTime = 0.00125
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 5000
 #plotFileIntervalStep = 1
-plotFileIntervalStep = 125000
+plotFileIntervalStep = 1250
 
 ##	AMR parameters
-nblockx	= 5 #4
-nblocky	= 5 #8
+nblockx	= 2 #4
+nblocky	= 2 #8
 lrefine_min	= 1
 lrefine_max     = 1
 mgrid_solveLevelKPD = 1

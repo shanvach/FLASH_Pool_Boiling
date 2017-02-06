@@ -89,13 +89,13 @@ restart         = .false.
 #plotFileNumber  = 1
 #nend            = 10000000
 #nend = 2
-nend = 25000
+nend = 75000
 tmax            = 0.025
-cflflg          = 0
-cfl             = 0.03
-sigma		= 0.05
-dtspec          = 1.00d-6
-dtinit          = 1.00d-6
+cflflg          = 1
+cfl             = 0.1
+sigma		= 0.03
+dtspec          = 1.00
+dtinit          = 1.00
 tstep_change_factor=1.00
 
 
