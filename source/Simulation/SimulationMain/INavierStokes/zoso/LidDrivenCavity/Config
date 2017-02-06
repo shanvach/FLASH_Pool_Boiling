@@ -5,10 +5,8 @@
 REQUIRES physics/IncompNS
 REQUIRES physics/IncompNS/IncompNSMain/constdens
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
-#REQUIRES Simulation/SimulationMain/INavierStokes/zoso/Heat_AD
-#REQUIRES Simulation/SimulationMain/INavierStokes/zoso/Heat_AD/Heat_ADMain/constdens
 REQUIRES physics/Heat_AD
-REQUIRES physics/Heat_AD/Heat_ADMain
+REQUIRES physics/Heat_AD/Heat_ADMain/constdens
 
 USESETUPVARS Grid
 
