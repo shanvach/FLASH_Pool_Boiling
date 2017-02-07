@@ -199,8 +199,7 @@
                           + Mdens*(txxp - txxm)*dx1                 & ! diffusion - normal terms 
                           + Mdens*(tyyp - tyym)*dy1                 &
                           + gravX     ! Shizhao changed the sign of gravity to keep the consistence with solid bodies     
-                          !- gravX     
-             !!ru(i,j,kz1) = 0.0 
+
           enddo
        enddo
 
@@ -343,8 +342,7 @@
                           + Mdens* (txxp - txxm)*dx1                 &! diffusion - normal terms
                           + Mdens* (tyyp - tyym)*dy1                 &
                           + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
-                          !- gravY                                      ! kpd - gravity term 
-             !rv(i,j,kz1) = -grav
+
           enddo
        enddo
 
@@ -667,7 +665,7 @@
                            + Mdens*(tzzp - tzzm)*dz1                &
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
-                           - gravX   
+                           + gravX   
 
             enddo
          enddo
@@ -880,8 +878,7 @@
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
-                          + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
-                          ! - gravY
+                           + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
             enddo
          enddo
       enddo
@@ -1093,7 +1090,7 @@
                           + Mdens* (tzzp - tzzm)*dz1                &
                           + Mdens* (txzp - txzm)*dx1                &! diffusion - cross terms
                           + Mdens* (tyzp - tyzm)*dy1                &
-                          - gravZ                   
+                          + gravZ                   
             enddo
          enddo
       enddo

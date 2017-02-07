@@ -241,7 +241,7 @@
                           + Mdens*(txxp - txxm)*dx1                 & ! diffusion - normal terms 
                           + Mdens*(tyyp - tyym)*dy1                 &
                           + gravX     
-             !!ru(i,j,kz1) = 0.0 
+
           enddo
        enddo
 
@@ -403,7 +403,6 @@
                           + Mdens* (txxp - txxm)*dx1                 &! diffusion - normal terms
                           + Mdens* (tyyp - tyym)*dy1                 &
                           + gravY                                      ! kpd - gravity term 
-             !rv(i,j,kz1) = -grav
           enddo
        enddo
 
@@ -761,7 +760,6 @@
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
                            + gravX   
-
             enddo
          enddo
       enddo
@@ -999,7 +997,7 @@
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
                            + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
-                          ! - gravY
+
             enddo
          enddo
       enddo
