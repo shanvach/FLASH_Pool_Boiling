@@ -11,6 +11,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
     real :: th,tol
     integer :: i,j,k
     real :: Tij,Tipj,Timj,Tijp,Tijm,dxp,dxm,dyp,dym,Tx,Ty,Tax,Tbx,Tay,Tby,dyc,dxc,Tpx,Tmx,Tpy,Tmy
+    logical :: int_xp,int_xm,int_yp,int_ym
 
     tol = 0.01
 
@@ -38,6 +39,11 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
          dym = dy
          dyp = dy
 
+         int_xp = .FALSE.
+         int_xm = .FALSE.
+         int_yp = .FALSE.
+         int_ym = .FALSE.
+
          if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
 
             Tpx = T(i,j,k)
@@ -52,6 +58,8 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
 
             dxp = th*dx
             Tipj = ht_Tsat
+
+            int_xp = .TRUE.
 
          end if
 
@@ -70,6 +78,8 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
             dxm = th*dx
             Timj = ht_Tsat
 
+            int_xm = .TRUE.
+
          end if
 
          if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
@@ -87,6 +97,8 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
             dyp = th*dy
             Tijp = ht_Tsat
 
+            int_yp = .TRUE.
+
          end if
 
          if(s(i,j,k)*s(i,j-1,k) .le. 0.) then
@@ -103,6 +115,8 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
 
             dym = th*dy
             Tijm = ht_Tsat
+
+            int_ym = .TRUE.
 
          end if
 
@@ -297,6 +311,8 @@ go to 200
 
 200 continue
 
+       !if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
+
          if (pf(i,j,k) .eq. 0.) then
           
             Tnl(i,j,k) = + nx(i,j,k)*Tx + ny(i,j,k)*Ty 
@@ -306,6 +322,8 @@ go to 200
             Tnv(i,j,k) = - nx(i,j,k)*Tx - ny(i,j,k)*Ty
          
          end if
+
+       !end if
                            
       end do
     end do
