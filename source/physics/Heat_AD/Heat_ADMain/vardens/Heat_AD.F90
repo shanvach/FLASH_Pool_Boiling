@@ -21,6 +21,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Multiphase_data, only: mph_thco1,mph_cp1,mph_thco2,mph_cp2,mph_meshMe,mph_meshNumProcs
 
+   use Heat_AD_data, only: ht_hfit
+
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
                             interp_mask_facex_res,    &
@@ -52,9 +54,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real :: Tnl_res, Tnv_res, Tnl_res1, Tnv_res1,Tnl_resBlock,Tnv_resBlock
    real :: T_res,T_res1,T_resBlock
 
-   integer :: max_iter, iter_count,intval
+   integer :: iter_count,intval
 
-   max_iter = 300
    iter_count = 0
 
 !______________________________________Energy Equation____________________________________________!
@@ -239,7 +240,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !__________________________Heat Flux extrapolation sub iterations__________________________!
 
-   do while(iter_count <= max_iter)
+   do while(iter_count <= ht_hfit)
 
    Tnl_resBlock = 0.0
    Tnv_resBlock = 0.0

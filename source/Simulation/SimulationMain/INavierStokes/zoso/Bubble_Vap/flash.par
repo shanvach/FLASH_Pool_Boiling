@@ -45,9 +45,12 @@ gravZ = 0.0
 # sten is the inverse of the Weber number
 sten = 1.0
 
+# Number of heat flux extrapolation iterations
+hfit = 200
+
 # Number of level-set redistancing iterations
 inls = 10
-lsit = 200
+lsit = 10
 
 
 #       Grid dimensionality and geometry

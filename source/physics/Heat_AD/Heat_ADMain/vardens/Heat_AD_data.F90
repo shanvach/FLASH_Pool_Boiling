@@ -12,4 +12,6 @@ module Heat_AD_data
      real, save :: ht_L
      real, save :: ht_St
 
+     integer, save :: ht_hfit
+
 end module Heat_AD_data

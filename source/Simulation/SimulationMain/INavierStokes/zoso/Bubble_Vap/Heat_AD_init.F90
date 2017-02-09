@@ -33,15 +33,15 @@ subroutine Heat_AD_init(blockCount,blockList)
    real :: maxdfun_local, maxdfun_global
    real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h
 
-
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
-
+   call RuntimeParameters_get("hfit",ht_hfit)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
      write(*,*) 'ht_Pr   =',ht_Pr
      write(*,*) 'ht_St   =',ht_St
+     write(*,*) 'ht_hfit =',ht_hfit
 
    end if
 
