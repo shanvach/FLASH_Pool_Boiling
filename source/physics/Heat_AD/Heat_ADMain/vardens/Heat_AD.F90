@@ -247,6 +247,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    do lb = 1,blockCount
 
+     Tnl_res1 = 0.0
+     Tnv_res1 = 0.0
+
      blockID = blockList(lb)
 
      ! Get blocks dx, dy ,dz:
@@ -311,7 +314,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
      ! Convergence check
-     if ((Tnl_res+Tnv_res)/2.d0 < 1E-9 ) exit
+     if ((Tnl_res+Tnv_res)/2.d0 < 1E-6 ) exit
 
      ! Increment counter
      iter_count = iter_count + 1
@@ -323,7 +326,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
       print *,"Tnl_res:",Tnl_res
       print *,"Tnv_res:",Tnv_res
-
+      print *,"Extrapolation Iterations (Max Iterations): ",iter_count,"(",ht_hfit,")"
+     
    end if
 
 !______End Heat Flux extrapolation sub iterations____________________________________!
