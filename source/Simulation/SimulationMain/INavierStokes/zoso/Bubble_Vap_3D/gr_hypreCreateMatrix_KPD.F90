@@ -128,7 +128,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   character(len=32) :: matfile
   integer :: numGraph, iter
 !  real, allocatable :: BoxVal(:)
-  real, dimension(100000) :: temp_BoxVal
+  real, dimension(1000000) :: temp_BoxVal
   integer, parameter :: nFluxVars = 2**(NDIM-1)
 
   !- kpd - 
