@@ -57,7 +57,7 @@
 !subroutine gr_hypreCreateMatrix(iVar, iFactorB, iFactorA, bcTypes, bcValues, dt, &
 !     alpha, blockCount, blockList, JacobiMatrix, iFactorC, level, idenvar)
 
-subroutine gr_hypreCreateMatrix(iVar, bcTypes, bcValues, dt, &
+subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
      alpha, blockCount, blockList, JacobiMatrix, level)
   
   use gr_hypreData,     ONLY : gr_hypreSolverType,gr_hypreLower, gr_hypreUpper, &
@@ -654,4 +654,4 @@ subroutine gr_hypreCreateMatrix(iVar, bcTypes, bcValues, dt, &
  
  return
  
-end subroutine gr_hypreCreateMatrix
+end subroutine gr_hypreCreateMatrix_KPD
