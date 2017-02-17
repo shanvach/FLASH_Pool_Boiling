@@ -176,9 +176,9 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 0.5d0
            !r0 = 5.0e-5
            !r0 = 0.02e-3
-           r0 = 0.005
+           r0 = 0.00021
            x0 = 0.0d0
-           y0 = 0.02d0
+           y0 = 0.001d0
            z0 = 0.0d0
 
            solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
