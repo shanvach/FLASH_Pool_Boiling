@@ -264,7 +264,7 @@
            if (icycle .eq. 1) then
              ! if (gr_meshMe .eq. 0) print*,"*** NOT *** Restricting Density At Level: ",i
              !if (gr_meshMe .eq. 0) print*,"Restricting Density At Level: ",i
-             !call gr_mgRestrictFaces (i, img_denx, img_denx)
+             call gr_mgRestrictFaces (i, img_denx, img_denx)
            end if
            call gr_mgRestrict (i, img_temp2, img_res)
 

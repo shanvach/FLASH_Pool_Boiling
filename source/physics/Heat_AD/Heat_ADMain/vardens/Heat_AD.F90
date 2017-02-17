@@ -166,7 +166,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     gcMask(TEMP_VAR)=.TRUE.
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
-         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
    end do !End RK-2
 
@@ -234,7 +234,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    gcMask(TNVP_VAR)=.TRUE.
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
-        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
 !_________________________________End of Heat Flux calculation_____________________________!
 
@@ -311,7 +311,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      gcMask(TNVP_VAR)=.TRUE.
 
      call Grid_fillGuardCells(CENTER,ALLDIR,&
-         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
      ! Convergence check
      if ((Tnl_res+Tnv_res)/2.d0 < 1E-6 ) exit
@@ -366,7 +366,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    gcMask(MDOT_VAR)=.TRUE.
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
-        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
 !______End Mass Flux calculation___________________________________________________!
 
