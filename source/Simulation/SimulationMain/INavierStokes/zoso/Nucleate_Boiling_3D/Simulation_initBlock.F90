@@ -62,11 +62,11 @@ subroutine Simulation_initBlock(blockId)
   real ::  boundBox(2,MDIM)
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData
 
-  real :: xcell,xedge,ycell,yedge
+  real :: xcell,xedge,ycell,yedge,zcell
 
   real :: A0
 
-  real :: A, B, emp, fs, x0, y0, r0, solnX
+  real :: A, B, emp, fs, x0, y0, r0, solnX, z0
 
   !----------------------------------------------------------------------
   
@@ -113,6 +113,10 @@ subroutine Simulation_initBlock(blockId)
            ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
+
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
 
           !if (ycell .LE. 0.0) then
           !   solnData(DFUN_VAR,i,j,k) = 0.0 - ycell
@@ -175,12 +179,13 @@ subroutine Simulation_initBlock(blockId)
            r0 = 0.1
            x0 = 0.0d0
            y0 = 0.1*cos((54.0/180.0)*acos(-1.0))
+           z0 = 0.0d0
 
-
-           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.08/2.))/0.08)) - ycell
+           !solnData(DFUN_VAR,i,j,k) = (0.08/128.)*(4+cos(2*acos(-1.0)*(sqrt(xcell**2+zcell**2))/0.08))-ycell 
            !solnData(DFUN_VAR,i,j,k) = (1.0/128. )*(4 + cos(2*acos(-1.0)*(xcell-(1.0/2.0))/1.0)) - ycell
            !solnData(DFUN_VAR,i,j,k) = (0.0273/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.0273/2.))/0.0273)) - ycell
            !solnData(DFUN_VAR,i,j,k) = (0.0023/128.0)*(4 + cos(2*acos(-1.0)*(xcell-(0.0023/2.))/0.0023)) - ycell

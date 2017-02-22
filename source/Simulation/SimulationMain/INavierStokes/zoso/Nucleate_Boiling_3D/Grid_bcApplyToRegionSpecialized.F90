@@ -377,13 +377,12 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                   regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
                end do
 
+
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                   regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar) - del(DIR_Y)*cos((54.0/180.0)*acos(-1.0))
                end do
-           
                !do i=1,guard
                !   do j=1,je                  
                !        xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
@@ -487,6 +486,93 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
            end select 
   
          else if (axis == KAXIS) then ! Level 3a
+ 
+           select case(gridDataStruct)
+  
+             case(CENTER)
+  
+               if (ivar == TEMP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
+               end do
+  
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+               end do
+    
+               !applied = .true.
+
+               end if
+
+             case(WORK)
+
+
+               !if(ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               !k = 2*guard+1
+               !do i = 1,guard
+               !   regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+               !end do
+
+               !else
+        
+               !if (counter == 1) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+               end do
+  
+               !counter = counter +1
+
+               !print *,"Here - X BC LOW"
+
+               !end if
+
+               !end if
+
+             case default
+
+               if(ivar == VELC_FACE_VAR) then
+               
+               if (isFace) then 
+                 k = 2*guard+2
+                 do i = 1,guard
+                    regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
+                    !regionData(i,1:je,1:ke,ivar) = 0.
+                 end do
+                 regionData(guard+1,1:je,1:ke,ivar)= 0.
+               
+               else          
+                 k = 2*guard+1
+                 do i = 1,guard
+                 !regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+                 end do
+               endif
+
+               else
+
+               k = 2*guard+1
+               if (isFace) k = k+1
+               do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+           end select
            ! KAXIS BCs for face == LOW
          end if ! End Level 3a
  
@@ -696,6 +782,106 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
            end select
   
          else if (axis == KAXIS) then ! Level 3b
+ 
+           select case(gridDataStruct)
+
+             case(CENTER)
+
+               if (ivar == TEMP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
+               end do
+
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+               end do
+
+               !applied = .true.
+
+               end if
+
+             case(WORK)
+
+               !if (ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               !k = 2*guard+1
+               !do i = 1,guard
+               !  regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
+               !end do
+
+               !else
+
+               !if(counter == 1) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
+               end do
+
+               !counter = counter + 1
+
+               !print *,"X BC HIGH"
+
+               !end if
+
+               !end if
+
+             case default
+
+              if (ivar == VELC_FACE_VAR) then
+              
+               if (isFace) then
+                 k = 2*guard+2
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= -regionData(i,1:je,1:ke,ivar)
+                    !regionData(k-i,1:je,1:ke,ivar)= 0.
+                 end do
+                 regionData(guard+1,1:je,1:ke,ivar)= 0.
+              
+               else
+                 k = 2*guard+1
+                 do i = 1,guard
+                    !regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                    regionData(k-i,1:je,1:ke,ivar)=regionData(i,1:je,1:ke,ivar)
+                 end do
+               endif
+
+              else
+
+              k = 2*guard+1
+              if(isFace)k=k+1
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+              end do
+
+
+              end if
+
+              !k = 2*guard+1
+              !if(isFace) then
+              !! First order down-wind for collocated var in the face:
+              !do i =1,guard
+              !   regionData(guard+1+i,1:je,1:ke,ivar) = regionData(guard+i,1:je,1:ke,ivar)
+              !enddo
+
+              !else
+              !do i = 1,guard
+              !  regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+              !end do
+              !endif
+
+           end select  
            ! KAXIS BCs for face == HIGH
          end if ! End Level 3b
   
