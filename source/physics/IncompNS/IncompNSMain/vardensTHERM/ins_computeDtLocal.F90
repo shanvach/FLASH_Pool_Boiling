@@ -99,7 +99,7 @@ subroutine ins_computeDtLocal(blockID,   &
 
   !print *,"dtc     : ",dtc
   !print *,"dtv     : ",dtv
-  !print *,"dt_mph1 : ",dth
+  !print *,"dth     : ",dth
   !print *,"dtl     : ",dtl
 
   if (dtl .lt. dtLocal) then
