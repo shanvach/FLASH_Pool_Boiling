@@ -181,7 +181,7 @@ subroutine Simulation_initBlock(blockId)
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.08/2.))/0.08)) - ycell
-           solnData(DFUN_VAR,i,j,k) = (0.002/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.002/2.0))/0.002)) - ycell
+           solnData(DFUN_VAR,i,j,k) = (10.0/128. )*(4 + cos(2*acos(-1.0)*(xcell-(10.0/2.0))/10.0)) - ycell
            !solnData(DFUN_VAR,i,j,k) = (0.0273/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.0273/2.))/0.0273)) - ycell
            !solnData(DFUN_VAR,i,j,k) = (0.0023/128.0)*(4 + cos(2*acos(-1.0)*(xcell-(0.0023/2.))/0.0023)) - ycell
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell)/0.08)) - ycell

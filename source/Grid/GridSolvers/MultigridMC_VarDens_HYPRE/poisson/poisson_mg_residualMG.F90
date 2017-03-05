@@ -238,7 +238,7 @@ subroutine poisson_mg_residualMG (level, irhs, ilhs, ires, leaf_only, &
                        end if
                     elseif (MdensXR.gt.1500.0 .OR. MdensYR.gt.1500.0 ) then
                        if (dr_nstep .gt. 1) then
-                       print*,"ERROR poisson_mg_residualMG.F90: Inverse Density Greater than 1.0",lb,i,j,MdensXR,MdensYR,idenvar
+                       !print*,"ERROR poisson_mg_residualMG.F90: Inverse Density Greater than 1.0",lb,i,j,MdensXR,MdensYR,idenvar
                        end if
                     end if
 
@@ -333,7 +333,7 @@ subroutine poisson_mg_residualMG (level, irhs, ilhs, ires, leaf_only, &
                           end if
                        elseif (MdensXR.gt.1500.0 .OR. MdensYR.gt.1500.0 .OR. MdensZR.gt.1500.0) then
                           if (dr_nstep .gt. 1) then
-                          print*,"ERROR poisson_mg_residualMG.F90: Inverse Density Greater than 1.0",lb,i,j,MdensXR,MdensYR,idenvar
+                          !print*,"ERROR poisson_mg_residualMG.F90: Inverse Density Greater than 1.0",lb,i,j,MdensXR,MdensYR,idenvar
                           end if
                        end if
 
