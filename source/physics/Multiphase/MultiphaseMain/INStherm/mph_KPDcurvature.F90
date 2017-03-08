@@ -285,6 +285,7 @@
         sigy = 0.
         w = 0.
         icrv = 0
+        !bb   = (rho2/rho1) - 1.0
 
         !- kpd - Need to loop through one guard cell on each side to set jumps 
         !           when they cross block boundaries

@@ -187,8 +187,15 @@ subroutine Simulation_initBlock(blockId)
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell)/0.08)) - ycell
            !solnData(DFUN_VAR,i,j,k) = 0.5 - ycell
 
+           solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.1220) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
+           if(ycell .le. 0.1) solnData(TEMP_VAR,i,j,k) = (0.1-ycell)/0.1
+
+           !if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+
+           !  if(ycell .le. 0.0800) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
+
+           !end if
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
              !solnData(TEMP_VAR,i,j,k) = 0.1*(0.08-ycell)/0.08
