@@ -66,7 +66,7 @@ subroutine Simulation_initBlock(blockId)
 
   real :: A0
 
-  real :: A, B, emp, fs, x0, y0, r0, solnX, z0
+  real :: A,B,emp,fs,x0,y0,r0,solnX,z0,x1,y1,z1,x2,y2,z2,d1,d2,d3
 
   !----------------------------------------------------------------------
   
@@ -179,9 +179,34 @@ subroutine Simulation_initBlock(blockId)
            r0 = 0.1
            x0 = 0.0d0
            y0 = 0.1*cos((54.0/180.0)*acos(-1.0))
-           z0 = 0.0d0
+           z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
 
-           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
+           x1 = -0.15
+           x2 =  0.15
+
+           z1 = -0.15*tan(acos(-1.0)/6)
+           z2 = -0.15*tan(acos(-1.0)/6)
+           
+           !z1 = 0.0d0
+           !z2 = 0.0d0
+
+           y1 = y0
+           y2 = y0
+
+
+           d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
+           d2 = r0 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
+           d3 = r0 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
+
+
+           if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
+
+           if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
+
+           if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
+          
+             
+           !solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.08/2.))/0.08)) - ycell
@@ -192,12 +217,16 @@ subroutine Simulation_initBlock(blockId)
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell)/0.08)) - ycell
            !solnData(DFUN_VAR,i,j,k) = 0.5 - ycell
 
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
+           solnData(TEMP_VAR,i,j,k) = 0.0
+
+           if(ycell .le. 0.1) solnData(TEMP_VAR,i,j,k) = (0.1 - ycell)/0.1
+
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
              !solnData(TEMP_VAR,i,j,k) = 0.1*(0.08-ycell)/0.08
-             solnData(TEMP_VAR,i,j,k) = (solnData(DFUN_VAR,i,j,k)*1.0)/(solnData(DFUN_VAR,i,j,k)+ycell)
-           else
-             solnData(TEMP_VAR,i,j,k) = 0.0
-           end if
+           !  solnData(TEMP_VAR,i,j,k) = (solnData(DFUN_VAR,i,j,k)*1.0)/(solnData(DFUN_VAR,i,j,k)+ycell)
+           !else
+           !  solnData(TEMP_VAR,i,j,k) = 0.0
+           !end if
 
            !solnData(TEMP_VAR,i,j,k) = 0.0          
  

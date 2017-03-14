@@ -66,7 +66,7 @@ subroutine Simulation_initBlock(blockId)
 
   real :: A0
 
-  real :: A, B, emp, fs, x0, y0, r0, solnX
+  real :: A, B, emp, fs, x0, y0, r0, solnX, x1, y1, d1, d2
 
   !----------------------------------------------------------------------
   
@@ -173,11 +173,25 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 5.0e-5
            !r0 = 0.02e-3
            r0 = 0.1
-           x0 = 0.0d0
+           x0 = 0.15d0
            y0 = 0.1*cos((54.0/180.0)*acos(-1.0))
 
+           x1 = -0.15d0
+           y1 = 0.1*cos((54.0/180.0)*acos(-1.0))
 
-           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+           d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+           d2 = r0 - sqrt((xcell-x1)**2+(ycell-y1)**2) 
+
+           if(abs(d1)<abs(d2)) then
+
+            solnData(DFUN_VAR,i,j,k) = d1
+
+           else 
+
+            solnData(DFUN_VAR,i,j,k) = d2
+
+           end if
+
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
            !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.08/2.))/0.08)) - ycell
@@ -189,7 +203,9 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.2487) solnData(TEMP_VAR,i,j,k) = (0.2487-ycell)/0.2487
+           !if(ycell .le. 0.2487) solnData(TEMP_VAR,i,j,k) = (0.2487-ycell)/0.2487
+ 
+           if(ycell .le. 0.1) solnData(TEMP_VAR,i,j,k) = (0.1 - ycell)/0.1
 
            !if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
