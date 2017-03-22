@@ -181,8 +181,8 @@ subroutine Simulation_initBlock(blockId)
            y0 = 0.1*cos((38.0/180.0)*acos(-1.0))
            !z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
 
-           x0 = -0.7
-           x1 =  0.7
+           x0 = -0.5
+           x1 =  0.5
            x2 =  0.0
 
            z0 = 0.0
