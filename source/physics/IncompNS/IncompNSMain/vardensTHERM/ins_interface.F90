@@ -397,5 +397,16 @@ Module ins_interface
     END SUBROUTINE
  end interface
 
+ interface
+    SUBROUTINE ins_MFcorrection( blockCount, blockList,timeEndAdv, dt)
+       implicit none
+       !! ---- Argument List ----------------------------------
+       integer, INTENT(INOUT) ::  blockCount
+       integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
+       real,    INTENT(IN) :: dt, timeEndAdv
+       !! -----------------------------------------------------
+    END SUBROUTINE
+ end interface
+
 
  end Module ins_interface

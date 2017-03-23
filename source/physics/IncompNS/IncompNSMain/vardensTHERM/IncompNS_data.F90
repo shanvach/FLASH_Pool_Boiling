@@ -98,4 +98,8 @@ module IncompNS_data
   real, save :: wvel_z(NGUARD+1,NXB+2*NGUARD,NYB+2*NGUARD*K2D,LOW:HIGH,MAXBLOCKS*10)
 #endif
 
+  real, save, dimension(MAXBLOCKS,GRID_IHI_GC+1,GRID_JHI_GC,GRID_KHI_GC) :: rhox_old
+  real, save, dimension(MAXBLOCKS,GRID_IHI_GC,GRID_JHI_GC+1,GRID_KHI_GC) :: rhoy_old
+  real, save, dimension(MAXBLOCKS,GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC+1) :: rhoz_old
+
 end module IncompNS_data

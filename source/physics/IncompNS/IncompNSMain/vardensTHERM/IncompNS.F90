@@ -46,7 +46,7 @@ subroutine IncompNS( blockCount, blockList, &
                      timeEndAdv, dt,  dtOld,&
                      sweepOrder)
 
-  use ins_interface, ONLY : ins_ab2rk3, ins_ab2rk3_VD
+  use ins_interface, ONLY : ins_ab2rk3, ins_ab2rk3_VD, ins_MFcorrection
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use Driver_data,   ONLY : dr_nstep
@@ -71,9 +71,11 @@ subroutine IncompNS( blockCount, blockList, &
   !call ins_ab2rk3(  blockCount, blockList, dt)
   !call ins_ab2rk3(  blockCount, blockList, timeEndAdv, dt)
   if (ins_meshMe .eq. 0) print*,"Using Variable Density INS (ins_ab2rk3_VD)..."
-  call ins_ab2rk3_VD(  blockCount, blockList, timeEndAdv, dt)
+
+  !if(ins_nstep .gt. 1) call ins_MFcorrection(blockCount, blockList, timeEndAdv, dt)
+
+  call ins_ab2rk3_VD(blockCount, blockList, timeEndAdv, dt)
 
   call Timers_stop("ins_ab2rk3")
-
 
 end subroutine IncompNS

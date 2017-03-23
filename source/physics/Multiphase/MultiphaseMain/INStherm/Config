@@ -42,6 +42,8 @@ VARIABLE smrh                   # Smeared density - mslee (Akash)
 FACEVAR sigm                   # Sigma * Kappa source at interface.
 FACEVAR rh1f
 FACEVAR rh2f
+#FACEVAR rh1o
+#FACEVAR rh2o
 
 FACEVAR veli                  # Interface Velocity - mslee (Akash)
 # Fluxes

@@ -101,7 +101,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                             ins_restart, ins_nstep, ins_Qin, ins_Qout, ins_predcorrflg, &
                             ins_convvel, ins_alf, ins_gam, ins_rho, ins_gama, ins_alfa, &
                             ins_rhoa, AB2_SCHM, RK3_SCHM, ins_outflowgridChanged, ins_tlevel, &
-                            ins_gravX, ins_gravY, ins_gravZ
+                            ins_gravX, ins_gravY,ins_gravZ,rhox_old,rhoy_old,rhoz_old
 
   use Grid_Data, ONLY : gr_domainBC 
 
@@ -716,6 +716,17 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
           blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
      !print *, "dust2",ist,solnData(DUST_VAR,:,:,:)
+
+
+     !-- Storing density values for velocity correction in next time step -- AD!
+
+     rhox_old(lb,:,:,:) = facexData(RH1F_FACE_VAR,:,:,:) + facexData(RH2F_FACE_VAR,:,:,:)
+
+     rhoy_old(lb,:,:,:) = faceyData(RH1F_FACE_VAR,:,:,:) + faceyData(RH2F_FACE_VAR,:,:,:)
+
+     rhoz_old(lb,:,:,:) = facezData(RH1F_FACE_VAR,:,:,:) + facezData(RH2F_FACE_VAR,:,:,:)
+
+     !-- END -- AD !
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)

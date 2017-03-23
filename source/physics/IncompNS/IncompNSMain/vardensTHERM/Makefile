@@ -13,7 +13,8 @@ IncompNS += ins_computeDtLocal.o\
             ins_ab2rk3_VD.o\
             ins_advance_VD.o\
             ins_rhs_VD.o \
-            ins_rhs_PC.o
+            ins_rhs_PC.o \
+            ins_MFcorrection.o
 
 #dependencies below:
 #ins_ab2rk3.o : ins_interface.o
