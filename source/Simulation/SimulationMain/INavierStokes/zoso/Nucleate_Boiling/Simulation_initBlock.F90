@@ -174,10 +174,10 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 0.02e-3
            r0 = 0.1
            !x0 = 0.12d0
-           y0 = 0.1*cos((38.0/180.0)*acos(-1.0))
+           y0 = 0.1*cos((54.0/180.0)*acos(-1.0))
 
            !x1 = -0.12d0
-           y1 = 0.1*cos((38.0/180.0)*acos(-1.0))
+           y1 = 0.1*cos((54.0/180.0)*acos(-1.0))
 
            x0 =  0.4d0
            x1 = -0.4d0
