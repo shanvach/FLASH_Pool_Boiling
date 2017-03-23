@@ -204,7 +204,7 @@ subroutine Simulation_initBlock(blockId)
            d2 = r0 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
            d3 = r0 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
 
-           !solnData(DFUN_VAR,i,j,k) = d3
+           solnData(DFUN_VAR,i,j,k) = d3
 
            !if(abs(d1)<abs(d2)) then
 
@@ -217,11 +217,11 @@ subroutine Simulation_initBlock(blockId)
            !end if
 
 
-           if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
+           !if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
 
-           if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
+           !if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
 
-           if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
+           !if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
           
              
            !solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
