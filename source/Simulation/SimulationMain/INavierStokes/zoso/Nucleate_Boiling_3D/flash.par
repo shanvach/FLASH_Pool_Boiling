@@ -46,11 +46,11 @@ gravZ =  0.0
 sten = 0.9927
 
 # Number of heat flux extrapolation iterations
-hfit = 5
+hfit = 200
 
 # Number of level-set redistancing iterations
 inls = 10
-lsit = 5
+lsit = 10
 
 
 #       Grid dimensionality and geometry
@@ -59,12 +59,12 @@ geometry	= "cartesian"
 
 #       Size of computational volume
 
-xmin =   -2.0
-xmax =    2.0
+xmin =   -1.5
+xmax =    1.5
 ymin =    0.0
-ymax =    4.0
-zmin =   -2.0
-zmax =    2.0
+ymax =    3.0
+zmin =   -1.5
+zmax =    1.5
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -96,7 +96,7 @@ nend = 1000000000
 tmax            = 40.0
 cflflg          = 1
 cfl             = 0.1
-sigma		= 0.01
+sigma		= 0.05
 dtspec          = 1.00
 dtinit          = 1.00
 tstep_change_factor=1.00
@@ -118,7 +118,7 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 500.
 checkpointFileIntervalStep = 400000000 
 
-plotFileIntervalTime = 0.01
+plotFileIntervalTime = 0.1
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 5000
 plotFileIntervalStep = 1000000
