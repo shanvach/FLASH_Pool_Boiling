@@ -67,7 +67,9 @@ subroutine Simulation_initBlock(blockId)
   real :: A0
 
   real :: A, B, emp, fs, x0, y0, r0, solnX, x1, y1, x2, y2, d1, d2, d3
-
+  real :: x3,x4,x5,x6,y3,y4,y5,y6
+  real :: d4,d5,d6,d7
+ 
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -174,38 +176,65 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 0.02e-3
            r0 = 0.1
            !x0 = 0.12d0
-           y0 = 0.1*cos((54.0/180.0)*acos(-1.0))
+           y0 = 0.1*cos((38.0/180.0)*acos(-1.0))
 
            !x1 = -0.12d0
-           y1 = 0.1*cos((54.0/180.0)*acos(-1.0))
+           y1 = 0.1*cos((38.0/180.0)*acos(-1.0))
 
-           x0 =  0.4d0
-           x1 = -0.4d0
-           x2 =  0.0
+           x0 =  0.3d0
+           x1 =  0.6d0
+           x2 =  0.0d0
+           x3 =  0.9d0
+           x4 = -0.3d0
+           x5 = -0.6d0
+           x6 = -0.9d0
+
            y2 = y1
+           y3 = y1
+           y4 = y1
+           y5 = y1
+           y6 = y1
 
            d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
            d2 = r0 - sqrt((xcell-x1)**2+(ycell-y1)**2) 
            d3 = r0 - sqrt((xcell-x2)**2+(ycell-y2)**2)
-
+           d4 = r0 - sqrt((xcell-x3)**2+(ycell-y3)**2)
+           d5 = r0 - sqrt((xcell-x4)**2+(ycell-y4)**2)
+           d6 = r0 - sqrt((xcell-x5)**2+(ycell-y5)**2)
+           d7 = r0 - sqrt((xcell-x6)**2+(ycell-y6)**2)
 
            solnData(DFUN_VAR,i,j,k) = d3
 
            !if(abs(d1)<abs(d2)) then
-
            ! solnData(DFUN_VAR,i,j,k) = d1
-
            !else 
-
            ! solnData(DFUN_VAR,i,j,k) = d2
-
            !end if
 
            !if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
-
            !if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
-
            !if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
+           
+           !if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4) .and. &
+           !   abs(d1) < abs(d5) .and. abs(d1) < abs(d6) .and. abs(d1) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d1
+
+           !if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4) .and. &
+           !   abs(d2) < abs(d5) .and. abs(d2) < abs(d6) .and. abs(d2) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d2
+
+           !if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4) .and. &
+           !   abs(d3) < abs(d5) .and. abs(d3) < abs(d6) .and. abs(d3) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d3
+
+           !if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1) .and. &
+           !   abs(d4) < abs(d5) .and. abs(d4) < abs(d6) .and. abs(d4) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d4
+
+           !if(abs(d5) < abs(d2) .and. abs(d5) < abs(d3) .and. abs(d5) < abs(d4) .and. &
+           !   abs(d5) < abs(d1) .and. abs(d5) < abs(d6) .and. abs(d5) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d5
+
+           !if(abs(d6) < abs(d2) .and. abs(d6) < abs(d3) .and. abs(d6) < abs(d4) .and. &
+           !   abs(d6) < abs(d5) .and. abs(d6) < abs(d1) .and. abs(d6) < abs(d7)) solnData(DFUN_VAR,i,j,k) = d6
+
+           !if(abs(d7) < abs(d2) .and. abs(d7) < abs(d3) .and. abs(d7) < abs(d4) .and. &
+           !   abs(d7) < abs(d5) .and. abs(d7) < abs(d6) .and. abs(d7) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d7
 
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
@@ -218,9 +247,9 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.2487) solnData(TEMP_VAR,i,j,k) = (0.2487-ycell)/0.2487
+           !if(ycell .le. 0.2487) solnData(TEMP_VAR,i,j,k) = (0.2487-ycell)/0.2487
  
-           !if(ycell .le. 0.2) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2
+           if(ycell .le. 0.2) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2
 
            !if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
