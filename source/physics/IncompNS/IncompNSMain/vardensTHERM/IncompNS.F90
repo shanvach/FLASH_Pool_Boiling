@@ -72,7 +72,7 @@ subroutine IncompNS( blockCount, blockList, &
   !call ins_ab2rk3(  blockCount, blockList, timeEndAdv, dt)
   if (ins_meshMe .eq. 0) print*,"Using Variable Density INS (ins_ab2rk3_VD)..."
 
-  !if(ins_nstep .gt. 1) call ins_MFcorrection(blockCount, blockList, timeEndAdv, dt)
+  if(ins_nstep .gt. 1) call ins_MFcorrection(blockCount, blockList, timeEndAdv, dt)
 
   call ins_ab2rk3_VD(blockCount, blockList, timeEndAdv, dt)
 

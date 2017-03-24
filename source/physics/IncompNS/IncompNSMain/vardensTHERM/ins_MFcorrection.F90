@@ -168,7 +168,7 @@ subroutine ins_MFcorrection( blockCount, blockList,timeEndAdv, dt)
 
         faceyData(VELC_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2) = faceyData(VELC_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2) + &
                                                              (solnData(MDOT_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+solnData(MDOT_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
-                                                             (solnData(NRMX_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+solnData(NRMX_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
+                                                             (solnData(NRMY_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+solnData(NRMY_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
                                                              (rhoy_old(lb,ix1:ix2,jy1:jy2+1,kz1:kz2) - &
                                                               (faceyData(RH1F_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2)+faceyData(RH2F_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2)))
 
@@ -177,7 +177,7 @@ subroutine ins_MFcorrection( blockCount, blockList,timeEndAdv, dt)
 
         facezData(VELC_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1) = facezData(VELC_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1) + &
                                                              (solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
-                                                             (solnData(NRMX_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+solnData(NRMX_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
+                                                             (solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
                                                              (rhoz_old(lb,ix1:ix2,jy1:jy2,kz1:kz2+1) - &
                                                               (facezData(RH1F_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1)+facezData(RH2F_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1)))
 
