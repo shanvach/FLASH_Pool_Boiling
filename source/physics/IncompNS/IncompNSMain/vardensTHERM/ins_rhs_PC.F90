@@ -91,19 +91,38 @@
              ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
              ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
   
-             rhoxc = rho1x(i,j,kz1) + rho2x(i,j,kz1)
+             ! -- Velocity Jump Method 1 --- !
+
+             !rhoxc = rho1x(i,j,kz1) + rho2x(i,j,kz1)
+           
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
+             !                           (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+             !                           (rho1x(i-2:i+2,j-2:j+2,kz1)+rho2x(i-2:i+2,j-2:j+2,kz1)-rhoxc)
+
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
+             !                           (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+             !                           (rho1y(i-2:i+2,j-2:j+2,kz1)+rho2y(i-2:i+2,j-2:j+2,kz1)-rhoxc)
+ 
+
+             ! -- Velocity Jump Method 2 --- !
+
+             rhoxc = (smrh(i-1,j,kz1) + smrh(i,j,kz1))/2.0d0
            
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
                                         (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-                                        (rho1x(i-2:i+2,j-2:j+2,kz1)+rho2x(i-2:i+2,j-2:j+2,kz1)-rhoxc)
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)
 
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
                                         (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-                                        (rho1y(i-2:i+2,j-2:j+2,kz1)+rho2y(i-2:i+2,j-2:j+2,kz1)-rhoxc)
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc)
  
+
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
              uu   = unig(i,j,kz1)
@@ -258,17 +277,33 @@
              ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
              ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
  
-             rhoyc = rho1y(i,j,kz1)+rho2y(i,j,kz1)
+             !--- Velocity Jump Method 1 ---!
+
+             !rhoyc = rho1y(i,j,kz1)+rho2y(i,j,kz1)
+
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
+             !                           (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+             !                           (rho1x(i-2:i+2,j-2:j+2,kz1)+rho2x(i-2:i+2,j-2:j+2,kz1)-rhoyc)
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
+             !                           (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+             !                           (rho1y(i-2:i+2,j-2:j+2,kz1)+rho2y(i-2:i+2,j-2:j+2,kz1)-rhoyc)
+ 
+             !--- Velocity Jump Method 2 ---!
+
+             rhoyc = (smrh(i,j,kz1)+smrh(i,j-1,kz1))/2.0d0
 
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
                                         (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-                                        (rho1x(i-2:i+2,j-2:j+2,kz1)+rho2x(i-2:i+2,j-2:j+2,kz1)-rhoyc)
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc)
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
                                         (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-                                        (rho1y(i-2:i+2,j-2:j+2,kz1)+rho2y(i-2:i+2,j-2:j+2,kz1)-rhoyc)
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc)
  
              !=============================================================
              !KPD - 1st Order Upwind... ===================================

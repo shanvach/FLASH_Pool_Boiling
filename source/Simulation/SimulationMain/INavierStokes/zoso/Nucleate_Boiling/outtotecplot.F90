@@ -304,7 +304,7 @@
      !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
      !                       solnData(TYVP_VAR,:,:,1),tyv)
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(SMHV_VAR,:,:,1),tpth)
+                            1./solnData(SMRH_VAR,:,:,1),tpth)
 
      !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
      !                       solnData(CPRS_VAR,:,:,1),tpcp)
