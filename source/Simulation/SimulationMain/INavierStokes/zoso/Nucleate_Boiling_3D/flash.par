@@ -125,9 +125,9 @@ plotFileIntervalStep = 1000000
 #plotFileIntervalStep = 5
 
 ##	AMR parameters
-nblockx	= 4 #4
-nblocky	= 4 #8
-nblockz = 4
+nblockx	= 10 #4
+nblocky	= 10 #8
+nblockz = 10
 
 lrefine_min	= 1
 lrefine_max     = 1

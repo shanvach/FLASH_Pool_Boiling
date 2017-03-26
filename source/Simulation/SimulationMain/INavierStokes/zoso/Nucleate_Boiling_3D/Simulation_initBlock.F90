@@ -237,7 +237,7 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.2) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2
+           if(ycell .le. 0.2487) solnData(TEMP_VAR,i,j,k) = (0.2487 - ycell)/0.2487
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
              !solnData(TEMP_VAR,i,j,k) = 0.1*(0.08-ycell)/0.08
