@@ -328,9 +328,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
               if ((i /= blkLimits(LOW, IAXIS)) .or. (faces(1,IAXIS) == NOT_BOUNDARY)) then                                         
                  MdensXL = facevarx(RH1F_FACE_VAR,i  ,j  ,k) +facevarx(RH2F_FACE_VAR,i  ,j  ,k)             
 
-                 if (MdensXL .lt. 0.99 .OR. MdensXL .gt. 1500.0) then 
-                    print*,"ERROR in hypreCreateMatrix: XL Density is out of physical bounds!",MdensXL
-                 end if
+                 !if (MdensXL .lt. 0.99 .OR. MdensXL .gt. 1500.0) then 
+                 !   print*,"ERROR in hypreCreateMatrix: XL Density is out of physical bounds!",MdensXL
+                 !end if
 
                  if (i == blkLimits(LOW, IAXIS) .and. mylevel /= gr_hypreNeghLevels(lb,LEFT_EDGE, 1+K2D, 1+K3D)) then  !! F/C boundary.                                         
                  !   - kpd - Put in Driver Abort for fine/coarse interface in HYPRE
@@ -372,9 +372,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  MdensXR = facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)
 
-                 if (MdensXR .le. 0.00 .OR. MdensXR .gt. 1500.0) then
-                    print*,"ERROR in hypreCreateMatrix: XR Density is out of physical bounds!",MdensXR
-                 end if
+                 !if (MdensXR .le. 0.00 .OR. MdensXR .gt. 1500.0) then
+                 !   print*,"ERROR in hypreCreateMatrix: XR Density is out of physical bounds!",MdensXR
+                 !end if
 
 
                  if (i == blkLimits(HIGH, IAXIS) .and. mylevel /= gr_hypreNeghLevels(lb, RIGHT_EDGE, 1+K2D, 1+K3D)) then !! F/C boundary.                     
@@ -422,9 +422,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  MdensYL = facevary(RH1F_FACE_VAR,i  ,j  ,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)
 
-                 if (MdensYL .le. 0.00 .OR. MdensYL .gt. 1500.0) then
-                    print*,"ERROR in hypreCreateMatrix: YL Density is out of physical bounds!",MdensYL
-                 end if
+                 !if (MdensYL .le. 0.00 .OR. MdensYL .gt. 1500.0) then
+                 !   print*,"ERROR in hypreCreateMatrix: YL Density is out of physical bounds!",MdensYL
+                 !end if
 
                  if (j == blkLimits(LOW, JAXIS) .and. mylevel /= gr_hypreNeghLevels(lb,1+K2D,LEFT_EDGE,1+K3D)) then  !! F/C boundary.                     
                     
@@ -463,9 +463,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  MdensYR = facevary(RH1F_FACE_VAR,i  ,j+1,k)+facevary(RH2F_FACE_VAR,i  ,j+1,k)
 
-                 if (MdensYR .le. 0.00 .OR. MdensYR .gt. 1500.0) then
-                    print*,"ERROR in hypreCreateMatrix: YR Density is out of physical bounds!",MdensYR
-                 end if
+                 !if (MdensYR .le. 0.00 .OR. MdensYR .gt. 1500.0) then
+                 !   print*,"ERROR in hypreCreateMatrix: YR Density is out of physical bounds!",MdensYR
+                 !end if
 
 
                  if (j ==  blkLimits(HIGH, JAXIS) .and. mylevel /= gr_hypreNeghLevels(lb,1+K2D,RIGHT_EDGE,1+K3D)) then !! F/C boundary.  
@@ -513,9 +513,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  MdensZL = facevarz(RH1F_FACE_VAR,i  ,j  ,k)+facevarz(RH2F_FACE_VAR,i  ,j  ,k)
 
-                 if (MdensZL .le. 0.00 .OR. MdensZL .gt. 1500.0) then
-                    print*,"ERROR in hypreCreateMatrix: ZL Density is out of physical bounds!",MdensZL
-                 end if
+                 !if (MdensZL .le. 0.00 .OR. MdensZL .gt. 1500.0) then
+                 !   print*,"ERROR in hypreCreateMatrix: ZL Density is out of physical bounds!",MdensZL
+                 !end if
 
 
                  if (k == blkLimits(LOW, KAXIS) .and. mylevel /= gr_hypreNeghLevels(lb,1+K2D,1+K2D,LEFT_EDGE)) then  !! F/C boundary.                     
@@ -550,9 +550,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  MdensZR = facevarz(RH1F_FACE_VAR,i  ,j,k+1)+facevarz(RH2F_FACE_VAR,i  ,j,k+1)
 
-                 if (MdensZR .le. 0.00099 .OR. MdensZR .gt. 1500.0) then
-                    print*,"ERROR in hypreCreateMatrix: ZR Density is out of physical bounds!",MdensZR
-                 end if
+                 !if (MdensZR .le. 0.00099 .OR. MdensZR .gt. 1500.0) then
+                 !   print*,"ERROR in hypreCreateMatrix: ZR Density is out of physical bounds!",MdensZR
+                 !end if
 
                  if (k ==  blkLimits(HIGH,KAXIS) .and. mylevel /= gr_hypreNeghLevels(lb,1+K2D,1+K2D,RIGHT_EDGE)) then !! F/C boundary.                     
                  else
