@@ -71,12 +71,12 @@ geometry	= "cartesian"
 
 #       Size of computational volume
 
-xmin =   -30
-xmax =    30
+xmin =   -0.04
+xmax =    0.04
 ymin =    0.0
-ymax =    60
-zmin =   -30
-zmax =    30
+ymax =    0.08
+zmin =   -0.04
+zmax =    0.04
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
