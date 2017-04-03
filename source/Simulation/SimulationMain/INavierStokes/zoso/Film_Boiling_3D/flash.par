@@ -17,7 +17,7 @@ Pr = 1.0
 
 # Stefan Number
 #St = 0.1
-St = 0.04
+St = 0.2
 
 #iConvU = 1
 
@@ -45,7 +45,7 @@ gravY = -1.0
 gravZ =  0.0
 
 # Inverse Weber Number
-sten = 1.0
+sten = 0.9750
 
 # Number of heat flux extrapolation iterations
 hfit = 200
@@ -60,12 +60,12 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin =   -5.0
-xmax =    5.0
+xmin =   -5.44
+xmax =    5.44
 ymin =    0.00
-ymax =   10.00
-zmin =   -5.0
-zmax =    5.0
+ymax =   10.88
+zmin =   -5.44
+zmax =    5.44
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -95,7 +95,7 @@ nend = 1000000000
 tmax            = 40.00
 cflflg          = 1
 cfl             = 0.1
-sigma		= 0.03
+sigma		= 0.05
 dtspec          = 1.0
 dtinit          = 1.0
 tstep_change_factor=1.00
@@ -114,19 +114,19 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 0.05.
-checkpointFileIntervalStep = 10000
+checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 100000
 
-plotFileIntervalTime = 0.05
+plotFileIntervalTime = 0.1
 #plotFileIntervalStep = 500000
 #plotFileIntervalStep = 10000
-plotFileIntervalStep = 5000
+plotFileIntervalStep = 50000
 #plotFileIntervalStep = 100
 
 ##	AMR parameters
-nblockx	= 8 #4
-nblocky	= 8 #8
-nblockz = 8
+nblockx	= 7 #4
+nblocky	= 7 #8
+nblockz = 7
 
 lrefine_min	= 1
 lrefine_max     = 1
