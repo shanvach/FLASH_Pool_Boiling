@@ -85,30 +85,30 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
                                                             -ny_mins(i-ix1+1,j-jy1+1)*Tvy_plus(i-ix1+1,j-jy1+1) &
                                                             -ny_plus(i-ix1+1,j-jy1+1)*Tvy_mins(i-ix1+1,j-jy1+1))
 
-         Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
-         Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
+         !Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
+         !Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
 
        endif
 
      end do
   end do
 
-  !do j =jy1,jy2
-  ! do i=ix1,ix2
+  do j =jy1,jy2
+   do i=ix1,ix2
 
-  !    if((s(i,j,k)*s(i+1,j,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i-1,j,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i,j+1,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i,j-1,k) .le. 0.)) then
+      if((s(i,j,k)*s(i+1,j,k) .le. 0.) .or. &
+         (s(i,j,k)*s(i-1,j,k) .le. 0.) .or. &
+         (s(i,j,k)*s(i,j+1,k) .le. 0.) .or. &
+         (s(i,j,k)*s(i,j-1,k) .le. 0.)) then
  
-  !       Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
-  !       Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
+         Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
+         Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
 
-  !    end if
+      end if
 
 
-  ! end do
-  !end do
+   end do
+  end do
 
    !Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
    !Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
