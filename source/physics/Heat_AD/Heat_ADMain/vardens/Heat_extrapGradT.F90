@@ -28,10 +28,10 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
    maxN = max(maxval(abs(nx)),maxval(abs(ny)))
 
-   !dt_ext = 0.5d0*dx*maxN
+   dt_ext = 0.5d0*dx*maxN
    !dt_ext = 1E-6
    !dt_ext = 0.5d0/(1.0d0/dx + 1.0d0/dy)
-   dt_ext = dx
+   !dt_ext = dx
 
    Tnl_i = Tnl
    Tnv_i = Tnv
@@ -85,6 +85,9 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
                                                             -ny_mins(i-ix1+1,j-jy1+1)*Tvy_plus(i-ix1+1,j-jy1+1) &
                                                             -ny_plus(i-ix1+1,j-jy1+1)*Tvy_mins(i-ix1+1,j-jy1+1))
 
+         Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
+         Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
+
        endif
 
      end do
@@ -107,8 +110,8 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
   ! end do
   !end do
 
-   Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
-   Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
+   !Tnl_res = sum(sum(sum((Tnl_o(:,:,:)-Tnl(:,:,:))**2,1),1))
+   !Tnv_res = sum(sum(sum((Tnv_o(:,:,:)-Tnv(:,:,:))**2,1),1))
 
    Tnl_res = sqrt(Tnl_res/size(Tnl))
    Tnv_res = sqrt(Tnv_res/size(Tnv))
