@@ -311,7 +311,7 @@ go to 200
 
 200 continue
 
-       !if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
+       if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
 
          if (pf(i,j,k) .eq. 0.) then
           
@@ -323,7 +323,7 @@ go to 200
          
          end if
 
-       !end if
+       end if
                            
       end do
     end do

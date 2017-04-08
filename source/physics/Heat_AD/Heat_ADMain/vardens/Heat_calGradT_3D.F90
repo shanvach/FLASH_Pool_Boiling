@@ -12,6 +12,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
     integer :: i,j,k
     real :: Tij,Tipj,Timj,Tijp,Tijm,dxp,dxm,dyp,dym,Tx,Ty,Tax,Tbx,Tay,Tby,dyc,dxc,Tpx,Tmx,Tpy,Tmy
     real :: Tmz,Tpz,dzp,dzm,Tkm,Tkp,Tz
+    logical :: int_xp,int_xm,int_yp,int_ym,int_zp,int_zm
+
 
    tol = 0.01
 
@@ -43,6 +45,13 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
          dzm = dz
          dzp = dz
 
+         int_xp = .FALSE.
+         int_xm = .FALSE.
+         int_yp = .FALSE.
+         int_ym = .FALSE.
+         int_zp = .FALSE.
+         int_zm = .FALSE.
+
          if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
 
             Tpx = T(i,j,k)
@@ -57,6 +66,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             dxp = th*dx
             Tipj = ht_Tsat
+
+            int_xp = .TRUE.
 
          end if
 
@@ -74,6 +85,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             dxm = th*dx
             Timj = ht_Tsat
+
+            int_xm = .TRUE.
          
          end if
 
@@ -92,6 +105,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
             dyp = th*dy
             Tijp = ht_Tsat
 
+            int_yp = .TRUE.
+
          end if
 
          if(s(i,j,k)*s(i,j-1,k) .le. 0.) then
@@ -108,6 +123,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             dym = th*dy
             Tijm = ht_Tsat
+
+            int_ym = .TRUE.
 
          end if
 
@@ -126,6 +143,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
             dzp = th*dz
             Tkp = ht_Tsat
 
+            int_zp = .TRUE.
+
          end if
 
          if(s(i,j,k)*s(i,j,k-1) .le. 0.) then
@@ -143,11 +162,16 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
             dzm = th*dz
             Tkm = ht_Tsat
 
+            int_zm = .TRUE.
+
          end if
 
          Tx = ((-dxp**2)*(Timj) + (dxp**2)*(Tmx) - (dxm**2)*(Tpx) + (dxm**2)*(Tipj))/(dxp*dxm*(dxp+dxm))
          Ty = ((-dyp**2)*(Tijm) + (dyp**2)*(Tmy) - (dym**2)*(Tpy) + (dym**2)*(Tijp))/(dyp*dym*(dyp+dym))
          Tz = ((-dzp**2)*(Tkm)  + (dzp**2)*(Tmz) - (dzm**2)*(Tpz) + (dzm**2)*(Tkp))/(dzp*dzm*(dzp+dzm))
+
+
+         if(int_xm .or. int_xp .or. int_ym .or. int_yp .or. int_zm .or. int_zp) then
 
          if (pf(i,j,k) .eq. 0.) then
           
@@ -157,6 +181,8 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
          
             Tnv(i,j,k) = - nx(i,j,k)*Tx - ny(i,j,k)*Ty - nz(i,j,k)*Tz
          
+         end if
+
          end if
                            
       end do
