@@ -1,10 +1,10 @@
-subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res)
+subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res,mflg)
 
 #include "Flash.h"
 
    implicit none
    real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-   real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+   real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
    real, intent(in) :: dx,dy,dz
    integer, intent(in) :: ix1,ix2,jy1,jy2
    real, intent(out) :: Tnl_res,Tnv_res
@@ -70,23 +70,23 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
    do j = jy1,jy2
      do i = ix1,ix2
 
-       if((s(i,j,k)*s(i+1,j,k) .le. 0.) .or. &
-          (s(i,j,k)*s(i-1,j,k) .le. 0.) .or. &
-          (s(i,j,k)*s(i,j+1,k) .le. 0.) .or. &
-          (s(i,j,k)*s(i,j-1,k) .le. 0.)) then
+       !if((s(i,j,k)*s(i+1,j,k) .le. 0.) .or. &
+       !   (s(i,j,k)*s(i-1,j,k) .le. 0.) .or. &
+       !   (s(i,j,k)*s(i,j+1,k) .le. 0.) .or. &
+       !   (s(i,j,k)*s(i,j-1,k) .le. 0.)) then
 
-        Tnl(i,j,k) = Tnl_i(i,j,k) + dt_ext*pf(i,j,k)*(-nx_mins(i-ix1+1,j-jy1+1)*Tlx_plus(i-ix1+1,j-jy1+1) &
-                                                      -nx_plus(i-ix1+1,j-jy1+1)*Tlx_mins(i-ix1+1,j-jy1+1) &
-                                                      -ny_mins(i-ix1+1,j-jy1+1)*Tly_plus(i-ix1+1,j-jy1+1) &
-                                                      -ny_plus(i-ix1+1,j-jy1+1)*Tly_mins(i-ix1+1,j-jy1+1))
+        Tnl(i,j,k) = Tnl_i(i,j,k) + mflg(i,j,k)*dt_ext*pf(i,j,k)*(-nx_mins(i-ix1+1,j-jy1+1)*Tlx_plus(i-ix1+1,j-jy1+1) &
+                                                                  -nx_plus(i-ix1+1,j-jy1+1)*Tlx_mins(i-ix1+1,j-jy1+1) &
+                                                                  -ny_mins(i-ix1+1,j-jy1+1)*Tly_plus(i-ix1+1,j-jy1+1) &
+                                                                  -ny_plus(i-ix1+1,j-jy1+1)*Tly_mins(i-ix1+1,j-jy1+1))
 
-        Tnv(i,j,k) = Tnv_i(i,j,k) + dt_ext*(1.0-pf(i,j,k))*(-nx_mins(i-ix1+1,j-jy1+1)*Tvx_plus(i-ix1+1,j-jy1+1) &
-                                                            -nx_plus(i-ix1+1,j-jy1+1)*Tvx_mins(i-ix1+1,j-jy1+1) &
-                                                            -ny_mins(i-ix1+1,j-jy1+1)*Tvy_plus(i-ix1+1,j-jy1+1) &
-                                                            -ny_plus(i-ix1+1,j-jy1+1)*Tvy_mins(i-ix1+1,j-jy1+1))
+        Tnv(i,j,k) = Tnv_i(i,j,k) + mflg(i,j,k)*dt_ext*(1.0-pf(i,j,k))*(-nx_mins(i-ix1+1,j-jy1+1)*Tvx_plus(i-ix1+1,j-jy1+1) &
+                                                                        -nx_plus(i-ix1+1,j-jy1+1)*Tvx_mins(i-ix1+1,j-jy1+1) &
+                                                                        -ny_mins(i-ix1+1,j-jy1+1)*Tvy_plus(i-ix1+1,j-jy1+1) &
+                                                                        -ny_plus(i-ix1+1,j-jy1+1)*Tvy_mins(i-ix1+1,j-jy1+1))
 
 
-       endif
+       !endif
 
      end do
   end do

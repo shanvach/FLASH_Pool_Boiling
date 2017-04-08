@@ -4,7 +4,7 @@
 
 
         subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg)
 
    
         implicit none
@@ -21,7 +21,7 @@
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,visc,&
-                                               thco,cprs,nrmx,nrmy
+                                               thco,cprs,nrmx,nrmy,mflg
 
         !--------------------------
         !- kpd - Local variables...
@@ -41,6 +41,7 @@
         crmx = -1E10
         crmn = 1E10
 
+        mflg = 0.0
 
         !*************************************************************************
 
@@ -139,6 +140,34 @@
               !print*,"VISC",i,j,k,visc(i,j,k)
               !print*,"PFUN",i,j,pf(i,j,k),visc(i,j,k)
            end do
+        end do
+
+        do j = jy1-1,jy2+1
+         do i = ix1-1,ix2+1
+
+              if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+
+                  mflg(i,j,k)   = 1.0
+                  mflg(i+1,j,k) = 1.0     
+                  mflg(i-1,j,k) = 1.0
+                  mflg(i-2,j,k) = 1.0
+                  mflg(i+2,j,k) = 1.0
+                  mflg(i+3,j,k) = 1.0
+
+              end if
+
+              if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
+
+                  mflg(i,j,k)   = 1.0
+                  mflg(i,j+1,k) = 1.0
+                  mflg(i,j-1,k) = 1.0
+                  mflg(i,j-2,k) = 1.0
+                  mflg(i,j+2,k) = 1.0
+                  mflg(i,j+3,k) = 1.0
+
+              end if
+
+         end do
         end do
 
         !--------------------------------------------------------------

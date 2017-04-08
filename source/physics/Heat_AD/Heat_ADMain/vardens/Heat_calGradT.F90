@@ -1,10 +1,10 @@
-subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
+subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
         
     use Heat_AD_data
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
     real, intent(in) :: dx,dy,dz
     integer, intent(in) :: ix1,ix2,jy1,jy2
 
@@ -311,19 +311,19 @@ go to 200
 
 200 continue
 
-       if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
+       !if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
 
          if (pf(i,j,k) .eq. 0.) then
           
-            Tnl(i,j,k) = + nx(i,j,k)*Tx + ny(i,j,k)*Ty 
+            Tnl(i,j,k) = mflg(i,j,k)*( + nx(i,j,k)*Tx + ny(i,j,k)*Ty) 
          
          else
          
-            Tnv(i,j,k) = - nx(i,j,k)*Tx - ny(i,j,k)*Ty
+            Tnv(i,j,k) = mflg(i,j,k)*( - nx(i,j,k)*Tx - ny(i,j,k)*Ty)
          
          end if
 
-       end if
+       !end if
                            
       end do
     end do

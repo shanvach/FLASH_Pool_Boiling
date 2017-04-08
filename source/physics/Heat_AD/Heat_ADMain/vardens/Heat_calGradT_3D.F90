@@ -1,10 +1,10 @@
-subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz)
+subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz,mflg)
         
     use Heat_AD_data
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz
+    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz,mflg
     real, intent(in) :: dx,dy,dz
     integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
@@ -171,19 +171,19 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
          Tz = ((-dzp**2)*(Tkm)  + (dzp**2)*(Tmz) - (dzm**2)*(Tpz) + (dzm**2)*(Tkp))/(dzp*dzm*(dzp+dzm))
 
 
-         if(int_xm .or. int_xp .or. int_ym .or. int_yp .or. int_zm .or. int_zp) then
+         !if(int_xm .or. int_xp .or. int_ym .or. int_yp .or. int_zm .or. int_zp) then
 
          if (pf(i,j,k) .eq. 0.) then
           
-            Tnl(i,j,k) = + nx(i,j,k)*Tx + ny(i,j,k)*Ty + nz(i,j,k)*Tz
+            Tnl(i,j,k) = mflg(i,j,k)* ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty + nz(i,j,k)*Tz)
          
          else
          
-            Tnv(i,j,k) = - nx(i,j,k)*Tx - ny(i,j,k)*Ty - nz(i,j,k)*Tz
+            Tnv(i,j,k) = mflg(i,j,k)* ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty - nz(i,j,k)*Tz)
          
          end if
 
-         end if
+         !end if
                            
       end do
     end do

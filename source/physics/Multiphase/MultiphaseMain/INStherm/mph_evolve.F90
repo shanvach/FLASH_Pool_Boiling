@@ -281,7 +281,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2, &
                            solnData(THCO_VAR,:,:,:), solnData(CPRS_VAR,:,:,:),&
                            mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
-                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:))!,blockID)
+                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))!,blockID)
      !------------------------------------------------------------------
 
 #elif NDIM ==3
@@ -310,7 +310,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            solnData(THCO_VAR,:,:,:),solnData(CPRS_VAR,:,:,:),&
                            mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
                            solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
-                           solnData(NRMZ_VAR,:,:,:))
+                           solnData(NRMZ_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
         !----------------------------------------------------------
 
 #endif
@@ -346,6 +346,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   gcMask(NRMX_VAR) = .TRUE. 
   gcMask(NRMY_VAR) = .TRUE.
   gcMask(NRMZ_VAR) = .TRUE.
+  gcMask(MFLG_VAR) = .TRUE.
 
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z

@@ -146,7 +146,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint ptes'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint mflg'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -320,7 +320,7 @@
                              solnData(SIGP_VAR,:,:,1),tsigp)
                                                                                                                                                                                                                 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(PTES_VAR,:,:,1),tptes)
+                            solnData(MFLG_VAR,:,:,1),tptes)
 
 
      tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)

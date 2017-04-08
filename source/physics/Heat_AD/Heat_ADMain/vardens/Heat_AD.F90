@@ -210,7 +210,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:))
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -220,7 +220,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                         blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:))
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
+                        solnData(MFLG_VAR,:,:,:))
 #endif
 
      ! Release pointers
@@ -270,7 +271,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                            solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                           Tnl_res1,Tnv_res1)
+                           Tnl_res1,Tnv_res1,solnData(MFLG_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -282,7 +283,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                           Tnl_res1,Tnv_res1)
+                           Tnl_res1,Tnv_res1,solnData(MFLG_VAR,:,:,:))
 #endif
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)

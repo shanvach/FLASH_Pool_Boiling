@@ -48,14 +48,14 @@ Module mph_interface
 
 interface
         subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx,dy,rho1,rho2,xit,vis1,vis2,thco1,thco2,cp1,cp2
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                                rho2y,pf,w,sigx,sigy,visc,thco,cprs,nrmx,nrmy
+                                                rho2y,pf,w,sigx,sigy,visc,thco,cprs,nrmx,nrmy,mflg
         end subroutine mph_KPDcurvature2DAB
 end interface
 
@@ -104,7 +104,7 @@ interface
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2,thco,cprs,&
-           thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz)
+           thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg)
 
         implicit none
 
@@ -114,7 +114,7 @@ interface
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
                                                 rho1z,rho2z, visc, thco,cprs,&
-                                                nrmx,nrmy,nrmz
+                                                nrmx,nrmy,nrmz,mflg
 
         end subroutine mph_KPDcurvature3DAB
 end interface

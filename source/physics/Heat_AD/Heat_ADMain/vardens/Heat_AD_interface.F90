@@ -53,20 +53,20 @@ module Heat_AD_interface
     end interface 
 
    interface 
-      subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny)
+      subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
         implicit none
         real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
         real, intent(in) :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2
       end subroutine Heat_calGradT
    end interface
 
    interface
-      subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res)
+      subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res,mflg)
         implicit none
         real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
         real, intent(in) :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(out) :: Tnl_res,Tnv_res
@@ -98,20 +98,20 @@ module Heat_AD_interface
    end interface
 
    interface 
-      subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz)
+      subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz,mflg)
         implicit none
         real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz,mflg
         real, intent(in) :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
       end subroutine Heat_calGradT_3D
    end interface
 
    interface
-      subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,kz1,kz2,Tnl_res,Tnv_res)
+      subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,kz1,kz2,Tnl_res,Tnv_res,mflg)
         implicit none
         real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
-        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz,mflg
         real, intent(in) :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(out) :: Tnl_res,Tnv_res

@@ -6,7 +6,7 @@
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2, &
-           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz)
+           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg)
 
         implicit none
 
@@ -23,7 +23,7 @@
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
                                                 rho1z,rho2z,visc,thco, &
-                                                cprs,nrmx,nrmy,nrmz
+                                                cprs,nrmx,nrmy,nrmz,mflg
 
         !--------------------------
         !- kpd - Local variables...
@@ -48,6 +48,8 @@
         !---------------------------------------------
 
         crv = 0.
+        mflg = 0.0
+
         do k = kz1,kz2
            do j = jy1,jy2
               do i = ix1,ix2    
@@ -136,6 +138,48 @@
               end do
            end do
         end do
+
+
+       do k = kz1-1,kz2+1
+        do j = jy1-1,jy2+1
+         do i = ix1-1,ix2+1
+
+              if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+
+                  mflg(i,j,k)   = 1.0
+                  mflg(i+1,j,k) = 1.0
+                  mflg(i-1,j,k) = 1.0
+                  mflg(i-2,j,k) = 1.0
+                  mflg(i+2,j,k) = 1.0
+                  mflg(i+3,j,k) = 1.0
+
+              end if
+
+              if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
+
+                  mflg(i,j,k)   = 1.0
+                  mflg(i,j+1,k) = 1.0
+                  mflg(i,j-1,k) = 1.0
+                  mflg(i,j-2,k) = 1.0
+                  mflg(i,j+2,k) = 1.0
+                  mflg(i,j+3,k) = 1.0
+
+              end if
+
+              if(s(i,j,k)*s(i,j,k+1) .le. 0.) then
+
+                  mflg(i,j,k)   = 1.0
+                  mflg(i,j,k+1) = 1.0
+                  mflg(i,j,k-1) = 1.0
+                  mflg(i,j,k-2) = 1.0
+                  mflg(i,j,k+2) = 1.0
+                  mflg(i,j,k+3) = 1.0
+
+              end if
+
+         end do
+        end do
+       end do
 
         !********************************************************************
 
