@@ -28,10 +28,10 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
    maxN = max(maxval(abs(nx)),maxval(abs(ny)))
 
-   !dt_ext = 0.5d0*(dx/maxN)
+   dt_ext = 0.5d0*(dx/maxN)
    !dt_ext = 1E-6
    !dt_ext = 0.5d0/(1.0d0/dx + 1.0d0/dy)
-   dt_ext = dx
+   !dt_ext = dx
 
    Tnl_i = Tnl
    Tnv_i = Tnv
