@@ -4,7 +4,7 @@
 
 
         subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,alph,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv,smrh)
 
    
         implicit none
@@ -21,7 +21,7 @@
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,visc,&
-                                               thco,cprs,nrmx,nrmy,mflg,smhv
+                                               alph,nrmx,nrmy,mflg,smhv,smrh
 
         !--------------------------
         !- kpd - Local variables...
@@ -123,33 +123,11 @@
 
         k=1
 
-        !do j = jy1-1,jy2+1
-        !   do i = ix1-1,ix2+1
-        !      pf(i,j,k) = 0.
-
-        !      if(s(i,j,k).ge.0.) then
-        !         pf(i,j,k) = 1.                       !- kpd - Set phase function on each side of interface
-        !         visc(i,j,k) = vis1/vis2              !- kpd - Set viscosity on each side of interface
-        !         thco(i,j,k) = thco1/thco2            !- Akash - Set thermal conductivity on each side of interface 
-        !         cprs(i,j,k) = cp1/cp2                !- Akash - Set specific heat on each side of interface
-                 !print*,"vis1",i,j,visc(i,j,k)
-        !      else
-        !         visc(i,j,k) = vis2/vis2
-        !         thco(i,j,k) = thco2/thco2
-        !         cprs(i,j,k) = cp2/cp2
-                 !print*,"vis2",i,j,visc(i,j,k
-        !      end if
-              !print*,"VISC",i,j,k,visc(i,j,k)
-              !print*,"PFUN",i,j,pf(i,j,k),visc(i,j,k)
-        !   end do
-        !end do
-
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
         visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)
-        thco(ix1-1:ix2+1,jy1-1:jy2+1,k) = thco2/thco2 + (thco1/thco2 - thco2/thco2)*smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)     
-        cprs(ix1-1:ix2+1,jy1-1:jy2+1,k) = cp2/cp2     + (cp1/cp2     - cp2/cp2)    *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k) 
+        alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)     
 
         do j = jy1-1,jy2+1
          do i = ix1-1,ix2+1
@@ -191,22 +169,15 @@
            do i = ix1-1,ix2+1
 
 
-              a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
-              a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
-                   pf(i,j,k)/abs(pf(i,j,k)+eps)
+               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                      
+               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
+                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-           !   !rho1x(i,j,k) = a1*a2/rho1
-           !   !rho2x(i,j,k) = (1. - a1*a2)/rho2
+              !rho1x(i,j,k) = a1*a2/rho1
+              !rho2x(i,j,k) = (1. - a1*a2)/rho2
 
-              rho1x(i,j,k) = a1*a2/(rho1/rho2)
-              rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
-
-           !   a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i-1,j,k))*0.5)
-           !   a1 = 1/a1
-
-           !   rho1x(i,j,k) = a1-(rho2/rho2)
-           !   rho2x(i,j,k) = a1-rho1x(i,j,k)
-
+               rho1x(i,j,k) = a1*a2/(rho1/rho2)
+               rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
 
            end do
         end do
@@ -229,13 +200,6 @@
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
 
-           !   a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i,j-1,k))*0.5)
-           !   a1 = 1/a1
-
-           !   rho1y(i,j,k) = a1-(rho2/rho2)
-           !   rho2y(i,j,k) = a1-rho1y(i,j,k)
-
-
            end do
         end do
 
@@ -255,11 +219,11 @@
              + ((s(ix1:ix2,jy1+1:jy2+1,kz1) - &
              s(ix1:ix2,jy1-1:jy2-1,kz1))/2./dy)**2 )
 
-!        do i = ix1-1,ix2+1
-!           do j = jy1-1,jy2+1
-!              print*,"First Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
-!           end do
-!        end do
+        !do i = ix1-1,ix2+1
+        !   do j = jy1-1,jy2+1
+        !      print*,"First Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
+        !   end do
+        !end do
 
       end subroutine mph_KPDcurvature2DAB
 

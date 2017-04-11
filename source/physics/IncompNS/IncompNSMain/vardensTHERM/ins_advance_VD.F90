@@ -145,30 +145,30 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
 
       !--- Density Jump Method 1 ---!
 
-      rhoxr = rho1x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+rho2x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)
-      rhoxl = rho1x(ix1:ix2,jy1:jy2,kz1:kz2)+rho2x(ix1:ix2,jy1:jy2,kz1:kz2)
-      rhoyr = rho1y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+rho2y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)
-      rhoyl = rho1y(ix1:ix2,jy1:jy2,kz1:kz2)+rho2y(ix1:ix2,jy1:jy2,kz1:kz2)
+      !rhoxr = rho1x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+rho2x(ix1+1:ix2+1,jy1:jy2,kz1:kz2)
+      !rhoxl = rho1x(ix1:ix2,jy1:jy2,kz1:kz2)+rho2x(ix1:ix2,jy1:jy2,kz1:kz2)
+      !rhoyr = rho1y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+rho2y(ix1:ix2,jy1+1:jy2+1,kz1:kz2)
+      !rhoyl = rho1y(ix1:ix2,jy1:jy2,kz1:kz2)+rho2y(ix1:ix2,jy1:jy2,kz1:kz2)
 
       !--- Density Jump Method 2 ---!
 
-      !rhoxr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0
-      !rhoxl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/2.0d0
-      !rhoyr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/2.0d0
-      !rhoyl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/2.0d0
+      rhoxr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0
+      rhoxl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/2.0d0
+      rhoyr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/2.0d0
+      rhoyl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/2.0d0
 
 #if NDIM == 3
 
       !--- Density Jump Method 1 ---!
 
-      rhozr = rho1z(ix1:ix2,jy1:jy2,kz1+1:kz2+1)+rho2z(ix1:ix2,jy1:jy2,kz1+1:kz2+1)
-      rhozl = rho1z(ix1:ix2,jy1:jy2,kz1:kz2)+rho2z(ix1:ix2,jy1:jy2,kz1:kz2)
+      !rhozr = rho1z(ix1:ix2,jy1:jy2,kz1+1:kz2+1)+rho2z(ix1:ix2,jy1:jy2,kz1+1:kz2+1)
+      !rhozl = rho1z(ix1:ix2,jy1:jy2,kz1:kz2)+rho2z(ix1:ix2,jy1:jy2,kz1:kz2)
 
 
       !--- Density Jump Method 2 ---!
 
-      !rhozr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/2.0d0
-      !rhozl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/2.0d0
+      rhozr = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/2.0d0
+      rhozl = (smrh(ix1:ix2,jy1:jy2,kz1:kz2)+smrh(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/2.0d0
 
 #endif
 

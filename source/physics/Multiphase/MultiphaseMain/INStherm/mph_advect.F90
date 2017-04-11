@@ -392,6 +392,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         lsDT = MIN(10.0*dt,0.001)
         !minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.+del(DIR_Z)**2.)
         minCellDiag =SQRT((SQRT(del(DIR_X)**2.+del(DIR_Y)**2.))**2.+del(DIR_Z)**2.)
+        !lsDT = minCellDiag/2.0d0
         if ( ii .eq. mph_lsit .AND. lb .eq. 1 .AND. mph_meshMe .eq. 0) then
            print*,"Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
         end if

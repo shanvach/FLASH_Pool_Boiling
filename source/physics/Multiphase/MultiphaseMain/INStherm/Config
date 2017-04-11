@@ -26,8 +26,7 @@ VARIABLE visc                   # Fluid Viscosity
 VARIABLE curv                   # Curvature
 VARIABLE sigp                   # Sigma * Kappa source at interface.
 VARIABLE pfun                   # Phase function.
-VARIABLE cprs                   # Specific Heat - Akash
-VARIABLE thco                   # Thermal Conductivity - Akash
+VARIABLE alph                   # Thermal Diffusivity- Akash
 VARIABLE mdot                   # (Capital) M dot (scalar) - Akash
 VARIABLE tnlq                   # Tn liquid - Akash
 VARIABLE tnvp                   # Tn vapor - Akash

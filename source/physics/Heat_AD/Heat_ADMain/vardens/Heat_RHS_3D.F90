@@ -1,5 +1,5 @@
 subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,thco,cp,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
+                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -12,7 +12,7 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real, dimension(:,:,:), intent(in) :: u,v,w
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
-  real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,thco,cp,rho1z,rho2z
+  real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph,rho1z,rho2z
   real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh
 
   real :: T_res,Mdensx,Mdensy,th,dxp,dxm,dyp,dym,dzp,dzm
@@ -206,12 +206,12 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
     end if
     ! End of Case 6 !
 
-    alphax_plus = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
-    alphax_mins = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
-    alphay_plus = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
-    alphay_mins = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
-    alphaz_mins = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
-    alphaz_plus = (thco(i,j,k)/cp(i,j,k))*(inRe/ht_Pr)
+    alphax_plus = (alph(i,j,k))*(inRe/ht_Pr)
+    alphax_mins = (alph(i,j,k))*(inRe/ht_Pr)
+    alphay_plus = (alph(i,j,k))*(inRe/ht_Pr)
+    alphay_mins = (alph(i,j,k))*(inRe/ht_Pr)
+    alphaz_mins = (alph(i,j,k))*(inRe/ht_Pr)
+    alphaz_plus = (alph(i,j,k))*(inRe/ht_Pr)
 
 !_________________________________RHS TERM____________________________________!
 

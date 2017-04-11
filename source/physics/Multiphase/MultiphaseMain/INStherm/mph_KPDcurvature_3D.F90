@@ -6,7 +6,7 @@
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2, &
-           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg,smhv)
+           alph,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg,smhv)
 
         implicit none
 
@@ -22,8 +22,8 @@
         real, dimension(:,:,:), intent(inout):: s,crv, &
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
-                                                rho1z,rho2z,visc,thco, &
-                                                cprs,nrmx,nrmy,nrmz,mflg,smhv
+                                                rho1z,rho2z,visc,alph, &
+                                                nrmx,nrmy,nrmz,mflg,smhv
 
         !--------------------------
         !- kpd - Local variables...
@@ -119,34 +119,12 @@
         !----------------------------------------------------
         !- kpd - Set phase function on each side of interface
         !----------------------------------------------------
-        !do k = kz1-1,kz2+1
-        !   do j = jy1-1,jy2+1
-        !      do i = ix1-1,ix2+1
-        !         pf(i,j,k) = 0.
-
-        !         if(s(i,j,k).ge.0.) then
-        !            pf(i,j,k) = 1.                       
-        !            visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
-        !            thco(i,j,k) = thco1/thco2
-        !            cprs(i,j,k) = cp1/cp2
-        !         else
-        !            visc(i,j,k) = vis2/vis2
-        !            thco(i,j,k) = thco2/thco2
-        !            cprs(i,j,k) = cp2/cp2
-        !         end if
-
-        !      end do
-        !   end do
-        !end do
-
 
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
 
         visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
-        thco(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = thco2/thco2 + (thco1/thco2 - thco2/thco2)*smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)     
-        cprs(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = cp2/cp2     + (cp1/cp2     - cp2/cp2)    *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) 
-
+        alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)     
 
        do k = kz1-1,kz2+1
         do j = jy1-1,jy2+1
