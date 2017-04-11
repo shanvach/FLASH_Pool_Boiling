@@ -6,7 +6,7 @@
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2, &
-           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg)
+           thco,cprs,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg,smhv)
 
         implicit none
 
@@ -23,7 +23,7 @@
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
                                                 rho1z,rho2z,visc,thco, &
-                                                cprs,nrmx,nrmy,nrmz,mflg
+                                                cprs,nrmx,nrmy,nrmz,mflg,smhv
 
         !--------------------------
         !- kpd - Local variables...
@@ -119,25 +119,33 @@
         !----------------------------------------------------
         !- kpd - Set phase function on each side of interface
         !----------------------------------------------------
-        do k = kz1-1,kz2+1
-           do j = jy1-1,jy2+1
-              do i = ix1-1,ix2+1
-                 pf(i,j,k) = 0.
+        !do k = kz1-1,kz2+1
+        !   do j = jy1-1,jy2+1
+        !      do i = ix1-1,ix2+1
+        !         pf(i,j,k) = 0.
 
-                 if(s(i,j,k).ge.0.) then
-                    pf(i,j,k) = 1.                       
-                    visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
-                    thco(i,j,k) = thco1/thco2
-                    cprs(i,j,k) = cp1/cp2
-                 else
-                    visc(i,j,k) = vis2/vis2
-                    thco(i,j,k) = thco2/thco2
-                    cprs(i,j,k) = cp2/cp2
-                 end if
+        !         if(s(i,j,k).ge.0.) then
+        !            pf(i,j,k) = 1.                       
+        !            visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
+        !            thco(i,j,k) = thco1/thco2
+        !            cprs(i,j,k) = cp1/cp2
+        !         else
+        !            visc(i,j,k) = vis2/vis2
+        !            thco(i,j,k) = thco2/thco2
+        !            cprs(i,j,k) = cp2/cp2
+        !         end if
 
-              end do
-           end do
-        end do
+        !      end do
+        !   end do
+        !end do
+
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
+        visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
+        thco(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = thco2/thco2 + (thco1/thco2 - thco2/thco2)*smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)     
+        cprs(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = cp2/cp2     + (cp1/cp2     - cp2/cp2)    *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) 
 
 
        do k = kz1-1,kz2+1
@@ -148,10 +156,14 @@
 
                   mflg(i,j,k)   = 1.0
                   mflg(i+1,j,k) = 1.0
+
                   mflg(i-1,j,k) = 1.0
                   mflg(i-2,j,k) = 1.0
+                  mflg(i-3,j,k) = 1.0
+
                   mflg(i+2,j,k) = 1.0
                   mflg(i+3,j,k) = 1.0
+                  mflg(i+4,j,k) = 1.0
 
               end if
 
@@ -159,10 +171,14 @@
 
                   mflg(i,j,k)   = 1.0
                   mflg(i,j+1,k) = 1.0
+
                   mflg(i,j-1,k) = 1.0
                   mflg(i,j-2,k) = 1.0
+                  mflg(i,j-3,k) = 1.0
+
                   mflg(i,j+2,k) = 1.0
                   mflg(i,j+3,k) = 1.0
+                  mflg(i,j+4,k) = 1.0
 
               end if
 
@@ -170,10 +186,14 @@
 
                   mflg(i,j,k)   = 1.0
                   mflg(i,j,k+1) = 1.0
+
                   mflg(i,j,k-1) = 1.0
                   mflg(i,j,k-2) = 1.0
+                  mflg(i,j,k-3) = 1.0
+
                   mflg(i,j,k+2) = 1.0
                   mflg(i,j,k+3) = 1.0
+                  mflg(i,j,k+4) = 1.0
 
               end if
 
@@ -201,10 +221,18 @@
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1x(i,j,k) = a1*a2/rho1
-              !rho2x(i,j,k) = (1. - a1*a2)/rho2
+
+
+            !  !rho1x(i,j,k) = a1*a2/rho1
+            !  !rho2x(i,j,k) = (1. - a1*a2)/rho2
               rho1x(i,j,k) = a1*a2/(rho1/rho2)
               rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i-1,j,k))*0.5)
+            !  a1 = 1/a1
+
+            !  rho1x(i,j,k) = a1-(rho2/rho2)
+            !  rho2x(i,j,k) = a1-rho1x(i,j,k)
 
               end do
            end do
@@ -224,10 +252,18 @@
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1y(i,j,k) = a1*a2/rho1
-              !rho2y(i,j,k) = (1. - a1*a2)/rho2
+
+            !  !rho1y(i,j,k) = a1*a2/rho1
+            !  !rho2y(i,j,k) = (1. - a1*a2)/rho2
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i,j-1,k))*0.5)
+            !  a1 = 1/a1
+
+            !  rho1y(i,j,k) = a1-(rho2/rho2)
+            !  rho2y(i,j,k) = a1-rho1y(i,j,k)
+
 
               end do
            end do
@@ -247,10 +283,17 @@
               a1 = (pf(i,j,k-1) + pf(i,j,k)) / 2.           
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1z(i,j,k) = a1*a2/rho1
-              !rho2z(i,j,k) = (1. - a1*a2)/rho2
+
+            !  !rho1z(i,j,k) = a1*a2/rho1
+            !  !rho2z(i,j,k) = (1. - a1*a2)/rho2
               rho1z(i,j,k) = a1*a2/(rho1/rho2)
               rho2z(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i,j,k-1))*0.5)
+            !  a1 = 1/a1
+
+            !  rho1z(i,j,k) = a1-(rho2/rho2)
+            !  rho2z(i,j,k) = a1-rho1z(i,j,k)
 
               end do
            end do

@@ -15,18 +15,51 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
         integer :: i,j,k
         real, parameter :: eps = 1E-13
 
-        real :: sp
+        real :: sp,pi
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
         INTEGER, parameter :: kz1 = 1
 
-         !sp=2.d0*min(dx,dy)
+         pi = acos(-1.0)
+
+         !sp=3.d0*min(dx,dy)
          !smhv(ix1:ix2,jy1:jy2,kz1) = &
          !        (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1)/sp))/2.d0
 
-         smhv(ix1:ix2,jy1:jy2,kz1) = pf(ix1:ix2,jy1:jy2,kz1)
+         !smhv(ix1:ix2,jy1:jy2,kz1) = pf(ix1:ix2,jy1:jy2,kz1)
+
+         !smrh(ix1:ix2,jy1:jy2,kz1) = &
+         !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
+
+
+         do j=jy1,jy2
+           do i=ix1,ix2
+
+              if(abs(s(i,j,kz1)) .le. 1.5*dx) then
+
+              smhv(i,j,kz1) = 0.5 + s(i,j,kz1)/(3*dx) + sin(2*pi*s(i,j,kz1)/(3*dx))/(2*pi)
+
+              else
+
+                  if(s(i,j,kz1) .gt. 0.0) then
+
+                        smhv(i,j,kz1) = 1.0
+  
+                  else
+
+                        smhv(i,j,kz1) = 0.0
+
+                  end if
+
+              end if
+
+
+           end do
+        end do
 
          smrh(ix1:ix2,jy1:jy2,kz1) = &
-                 (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
+                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
+
+         smrh(ix1:ix2,jy1:jy2,kz1) = 1./smrh(ix1:ix2,jy1:jy2,kz1)
 
 end subroutine mph_getSmearedProperties2D
 
@@ -47,17 +80,53 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
         integer :: i,j,k
         real, parameter :: eps = 1E-13
 
-        real :: sp
+        real :: sp,pi
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
+
+
+         pi = acos(-1.0)
 
          !sp=2.d0*min(dx,dy)
          !smhv(ix1:ix2,jy1:jy2,kz1:kz2) = &
          !        (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1:kz2)/sp))/2.d0
 
-         smhv(ix1:ix2,jy1:jy2,kz1:kz2) = pf(ix1:ix2,jy1:jy2,kz1:kz2)
+         !smhv(ix1:ix2,jy1:jy2,kz1:kz2) = pf(ix1:ix2,jy1:jy2,kz1:kz2)
+
+         !smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
+         !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+
+        do k=kz1,kz2
+         do j=jy1,jy2
+           do i=ix1,ix2
+
+              if(abs(s(i,j,k)) .le. 1.5*dx) then
+
+              smhv(i,j,k) = 0.5 + s(i,j,k)/(3*dx) + sin(2*pi*s(i,j,k)/(3*dx))/(2*pi)
+
+              else
+
+                  if(s(i,j,k) .gt. 0.0) then
+
+                        smhv(i,j,k) = 1.0
+  
+                  else
+
+                        smhv(i,j,k) = 0.0
+
+                  end if
+
+              end if
+
+
+           end do
+        end do
+       end do      
 
          smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
-                 (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+
+         smrh(ix1:ix2,jy1:jy2,kz1:kz2) = 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2)
+
 
 end subroutine mph_getSmearedProperties3D
 

@@ -218,6 +218,69 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
    end if  ! End if: dr_nstep = 1
            !=====================
 
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+     !----------------------------------------------------------
+     !- ML - Call mph_getSmearedProperties2D
+     !----------------------------------------------------------
+
+#if NDIM == 2
+
+     call mph_getSmearedProperties2D(solnData(DFUN_VAR,:,:,:), &
+                          solnData(PFUN_VAR,:,:,:),&
+                          del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                          solnData(NRMX_VAR,:,:,:),&
+                          solnData(NRMY_VAR,:,:,:),&
+                          solnData(SMHV_VAR,:,:,:),&
+                          solnData(SMRH_VAR,:,:,:))
+#endif
+
+#if NDIM == 3
+
+     call mph_getSmearedProperties3D(solnData(DFUN_VAR,:,:,:), &
+                          solnData(PFUN_VAR,:,:,:),&
+                          del(DIR_X),del(DIR_Y),del(DIR_Z),mph_rho1,mph_rho2, &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                          solnData(NRMX_VAR,:,:,:),&
+                          solnData(NRMY_VAR,:,:,:),&
+                          solnData(NRMZ_VAR,:,:,:),&
+                          solnData(SMHV_VAR,:,:,:),&
+                          solnData(SMRH_VAR,:,:,:))
+
+#endif
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(SMHV_VAR) = .TRUE.
+  gcMask(SMRH_VAR) = .TRUE.
+  
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+ 
 !************************************************************************************************************
 !************************************************************************************************************
 
@@ -281,7 +344,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2, &
                            solnData(THCO_VAR,:,:,:), solnData(CPRS_VAR,:,:,:),&
                            mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
-                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))!,blockID)
+                           solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
+                           solnData(MFLG_VAR,:,:,:),solnData(SMHV_VAR,:,:,:))!,blockID)
      !------------------------------------------------------------------
 
 #elif NDIM ==3
@@ -310,7 +374,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                            solnData(THCO_VAR,:,:,:),solnData(CPRS_VAR,:,:,:),&
                            mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
                            solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
-                           solnData(NRMZ_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
+                           solnData(NRMZ_VAR,:,:,:),solnData(MFLG_VAR,:,:,:),&
+                           solnData(SMHV_VAR,:,:,:))
         !----------------------------------------------------------
 
 #endif
@@ -502,67 +567,4 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                    blockCount,blockList)
 #endif
 
-  do lb = 1,blockCount
-     blockID = blockList(lb)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-     !----------------------------------------------------------
-     !- ML - Call mph_getSmearedProperties2D
-     !----------------------------------------------------------
-
-#if NDIM == 2
-
-     call mph_getSmearedProperties2D(solnData(DFUN_VAR,:,:,:), &
-                          solnData(PFUN_VAR,:,:,:),&
-                          del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                          solnData(NRMX_VAR,:,:,:),&
-                          solnData(NRMY_VAR,:,:,:),&
-                          solnData(SMHV_VAR,:,:,:),&
-                          solnData(SMRH_VAR,:,:,:))
-#endif
-
-#if NDIM == 3
-
-     call mph_getSmearedProperties3D(solnData(DFUN_VAR,:,:,:), &
-                          solnData(PFUN_VAR,:,:,:),&
-                          del(DIR_X),del(DIR_Y),del(DIR_Z),mph_rho1,mph_rho2, &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                          solnData(NRMX_VAR,:,:,:),&
-                          solnData(NRMY_VAR,:,:,:),&
-                          solnData(NRMZ_VAR,:,:,:),&
-                          solnData(SMHV_VAR,:,:,:),&
-                          solnData(SMRH_VAR,:,:,:))
-
-#endif
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-
-  end do
-
-  gcMask = .FALSE.
-  gcMask(SMHV_VAR) = .TRUE.
-  gcMask(SMRH_VAR) = .TRUE.
-  
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-
- 
 end subroutine
