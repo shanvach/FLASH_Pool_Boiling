@@ -41,7 +41,7 @@
         crmx = -1E10
         crmn = 1E10
 
-        mflg = 0.0
+        mflg = 1.0
 
         !*************************************************************************
 
@@ -129,33 +129,33 @@
         visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)
         alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)     
 
-        do j = jy1-1,jy2+1
-         do i = ix1-1,ix2+1
+        !do j = jy1-1,jy2+1
+        ! do i = ix1-1,ix2+1
 
-              if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+        !      if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
 
-                  mflg(i,j,k)   = 1.0
-                  mflg(i+1,j,k) = 1.0     
-                  mflg(i-1,j,k) = 1.0
-                  mflg(i-2,j,k) = 1.0
-                  mflg(i+2,j,k) = 1.0
-                  mflg(i+3,j,k) = 1.0
+        !          mflg(i,j,k)   = 1.0
+        !          mflg(i+1,j,k) = 1.0     
+        !          mflg(i-1,j,k) = 1.0
+        !          mflg(i-2,j,k) = 1.0
+        !          mflg(i+2,j,k) = 1.0
+        !          mflg(i+3,j,k) = 1.0
 
-              end if
+        !      end if
 
-              if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
+        !      if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
 
-                  mflg(i,j,k)   = 1.0
-                  mflg(i,j+1,k) = 1.0
-                  mflg(i,j-1,k) = 1.0
-                  mflg(i,j-2,k) = 1.0
-                  mflg(i,j+2,k) = 1.0
-                  mflg(i,j+3,k) = 1.0
+        !          mflg(i,j,k)   = 1.0
+        !          mflg(i,j+1,k) = 1.0
+        !          mflg(i,j-1,k) = 1.0
+        !          mflg(i,j-2,k) = 1.0
+        !          mflg(i,j+2,k) = 1.0
+        !          mflg(i,j+3,k) = 1.0
 
-              end if
+        !      end if
 
-         end do
-        end do
+        ! end do
+        !end do
 
         !--------------------------------------------------------------
         !- kpd - These are FACE VALUED inverse densities for each phase

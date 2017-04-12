@@ -375,6 +375,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                do i = 1,guard
                   !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                   regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-abs(regionData(k-i,1:je,1:ke,PFUN_VAR))) - regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then

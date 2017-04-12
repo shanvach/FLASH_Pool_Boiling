@@ -36,6 +36,7 @@ VARIABLE nrmz
 
 VARIABLE smhv                   # Smeared Heaviside Function - mslee (Akash)
 VARIABLE smrh                   # Smeared density - mslee (Akash)
+VARIABLE rold
 
 # Use FACEVAR for cell interface velocity fields
 FACEVAR sigm                   # Sigma * Kappa source at interface.

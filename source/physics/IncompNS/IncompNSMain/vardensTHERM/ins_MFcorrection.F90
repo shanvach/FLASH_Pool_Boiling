@@ -39,7 +39,7 @@ subroutine ins_MFcorrection( blockCount, blockList,timeEndAdv, dt)
                             ins_restart, ins_nstep, ins_Qin, ins_Qout, ins_predcorrflg, &
                             ins_convvel, ins_alf, ins_gam, ins_rho, ins_gama, ins_alfa, &
                             ins_rhoa, AB2_SCHM, RK3_SCHM, ins_outflowgridChanged, ins_tlevel, &
-                            ins_gravX, ins_gravY, ins_gravZ,rhox_old,rhoy_old,rhoz_old
+                            ins_gravX, ins_gravY, ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit,mph_inls,mph_thco1, &
@@ -160,26 +160,49 @@ subroutine ins_MFcorrection( blockCount, blockList,timeEndAdv, dt)
 
 
         facexData(VELC_FACE_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2) = facexData(VELC_FACE_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2) + &
-                                                             (solnData(MDOT_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)+solnData(MDOT_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
-                                                             (solnData(NRMX_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)+solnData(NRMX_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
-                                                             (rhox_old(lb,ix1:ix2+1,jy1:jy2,kz1:kz2) - &
-                                                              (facexData(RH1F_FACE_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2)+facexData(RH2F_FACE_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2)))
-                                     
+
+                                                             (solnData(MDOT_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)+&
+                                                              solnData(MDOT_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
+
+                                                             (solnData(NRMX_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)&
+                                                              +solnData(NRMX_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 * &
+
+                                                             ((solnData(ROLD_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)&
+                                                              +solnData(ROLD_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0 - &
+
+                                                             (solnData(SMRH_VAR,ix1-1:ix2,jy1:jy2,kz1:kz2)&
+                                                              +solnData(SMRH_VAR,ix1:ix2+1,jy1:jy2,kz1:kz2))/2.d0)
+
 
         faceyData(VELC_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2) = faceyData(VELC_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2) + &
-                                                             (solnData(MDOT_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+solnData(MDOT_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
-                                                             (solnData(NRMY_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+solnData(NRMY_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
-                                                             (rhoy_old(lb,ix1:ix2,jy1:jy2+1,kz1:kz2) - &
-                                                              (faceyData(RH1F_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2)+faceyData(RH2F_FACE_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2)))
 
+                                                             (solnData(MDOT_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+&
+                                                              solnData(MDOT_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
+
+                                                             (solnData(NRMY_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+&
+                                                              solnData(NRMY_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 * &
+
+                                                             ((solnData(ROLD_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+&
+                                                              solnData(ROLD_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0 - &
+
+                                                             (solnData(SMRH_VAR,ix1:ix2,jy1-1:jy2,kz1:kz2)+&
+                                                              solnData(SMRH_VAR,ix1:ix2,jy1:jy2+1,kz1:kz2))/2.d0)
 
 #if NDIM==3
 
         facezData(VELC_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1) = facezData(VELC_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1) + &
-                                                             (solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
-                                                             (solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
-                                                             (rhoz_old(lb,ix1:ix2,jy1:jy2,kz1:kz2+1) - &
-                                                              (facezData(RH1F_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1)+facezData(RH2F_FACE_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1)))
+  
+                                                             (solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+&
+                                                              solnData(MDOT_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
+
+                                                             (solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+&
+                                                              solnData(NRMZ_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 * &
+
+                                                             ((solnData(ROLD_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+&
+                                                              solnData(ROLD_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0 - &
+
+                                                             (solnData(SMRH_VAR,ix1:ix2,jy1:jy2,kz1-1:kz2)+&
+                                                              solnData(SMRH_VAR,ix1:ix2,jy1:jy2,kz1:kz2+1))/2.d0)
 
 #endif
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)

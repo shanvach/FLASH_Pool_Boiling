@@ -1,6 +1,5 @@
-
-!#define SMOOTHED_LS
-!#define SMOOTHED_SGN
+#define SMOOTHED_LS
+#define SMOOTHED_SGN
 
       subroutine mph_KPDlsRedistance(s,u,v,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
 
