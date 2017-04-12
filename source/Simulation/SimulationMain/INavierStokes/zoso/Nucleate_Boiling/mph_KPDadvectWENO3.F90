@@ -33,7 +33,7 @@
         integer :: i,j,k,n
 
         !kpd - Damping Variables...
-        real :: xcell, ycell, Fn, pi, xd, AA 
+        real :: xcell, ycell, Fn, pi, xd, AA, rc 
         real del(MDIM),bsize(MDIM),coord(MDIM)
         real, dimension(2,MDIM) :: boundBox
 
@@ -98,6 +98,12 @@
                  AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
               end if
   
+
+              ! AD - Cavity boundary condition for Nucleate Boiling
+              
+              rc = sqrt((xcell-0.0)**2 + &
+                        (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
+
 
               !***************** KPD **********************
 
@@ -373,6 +379,14 @@
                                    - ins_dampC*AA*(s(i,j,k)-ycell)
               !---------------------------------------------------------------
               !---------------------------------------------------------------
+
+              ! AD - Cavity boundary condition for Nucleate Boiling
+
+              if (rc .le. 0.05 .and. s(i,j,k) .lt. 0.0) &
+                 s(i,j,k) = so(i,j,k)
+              
+              !--------------------------------------------------------------
+
 
            end do
         end do

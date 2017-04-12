@@ -48,25 +48,25 @@
 
       !____________________________U component________________________________________!
 
-      uint(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
-                                      (mdot(ix1-1:ix2,jy1:jy2,kz1:kz2) + mdot(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
-                                      (xnorm(ix1-1:ix2,jy1:jy2,kz1:kz2) + xnorm(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
-                                      (rho1x(ix1:ix2+1,jy1:jy2,kz1:kz2) + rho2x(ix1:ix2+1,jy1:jy2,kz1:kz2))
+      !uint(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
+      !                                (mdot(ix1-1:ix2,jy1:jy2,kz1:kz2) + mdot(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
+      !                                (xnorm(ix1-1:ix2,jy1:jy2,kz1:kz2) + xnorm(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
+      !                                (rho1x(ix1:ix2+1,jy1:jy2,kz1:kz2) + rho2x(ix1:ix2+1,jy1:jy2,kz1:kz2))
 
 
       !____________________________V component________________________________________!
 
-      vint(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
-                                      (mdot(ix1:ix2,jy1-1:jy2,kz1:kz2) + mdot(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
-                                      (ynorm(ix1:ix2,jy1-1:jy2,kz1:kz2) + ynorm(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
-                                      (rho1y(ix1:ix2,jy1:jy2+1,kz1:kz2) + rho2y(ix1:ix2,jy1:jy2+1,kz1:kz2))
+      !vint(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
+      !                                (mdot(ix1:ix2,jy1-1:jy2,kz1:kz2) + mdot(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
+      !                                (ynorm(ix1:ix2,jy1-1:jy2,kz1:kz2) + ynorm(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
+      !                                (rho1y(ix1:ix2,jy1:jy2+1,kz1:kz2) + rho2y(ix1:ix2,jy1:jy2+1,kz1:kz2))
 
       !____________________________W component________________________________________!
 
-      wint(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
-                                      (mdot(ix1:ix2,jy1:jy2,kz1-1:kz2) + mdot(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
-                                      (znorm(ix1:ix2,jy1:jy2,kz1-1:kz2) + znorm(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
-                                      (rho1z(ix1:ix2,jy1:jy2,kz1:kz2+1) + rho2z(ix1:ix2,jy1:jy2,kz1:kz2+1))
+      !wint(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
+      !                                (mdot(ix1:ix2,jy1:jy2,kz1-1:kz2) + mdot(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
+      !                                (znorm(ix1:ix2,jy1:jy2,kz1-1:kz2) + znorm(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
+      !                                (rho1z(ix1:ix2,jy1:jy2,kz1:kz2+1) + rho2z(ix1:ix2,jy1:jy2,kz1:kz2+1))
 
 
 
@@ -75,25 +75,25 @@
 
       !____________________________U component________________________________________!
 
-      !uint(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
-      !                                (mdot(ix1-1:ix2,jy1:jy2,kz1:kz2) + mdot(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
-      !                                (xnorm(ix1-1:ix2,jy1:jy2,kz1:kz2) + xnorm(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
-      !                                (smrh(ix1-1:ix2,jy1:jy2,kz1:kz2) + smrh(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0
+      uint(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
+                                      (mdot(ix1-1:ix2,jy1:jy2,kz1:kz2) + mdot(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
+                                      (xnorm(ix1-1:ix2,jy1:jy2,kz1:kz2) + xnorm(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0 * &
+                                      (smrh(ix1-1:ix2,jy1:jy2,kz1:kz2) + smrh(ix1:ix2+1,jy1:jy2,kz1:kz2))/2.0d0
 
 
       !____________________________V component________________________________________!
 
-      !vint(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
-      !                                (mdot(ix1:ix2,jy1-1:jy2,kz1:kz2) + mdot(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
-      !                                (ynorm(ix1:ix2,jy1-1:jy2,kz1:kz2) + ynorm(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
-      !                                (smrh(ix1:ix2,jy1-1:jy2,kz1:kz2) + smrh(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0
+      vint(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
+                                      (mdot(ix1:ix2,jy1-1:jy2,kz1:kz2) + mdot(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
+                                      (ynorm(ix1:ix2,jy1-1:jy2,kz1:kz2) + ynorm(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0 * &
+                                      (smrh(ix1:ix2,jy1-1:jy2,kz1:kz2) + smrh(ix1:ix2,jy1:jy2+1,kz1:kz2))/2.0d0
 
       !____________________________W component________________________________________!
 
-      !wint(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
-      !                                (mdot(ix1:ix2,jy1:jy2,kz1-1:kz2) + mdot(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
-      !                                (znorm(ix1:ix2,jy1:jy2,kz1-1:kz2) + znorm(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
-      !                                (smrh(ix1:ix2,jy1:jy2,kz1-1:kz2) + smrh(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0
+      wint(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
+                                      (mdot(ix1:ix2,jy1:jy2,kz1-1:kz2) + mdot(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
+                                      (znorm(ix1:ix2,jy1:jy2,kz1-1:kz2) + znorm(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0 * &
+                                      (smrh(ix1:ix2,jy1:jy2,kz1-1:kz2) + smrh(ix1:ix2,jy1:jy2,kz1:kz2+1))/2.0d0
 
 
 END SUBROUTINE mph_getInterfaceVelocity_3D
