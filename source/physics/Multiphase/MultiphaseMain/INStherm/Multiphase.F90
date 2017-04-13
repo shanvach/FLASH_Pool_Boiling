@@ -1,4 +1,4 @@
-subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,mph_flag)
 
 #include "Flash.h"
 #include "constants.h"
@@ -27,6 +27,7 @@ subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
       integer, INTENT(INOUT) :: blockCount
       integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
       real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+      integer, intent(in) :: mph_flag
 
       ! Used only with analytical equation of interface location
 
@@ -38,12 +39,12 @@ subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
       !real :: solnX
 
-      if(dr_nstep > 1) then
+      if(dr_nstep > 1 .and. mph_flag == 1) then
 
       call mph_advect(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
       end if
 
-      call mph_evolve(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
+      call mph_evolve(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,mph_flag)
 
 end subroutine

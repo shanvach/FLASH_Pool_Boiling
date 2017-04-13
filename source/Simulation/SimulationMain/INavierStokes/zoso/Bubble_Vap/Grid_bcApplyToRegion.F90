@@ -368,7 +368,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,VISC_VAR,DFUN_VAR,CURV_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) ! Shizhao
+              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,VISC_VAR,DFUN_VAR,CURV_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) ! Shizhao
               k = 2*guard+1
               do i = 1,guard
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
@@ -438,7 +438,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case (PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)    !1to6, 2to5, 3to4
+              case (PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)    !1to6, 2to5, 3to4
                     !--------------------------------------------------------------!
 
               k = 2*guard+1 
@@ -536,7 +536,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) !1to6, 2to5, 3to4
+              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) !1to6, 2to5, 3to4
 
               k = 2*guard+1 
               do i = 1,guard
@@ -766,7 +766,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,VISC_VAR,DFUN_VAR,CURV_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) ! Shizhao
+              case (PRES_VAR,DELP_VAR,TVIS_VAR,PFUN_VAR,VISC_VAR,DFUN_VAR,CURV_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR) ! Shizhao
               k = 2*guard+1 
               do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
@@ -827,7 +827,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case (PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)
+              case (PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)
            
               k = 2*guard+1 
               do i = 1,guard
@@ -959,7 +959,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
               select case(ivar)
               !KPD - ORIG case (PRES_VAR,DELP_VAR,TVIS_VAR)
-              case(PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,THCO_VAR,CPRS_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)
+              case(PRES_VAR,DELP_VAR,TVIS_VAR,DFUN_VAR,PFUN_VAR,CURV_VAR,VISC_VAR,ALPH_VAR,NRMX_VAR,NRMY_VAR,TNLQ_VAR,TNVP_VAR,MDOT_VAR,SMHV_VAR,SMRH_VAR)
 
               k = 2*guard+1 
               do i = 1,guard

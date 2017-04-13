@@ -315,11 +315,11 @@ go to 200
 
          if (pf(i,j,k) .eq. 0.) then
           
-            Tnl(i,j,k) = mflg(i,j,k)*( + nx(i,j,k)*Tx + ny(i,j,k)*Ty) 
+            Tnl(i,j,k) = ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty) 
          
          else
          
-            Tnv(i,j,k) = mflg(i,j,k)*( - nx(i,j,k)*Tx - ny(i,j,k)*Ty)
+            Tnv(i,j,k) = ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty)
          
          end if
 

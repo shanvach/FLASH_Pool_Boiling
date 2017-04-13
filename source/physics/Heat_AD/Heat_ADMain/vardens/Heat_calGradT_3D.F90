@@ -175,11 +175,11 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
          if (pf(i,j,k) .eq. 0.) then
           
-            Tnl(i,j,k) = mflg(i,j,k)* ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty + nz(i,j,k)*Tz)
+            Tnl(i,j,k) = ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty + nz(i,j,k)*Tz)
          
          else
          
-            Tnv(i,j,k) = mflg(i,j,k)* ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty - nz(i,j,k)*Tz)
+            Tnv(i,j,k) = ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty - nz(i,j,k)*Tz)
          
          end if
 

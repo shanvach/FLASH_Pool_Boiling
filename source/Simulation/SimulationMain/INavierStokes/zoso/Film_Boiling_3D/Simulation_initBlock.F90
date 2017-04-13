@@ -269,8 +269,7 @@ subroutine Simulation_initBlock(blockId)
 
   solnData(PTES_VAR,:,:,:) = 0.0
   solnData(RTES_VAR,:,:,:) = 0.0
-  solnData(THCO_VAR,:,:,:) = 0.0
-  solnData(CPRS_VAR,:,:,:) = 0.0
+  solnData(ALPH_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
   faceyData(VELC_FACE_VAR,:,:,:) = 0.0
