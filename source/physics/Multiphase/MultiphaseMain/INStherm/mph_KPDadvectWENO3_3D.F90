@@ -598,17 +598,17 @@
               !                        - dt*(frz*wr - flz*wl)/dz &
               !                        - ins_dampC*AA*(s(i,j,k)-ycell)
               !else
-              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-              !                        - dt*(fry*vr - fly*vl)/dy &
-              !                        - dt*(frz*wr - flz*wl)/dz 
-              !end if
-
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz &
-                                      + dt*so(i,j,k)*(ur-ul)/dx &
-                                      + dt*so(i,j,k)*(vr-vl)/dy &
-                                      + dt*so(i,j,k)*(wr-wl)/dz
+                                      - dt*(frz*wr - flz*wl)/dz 
+              !end if
+
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*(frz*wr - flz*wl)/dz &
+              !                        + dt*so(i,j,k)*(ur-ul)/dx &
+              !                        + dt*so(i,j,k)*(vr-vl)/dy &
+              !                        + dt*so(i,j,k)*(wr-wl)/dz
               !---------------------------------------------------------------
               !---------------------------------------------------------------
 
