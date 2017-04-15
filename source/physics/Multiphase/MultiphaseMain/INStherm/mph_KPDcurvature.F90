@@ -137,9 +137,9 @@
                   mflg(i,j,k)   = 1.0
                   mflg(i+1,j,k) = 1.0     
                   mflg(i-1,j,k) = 1.0
-                  mflg(i-2,j,k) = 1.0
+                  !mflg(i-2,j,k) = 1.0
                   mflg(i+2,j,k) = 1.0
-                  mflg(i+3,j,k) = 1.0
+                  !mflg(i+3,j,k) = 1.0
 
               end if
 
@@ -148,9 +148,9 @@
                   mflg(i,j,k)   = 1.0
                   mflg(i,j+1,k) = 1.0
                   mflg(i,j-1,k) = 1.0
-                  mflg(i,j-2,k) = 1.0
+                  !mflg(i,j-2,k) = 1.0
                   mflg(i,j+2,k) = 1.0
-                  mflg(i,j+3,k) = 1.0
+                  !mflg(i,j+3,k) = 1.0
 
               end if
 

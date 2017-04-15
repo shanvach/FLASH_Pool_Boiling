@@ -119,8 +119,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      if (step == 1) then
 
-     ! RK-1 dt/2.0
-     ! RK-2 dt/1.0
+     ! RK-1 dt/1.0
+     ! RK-2 dt/2.0
 
      ! Calculate temperature at new time-step
 

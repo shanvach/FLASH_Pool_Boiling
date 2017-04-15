@@ -246,6 +246,7 @@
              if (iConvU .eq. 0) then
                 rConvU = - (uxplus*uxplus - uxminus*uxminus)*dx1   &! advection term
                          - (vxplus*uyplus - vxminus*uyminus)*dy1
+
              elseif (iConvU .eq. 1 .OR. iConvU .eq. 3 .OR. iConvU .eq. 2) then
                 rConvU = - ududx - vdudy 
              end if
@@ -557,22 +558,47 @@
              ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
              ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
  
-             rhoxc = rho1x(i,j,k)+rho2x(i,j,k)
+             ! -- Velocity Jump Method 1 --- !
 
+             !rhoxc = rho1x(i,j,k)+rho2x(i,j,k)
+
+             !unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (xnorm(i-1,j,k) +xnorm(i,j,k))/2.0d0 * &
+             !                           (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+
+             !vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (ynorm(i-1,j,k) +ynorm(i,j,k))/2.0d0 * &
+             !                           (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+ 
+             !wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (znorm(i-1,j,k) +znorm(i,j,k))/2.0d0 * &
+             !                           (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+
+
+             ! -- Velocity Jump Method 2 --- !
+
+             rhoxc = (smrh(i-1,j,k) + smrh(i,j,k))/2.0d0
+           
              unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
                                         (xnorm(i-1,j,k) +xnorm(i,j,k))/2.0d0 * &
-                                        (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-3:i+1,j-2:j+2,k-2:k+2))/2.0d0-rhoxc)
+
 
              vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
                                         (ynorm(i-1,j,k) +ynorm(i,j,k))/2.0d0 * &
-                                        (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-3:j+1,k-2:k+2))/2.0d0-rhoxc)
  
              wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i-1,j,k) + mdot(i,j,k))/2.0d0 * &
                                         (znorm(i-1,j,k) +znorm(i,j,k))/2.0d0 * &
-                                        (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhoxc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-3:k+1))/2.0d0-rhoxc)
+
+
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
@@ -812,23 +838,46 @@
              ! AVD - Calculating Ghost Fluid Velocities
              ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
              ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
- 
-             rhoyc = rho1y(i,j,k)+rho2y(i,j,k)
 
+             ! -- Velocity Jump Method 1 --- !
+ 
+             !rhoyc = rho1y(i,j,k)+rho2y(i,j,k)
+
+             !unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (xnorm(i,j-1,k) +xnorm(i,j,k))/2.0d0 * &
+             !                           (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+
+             !vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (ynorm(i,j-1,k) +ynorm(i,j,k))/2.0d0 * &
+             !                           (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+ 
+             !wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
+             !                           (znorm(i,j-1,k) +znorm(i,j,k))/2.0d0 * &
+             !                           (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+
+             ! -- Velocity Jump Method 2 --- !
+
+             rhoyc = (smrh(i,j,k) + smrh(i,j-1,k))/2.0d0
+           
              unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
                                         (xnorm(i,j-1,k) +xnorm(i,j,k))/2.0d0 * &
-                                        (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-3:i+1,j-2:j+2,k-2:k+2))/2.0d0-rhoyc)
+
 
              vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
                                         (ynorm(i,j-1,k) +ynorm(i,j,k))/2.0d0 * &
-                                        (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-3:j+1,k-2:k+2))/2.0d0-rhoyc)
  
              wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j-1,k) + mdot(i,j,k))/2.0d0 * &
                                         (znorm(i,j-1,k) +znorm(i,j,k))/2.0d0 * &
-                                        (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhoyc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-3:k+1))/2.0d0-rhoyc)
+
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
@@ -1050,24 +1099,49 @@
              ! AVD - Calculating Ghost Fluid Velocities
              ! u1(G) = u1 + mdot*norm*(1/rho1 - 1/rho2)
              ! u2(G) = u2 + mdot*norm*(1/rho2 - 1/rho1)
+
+             ! -- Velocity Jump Method 1 --- !
  
-             rhozc = rho1z(i,j,k)+rho2z(i,j,k)
+             !rhozc = rho1z(i,j,k)+rho2z(i,j,k)
 
 
+             !unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+             !                           (xnorm(i,j,k-1) +xnorm(i,j,k))/2.0d0 * &
+             !                           (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+
+             !vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+             !                           (ynorm(i,j,k-1) +ynorm(i,j,k))/2.0d0 * &
+             !                           (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+ 
+             !wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
+             !                           (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
+             !                           (znorm(i,j,k-1) +znorm(i,j,k))/2.0d0 * &
+             !                           (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+
+
+             ! -- Velocity Jump Method 2 --- !
+
+             rhozc = (smrh(i,j,k) + smrh(i,j,k-1))/2.0d0
+           
              unig(i-2:i+2,j-2:j+2,k-2:k+2) = uni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
                                         (xnorm(i,j,k-1) +xnorm(i,j,k))/2.0d0 * &
-                                        (rho1x(i-2:i+2,j-2:j+2,k-2:k+2)+rho2x(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-3:i+1,j-2:j+2,k-2:k+2))/2.0d0-rhozc)
+
 
              vnig(i-2:i+2,j-2:j+2,k-2:k+2) = vni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
                                         (ynorm(i,j,k-1) +ynorm(i,j,k))/2.0d0 * &
-                                        (rho1y(i-2:i+2,j-2:j+2,k-2:k+2)+rho2y(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-3:j+1,k-2:k+2))/2.0d0-rhozc)
  
              wnig(i-2:i+2,j-2:j+2,k-2:k+2) = wni(i-2:i+2,j-2:j+2,k-2:k+2) + &
                                         (mdot(i,j,k-1) + mdot(i,j,k))/2.0d0 * &
                                         (znorm(i,j,k-1) +znorm(i,j,k))/2.0d0 * &
-                                        (rho1z(i-2:i+2,j-2:j+2,k-2:k+2)+rho2z(i-2:i+2,j-2:j+2,k-2:k+2)-rhozc)
+                                        ((smrh(i-2:i+2,j-2:j+2,k-2:k+2)+smrh(i-2:i+2,j-2:j+2,k-3:k+1))/2.0d0-rhozc)
+
+
 
              !=============================================================
              !KPD - 1st or 3rd Order Upwind... ============================
