@@ -27,7 +27,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
+                             mph_radius
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -300,6 +301,18 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     endif
+
+#if NDIM == 3
+
+    mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
+
+#endif
+
+#if NDIM == 2
+
+    mph_radius = sqrt(volSumAll/acos(-1.0))
+
+#endif
 
     !********************************************************************************************************
     !-kpd - Fill distance function guard cells before re-initialization to

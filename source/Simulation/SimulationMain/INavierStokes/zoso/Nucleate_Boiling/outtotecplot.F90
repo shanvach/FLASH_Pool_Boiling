@@ -17,6 +17,7 @@
 
   use Driver_data,      ONLY : dr_nstep
 
+  use Multiphase_data,  ONLY : mph_radius
 
 #ifdef FLASH_GRID_UG
 #else
@@ -71,7 +72,7 @@
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes
+           tpuint, tpvint,tptes,tprds
 
   real, dimension(NXB,NYB) :: tptes_c
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
@@ -146,7 +147,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint mflg'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint mflg diam'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -211,6 +212,7 @@
      tptes = 0.
      tptes_c = 0.
      tptes_d = 0.
+     tprds = 0.
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -325,6 +327,8 @@
 
      tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)
      tptes_d = solnData(PTES_VAR,:,:,1)
+
+     tprds   = 2*mph_radius
 
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
@@ -499,6 +503,9 @@
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tptes)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tprds)
       i = TecDat(ijk,arraylb,0)
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)

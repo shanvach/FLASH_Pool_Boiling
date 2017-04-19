@@ -48,4 +48,7 @@ module Multiphase_data
   real, save :: mph_cp1   ! Akash
   real, save :: mph_cp2   ! Akash
 
+  real, save :: mph_radius
+
+
 end module Multiphase_data
