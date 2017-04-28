@@ -240,7 +240,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
               do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-                 if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
+                 if (solnData(DFUN_VAR,i,j,k) .gt. 0) then
                    volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
                  end if
               end do
