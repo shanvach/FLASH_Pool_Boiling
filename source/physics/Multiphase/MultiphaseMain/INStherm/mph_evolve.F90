@@ -421,8 +421,8 @@ if(mph_flag == 1) then
 #endif
 
 #ifdef FLASH_GRID_PARAMESH
-  !intval = 1
-  intval = 2
+  intval = 1
+  !intval = 2
   interp_mask_unk = intval;   interp_mask_unk_res = intval;
   interp_mask_work= intval;
   interp_mask_facex = intval; interp_mask_facex_res = intval;
@@ -544,8 +544,8 @@ else if(mph_flag == 0) then
   gcMask(NUNK_VARS+2*NFACE_VARS+SIGM_FACE_VAR) = .TRUE.    ! Momentum Jump Z
 #endif
 #ifdef FLASH_GRID_PARAMESH
-  !intval = 1
-  intval = 2
+  intval = 1
+  !intval = 2
   interp_mask_unk = intval;   interp_mask_unk_res = intval;
   interp_mask_work= intval;
   interp_mask_facex = intval; interp_mask_facex_res = intval;

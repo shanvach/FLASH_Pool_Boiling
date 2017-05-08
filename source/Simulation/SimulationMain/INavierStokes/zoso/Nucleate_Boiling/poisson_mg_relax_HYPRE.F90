@@ -103,10 +103,6 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   use tree, only : maxblocks_tr, lrefine, grid_changed, nodetype
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get 
 
-  Use paramesh_mpi_interfaces, only : amr_morton_process
-
-  use tree, only : newchild
-
   implicit none
 
 #include "Flash.h"
@@ -153,8 +149,6 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   !- kpd - Fix for INTEL compiler
   integer, dimension(NDIM) :: temp_gr_hypreLower,temp_gr_hypreUpper 
   real, dimension(NXB*NYB*NZB) :: temp_RHSVal
-
-  logical :: newchild_old(maxblocks_tr) !Shizhao
   
   call Timers_start("Grid_solvePoisson")    
 
@@ -172,10 +166,8 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   !!         Only in AMR is this routine meaningful.
   !!-----------------------------------------------------------------------
 
-  !nodetype_perm(:) = nodetype(:)
-  nodetype_perm(1:lnblocks) = nodetype(1:lnblocks)
+  nodetype_perm(:) = nodetype(:)
 
-#ifdef PREVIOUS_NODETYPE
   blockCount_AMR = 0
   do lb_AMR = 1, lnblocks
      if (lrefine(lb_AMR) == level) then
@@ -188,73 +180,11 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
         nodetype(lb_AMR) = 2
      end if
   end do
-#endif
-
-  !---------------------------------
-  ! Shizhao
-  newchild_old(1:lnblocks) = newchild(1:lnblocks)
-
-  blockCount_AMR = 0
-  newchild = .FALSE.
-  do lb_AMR = 1, lnblocks
-    nodetype(lb_AMR) = nodetype_perm(lb_AMR)
-    if (lrefine(lb_AMR) > level) nodetype(lb_AMR) = -1
-    if (lrefine(lb_AMR) == level) then
-      nodetype(lb_AMR) = 1
-      blockCount_AMR = blockCount_AMR + 1
-      blockList_AMR(blockCount_AMR) = lb_AMR
-      newchild(lb_AMR) = .TRUE.
-    end if
-    if (lrefine(lb_AMR) == level-1 .and. nodetype(lb_AMR) /= 1) &
-      nodetype(lb_AMR) = 2
-  end do
-  call amr_morton_process()
-  !call mg_restore_nodetypes (level)  ! Shizhao.
-  !---------------------------------
-
   call gr_hypreGridStatus (blockCount_AMR, blockList_AMR)  
 
   !KPD - Print which cores are being solved on and how many blocks they have...
-  !if (dr_nstep .eq. 1 .AND. blockCount_AMR .gt. 0) print*,"Bottom Level Dist:",gr_meshMe,blockCount_AMR
+  if (dr_nstep .eq. 1 .AND. blockCount_AMR .gt. 0) print*,"Bottom Level Dist:",gr_meshMe,blockCount_AMR
 
-#ifdef NOTETYPR_DEBUG
-  call mg_restore_nodetypes (level)  ! Shizhao.
-  ! Shizhao, debug
-  blockCount_AMR = 0
-  do lb_AMR = 1, lnblocks
-     if (lrefine(lb_AMR) == level) then
-        blockCount_AMR = blockCount_AMR + 1
-     end if
-  end do
-  if (dr_nstep .eq. 1 .AND. blockCount_AMR .gt. 0) print*,"Bottom Level Dist 2:",gr_meshMe,blockCount_AMR
-  ! Shizhao, debug
-  blockCount_AMR = 0
-  do lb_AMR = 1, lnblocks
-     if (nodetype(lb_AMR) == 1) then
-
-        blockCount_AMR = blockCount_AMR + 1
-     end if
-  end do
-  if (dr_nstep .eq. 1 .AND. blockCount_AMR .gt. 0) print*,"Bottom Level Dist 3:",gr_meshMe,blockCount_AMR
-
-  ! Shizhao, debug
-  blockCount_AMR = 0
-  do lb_AMR = 1, lnblocks
-     if (lrefine(lb_AMR) == level) then
-
-        blockCount_AMR = blockCount_AMR + 1
-        blockList_AMR(blockCount_AMR) = lb_AMR
-
-        nodetype(lb_AMR) = 1
-     elseif(lrefine(lb_AMR) == level-1) then
-        nodetype(lb_AMR) = 2
-     else
-        nodetype(lb_AMR) = -1
-     end if
-  end do
-  if (dr_nstep .eq. 1 .AND. blockCount_AMR .gt. 0) print*,"Bottom Level Dist 4:",gr_meshMe,blockCount_AMR
-
-#endif
   !!-----------------------------------------------------------------------
 
   !- kpd - This CAN NOT have the same integer value as a Flash.h Variable,
@@ -407,14 +337,10 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+MGW8_FACE_VAR) = .TRUE.    ! Z-dens
 #endif
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
+  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
   !***********************************************************************************************
-  !nodetype(:) = nodetype_perm(:)
-  nodetype(1:lnblocks) = nodetype_perm(1:lnblocks) ! Shizhao add 1:lnblocks
-  newchild = newchild_old ! Shizhao
-  call amr_morton_process() ! Shizhao
- 
+  nodetype(:) = nodetype_perm(:) 
   !***********************************************************************************************
   lb = 0
   do lb_AMR = 1, lnblocks
@@ -552,7 +478,7 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   dt       = 1.0
   theta    = 1.0 
   
-  !localbcTypes = GRID_PDE_BND_DIRICHLET
+  localbcTypes = GRID_PDE_BND_NEUMANN
   !localbcTypes = GRID_PDE_BND_PERIODIC    !- kpd - Does this even change the BC from Neumann ???
   bcValues(1,:) = 0.0                      !        The faces array is set from the flash.par global BCs!!!
   bcValues(2,:) = 0.0

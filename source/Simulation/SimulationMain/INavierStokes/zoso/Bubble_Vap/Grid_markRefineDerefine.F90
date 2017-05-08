@@ -81,7 +81,7 @@ subroutine Grid_markRefineDerefine()
 
   !! index of the threshold var
   specs(1) = real(DFUN_VAR)
-  specs(2) = -0.0009d0  ! lower boundary of the refinement
+  specs(2) = -0.001d0  ! lower boundary of the refinement
   specs(3) =  0.0000d0  ! upper boundary of the refinement
 
   !! Bring all qualifying blocks to this level of refinement

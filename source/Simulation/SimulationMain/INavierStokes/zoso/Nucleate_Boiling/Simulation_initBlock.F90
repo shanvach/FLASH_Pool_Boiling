@@ -175,7 +175,7 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 5.0e-5
            !r0 = 0.02e-3
 
-           r0 = 3.5
+           r0 = 5.0
            !r0 = 0.1
 
            !x0 = 0.12d0

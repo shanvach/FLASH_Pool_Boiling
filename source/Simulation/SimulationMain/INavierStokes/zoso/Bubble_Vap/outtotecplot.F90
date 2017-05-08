@@ -17,6 +17,7 @@
 
   use Driver_data,      ONLY : dr_nstep
 
+  use Multiphase_data,  ONLY: mph_radius
 
 #ifdef FLASH_GRID_UG
 #else
@@ -319,12 +320,14 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(SIGP_VAR,:,:,1),tsigp)
                                                                                                                                                                                                                 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(PTES_VAR,:,:,1),tptes)
+     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+     !                       solnData(PTES_VAR,:,:,1),tptes)
 
 
-     tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)
-     tptes_d = solnData(PTES_VAR,:,:,1)
+     tptes   = 2*mph_radius
+
+     !tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)
+     !tptes_d = solnData(PTES_VAR,:,:,1)
 
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
