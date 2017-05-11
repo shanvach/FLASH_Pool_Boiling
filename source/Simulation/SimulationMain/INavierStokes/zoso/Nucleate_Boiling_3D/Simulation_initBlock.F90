@@ -68,6 +68,7 @@ subroutine Simulation_initBlock(blockId)
 
   real :: A,B,emp,fs,x0,y0,r0,solnX,z0,x1,y1,z1,x2,y2,z2,d1,d2,d3
 
+  real :: fn(8)
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -78,6 +79,15 @@ subroutine Simulation_initBlock(blockId)
   !nxb = blIndSize(1)
   !nyb = blIndSize(2)
   !nzb = blIndSize(3)
+
+  fn(1) = -1938.3
+  fn(2) = -958.9
+  fn(3) =  3255.2
+  fn(4) = -1911.5
+  fn(5) =  420.5
+  fn(6) = -10.0
+  fn(7) = -09.2
+  fn(8) =  1.0
 
   ! Get Coord and Bsize for the block:
   ! Bounding box:
@@ -243,7 +253,16 @@ subroutine Simulation_initBlock(blockId)
 
            !if(ycell .le. 9.6729 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.) solnData(TEMP_VAR,i,j,k) = (9.6729 - ycell)/9.6729
 
-           if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (((0.3520-ycell)/0.3520)**4+((0.3520-ycell)/0.3520)**3)/2.0
+           if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+
+           solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
+                                      fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &
+                                      fn(7)*(ycell**1) + fn(8)
+
+           if (solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
+
+
+           end if
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
              !solnData(TEMP_VAR,i,j,k) = 0.1*(0.08-ycell)/0.08
