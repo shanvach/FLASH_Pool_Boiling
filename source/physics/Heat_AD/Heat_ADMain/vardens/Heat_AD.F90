@@ -167,7 +167,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.
 
-    if(dr_nstep .gt. 1) call Grid_fillGuardCells(CENTER,ALLDIR,&
+    call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
    end do !End RK-2
