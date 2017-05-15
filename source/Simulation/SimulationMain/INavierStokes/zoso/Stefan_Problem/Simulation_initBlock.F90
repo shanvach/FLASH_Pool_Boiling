@@ -99,7 +99,9 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
   A0 = sim_waveA
-  solnX = 0.17665658290058407310768837725119
+
+  solnX = 0.68085414306744777221840863823714 !rho2 = 20
+  !solnX = 1.3246415825251054266496091471747  !rho2 = 200
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -177,8 +179,11 @@ subroutine Simulation_initBlock(blockId)
            y0 = 0.0d0
 
 
-           solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(120*0.001)))
-           solnData(DFUN_VAR,i,j,k) = 0.12239127083012598534472395028188 - ycell
+           solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(0.001)))
+
+         
+           solnData(DFUN_VAR,i,j,k) = 0.043060996929105514582028364588445 - ycell ! rho2 = 20
+           !solnData(DFUN_VAR,i,j,k) = 0.083777689682984590892847242435151 - ycell ! rho2 = 200
 
            if(solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0          
  
