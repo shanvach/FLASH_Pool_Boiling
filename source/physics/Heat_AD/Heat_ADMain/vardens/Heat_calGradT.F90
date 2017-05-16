@@ -136,9 +136,17 @@ go to 200
 
             if(s(i-1,j,k)*s(i,j,k) .le. 0.0) then
 
-                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
+                if((abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))) .gt. tol) then
 
-                Tx = (T(i,j,k)-ht_Tsat)/(th*dx)
+                    th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
+                    Tx = (T(i,j,k)-ht_Tsat)/(th*dx)
+
+                else
+
+                    th = (abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i-1,j,k))))
+                    Tx = (T(i+1,j,k)-ht_Tsat)/(th*dx)
+
+                end if
               
             else
 
@@ -153,9 +161,17 @@ go to 200
 
             if(s(i+1,j,k)*s(i,j,k) .le. 0.0) then
 
-                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
 
-                Tx = (ht_Tsat-T(i,j,k))/(th*dx)
+                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
+                  Tx = (ht_Tsat-T(i,j,k))/(th*dx)
+
+                else
+
+                  th = abs(s(i-1,j,k))/(abs(s(i-1,j,k))+abs(s(i+1,j,k)))
+                  Tx = (ht_Tsat-T(i-1,j,k))/(th*dx)
+                
+                end if
               
             else
 
@@ -185,9 +201,17 @@ go to 200
 
             if(s(i,j-1,k)*s(i,j,k) .le. 0.0) then
 
-                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
 
-                Ty = (T(i,j,k)-ht_Tsat)/(th*dy)
+                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
+                  Ty = (T(i,j,k)-ht_Tsat)/(th*dy)
+
+                else
+
+                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j-1,k)))
+                  Ty = (T(i,j+1,k)-ht_Tsat)/(th*dy)
+
+                end if
 
             else
 
@@ -200,9 +224,18 @@ go to 200
 
             if(s(i,j+1,k)*s(i,j,k) .le. 0.0) then
 
-                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
 
-                Ty = (ht_Tsat-T(i,j,k))/(th*dy)
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
+
+                  th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
+                  Ty = (ht_Tsat-T(i,j,k))/(th*dy)
+
+                else
+
+                  th = (abs(s(i,j-1,k))/(abs(s(i,j-1,k))+abs(s(i,j+1,k))))
+                  Ty = (ht_Tsat-T(i,j-1,k))/(th*dy)
+
+                end if
 
             else
 
