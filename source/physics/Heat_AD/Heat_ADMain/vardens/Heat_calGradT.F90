@@ -8,7 +8,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
     real, intent(in) :: dx,dy,dz
     integer, intent(in) :: ix1,ix2,jy1,jy2
 
-    real :: th,tol
+    real :: th,tol,th2
     integer :: i,j,k
     real :: Tij,Tipj,Timj,Tijp,Tijm,dxp,dxm,dyp,dym,Tx,Ty,Tax,Tbx,Tay,Tby,dyc,dxc,Tpx,Tmx,Tpy,Tmy
     logical :: int_xp,int_xm,int_yp,int_ym
@@ -131,183 +131,101 @@ go to 200
 
 !___________X DIR_______________!
 
-         if(abs(s(i-1,j,k)) .le. abs(s(i+1,j,k))) then
+         if((abs(s(i-1,j,k)) .le. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
-            if(s(i-1,j,k)*s(i,j,k) .le. 0.) then
 
-               if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))) .gt. tol) then
+            if(s(i-1,j,k)*s(i,j,k) .le. 0.0) then
 
-                  Tax = T(i,j,k)
-                  Tbx = ht_Tsat
-                  th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))) 
-                  dxc = dx*th
+                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
 
-               else 
-          
-                  if(s(i+1,j,k)*s(i,j,k) .gt. 0) then
-                    
-                     Tax = T(i+1,j,k)
-                     Tbx = ht_Tsat
-                     th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))) 
-                     dxc = dx*th + dx
+                Tx = (T(i,j,k)-ht_Tsat)/(th*dx)
+              
+            else
 
-                  else
+                Tx = (T(i,j,k)-T(i-1,j,k))/dx
+
              
-                     Tax = 0.
-                     Tbx = 0.
-                     dxc = 1.
-
-                  end if
-
-               end if
-
-            else
-
-               Tax = T(i,j,k)
-               Tbx = T(i-1,j,k)
-               dxc = dx
-
-               !Tax = 0.
-               !Tbx = 0.
-               !dxc = 1.
-
             end if
 
-         else
 
-            if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
 
-               if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
+        else if((abs(s(i-1,j,k)) .gt. abs(s(i+1,j,k))) .or. (s(i+1,j,k)*s(i,j,k) .le. 0.0)) then
 
-                  Tax = ht_Tsat
-                  Tbx = T(i,j,k)
-                  th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
-                  dxc = dx*th
+            if(s(i+1,j,k)*s(i,j,k) .le. 0.0) then
 
-               else
+                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
 
-                  if(s(i-1,j,k)*s(i,j,k) .gt. 0) then
-
-                     Tax = ht_Tsat
-                     Tbx = T(i-1,j,k)
-                     th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
-                     dxc = dx*th + dx
-
-                  else
-
-                     Tax = 0.
-                     Tbx = 0.
-                     dxc = 1.
-
-                  end if
-
-               end if
-
+                Tx = (ht_Tsat-T(i,j,k))/(th*dx)
+              
             else
 
-               Tax = T(i+1,j,k)
-               Tbx = T(i,j,k)
-               dxc = dx
+                Tx = (T(i+1,j,k)-T(i,j,k))/dx
 
-               !Tax = 0.
-               !Tbx = 0.
-               !dxc = 1.
-
+             
             end if
 
-         end if
+
+
+        endif
+
+
+        if((s(i+1,j,k)*s(i,j,k) .le. 0.0) .and. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
+
+            th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
+            th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
+
+            Tx  = 0.5*((T(i,j,k) - ht_Tsat)/(th2*dx) + (ht_Tsat-T(i,j,k))/(th*dx))
+
+        end if
 
 !___________Y DIR_______________!
 
-         if(abs(s(i,j-1,k)) .le. abs(s(i,j+1,k))) then
+         if((abs(s(i,j-1,k)) .le. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 
-            if(s(i,j-1,k)*s(i,j,k) .le. 0.) then
 
-               if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
+            if(s(i,j-1,k)*s(i,j,k) .le. 0.0) then
 
-                  Tay = T(i,j,k)
-                  Tby = ht_Tsat
-                  th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
-                  dyc = dy*th
+                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
 
-               else
-
-                  if(s(i,j+1,k)*s(i,j,k) .gt. 0) then
-
-                     Tay = T(i,j+1,k)
-                     Tby = ht_Tsat
-                     th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
-                     dyc = dy*th + dy
-
-                  else
-
-                     Tay = 0.
-                     Tby = 0.
-                     dyc = 1.
-
-                  end if
-
-               end if
+                Ty = (T(i,j,k)-ht_Tsat)/(th*dy)
 
             else
 
-               Tay = T(i,j,k)
-               Tby = T(i,j-1,k)
-               dyc = dy
+                Ty = (T(i,j,k)-T(i,j-1,k))/dy
 
-               !Tay = 0.
-               !Tby = 0.
-               !dyc = 1.
 
             end if
 
-         else
+      else if((abs(s(i,j-1,k)) .gt. abs(s(i,j+1,k))) .or. (s(i,j+1,k)*s(i,j,k) .le. 0.0)) then
 
-            if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
+            if(s(i,j+1,k)*s(i,j,k) .le. 0.0) then
 
-               if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
+                th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
 
-                  Tay = ht_Tsat
-                  Tby = T(i,j,k)
-                  th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
-                  dyc = dy*th
-
-               else
-
-                  if(s(i,j-1,k)*s(i,j,k) .gt. 0) then
-
-                     Tay = ht_Tsat
-                     Tby = T(i,j-1,k)
-                     th  = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
-                     dyc = dy*th + dy
-
-                  else
-
-                     Tay = 0.
-                     Tby = 0.
-                     dyc = 1.
-
-                  end if
-
-               end if
+                Ty = (ht_Tsat-T(i,j,k))/(th*dy)
 
             else
 
-               Tay = T(i,j+1,k)
-               Tby = T(i,j,k)
-               dyc = dy
+                Ty = (T(i,j+1,k)-T(i,j,k))/dy
 
-               !Tay = 0.
-               !Tby = 0.
-               !dyc = 1.
 
             end if
 
-         end if
+
+        endif
 
 
-         Tx = (Tax - Tbx)/dxc
-         Ty = (Tay - Tby)/dyc
+        if((s(i,j+1,k)*s(i,j,k) .le. 0.0) .and. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
+
+
+            th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
+            th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
+
+            Ty  = 0.5*((T(i,j,k) - ht_Tsat)/(th2*dy) + (ht_Tsat-T(i,j,k))/(th*dy))
+
+
+        end if
+
 
 200 continue
 
