@@ -14,6 +14,9 @@
 
   use ins_interface, only : ins_velgradtensor
 
+
+  use Multiphase_data, only: mph_radius
+
   implicit none
 
 #include "constants.h"
@@ -50,7 +53,7 @@
             tpdwdxcorn, tpdwdycorn, tpdwdzcorn,&
             vortx,vorty,vortz,omg,             &
             Sxy,Syz,Sxz,Oxy,Oyz,Oxz,Qcr,divpp,TVtpp,&
-            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp
+            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp,davg
 
 
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
@@ -139,7 +142,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz'//NULLCHR,  &
+             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz diam'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -184,6 +187,8 @@
      tpw = 0.
      tpp = 0.
      omg = 0.
+
+     davg = 2*mph_radius
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -529,6 +534,9 @@
      i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(nzp)
+     i = TecDat(ijk,arraylb,0)
+
+     arraylb = sngl(davg)
      i = TecDat(ijk,arraylb,0)
 
      ! Write Div Ustar:

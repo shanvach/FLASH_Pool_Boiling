@@ -31,7 +31,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    integer :: ierr,iter
    real :: maxdfun_local, maxdfun_global
-   real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h
+   real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h,cps
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
@@ -50,7 +50,14 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Tsat       = 0.0
 
    beta = sqrt(3/acos(-1.0))*(ht_St)*(mph_rho2/mph_rho1)
+
+   !if((mph_rho2 .gt. 10.0)  .and. (mph_rho2 .lt. 30.0))  !beta =
+   !if((mph_rho2 .gt. 50.0)  .and. (mph_rho2 .lt. 70.0))  !beta =
+   !if((mph_rho2 .gt. 100.0) .and. (mph_rho2 .lt. 150.0)) beta = 6.8074241158925353901506643989232
+   !if((mph_rho2 .gt. 1600.0)) beta = 5.0880841483201690539025583264782
+
    chi  = 1.0 - (mph_rho1/mph_rho2)
+   cps  = 1.0 - ((mph_cp1/mph_rho1)/(mph_cp2/mph_rho2))
    soln = 0.0
 
    do lb = 1,blockCount
@@ -107,7 +114,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
         end do
 
-        solnData(TEMP_VAR,i,j,k) = ht_Twall_low - 2.0*beta*beta*(mph_rho1/mph_rho2)*(1/ht_St)*exp(beta*beta)*soln;
+        solnData(TEMP_VAR,i,j,k) = ht_Twall_low - 2.0*beta*beta*(mph_rho1/mph_rho2)*((1/ht_St)+cps)*exp(beta*beta)*soln;
         !solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
         end if 
