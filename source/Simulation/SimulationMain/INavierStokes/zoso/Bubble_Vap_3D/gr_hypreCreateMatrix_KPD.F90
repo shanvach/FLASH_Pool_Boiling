@@ -360,9 +360,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else  !- kpd - Boundary Node
 
-                 !MdensXL = 0.0 ! Neumann
+                 MdensXL = 0.0 ! Neumann
                  !MdensXL = 4.0
-                 MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 !MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+1) = 0.0
 
               end if
@@ -451,9 +451,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else   !- kpd - Boundary Node
 
-                 !MdensYL = 0.0 ! Neumann
+                 MdensYL = 0.0 ! Neumann
                  !MdensYL = 4.0
-                 MdensYL = 2*(facevary(RH1F_FACE_VAR,i  ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 !MdensYL = 2*(facevary(RH1F_FACE_VAR,i  ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+3) = 0.0
 
               end if
@@ -539,8 +539,8 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else  !- kpd - Boundary Node
 
-                 !MdensZL = 0.0
-                 MdensZL = facevarz(RH1F_FACE_VAR,i  ,j  ,k)+facevarz(RH2F_FACE_VAR,i  ,j  ,k)
+                 MdensZL = 0.0
+                 !MdensZL = facevarz(RH1F_FACE_VAR,i  ,j  ,k)+facevarz(RH2F_FACE_VAR,i  ,j  ,k)
                  temp_BoxVal(iter+5) = 0.0
 
               end if
