@@ -141,12 +141,12 @@
                   mflg(i-1,j,k) = 1.0
                   mflg(i-2,j,k) = 1.0
                   mflg(i-3,j,k) = 1.0
-                  mflg(i-4,j,k) = 1.0
+                  !mflg(i-4,j,k) = 1.0
 
                   mflg(i+2,j,k) = 1.0
                   mflg(i+3,j,k) = 1.0
                   mflg(i+4,j,k) = 1.0
-                  mflg(i+5,j,k) = 1.0
+                  !mflg(i+5,j,k) = 1.0
 
               end if
 
@@ -158,12 +158,12 @@
                   mflg(i,j-1,k) = 1.0
                   mflg(i,j-2,k) = 1.0
                   mflg(i,j-3,k) = 1.0
-                  mflg(i,j-4,k) = 1.0
+                  !mflg(i,j-4,k) = 1.0
 
                   mflg(i,j+2,k) = 1.0
                   mflg(i,j+3,k) = 1.0
                   mflg(i,j+4,k) = 1.0
-                  mflg(i,j+5,k) = 1.0
+                  !mflg(i,j+5,k) = 1.0
 
               end if
 
@@ -175,12 +175,12 @@
                   mflg(i,j,k-1) = 1.0
                   mflg(i,j,k-2) = 1.0
                   mflg(i,j,k-3) = 1.0
-                  mflg(i,j,k-4) = 1.0
+                  !mflg(i,j,k-4) = 1.0
 
                   mflg(i,j,k+2) = 1.0
                   mflg(i,j,k+3) = 1.0
                   mflg(i,j,k+4) = 1.0
-                  mflg(i,j,k+5) = 1.0
+                  !mflg(i,j,k+5) = 1.0
 
               end if
 
