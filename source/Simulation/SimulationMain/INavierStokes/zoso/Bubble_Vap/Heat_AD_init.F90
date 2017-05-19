@@ -109,11 +109,11 @@ subroutine Heat_AD_init(blockCount,blockList)
              x1 = a_I + h*(iter-1)
              x2 = a_I + h*(iter)
 
-             !f1 = ((1-x1)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x1)**2))*(1./((1-x1)**2));
-             !f2 = ((1-x2)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x2)**2))*(1./((1-x2)**2));
+             f1 = ((1-x1)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x1)**2))*(1./((1-x1)**2));
+             f2 = ((1-x2)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x2)**2))*(1./((1-x2)**2));
 
-             f1 = exp(2*chi*beta*beta*x1)*exp((-beta*beta)/((1-x1)**2));
-             f2 = exp(2*chi*beta*beta*x2)*exp((-beta*beta)/((1-x2)**2));
+             !f1 = exp(2*chi*beta*beta*x1)*exp((-beta*beta)/((1-x1)**2));
+             !f2 = exp(2*chi*beta*beta*x2)*exp((-beta*beta)/((1-x2)**2));
 
             soln = soln + (h/2)*(f1+f2)
 
