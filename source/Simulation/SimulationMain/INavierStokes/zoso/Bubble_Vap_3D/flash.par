@@ -9,7 +9,7 @@ gr_pmRpConsvFluxDensities = .FALSE.
 pt_maxPerProc=3500
 
 # Growth Constant - Only for Vaporization
-beta = 6.34
+beta = 5.9225
 
 # Inverse of Reynolds Number
 invRe = 7.4343d-4  
