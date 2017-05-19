@@ -9,7 +9,7 @@ gr_pmRpConsvFluxDensities = .FALSE.
 pt_maxPerProc=3500
 
 # Growth Constant - Only for Vaporization
-beta = 5.9225
+beta = 6.3376
 
 # Inverse of Reynolds Number
 invRe = 7.4343d-4  
@@ -125,9 +125,9 @@ plotFileIntervalTime = 0.00003
 plotFileIntervalStep = 1250
 
 ##	AMR parameters
-nblockx	= 4 #4
-nblocky	= 4 #8
-nblockz = 4
+nblockx	= 3 #4
+nblocky	= 3 #8
+nblockz = 3
 
 lrefine_min	= 1
 lrefine_max     = 1
