@@ -51,6 +51,7 @@ PARAMETER quadrant          BOOLEAN  FALSE
 
 PARAMETER waveA          REAL  0.0
 
+PARAMETER beta           REAL  0.0
 # Number of guardcells at each boundary
 GUARDCELLS 3
 

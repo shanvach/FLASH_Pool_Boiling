@@ -36,12 +36,14 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
    call RuntimeParameters_get("hfit",ht_hfit)
+   call RuntimeParameters_get("beta",beta)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
      write(*,*) 'ht_Pr   =',ht_Pr
      write(*,*) 'ht_St   =',ht_St
      write(*,*) 'ht_hfit =',ht_hfit
+     write(*,*) 'beta    =',beta
 
    end if
 
@@ -49,7 +51,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Twall_high = 1.0
    ht_Tsat       = 0.0
 
-   beta = sqrt(3/acos(-1.0))*(ht_St)*(mph_rho2/mph_rho1)
+   !beta = sqrt(3/acos(-1.0))*(ht_St)*(mph_rho2/mph_rho1)
 
    !if((mph_rho2 .gt. 10.0)  .and. (mph_rho2 .lt. 30.0))  !beta =
    !if((mph_rho2 .gt. 50.0)  .and. (mph_rho2 .lt. 70.0))  !beta =
@@ -107,10 +109,13 @@ subroutine Heat_AD_init(blockCount,blockList)
              x1 = a_I + h*(iter-1)
              x2 = a_I + h*(iter)
 
-             f1 = ((1-x1)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x1)**2))*(1./((1-x1)**2));
-             f2 = ((1-x2)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x2)**2))*(1./((1-x2)**2));
+             !f1 = ((1-x1)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x1)**2))*(1./((1-x1)**2));
+             !f2 = ((1-x2)**(1-2*chi*beta*beta))*exp((-beta*beta)/((1-x2)**2))*(1./((1-x2)**2));
 
-             soln = soln + (h/2)*(f1+f2)
+             f1 = exp(2*chi*beta*beta*x1)*exp((-beta*beta)/((1-x1)**2));
+             f2 = exp(2*chi*beta*beta*x2)*exp((-beta*beta)/((1-x2)**2));
+
+            soln = soln + (h/2)*(f1+f2)
 
         end do
 

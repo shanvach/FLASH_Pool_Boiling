@@ -31,31 +31,23 @@ subroutine Heat_AD_init(blockCount,blockList)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    integer :: ierr,iter
    real :: maxdfun_local, maxdfun_global
-   real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, cps,h
+   real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h,cps
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
    call RuntimeParameters_get("hfit",ht_hfit)
-   call RuntimeParameters_get("beta",beta)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
      write(*,*) 'ht_Pr   =',ht_Pr
      write(*,*) 'ht_St   =',ht_St
      write(*,*) 'ht_hfit =',ht_hfit
-     write(*,*) 'beta    =',beta
 
    end if
 
    ht_Twall_low  = 1.0
    ht_Twall_high = 1.0
    ht_Tsat       = 0.0
-
-   !beta = sqrt(3/acos(-1.0))*(ht_St)*(mph_rho2/mph_rho1)
-
-   chi  = 1.0 - (mph_rho1/mph_rho2)
-   cps  = 1.0 - ((mph_cp1/mph_rho1)/(mph_cp2/mph_rho2))
-   soln = 0.0
 
    do lb = 1,blockCount
      blockID = blockList(lb)
@@ -77,11 +69,6 @@ subroutine Heat_AD_init(blockCount,blockList)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
 
-     !maxdfun_local = maxval(abs(solnData(DFUN_VAR,:,:,:)))
-
-     !call MPI_Allreduce(maxdfun_local, maxdfun_global, 1, FLASH_REAL,&
-     !                MPI_MAX, MPI_COMM_WORLD, ierr)
-
      do k=1,blkLimitsGC(HIGH,KAXIS)
       do j=1,blkLimitsGC(HIGH,JAXIS)
         do i=1,blkLimitsGC(HIGH,IAXIS) 
@@ -89,35 +76,12 @@ subroutine Heat_AD_init(blockCount,blockList)
         if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
      
         solnData(TEMP_VAR,i,j,k) = ht_Tsat
-        !solnData(TEMP_VAR,i,j,k) = ht_Twall_low
 
         else 
 
-
-        a_I   = 1 - 0.005/(0.005+abs(solnData(DFUN_VAR,i,j,k)))
-        b_I   = 0.99
-        soln   = 0.
-        h     = (b_I-a_I)/200
-
-        do iter=1,200
-
-             x1 = a_I + h*(iter-1)
-             x2 = a_I + h*(iter)
-
-             f1 = exp(2*chi*beta*beta*x1)*exp((-beta*beta)/((1-x1)**2));
-             f2 = exp(2*chi*beta*beta*x2)*exp((-beta*beta)/((1-x2)**2));
-
-             soln = soln + (h/2)*(f1+f2)
-
-        end do
-
-        solnData(TEMP_VAR,i,j,k) = ht_Twall_low - 2.0*beta*beta*(mph_rho1/mph_rho2)*((1/ht_St)+cps)*exp(beta*beta)*soln;
-        !solnData(TEMP_VAR,i,j,k) = ht_Tsat
+        solnData(TEMP_VAR,i,j,k) = ht_Twall_high
 
         end if 
-
-
-        if(solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.
 
          end do
        end do
