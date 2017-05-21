@@ -172,7 +172,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    end do !End RK-2
 
-   T_resBlock = T_resBlock/blockCount
+   if(blockCount .gt. 0) T_resBlock = T_resBlock/blockCount
 
    ! Collect residuals from other processes
    call MPI_Allreduce(T_resBlock, T_res, 1, FLASH_REAL,&
@@ -295,8 +295,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    
    end do
 
-     Tnl_resBlock = Tnl_resBlock/blockCount
-     Tnv_resBlock = Tnv_resBlock/blockCount
+     if(blockCount .gt. 0) Tnl_resBlock = Tnl_resBlock/blockCount
+     if(blockCount .gt. 0) Tnv_resBlock = Tnv_resBlock/blockCount
 
      ! Collect residuals from other processes
      call MPI_Allreduce(Tnl_resBlock, Tnl_res, 1, FLASH_REAL,&
