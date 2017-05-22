@@ -62,10 +62,10 @@ geometry	= "cartesian"
 
 #       Size of computational volume
 
-xmin =   -0.02
-xmax =    0.02
-ymin =   -0.02
-ymax =    0.02
+xmin =   -0.0255
+xmax =    0.0255
+ymin =   -0.0255
+ymax =    0.0255
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -90,7 +90,7 @@ restart         = .false.
 #nend            = 10000000
 #nend = 2
 nend = 7500000
-tmax            = 0.0006
+tmax            = 0.002
 cflflg          = 1
 cfl             = 0.1
 sigma		= 0.1
@@ -115,12 +115,12 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 500.
 checkpointFileIntervalStep = 400000000 
 
-plotFileIntervalTime = 0.00003
+plotFileIntervalTime = 0.0001
 plotFileIntervalStep = 1250
 
 ##	AMR parameters
-nblockx	= 12 #4
-nblocky	= 12 #8
+nblockx	= 4 #4
+nblocky	= 4 #8
 lrefine_min	= 1
 lrefine_max     = 1
 mgrid_solveLevelKPD = 1
