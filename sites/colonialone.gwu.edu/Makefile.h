@@ -25,7 +25,8 @@ MPE_PATH   =
 
 BLAS_PATH    =$(LIB_BASE)/openblas
 LAPACK_PATH  =$(LIB_BASE)/openblas
-HYPRE_PATH   =$(LIB_BASE)/hypre2.9.0b
+#HYPRE_PATH   =$(LIB_BASE)/hypre2.9.0b
+HYPRE_PATH = /groups/balarasgrp/akash/hypre
 SUPERLU_PATH =$(LIB_BASE)/SuperLU4.3
 
 # Current directory:
