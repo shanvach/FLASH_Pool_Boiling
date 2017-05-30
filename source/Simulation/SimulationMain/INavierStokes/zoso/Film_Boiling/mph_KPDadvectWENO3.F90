@@ -374,7 +374,7 @@
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell) &
-                                   + dt*10.88*0.5
+                                   - dt*10.88*0.7
 
               else
 
