@@ -80,9 +80,13 @@ subroutine Grid_markRefineDerefine()
   specsSize=3
 
   !! index of the threshold var
+  !specs(1) = real(DFUN_VAR)
+  !specs(2) = -0.0015d0  ! lower boundary of the refinement
+  !specs(3) =  0.0015d0  ! upper boundary of the refinement
+
   specs(1) = real(DFUN_VAR)
-  specs(2) = -0.0015d0  ! lower boundary of the refinement
-  specs(3) =  0.0015d0  ! upper boundary of the refinement
+  specs(2) = -0.2d0  ! lower boundary of the refinement
+  specs(3) =  0.2d0  ! upper boundary of the refinement
 
   !! index of the threshold var
   !specs(1) = real(TEMP_VAR)
