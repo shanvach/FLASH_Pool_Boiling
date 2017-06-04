@@ -195,6 +195,22 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
            wni(ix1:ix2,jy1:jy2,kz1:kz2) - aizl)/dz
 #endif
 
+!      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+!         ( uni(ix1+1:ix2+1,jy1:jy2,kz1:kz2) - uni(ix1:ix2,jy1:jy2,kz1:kz2))/dx +  &
+!         ( vni(ix1:ix2,jy1+1:jy2+1,kz1:kz2) - vni(ix1:ix2,jy1:jy2,kz1:kz2))/dy +  &
+!         mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxr-rhoxl)/dx + &
+!         mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyr-rhoyl)/dy 
+
+!#if NDIM == 3
+
+!      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           &
+!           divv(ix1:ix2,jy1:jy2,kz1:kz2)     +  &
+!         ( wni(ix1:ix2,jy1:jy2,kz1+1:kz2+1) - wni(ix1:ix2,jy1:jy2,kz1:kz2))/dz + &
+!         mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozr-rhozl)/dz
+
+!#endif
+
+
 END SUBROUTINE ins_divergence_PC
 
 

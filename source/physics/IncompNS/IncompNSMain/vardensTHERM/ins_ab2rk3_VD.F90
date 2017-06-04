@@ -506,7 +506,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                       solnData(MDOT_VAR,:,:,:),&
                       solnData(SMRH_VAR,:,:,:),&
                       solnData(NRMX_VAR,:,:,:),&
-                      solnData(NRMY_VAR,:,:,:) )
+                      solnData(NRMY_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
+                      solnData(DFUN_VAR,:,:,:),solnData(PFUN_VAR,:,:,:))
 
      
 #endif
