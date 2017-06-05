@@ -23,7 +23,7 @@
 
       use IncompNS_data, ONLY : ins_iConvU
  
-      use Multiphase_data, ONLY: mph_rho2
+      use Multiphase_data, ONLY: mph_rho2,mph_sten
 
 #include "Flash.h"
 !#include "constants.h"
@@ -109,49 +109,55 @@
 
              ! -- Velocity Jump Method 2 --- !
 
-             !rhoxc = (smrh(i-1,j,kz1) + smrh(i,j,kz1))/2.0d0
-           
-             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
-             !                           (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)
-
-
-             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
-             !                           (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc)
- 
-             ! -- Velocity Jump Method 3 - MPCC --- !
-
              rhoxc = (smrh(i-1,j,kz1) + smrh(i,j,kz1))/2.0d0
-             
-             if(s(i,j,kz1)*s(i-1,j,kz1) .le. 0.0) then
-
-             th = abs(s(i,j,kz1))/(abs(s(i,j,kz1))+abs(s(i-1,j,kz1)))
-
-             cri = crv(i,j,kz1)*(th) + crv(i-1,j,kz1)*(1.-th)
-
-             crc = (crv(i,j,kz1)+crv(i-1,j,kz1))/2.0d0
-
-             else
-
-             cri = 1
-             crc = 1
-
-             end if
- 
+           
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
                                         ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)
 
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
                                         ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc)
  
+             ! -- Velocity Jump Method 3 - MPCC --- !
+
+             !rhoxc = (smrh(i-1,j,kz1) + smrh(i,j,kz1))/2.0d0
+             
+             !if(s(i,j,kz1)*s(i-1,j,kz1) .le. 0.0) then
+
+             !th = abs(s(i,j,kz1))/(abs(s(i,j,kz1))+abs(s(i-1,j,kz1)))
+             !cri = crv(i,j,kz1)*(th) + crv(i-1,j,kz1)*(1.-th)
+             !crc = (crv(i,j,kz1)+crv(i-1,j,kz1))/2.0d0
+
+             !else
+
+             !cri = 1
+             !crc = 1
+
+             !end if
+ 
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+             !                           (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)
+
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+             !                           (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc)
+ 
+
+
+             ! -- Velocity Jump Method 4 - SDI --- !
+
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1)
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1)
+
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
              uu   = unig(i,j,kz1)
@@ -289,7 +295,7 @@
                           rConvU                                    &
                           + Mdens*(txxp - txxm)*dx1                 & ! diffusion - normal terms 
                           + Mdens*(tyyp - tyym)*dy1                 &
-                          + gravX     
+                          + gravX                                   
 
           enddo
        enddo
@@ -323,47 +329,52 @@
  
              !--- Velocity Jump Method 2 ---!
 
-             !rhoyc = (smrh(i,j,kz1)+smrh(i,j-1,kz1))/2.0d0
-
-             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
-             !                           (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc)
-
-             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
-             !                           (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc)
- 
-             !--- Velocity Jump Method 3 - MPCC ---!
-
              rhoyc = (smrh(i,j,kz1)+smrh(i,j-1,kz1))/2.0d0
 
-             if(s(i,j,kz1)*s(i,j-1,kz1) .le. 0.0) then
-
-             th = abs(s(i,j,kz1))/(abs(s(i,j,kz1))+abs(s(i,j-1,kz1)))
-
-             cri = crv(i,j,kz1)*(th) + crv(i,j-1,kz1)*(1.-th)
-
-             crc = (crv(i,j,kz1)+crv(i,j-1,kz1))/2.0d0
-
-             else
-
-             cri = 1
-             crc = 1
-
-             end if
-
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
                                         ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc)
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
                                         ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc)
  
+             !--- Velocity Jump Method 3 - MPCC ---!
+
+             !rhoyc = (smrh(i,j,kz1)+smrh(i,j-1,kz1))/2.0d0
+
+             !if(s(i,j,kz1)*s(i,j-1,kz1) .le. 0.0) then
+
+             !th = abs(s(i,j,kz1))/(abs(s(i,j,kz1))+abs(s(i,j-1,kz1)))
+             !cri = crv(i,j,kz1)*(th) + crv(i,j-1,kz1)*(1.-th)
+             !crc = (crv(i,j,kz1)+crv(i,j-1,kz1))/2.0d0
+
+             !else
+
+             !cri = 1
+             !crc = 1
+
+             !end if
+
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+             !                           (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
+             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc)
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
+             !                           (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * (cri/crc) *&
+             !                           (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
+             !                           ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc)
+ 
+
+             !--- Velocity Jump Method 4 - SDI ---!
+
+             !unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1)
+
+             !vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1)
+
              !=============================================================
              !KPD - 1st Order Upwind... ===================================
              uu   = unig(i,j,kz1)
@@ -496,7 +507,8 @@
                           rConvU                                     &
                           + Mdens* (txxp - txxm)*dx1                 &! diffusion - normal terms
                           + Mdens* (tyyp - tyym)*dy1                 &
-                          + gravY                                      ! kpd - gravity term 
+                          + gravY                                    ! kpd - gravity term                         
+ 
           enddo
        enddo
 

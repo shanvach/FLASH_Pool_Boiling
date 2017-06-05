@@ -31,7 +31,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
          !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
 
 
-         sp = 1.5*dx
+         sp = 0.0*dx
 
          do j=jy1,jy2
            do i=ix1,ix2
