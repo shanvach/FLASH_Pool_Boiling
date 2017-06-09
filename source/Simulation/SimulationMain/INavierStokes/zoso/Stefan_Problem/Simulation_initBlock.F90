@@ -181,6 +181,7 @@ subroutine Simulation_initBlock(blockId)
            y0 = 0.0d0
 
 
+           !solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(0.001)))
            solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(124.1498*0.001)))
 
          
