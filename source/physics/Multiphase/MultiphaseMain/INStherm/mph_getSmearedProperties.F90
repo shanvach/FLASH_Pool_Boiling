@@ -31,7 +31,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
          !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
 
 
-         sp = 0.0*dx
+         sp = 1.0*dx
 
          do j=jy1,jy2
            do i=ix1,ix2
@@ -98,7 +98,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
          !smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
          !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
 
-        sp = 0.0*dx
+        sp = 1.0*dx
 
         do k=kz1,kz2
          do j=jy1,jy2

@@ -318,7 +318,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Convergence check
      !if ((Tnl_res+Tnv_res)/2.d0 < 1E-6 ) exit
-     if  (Tnl_res < 1E-6) exit
+     if  (Tnv_res < 1E-6) exit
 
      ! Increment counter
      iter_count = iter_count + 1
