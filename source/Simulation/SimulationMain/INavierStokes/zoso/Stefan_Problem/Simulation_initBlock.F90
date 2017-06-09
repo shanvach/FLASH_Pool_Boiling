@@ -44,6 +44,7 @@ subroutine Simulation_initBlock(blockId)
                              Grid_getBlkCenterCoords
 
   use Driver_data, ONLY : dr_simTime
+  use Multiphase_data, ONLY: mph_thco1,mph_thco2
 
   implicit none
 
@@ -100,8 +101,9 @@ subroutine Simulation_initBlock(blockId)
 
   A0 = sim_waveA
 
-  solnX = 0.68085414306744777221840863823714 !rho2 = 20
+  !solnX = 0.68085414306744777221840863823714 !rho2 = 20
   !solnX = 1.3246415825251054266496091471747  !rho2 = 200
+  solnX = 0.1055268130426993147348719917984 !water
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -179,11 +181,12 @@ subroutine Simulation_initBlock(blockId)
            y0 = 0.0d0
 
 
-           solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(0.001)))
+           solnData(TEMP_VAR,i,j,k) = 1.0 + (-1.0/erf(solnX))*(erf(ycell)/(2*sqrt(124.1498*0.001)))
 
          
-           solnData(DFUN_VAR,i,j,k) = 0.043060996929105514582028364588445 - ycell ! rho2 = 20
+           !solnData(DFUN_VAR,i,j,k) = 0.043060996929105514582028364588445 - ycell ! rho2 = 20
            !solnData(DFUN_VAR,i,j,k) = 0.083777689682984590892847242435151 - ycell ! rho2 = 200
+           solnData(DFUN_VAR,i,j,k) = 0.074364514813805158766076957058569 - ycell  ! Water
 
            if(solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0          
  
