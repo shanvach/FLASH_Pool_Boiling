@@ -68,6 +68,8 @@ subroutine Simulation_initBlock(blockId)
 
   real :: A,B,emp,fs,x0,y0,r0,solnX,z0,x1,y1,z1,x2,y2,z2,d1,d2,d3
 
+  real :: x3,y3,z3,d4,r1
+
   real :: fn(8)
   !----------------------------------------------------------------------
   
@@ -189,36 +191,33 @@ subroutine Simulation_initBlock(blockId)
 
            !r0 = 3.2503
            !r0 = 5.0
-           r0 = 0.05
+           r0 = 0.35
+           r1 = 0.1
 
            !x0 = 0.0d0
            y0 = r0*cos((38.0/180.0)*acos(-1.0))
+           y1 = r1*cos((38.0/180.0)*acos(-1.0))
            !z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
 
-           x0 = -0.5
-           x1 =  0.5
-           x2 =  0.0
+           x0 =  0.0
+           x1 =  0.15
+           x2 =  0.40
+           x3 =  0.56
 
            z0 = 0.0
-           z1 = 0.0
-           z2 = 0.0
+           z1 = sqrt(0.36 - x1**2)
+           z2 = sqrt(0.36 - x2**2)
+           z3 = sqrt(0.36 - x3**2)
 
-           !z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
-           !z1 = -0.15*tan(acos(-1.0)/6)
-           !z2 = -0.15*tan(acos(-1.0)/6)
+           y2 = y1
+           y3 = y1
            
-           !z1 = 0.0d0
-           !z2 = 0.0d0
-
-           y1 = y0
-           y2 = y0
-
-
            d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
-           d2 = r0 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
-           d3 = r0 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
+           d2 = r1 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
+           d3 = r1 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
+           d4 = r1 - sqrt((xcell-x3)**2+(ycell-y3)**2+(zcell-z3)**2)
 
-           solnData(DFUN_VAR,i,j,k) = d3
+           !solnData(DFUN_VAR,i,j,k) = d1
 
            !if(abs(d1)<abs(d2)) then
 
@@ -237,7 +236,15 @@ subroutine Simulation_initBlock(blockId)
 
            !if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
           
-             
+           
+           if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d1
+
+           if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d2
+
+           if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d3
+
+           if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d4
+ 
            !solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
