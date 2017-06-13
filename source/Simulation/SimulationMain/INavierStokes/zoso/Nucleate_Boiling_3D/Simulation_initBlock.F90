@@ -191,7 +191,7 @@ subroutine Simulation_initBlock(blockId)
 
            !r0 = 3.2503
            !r0 = 5.0
-           r0 = 0.35
+           r0 = 0.45
            r1 = 0.1
 
            !x0 = 0.0d0
@@ -200,9 +200,9 @@ subroutine Simulation_initBlock(blockId)
            !z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
 
            x0 =  0.0
-           x1 =  0.15
-           x2 =  0.40
-           x3 =  0.56
+           x1 =  0.16
+           x2 =  0.41
+           x3 =  0.57
 
            z0 = 0.0
            z1 = sqrt(0.36 - x1**2)

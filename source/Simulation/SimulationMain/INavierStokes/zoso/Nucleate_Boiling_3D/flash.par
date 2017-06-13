@@ -39,8 +39,8 @@ cp2   = 1.0
 
 # Gravity in the +y direction
 gravX =  0.0
-gravY = -1.0
-#gravY = -2.5d-7
+#gravY = -1.0
+gravY = -2.5d-7
 gravZ =  0.0
 
 # sten is the inverse of the Weber number
@@ -61,11 +61,11 @@ geometry	= "cartesian"
 #       Size of computational volume
 
 xmin =    0.0
-xmax =    1.0
+xmax =    1.5
 ymin =    0.0
-ymax =    2.0
+ymax =    3.0
 zmin =    0.0
-zmax =    1.0
+zmax =    1.5
 
 
 #       Boundary conditions
@@ -97,8 +97,8 @@ restart         = .false.
 nend = 1000000000
 tmax            = 20.0
 cflflg          = 1
-cfl             = 0.5
-sigma		= 0.5
+cfl             = 0.2
+sigma		= 0.2
 dtspec          = 1.00
 dtinit          = 1.00
 tstep_change_factor=1.00
@@ -120,13 +120,13 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 1.0
 #checkpointFileIntervalStep = 400000000 
 
-plotFileIntervalTime = 0.1
+plotFileIntervalTime = 0.05
 #plotFileIntervalStep = 1000000
 
 ##	AMR parameters
-nblockx	= 4 #4
-nblocky	= 8 #8
-nblockz = 4
+nblockx	= 3 #4
+nblocky	= 6 #8
+nblockz = 3
 
 lrefine_min	= 1
 lrefine_max     = 1
