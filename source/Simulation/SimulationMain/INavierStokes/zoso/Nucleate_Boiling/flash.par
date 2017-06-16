@@ -81,7 +81,7 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin =   -1.5
+xmin =    0.0
 xmax =    1.5
 ymin =    0.0
 ymax =    3.0
@@ -103,9 +103,10 @@ yr_mg_boundary_type = "outflow"
 run_comment	= "2D Inflow-Outflow Cylinder problem"
 log_file	= "INS_INOUT.log"
 basenm		= "INS_INOUT_"
+
 restart         = .false.
 
-#checkPointFileNumber=1
+#checkPointFileNumber=5
 #plotFileNumber  = 1
 
 nend = 2000000000
@@ -137,14 +138,14 @@ plotFileIntervalTime = 0.1
 plotFileIntervalStep = 1000000
 
 ##	AMR parameters
-nblockx	= 3 
+nblockx	= 3
 nblocky	= 6 
 lrefine_min	= 1
 lrefine_max     = 1
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 5000
+nrefs           = 500000
 refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1

@@ -102,7 +102,7 @@
               ! AD - Cavity boundary condition for Nucleate Boiling
               
               rc = sqrt((xcell-0.0)**2 + &
-                        (ycell-0.1*cos((38.0/180.0)*acos(-1.0)))**2)
+                        (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
 
 
               !***************** KPD **********************
@@ -389,8 +389,8 @@
 
               ! AD - Cavity boundary condition for Nucleate Boiling
 
-              if (rc .le. 0.1 .and. abs(s(i,j,k)) .le. 0.0 .and. j==jy1) &
-                 s(i,j,k) = so(i,j,k)
+              if (rc .le. 0.05 .and. s(i,j,k) .le. 0.0 .and. j==jy1) &
+                 s(i,j,k) = 0.05-rc
               
               !--------------------------------------------------------------
 
