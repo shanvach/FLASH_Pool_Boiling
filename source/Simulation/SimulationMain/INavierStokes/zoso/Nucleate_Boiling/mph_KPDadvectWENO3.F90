@@ -33,7 +33,7 @@
         integer :: i,j,k,n
 
         !kpd - Damping Variables...
-        real :: xcell, ycell, Fn, pi, xd, AA, rc 
+        real :: xcell, ycell, Fn, pi, xd, AA, rc, Cb, Ly, Lb
         real del(MDIM),bsize(MDIM),coord(MDIM)
         real, dimension(2,MDIM) :: boundBox
 
@@ -56,6 +56,9 @@
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         xd  = ins_xDampL
+        Cb  = 12.0
+        Ly  = 06.0
+        Lb  = 05.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -98,13 +101,6 @@
                  AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
               end if
   
-
-              ! AD - Cavity boundary condition for Nucleate Boiling
-              
-              rc = sqrt((xcell-0.0)**2 + &
-                        (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
-
-
               !***************** KPD **********************
 
               !- kpd - Velocities on faces used for divergence --> div(u*phi)
@@ -367,7 +363,6 @@
               !---------------------------------------------------------
               !---------------------------------------------------------
 
-
               !---------------------------------------------------------------
               !- kpd - Calculate the new Level Set function ------------------
               !---------------------------------------------------------------
@@ -375,30 +370,50 @@
               !   print*,"Block15 8,8:",xcell,ycell,s(i,j,k),AA*(s(i,j,k)-ycell)
               !end if
 
+              if(ycell .lt. Lb) then
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell)
 
-              !s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-              !                     - dt*(fry*vr - fly*vl)/dy &
-              !                     + dt*so(i,j,k)*(ur-ul)/dx &
-              !                     + dt*so(i,j,k)*(vr-vl)/dy
- 
-              !---------------------------------------------------------------
-              !---------------------------------------------------------------
+              else
+              s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+                                   - dt*(fry*vr - fly*vl)/dy &
+                                   - ins_dampC*AA*(s(i,j,k)-ycell) &
+                                   - dt*Cb*(ycell-Ly+Lb)/Lb
+              end if
 
-              ! AD - Cavity boundary condition for Nucleate Boiling
-
-              if (rc .le. 0.05 .and. s(i,j,k) .le. 0.0 .and. j==jy1) &
-                 s(i,j,k) = 0.05-rc
-              
-              !--------------------------------------------------------------
 
 
            end do
         end do
 
-        err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
+       ! AD - Cavity boundary condition for Nucleate Boiling
+ 
+       !do j=jy1,jy2
+       ! do i=ix1,ix2
 
+       !       xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+       !               real(i - NGUARD - 1)*del(IAXIS) +   &
+       !               0.5*del(IAXIS)
+
+       !       ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+       !               real(j - NGUARD - 1)*del(JAXIS)  +  &
+       !               0.5*del(JAXIS)
+
+             
+       !       rc = sqrt((xcell-0.0)**2 + &
+       !                 (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
+
+
+       !       if (rc .le. 0.05 .and. s(i,j,k) .lt. 0.05-rc) s(i,j,k) = 0.05-rc
+             
+       !       !--------------------------------------------------------------
+
+
+
+       ! end do
+       !end do
+
+       err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
 
       end subroutine mph_KPDadvectWENO3
