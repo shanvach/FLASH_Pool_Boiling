@@ -1,5 +1,6 @@
 subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
+#define NUCLEATE_BOILING
 #include "Flash.h"
 
   ! Modules Use:
@@ -28,7 +29,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
-                             mph_radius
+                             mph_radius, mph_isAttached, mph_timeStamp
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -39,7 +40,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
-  use Driver_data, ONLY : dr_nstep
+  use Driver_data, ONLY : dr_nstep, dr_simTime
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -63,7 +64,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   real, dimension(2,MDIM) :: boundBox
 
 
-  logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
+  logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS), isAttached
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
@@ -366,6 +367,96 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     !call sim_trackBubble(blockCount, blockList,vol, cx, cy, vx, vy,xh,yh,xl,yl)
     !if(mph_meshMe == 0) write(100000,'(12f20.12)') real(dr_nStep), timeEndAdv,vol, cx, cy, vx, vy, xh, yh, xl, yl
 
+
+!###################################################################################################################
+
+! Level set re-initialization for nucleate boiling simulation.
+! The procedure checks if the bubble has departed the heating surface (boundary),
+! and if it has then it creates a nucleus for the next bubble to grow and
+! continue the cyclic process.
+! - Akash Dhruv
+
+#ifdef NUCLEATE_BOILING
+  if(mph_isAttached .eqv. .true.) then
+
+  isAttached = .false.
+
+  do lb = 1,blockCount
+
+     blockID = blockList(lb)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     if((coord(JAXIS) - bsize(JAXIS)/2.0) == 0.0) then
+
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+           if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) then
+                isAttached = isAttached .or. .true.
+           else
+                isAttached = isAttached .or. .false.
+           end if  
+        end do
+        
+     end if
+  
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+  end do
+
+  call MPI_Allreduce(isAttached, mph_isAttached, 1, FLASH_LOGICAL,&
+                     MPI_LOR, MPI_COMM_WORLD, ierr)
+
+  if(mph_isAttached .eqv. .false.) mph_timeStamp = dr_simTime
+
+ end if
+
+ if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.5) .le. dr_simTime)) then
+
+  do lb = 1,blockCount
+
+     blockID = blockList(lb)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+
+      if(abs(solnData(DFUN_VAR,i,j,1)) > abs(solnData(RTES_VAR,i,j,1))) solnData(DFUN_VAR,i,j,1) = solnData(RTES_VAR,i,j,1)
+         
+      end do
+     end do
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+  end do
+
+    gcMask = .FALSE.
+    gcMask(DFUN_VAR) = .TRUE.
+#ifdef FLASH_GRID_PARAMESH
+    !intval = 1
+    intval = 2
+    interp_mask_unk = intval;   interp_mask_unk_res = intval;
+    interp_mask_work = intval;
+#endif
+    call Grid_fillGuardCells(CENTER,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+ mph_isAttached = .true.
+ end if
+#endif
+
+! End of procedure - Akash
+!###################################################################################################################
 
    call cpu_time(t_startMP2a)
 

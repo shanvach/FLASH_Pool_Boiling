@@ -382,12 +382,10 @@
                                    - dt*Cb*(ycell-Ly+Lb)/Lb
               end if
 
-
-
            end do
         end do
 
-       ! AD - Cavity boundary condition for Nucleate Boiling
+       !! AD - Cavity boundary condition for Nucleate Boiling
  
        !do j=jy1,jy2
        ! do i=ix1,ix2
@@ -402,10 +400,10 @@
 
              
        !       rc = sqrt((xcell-0.0)**2 + &
-       !                 (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
+       !                 (ycell-0.05*cos((35.0/180.0)*acos(-1.0)))**2)
 
 
-       !       if (rc .le. 0.05 .and. s(i,j,k) .lt. 0.05-rc) s(i,j,k) = 0.05-rc
+       !       if (rc .le. 0.05 .and. s(i,j,k) .le. 0.0) s(i,j,k) = 0.05-rc
              
        !       !--------------------------------------------------------------
 

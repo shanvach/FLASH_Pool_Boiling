@@ -366,15 +366,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                     
                     !rc = sqrt((xcell-0.0)**2+(ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
                     
-                    if (abs(xcell) .le. 0.05) then
+                    !if (abs(xcell) .le. 0.05) then
 
-                       regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((100.0/180.0)*acos(-1.0))
+                    !   regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((150.0/180.0)*acos(-1.0))
 
-                    else
+                    !else
                     
-                       regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((25.0/180.0)*acos(-1.0))
+                       regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((30.0/180.0)*acos(-1.0))
 
-                    end if
+                    !end if
 
                  end do
                 end do

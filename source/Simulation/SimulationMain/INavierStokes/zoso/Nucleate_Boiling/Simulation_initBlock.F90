@@ -194,7 +194,7 @@ subroutine Simulation_initBlock(blockId)
            y0 = 4.75d0
 
            !x1 = -0.12d0
-           y1 = r0*cos((25.0/180.0)*acos(-1.0))
+           y1 = r0*cos((30.0/180.0)*acos(-1.0))
 
            x0 =  0.0d0
            x1 =  0.0d0
@@ -220,13 +220,13 @@ subroutine Simulation_initBlock(blockId)
            d6 = r0 - sqrt((xcell-x5)**2+(ycell-y5)**2)
            d7 = r0 - sqrt((xcell-x6)**2+(ycell-y6)**2)
 
-           !solnData(DFUN_VAR,i,j,k) = d3
+           solnData(DFUN_VAR,i,j,k) = d3
 
-           if(abs(d1)<abs(d3)) then
-            solnData(DFUN_VAR,i,j,k) = d1
-           else 
-            solnData(DFUN_VAR,i,j,k) = d3
-           end if
+           !if(abs(d1)<abs(d3)) then
+           ! solnData(DFUN_VAR,i,j,k) = d1
+           !else 
+           ! solnData(DFUN_VAR,i,j,k) = d3
+           !end if
 
            !if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
            !if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
@@ -264,20 +264,20 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           !if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+           if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
-           !solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
-           !                           fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &
-           !                           fn(7)*(ycell**1) + fn(8)
+           solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
+                                      fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &
+                                      fn(7)*(ycell**1) + fn(8)
 
-           !if (solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
+           if (solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
 
-           !end if
+           end if
 
            !if(ycell .le. 0.2922 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.2922-ycell)/0.2922
 
-           if(ycell .le. 0.2 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.2-ycell)/0.2
+           !if(ycell .le. 0.2 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.2-ycell)/0.2
 
            !if(ycell .le. 0.0044) solnData(TEMP_VAR,i,j,k) = (0.0044-ycell)/0.0044
  
@@ -371,7 +371,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(TOLD_VAR,:,:,:) = 0.0
 
   solnData(PTES_VAR,:,:,:) = 0.0
-  solnData(RTES_VAR,:,:,:) = 0.0
+  solnData(RTES_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
   solnData(ALPH_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
@@ -420,8 +420,6 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_releaseBlkPtr(blockID,facexData,FACEX)
   call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-
 
   return
 
