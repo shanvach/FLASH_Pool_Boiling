@@ -329,8 +329,8 @@
      tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)
      tptes_d = solnData(PTES_VAR,:,:,1)
 
-     !tprds   = 2*mph_radius
-     tprds = ins_convvel(HIGH,JAXIS)
+     tprds   = 2*mph_radius
+     !tprds = ins_convvel(HIGH,JAXIS)
 
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------

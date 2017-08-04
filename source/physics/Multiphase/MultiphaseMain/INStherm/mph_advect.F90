@@ -72,7 +72,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   real bsize(MDIM),coord(MDIM)
   
-  real del(MDIM),xcell,ycell
+  real del(MDIM),xcell,ycell,zcell,rc
 
   real    :: r_avg
   integer :: n_avg
@@ -398,6 +398,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
      if((coord(JAXIS) - bsize(JAXIS)/2.0) == 0.0) then
 
+#if NDIM == 2
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) then
                 isAttached = isAttached .or. .true.
@@ -405,7 +406,20 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                 isAttached = isAttached .or. .false.
            end if  
         end do
-        
+#endif        
+
+#if NDIM == 3
+       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+           if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k) .ge. 0.0) then
+                isAttached = isAttached .or. .true.
+           else
+                isAttached = isAttached .or. .false.
+           end if  
+        end do
+       end do
+#endif
+
      end if
   
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -424,17 +438,63 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   do lb = 1,blockCount
 
      blockID = blockList(lb)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+#if NDIM == 2
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-      if(abs(solnData(DFUN_VAR,i,j,1)) > abs(solnData(RTES_VAR,i,j,1))) solnData(DFUN_VAR,i,j,1) = solnData(RTES_VAR,i,j,1)
+         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                 real(i - NGUARD - 1)*del(IAXIS) +   &
+                 0.5*del(IAXIS)
+
+         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                  real(j - NGUARD - 1)*del(JAXIS)  +  &
+                  0.5*del(JAXIS)
+
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2)
+
+         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
          
       end do
      end do
+#endif
+
+#if NDIM == 3
+    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                 real(i - NGUARD - 1)*del(IAXIS) +   &
+                 0.5*del(IAXIS)
+
+         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                  real(j - NGUARD - 1)*del(JAXIS)  +  &
+                  0.5*del(JAXIS)
+
+         zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                  real(k - NGUARD - 1)*del(KAXIS)  +  &
+                  0.5*del(KAXIS)
+
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
+
+         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,k) = 0.05-rc
+         
+      end do
+     end do
+    end do
+#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 

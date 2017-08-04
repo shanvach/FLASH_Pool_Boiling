@@ -1,6 +1,4 @@
-
-   
-     subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
+subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
 
         use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin
 
@@ -385,33 +383,6 @@
            end do
         end do
 
-       !! AD - Cavity boundary condition for Nucleate Boiling
- 
-       !do j=jy1,jy2
-       ! do i=ix1,ix2
+        err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
 
-       !       xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-       !               real(i - NGUARD - 1)*del(IAXIS) +   &
-       !               0.5*del(IAXIS)
-
-       !       ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-       !               real(j - NGUARD - 1)*del(JAXIS)  +  &
-       !               0.5*del(JAXIS)
-
-             
-       !       rc = sqrt((xcell-0.0)**2 + &
-       !                 (ycell-0.05*cos((35.0/180.0)*acos(-1.0)))**2)
-
-
-       !       if (rc .le. 0.05 .and. s(i,j,k) .le. 0.0) s(i,j,k) = 0.05-rc
-             
-       !       !--------------------------------------------------------------
-
-
-
-       ! end do
-       !end do
-
-       err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
-
-      end subroutine mph_KPDadvectWENO3
+end subroutine mph_KPDadvectWENO3
