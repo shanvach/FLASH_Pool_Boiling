@@ -317,7 +317,7 @@
                             solnData(DFUN_VAR,:,:,1),tpdfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(ALPH_VAR,:,:,1),tppfun)
+                            solnData(PFUN_VAR,:,:,1),tppfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(SIGP_VAR,:,:,1),tsigp)

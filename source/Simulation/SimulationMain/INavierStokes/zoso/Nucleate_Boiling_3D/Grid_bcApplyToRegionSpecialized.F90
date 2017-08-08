@@ -340,7 +340,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-abs(regionData(guard+1,1:je,1:ke,PFUN_VAR))) - regionData(guard+1,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-abs(regionData(guard+1,1:je,1:ke,PFUN_VAR))) - regionData(guard+1,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
 
