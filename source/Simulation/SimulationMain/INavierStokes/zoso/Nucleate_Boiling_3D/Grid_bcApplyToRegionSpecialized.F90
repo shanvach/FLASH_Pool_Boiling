@@ -351,7 +351,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                 do jd = 1,je
                  do kd = 1,ke
 
-                    if(regionData(guard+1,jd,kd,DFUN_VAR) .ge. 0.0) then
+                    if(regionData(guard+1,jd,kd,DFUN_VAR)*regionData(guard,jd,kd,DFUN_VAR) .le. 0.0) then
 
                         regionData(i,jd,kd,ivar) = - regionData(guard+1,jd,kd,ivar)
 
