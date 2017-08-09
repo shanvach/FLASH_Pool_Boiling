@@ -137,7 +137,7 @@ subroutine Grid_markRefineDerefine()
 !  specs(1) =  -1.5  ! sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
 !  specs(2) =   1.5  !sim_xMax -.005
   specs(1) =   0.0  ! sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
-  specs(2) =   0.3  !sim_xMax -.005
+  specs(2) =   0.2  !sim_xMax -.005
 
   !! define a range of coordinates of the rectangle in y-direction
 !  specs(3) =  -2.5  !sim_yMin + 2./4.*(sim_yMax - sim_yMin) +.005

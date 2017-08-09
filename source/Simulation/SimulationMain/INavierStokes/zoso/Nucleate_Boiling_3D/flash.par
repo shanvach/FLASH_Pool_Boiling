@@ -137,14 +137,14 @@ nblocky	= 6 #8
 nblockz = 3
 
 lrefine_min	= 1
-lrefine_max     = 1
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000000
-refine_var_1    = "dfun"
-refine_cutoff_1 = .1
-derefine_cutoff_1 = -.1
+nrefs           = 500000
+#refine_var_1    = "dfun"
+#refine_cutoff_1 = .1
+#derefine_cutoff_1 = -.1
 
 enableMaskedGCFill=.true.
 
@@ -156,7 +156,7 @@ flux_correct    = .true.
 mg_maxResidualNorm = 1.e-10
 
 ## Multigrid Convergence tolerance
-mgrid_npresmooth = 2
+mgrid_npresmooth = 5
 mgrid_npossmooth = 4
 mgrid_print_norm = .true.
 mgrid_max_residual_norm = 1.e-10
@@ -181,7 +181,7 @@ gr_hyprePrintSolveInfo  = .FALSE.
 gr_hypreInfoLevel       = 1
 gr_hypreMaxIter         = 1000
 #gr_hypreRelTol          = 5.0e-6
-gr_hypreRelTol          = 1.0e-10
+gr_hypreRelTol          = 1.0e-8
 gr_hypreFloor           = 1.0e-16
 #gr_hyprePCType          = "HYPRE_PARASAILS"
 #gr_hyprePCType          = "HYPRE_ILU"

@@ -98,7 +98,7 @@ subroutine Grid_markRefineDerefine()
   !! Coordinate information --------------------------------------
   !! define a range of coordinates of the rectangle in x-direction
   specs(1) =  0.0  !sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
-  specs(2) =  0.3 ! sim_xMax -.005
+  specs(2) =  0.2 ! sim_xMax -.005
 
   !! define a range of coordinates of the rectangle in y-direction
   specs(3) =  0.0 !sim_yMin + 0./4.*(sim_yMax - sim_yMin) +.005
@@ -106,7 +106,7 @@ subroutine Grid_markRefineDerefine()
 
   !! define a range of coordinates of the rectangle in z-direction
   specs(5) =  0.0 !sim_zMin + 1./4.*(sim_zMax - sim_zMin) +.05
-  specs(6) =  0.3 !sim_zMin + 3./4.*(sim_zMax - sim_zMin) -.05
+  specs(6) =  0.2 !sim_zMin + 3./4.*(sim_zMax - sim_zMin) -.05
   !! End of coordinate information -------------------------------
 
   !! Decide wheather or not we refine only blocks completely 
