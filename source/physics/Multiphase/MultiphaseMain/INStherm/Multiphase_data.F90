@@ -55,4 +55,6 @@ module Multiphase_data
   logical, save :: mph_isAttached 
   real, save :: mph_timeStamp
 
+  integer, save :: mph_bcFlag(NXB,NZB,MAXBLOCKS*10)
+
 end module Multiphase_data

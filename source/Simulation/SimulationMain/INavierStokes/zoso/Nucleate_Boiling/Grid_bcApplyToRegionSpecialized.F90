@@ -204,6 +204,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Heat_AD_data
 
+  use Multiphase_data, ONLY: mph_bcFlag
+
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
 #endif
@@ -342,64 +344,35 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                if (ivar == TEMP_VAR) then
 
-               !k = 2*guard+1
-               !do i = 1,guard
-               !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-int(abs(regionData(guard+1,1:je,1:ke,PFUN_VAR)))) - regionData(guard+1,1:je,1:ke,ivar)
-               !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(guard+1,1:je,1:ke,ivar)
-               !end do
-
                k = 2*guard+1
                do i = 1,guard
-                do jd = 1,je
-                 do kd = 1,ke
-
-                    if(regionData(guard+1,jd,kd,DFUN_VAR) .ge. 0.0) then
-
-                        regionData(i,jd,kd,ivar) = - regionData(guard+1,jd,kd,ivar)
-
-                    else
-
-                        regionData(i,jd,kd,ivar) = 2*ht_Twall_low - regionData(guard+1,jd,kd,ivar)
-        
-                    end if
-
-                 end do
-                end do
+               regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-mph_bcFlag(:,:,blockHandle)) - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                do jd = 1,je
-                 do kd = 1,ke
-
-                    !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                    !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar) - del(DIR_Y)*cos((38.0/180.0)*acos(-1.0))
-
-                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                            real(jd - NGUARD - 1)*del(IAXIS) +   &
-                            0.5*del(IAXIS)
-                    
-                    !ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                    !        real(i - NGUARD - 1)*del(JAXIS) +   &
-                    !        0.5*del(JAXIS)
-                    
-                    
-                    !rc = sqrt((xcell-0.0)**2+(ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
-                    
-                    !if (abs(xcell) .le. 0.05) then
-
-                    !   regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((150.0/180.0)*acos(-1.0))
-
-                    !else
-                    
-                       regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((30.0/180.0)*acos(-1.0))
-
-                    !end if
-
-                 end do
-                end do
+               regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos((30.0/180.0)*acos(-1.0))
                end do
+
+               !k = 2*guard+1
+               !do i = 1,guard
+               ! do jd = 1,je
+               !  do kd = 1,ke
+
+               !     !xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+               !     !        real(jd - NGUARD - 1)*del(IAXIS) +   &
+               !     !        0.5*del(IAXIS)
+                    
+               !     !ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+               !     !        real(i - NGUARD - 1)*del(JAXIS) +   &
+               !     !        0.5*del(JAXIS)
+                    
+               !     regionData(i,jd,kd,ivar) = regionData(guard+1,jd,kd,ivar) - del(DIR_Y)*cos((30.0/180.0)*acos(-1.0))
+
+               !  end do
+               ! end do
+               !end do
            
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
