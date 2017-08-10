@@ -1,1 +1,1 @@
-./setup INavierStokes/zoso/Nucleate_Boiling_3D  -3d -auto  -nxb=20 -nyb=20 -nzb=20 -opt  -maxblocks=32 -gridinterpolation=native +pm4dev  -objdir=Nucleate_Boiling_3D -site=colonialone.gwu.edu Bittree=1
+./setup INavierStokes/zoso/Nucleate_Boiling_3D  -3d -auto  -nxb=20 -nyb=20 -nzb=20 -opt  -maxblocks=32 -gridinterpolation=native +pm4dev  -objdir=Nucleate_Boiling_3D -site=colonialone.gwu.edu Bittree=0
