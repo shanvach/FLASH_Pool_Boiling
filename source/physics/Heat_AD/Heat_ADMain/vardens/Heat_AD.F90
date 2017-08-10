@@ -25,6 +25,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Driver_data,  only: dr_nstep
 
+   use Heat_AD_data, only: ht_AMR_specs
+
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
                             interp_mask_facex_res,    &
@@ -55,6 +57,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
    real :: Tnl_res, Tnv_res, Tnl_res1, Tnv_res1,Tnl_resBlock,Tnv_resBlock
    real :: T_res,T_res1,T_resBlock
+   real :: max_flux, min_flux
+
 
    integer :: iter_count,intval
 
@@ -288,6 +292,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                            Tnl_res1,Tnv_res1,solnData(MFLG_VAR,:,:,:))
 #endif
      ! Release pointers
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
      Tnl_resBlock = Tnl_resBlock + Tnl_res1
@@ -338,6 +343,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !______Mass Flux calculation_________________________________________________________!
 
+   max_flux = -10.**(10.)
+   min_flux =  10.**(10.)
+
    do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -361,6 +369,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
 
     ! Release pointers
+
+    max_flux = max(max_flux,maxval(solnData(MDOT_VAR,:,:,:)))
+    min_flux = min(min_flux,minval(solnData(MDOT_VAR,:,:,:)))
+
     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
    
    end do
@@ -371,6 +383,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+   call MPI_Allreduce(ht_AMR_specs(2), max_flux, 1, FLASH_REAL,&
+                      MPI_MAX, MPI_COMM_WORLD, ierr)
+
+   call MPI_Allreduce(ht_AMR_specs(1), min_flux, 1, FLASH_REAL,&
+                      MPI_MIN, MPI_COMM_WORLD, ierr)
 
 !______End Mass Flux calculation___________________________________________________!
 

@@ -28,8 +28,8 @@
 !!
 !!***
 !#define  SPECIAL_REFINEMENT_1
-#define SPECIAL_REFINEMENT_2
-!#define SPECIAL_THRESHOLD_KPD
+!#define SPECIAL_REFINEMENT_2
+#define SPECIAL_THRESHOLD_KPD
 
 subroutine Grid_markRefineDerefine()
 

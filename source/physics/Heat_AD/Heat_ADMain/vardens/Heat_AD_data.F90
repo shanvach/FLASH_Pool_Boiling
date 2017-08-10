@@ -14,4 +14,6 @@ module Heat_AD_data
 
      integer, save :: ht_hfit
 
+     real, save    :: ht_AMR_specs(2)
+
 end module Heat_AD_data
