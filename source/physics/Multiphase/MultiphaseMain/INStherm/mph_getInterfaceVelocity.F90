@@ -1,6 +1,6 @@
     SUBROUTINE mph_getInterfaceVelocity(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy, &
                            visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
-                           mdot,smrh,xnorm,ynorm,uint,vint)
+                           mdot,smrh,xnorm,ynorm,uint,vint,curv)
 
   !-------------------------------------------------------------
   ! Computes the interface velocity to be used in level 
@@ -33,7 +33,7 @@
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,curv
       REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint
 
       INTEGER:: i, j
@@ -68,16 +68,18 @@
       !++++++++++  U-COMPONENT  ++++++++++
 
        uint(ix1:ix2+1,jy1:jy2,kz1) =  uni(ix1:ix2+1,jy1:jy2,kz1) + &
-                                      (mdot(ix1-1:ix2,jy1:jy2,kz1) + mdot(ix1:ix2+1,jy1:jy2,kz1))/2.0d0 * &
+                                      (mdot(ix1-1:ix2,jy1:jy2,kz1)*abs(curv(ix1-1:ix2,jy1:jy2,kz1)) + mdot(ix1:ix2+1,jy1:jy2,kz1)*abs(curv(ix1:ix2+1,jy1:jy2,kz1))) * &
                                       (xnorm(ix1-1:ix2,jy1:jy2,kz1) + xnorm(ix1:ix2+1,jy1:jy2,kz1))/2.0d0 * &
-                                      (smrh(ix1-1:ix2,jy1:jy2,kz1) + smrh(ix1:ix2+1,jy1:jy2,kz1))/2.0d0
+                                      (smrh(ix1-1:ix2,jy1:jy2,kz1)  + smrh(ix1:ix2+1,jy1:jy2,kz1))/2.0d0  * &
+                                1.0d0/(abs(curv(ix1-1:ix2,jy1:jy2,kz1))  + abs(curv(ix1:ix2+1,jy1:jy2,kz1)))
 
       !++++++++++  V-COMPONENT  ++++++++++
 
        vint(ix1:ix2,jy1:jy2+1,kz1) =  vni(ix1:ix2,jy1:jy2+1,kz1) + &
-                                      (mdot(ix1:ix2,jy1-1:jy2,kz1) + mdot(ix1:ix2,jy1:jy2+1,kz1))/2.0d0 * &
+                                      (mdot(ix1:ix2,jy1-1:jy2,kz1)*abs(curv(ix1:ix2,jy1-1:jy2,kz1)) + mdot(ix1:ix2,jy1:jy2+1,kz1)*abs(curv(ix1:ix2,jy1:jy2+1,kz1))) * &
                                       (ynorm(ix1:ix2,jy1-1:jy2,kz1) + ynorm(ix1:ix2,jy1:jy2+1,kz1))/2.0d0 * &
-                                      (smrh(ix1:ix2,jy1-1:jy2,kz1) + smrh(ix1:ix2,jy1:jy2+1,kz1))/2.0d0
+                                      (smrh(ix1:ix2,jy1-1:jy2,kz1)  + smrh(ix1:ix2,jy1:jy2+1,kz1))/2.0d0  * &
+                                1.0d0/(abs(curv(ix1:ix2,jy1-1:jy2,kz1))  + abs(curv(ix1:ix2,jy1:jy2+1,kz1)))
 
 
        END SUBROUTINE mph_getInterfaceVelocity
