@@ -1,5 +1,5 @@
 subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh)
+                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -13,7 +13,7 @@ subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2
   real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
-  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh
+  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
 
   real :: T_res,Mdensx,Mdensy,th,dxp,dxm,dyp,dym
 

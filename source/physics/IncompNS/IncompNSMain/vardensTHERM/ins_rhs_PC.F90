@@ -112,17 +112,14 @@
              rhoxc = (smrh(i-1,j,kz1) + smrh(i,j,kz1))/2.0d0
            
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i-1,j,kz1)*abs(crv(i-1,j,kz1)) + mdot(i,j,kz1)*abs(crv(i,j,kz1))) * &
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i-1,j,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)* &
-                                        1.0d0/(abs(crv(i-1,j,kz1))+abs(crv(i,j,kz1)))
-
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoxc)
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i-1,j,kz1)*abs(crv(i-1,j,kz1)) + mdot(i,j,kz1)*abs(crv(i,j,kz1))) * &
+                                        (mdot(i-1,j,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i-1,j,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc) * &
-                                        1.0d0/(abs(crv(i-1,j,kz1))+abs(crv(i,j,kz1)))
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoxc)
  
              ! -- Velocity Jump Method 3 - MPCC --- !
 
@@ -334,16 +331,14 @@
              rhoyc = (smrh(i,j,kz1)+smrh(i,j-1,kz1))/2.0d0
 
              unig(i-2:i+2,j-2:j+2,kz1) = uni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i,j-1,kz1)*abs(crv(i,j-1,kz1)) + mdot(i,j,kz1)*abs(crv(i,j,kz1))) * &
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (xnorm(i,j-1,kz1) +xnorm(i,j,kz1))/2.0d0 * &
-                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc) * &
-                                        1.0d0/(abs(crv(i,j-1,kz1))+abs(crv(i,j,kz1)))
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-3:i+1,j-2:j+2,kz1))/2.0d0-rhoyc)
 
              vnig(i-2:i+2,j-2:j+2,kz1) = vni(i-2:i+2,j-2:j+2,kz1) + &
-                                        (mdot(i,j-1,kz1)*abs(crv(i,j-1,kz1)) + mdot(i,j,kz1)*abs(crv(i,j,kz1))) * &
+                                        (mdot(i,j-1,kz1) + mdot(i,j,kz1))/2.0d0 * &
                                         (ynorm(i,j-1,kz1) +ynorm(i,j,kz1))/2.0d0 * &
-                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc) * &
-                                        1.0d0/(abs(crv(i,j-1,kz1))+abs(crv(i,j,kz1)))
+                                        ((smrh(i-2:i+2,j-2:j+2,kz1)+smrh(i-2:i+2,j-3:j+1,kz1))/2.0d0-rhoyc)
  
              !--- Velocity Jump Method 3 - MPCC ---!
 

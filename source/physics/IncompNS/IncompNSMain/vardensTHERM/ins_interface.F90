@@ -365,14 +365,14 @@ Module ins_interface
                            dx,dy,dz,ru,rv,rw,visc,  &
                            rho1x,rho2x,rho1y,rho2y, &
                            rho1z,rho2z,gravX, gravY, gravZ,&
-                           mdot,smrh,xnorm,ynorm,znorm)
+                           mdot,smrh,xnorm,ynorm,znorm,crv)
 
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x,rho2x, rho1y, rho2y
       REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z
-      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,smrh,xnorm,ynorm,znorm
+      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,smrh,xnorm,ynorm,znorm,crv
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
 
       END SUBROUTINE

@@ -16,7 +16,7 @@ module Heat_AD_interface
 
     interface
        subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
-                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh)
+                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
          real, dimension(:,:,:), intent(in) :: T_o
@@ -24,7 +24,7 @@ module Heat_AD_interface
          real, intent(in) :: dx, dy, dz, inRe
          integer, intent(in) :: ix1, ix2, jy1, jy2
          real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
-         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
        end subroutine Heat_RHS
     end interface
 
@@ -85,7 +85,7 @@ module Heat_AD_interface
 
    interface
        subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, kz1, kz2,&
-                              rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh)
+                              rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
          real, dimension(:,:,:), intent(in) :: T_o
@@ -93,7 +93,7 @@ module Heat_AD_interface
          real, intent(in) :: dx, dy, dz, inRe
          integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
          real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph,rho1z,rho2z
-         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv
        end subroutine Heat_RHS_3D
    end interface
 

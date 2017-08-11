@@ -646,7 +646,7 @@
         end do
         end do
 
-        crv = crv*icrv
+        !crv = crv*icrv
 
       end subroutine mph_KPDcurvature3DC
 

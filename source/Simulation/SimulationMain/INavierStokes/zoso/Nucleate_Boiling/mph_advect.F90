@@ -130,7 +130,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       solnData(NRMX_VAR,:,:,:),&
                       solnData(NRMY_VAR,:,:,:),&
                       facexData(VELI_FACE_VAR,:,:,:),            &
-                      faceyData(VELI_FACE_VAR,:,:,:))
+                      faceyData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
 
 #endif
 
@@ -159,7 +159,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       solnData(NRMZ_VAR,:,:,:),&
                       facexData(VELI_FACE_VAR,:,:,:),            &
                       faceyData(VELI_FACE_VAR,:,:,:),            &
-                      facezData(VELI_FACE_VAR,:,:,:))
+                      facezData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
 
 #endif
          !---------------------------------------------------------------------

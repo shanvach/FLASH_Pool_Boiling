@@ -68,19 +68,16 @@
       !++++++++++  U-COMPONENT  ++++++++++
 
        uint(ix1:ix2+1,jy1:jy2,kz1) =  uni(ix1:ix2+1,jy1:jy2,kz1) + &
-                                      (mdot(ix1-1:ix2,jy1:jy2,kz1)*abs(curv(ix1-1:ix2,jy1:jy2,kz1)) + mdot(ix1:ix2+1,jy1:jy2,kz1)*abs(curv(ix1:ix2+1,jy1:jy2,kz1))) * &
+                                      (mdot(ix1-1:ix2,jy1:jy2,kz1)  + mdot(ix1:ix2+1,jy1:jy2,kz1))/2.0d0 * &
                                       (xnorm(ix1-1:ix2,jy1:jy2,kz1) + xnorm(ix1:ix2+1,jy1:jy2,kz1))/2.0d0 * &
-                                      (smrh(ix1-1:ix2,jy1:jy2,kz1)  + smrh(ix1:ix2+1,jy1:jy2,kz1))/2.0d0  * &
-                                1.0d0/(abs(curv(ix1-1:ix2,jy1:jy2,kz1))  + abs(curv(ix1:ix2+1,jy1:jy2,kz1)))
+                                      (smrh(ix1-1:ix2,jy1:jy2,kz1)  + smrh(ix1:ix2+1,jy1:jy2,kz1))/2.0d0
 
       !++++++++++  V-COMPONENT  ++++++++++
 
        vint(ix1:ix2,jy1:jy2+1,kz1) =  vni(ix1:ix2,jy1:jy2+1,kz1) + &
-                                      (mdot(ix1:ix2,jy1-1:jy2,kz1)*abs(curv(ix1:ix2,jy1-1:jy2,kz1)) + mdot(ix1:ix2,jy1:jy2+1,kz1)*abs(curv(ix1:ix2,jy1:jy2+1,kz1))) * &
+                                      (mdot(ix1:ix2,jy1-1:jy2,kz1)  + mdot(ix1:ix2,jy1:jy2+1,kz1))/2.0d0 * &
                                       (ynorm(ix1:ix2,jy1-1:jy2,kz1) + ynorm(ix1:ix2,jy1:jy2+1,kz1))/2.0d0 * &
-                                      (smrh(ix1:ix2,jy1-1:jy2,kz1)  + smrh(ix1:ix2,jy1:jy2+1,kz1))/2.0d0  * &
-                                1.0d0/(abs(curv(ix1:ix2,jy1-1:jy2,kz1))  + abs(curv(ix1:ix2,jy1:jy2+1,kz1)))
-
+                                      (smrh(ix1:ix2,jy1-1:jy2,kz1)  + smrh(ix1:ix2,jy1:jy2+1,kz1))/2.0d0
 
        END SUBROUTINE mph_getInterfaceVelocity
 

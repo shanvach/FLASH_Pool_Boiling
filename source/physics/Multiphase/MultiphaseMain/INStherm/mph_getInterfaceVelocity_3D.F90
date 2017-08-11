@@ -1,6 +1,6 @@
     SUBROUTINE mph_getInterfaceVelocity_3D(uni,vni,wni,ru1,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz,&
                            visc,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,gravX,gravY,gravZ,&
-                           mdot,smrh,xnorm,ynorm,znorm,uint,vint,wint)
+                           mdot,smrh,xnorm,ynorm,znorm,uint,vint,wint,curv)
 
   !-------------------------------------------------------------
   ! Computes the interface velocity to be used in level 
@@ -33,7 +33,7 @@
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, visc, rho1x, rho2x, rho1y, rho2y, rho1z, rho2z
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,znorm,mdot,smrh
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,znorm,mdot,smrh,curv
       REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint, wint
 
       INTEGER:: i, j, k
