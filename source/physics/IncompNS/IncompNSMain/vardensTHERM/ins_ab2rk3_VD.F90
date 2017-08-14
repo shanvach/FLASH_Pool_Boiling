@@ -358,10 +358,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   ! These two subroutine calls ar used in case of outflow BCs, only when NEUMANN_INS and
   ! OUTFLOW_INS are present.
   ! Compute inflow volume ratio: (Not computed on NOT_BOUNDARY, NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .true., ins_Qin)
+  !call ins_computeQinout( blockCount, blockList, .true., ins_Qin)
   
   ! For OUTFLOW_INS condition compute convective velocity
-  call ins_convectVelout( blockCount, blockList, ins_convvel)
+  !call ins_convectVelout( blockCount, blockList, ins_convvel)
   !if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)  
 
 !***********************************************************************************************
@@ -582,7 +582,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 !*************************************************************************************************
 
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
+  !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout before ref=',ins_Qout
 
   ! Rescale Velocities at outflows for overall conservation: 
@@ -596,7 +596,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
  
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
+  !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
 
 !*************************************************************************************************

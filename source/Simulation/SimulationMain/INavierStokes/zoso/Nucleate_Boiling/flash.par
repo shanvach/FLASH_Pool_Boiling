@@ -46,7 +46,7 @@ vis2 = 47.6290  # R113
 #vis2 = 1.0       # FC-72
 
 # Thermal Properties 
-thco1 = 0.0
+thco1 = 1.0
 thco2 = 6.7006   # R113
 #thco2 = 27.16    # Water
 #thco2 = 1.0      # FC-72
@@ -145,7 +145,7 @@ lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 500000
+nrefs           = 5000
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1

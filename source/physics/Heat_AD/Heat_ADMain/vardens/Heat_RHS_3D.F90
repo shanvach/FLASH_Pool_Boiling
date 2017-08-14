@@ -57,21 +57,37 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      rhoyp = (smrh(i,j,k) + smrh(i,j+1,k))/2.0d0 - smrh(i,j,k)
      rhozp = (smrh(i,j,k) + smrh(i,j,k+1))/2.0d0 - smrh(i,j,k)
 
-     mdotxm = mdot(i,j,k)
-     mdotym = mdot(i,j,k)
-     mdotzm = mdot(i,j,k)
+     !mdotxm = mdot(i,j,k)
+     !mdotym = mdot(i,j,k)
+     !mdotzm = mdot(i,j,k)
 
-     mdotxp = mdot(i,j,k)
-     mdotyp = mdot(i,j,k)
-     mdotzp = mdot(i,j,k)
+     !mdotxp = mdot(i,j,k)
+     !mdotyp = mdot(i,j,k)
+     !mdotzp = mdot(i,j,k)
 
-     nxm    = nrmx(i,j,k)
-     nym    = nrmy(i,j,k)
-     nzm    = nrmz(i,j,k)
+     !nxm    = nrmx(i,j,k)
+     !nym    = nrmy(i,j,k)
+     !nzm    = nrmz(i,j,k)
      
-     nxp    = nrmx(i,j,k)
-     nyp    = nrmy(i,j,k)
-     nzp    = nrmz(i,j,k)
+     !nxp    = nrmx(i,j,k)
+     !nyp    = nrmy(i,j,k)
+     !nzp    = nrmz(i,j,k)
+
+     mdotxm = (3.0d0*mdot(i,j,k)+mdot(i-1,j,k))/4.0d0
+     mdotym = (3.0d0*mdot(i,j,k)+mdot(i,j-1,k))/4.0d0
+     mdotzm = (3.0d0*mdot(i,j,k)+mdot(i,j,k-1))/4.0d0
+
+     mdotxp = (3.0d0*mdot(i,j,k)+mdot(i+1,j,k))/4.0d0
+     mdotyp = (3.0d0*mdot(i,j,k)+mdot(i,j+1,k))/4.0d0
+     mdotzp = (3.0d0*mdot(i,j,k)+mdot(i,j,k+1))/4.0d0
+
+     nxm    = (3.0d0*nrmx(i,j,k)+nrmx(i-1,j,k))/4.0d0
+     nym    = (3.0d0*nrmy(i,j,k)+nrmy(i,j-1,k))/4.0d0
+     nzm    = (3.0d0*nrmz(i,j,k)+nrmz(i,j,k-1))/4.0d0
+
+     nxp    = (3.0d0*nrmx(i,j,k)+nrmx(i+1,j,k))/4.0d0
+     nyp    = (3.0d0*nrmy(i,j,k)+nrmy(i,j+1,k))/4.0d0
+     nzp    = (3.0d0*nrmz(i,j,k)+nrmz(i,j,k+1))/4.0d0
 
      u_conv = (u(i+1,j,k)+u(i,j,k)+(mdotxm*nxm*rhoxm)+(mdotxp*nxp*rhoxp))/2.
      v_conv = (v(i,j+1,k)+v(i,j,k)+(mdotym*nym*rhoym)+(mdotyp*nyp*rhoyp))/2.

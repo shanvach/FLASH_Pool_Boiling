@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/Bubble_ConstantMF_3D  -3d -auto  -nxb=20 -nyb=20 -nzb=20 -opt  -maxblocks=10 -gridinterpolation=native +pm4dev  -objdir=Bubble_ConstantMF_3D -site=splash.seas.gwu.edu Bittree=0
