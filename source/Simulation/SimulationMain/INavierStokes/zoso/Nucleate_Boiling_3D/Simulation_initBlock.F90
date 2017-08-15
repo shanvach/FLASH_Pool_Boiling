@@ -71,6 +71,11 @@ subroutine Simulation_initBlock(blockId)
   real :: x3,y3,z3,d4,r1
 
   real :: fn(8)
+  real :: x4,x5,x6,x7,x8
+  real :: y4,y5,y6,y7,y8
+  real :: d5,d6,d7,d8,d9
+  real :: z4,z5,z6,z7,z8 
+ 
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -130,135 +135,95 @@ subroutine Simulation_initBlock(blockId)
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
 
-          !if (ycell .LE. 0.0) then
-          !   solnData(DFUN_VAR,i,j,k) = 0.0 - ycell
-          !else
-          !   solnData(DFUN_VAR,i,j,k) = -1.0 * ycell
-          !end if
-          !solnData(DFUN_VAR,i,j,k) = ycell
-          
-!          solnData(DFUN_VAR,i,j,k) = ycell - A0/(cosh(sqrt(3.0*A0)*xcell/2)**2)
-
-          ! Ellipse with disturbution
-          ! phi = fs*(sqrt(x^2/A^2+y^2/B^2)-1)
-          ! fs = emp + (x-x0)^2 + (y-y0)^2
-          !A = 4.0d0
-          !B = 2.0d0
-          !emp = 0.1d0
-          !x0 = 3.5d0
-          !y0 = 2.0d0
-          !fs = emp + (xcell-x0)**2 + (ycell-y0)**2
-          !fs = 0.125*fs
-          !solnData(DFUN_VAR,i,j,k) = fs*(sqrt((xcell/A)**2+(ycell/B)**2)-1.0d0)
-          !solnData(CURV_VAR,i,j,k) = (sqrt((xcell/A)**2+(ycell/B)**2)-1.0d0)
-          !solnData(VISC_VAR,i,j,k) = fs
-
-          ! Circle with distrubution
-          ! phi = fs*(sqrt(x^2/A^2+y^2/B^2)-1)
-          ! fs = emp + (x-x0)^2 + (y-y0)^2
-          !A = 3.0d0
-          !B = 3.0d0
-          !emp = 0.1d0
-          !x0 = 1.7d0
-          !y0 = 1.7d0
-          !fs = emp + (xcell-x0)**2 + (ycell-y0)**2
-          !fs = 1.0d0*fs
-          !solnData(DFUN_VAR,i,j,k) = fs*(sqrt((xcell/A)**2+(ycell/B)**2)-1.0d0)
-
-          ! Shizhao 
-          ! Jul 7, 2015
-          ! Zalesak's circle (1979, JCP)
-          !r0 = 0.15d0
-          !x0 = 0.0d0
-          !y0 = 0.25d0
-          !solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
-          !if (sqrt((xcell-x0)**2+(ycell-y0)**2) < r0) then
-          !  if(abs(xcell-x0) < 0.03d0 .and. (ycell-y0) < 0.1d0) then
-          !    solnData(DFUN_VAR,i,j,k) = -1.0d0
-          !  endif
-          !endif
-
-          ! Shizhao 
-          ! Jul 7, 2015
-          ! Circle
-
-           !r0 = 0.25d0 !1.0d0 !0.5d0
-           !r0 = 0.03
-           !r0 = 1.0e-4
-           !r0 = 0.5d0
-           !r0 = 5.0e-5
-           !r0 = 0.02e-3
-
-           !r0 = 3.2503
-           !r0 = 5.0
-           r0 = 0.05
-           r1 = 0.05
-
-           !x0 = 0.0d0
-           y0 = r0*cos((30.0/180.0)*acos(-1.0))
-           y1 = r1*cos((30.0/180.0)*acos(-1.0))
-           !z0 = 0.15*(tan(acos(-1.0)/3)-tan(acos(-1.0)/6))
-
+           ! Main Bubble
+           r0 =  0.2
            x0 =  0.0
-           x1 =  0.16
-           x2 =  0.41
-           x3 =  0.57
+           z0 =  0.0
+           y0 =  r0*cos((30.0/180.0)*acos(-1.0))
 
-           z0 = 0.0
-           z1 = sqrt(0.36 - x1**2)
-           z2 = sqrt(0.36 - x2**2)
-           z3 = sqrt(0.36 - x3**2)
-
+           ! Auxiallary Bubbles
+           r1 =  0.05
+          
+           y1 = r1*cos((30.0/180.0)*acos(-1.0))
            y2 = y1
            y3 = y1
-           
+           y4 = y1
+           y5 = y1
+           y6 = y1
+           y7 = y1
+           y8 = y1
+
+           x1 =   0.0
+           x2 =   0.3/sqrt(2.)
+           x3 =   0.3
+           x4 =   0.3/sqrt(2.)
+           x5 =   0.0
+           x6 =  -0.3/sqrt(2.)
+           x7 =  -0.3
+           x8 =  -0.3/sqrt(2.)
+
+           z1 = -sqrt(0.09 - x1**2)
+           z2 = -sqrt(0.09 - x2**2)
+           z3 =  sqrt(0.09 - x3**2)
+           z4 =  sqrt(0.09 - x4**2)
+           z5 =  sqrt(0.09 - x5**2)
+           z6 =  sqrt(0.09 - x6**2)
+           z7 =  sqrt(0.09 - x7**2)
+           z8 = -sqrt(0.09 - x8**2)
+
+           ! Distance functions
            d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            d2 = r1 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
            d3 = r1 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
            d4 = r1 - sqrt((xcell-x3)**2+(ycell-y3)**2+(zcell-z3)**2)
+           d5 = r1 - sqrt((xcell-x4)**2+(ycell-y4)**2+(zcell-z4)**2)
+           d6 = r1 - sqrt((xcell-x5)**2+(ycell-y5)**2+(zcell-z5)**2)
+           d7 = r1 - sqrt((xcell-x6)**2+(ycell-y6)**2+(zcell-z6)**2)
+           d8 = r1 - sqrt((xcell-x7)**2+(ycell-y7)**2+(zcell-z7)**2)
+           d9 = r1 - sqrt((xcell-x8)**2+(ycell-y8)**2+(zcell-z8)**2)
 
+           ! Single bubble setup
            solnData(DFUN_VAR,i,j,k) = d1
 
-           !if(abs(d1)<abs(d2)) then
-
-           ! solnData(DFUN_VAR,i,j,k) = d1
-
-           !else 
-
-           ! solnData(DFUN_VAR,i,j,k) = d2
-
-           !end if
-
-
-           !if(abs(d1) < abs(d2) .and. abs(d1)<abs(d3)) solnData(DFUN_VAR,i,j,k) = d1
-
-           !if(abs(d2) < abs(d3) .and. abs(d2)<abs(d1)) solnData(DFUN_VAR,i,j,k) = d2
-
-           !if(abs(d3) < abs(d1) .and. abs(d3)<abs(d2)) solnData(DFUN_VAR,i,j,k) = d3
-          
+           ! Multiple bubble setup         
            
-           !if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d1
+           if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4) .and. &
+              abs(d1) < abs(d5) .and. abs(d1) < abs(d6) .and. abs(d1) < abs(d7) .and. &
+              abs(d1) < abs(d8) .and. abs(d1) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d1
 
-           !if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d2
+           if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4) .and. &
+              abs(d2) < abs(d5) .and. abs(d2) < abs(d6) .and. abs(d2) < abs(d7) .and. &
+              abs(d2) < abs(d8) .and. abs(d2) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d2
 
-           !if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4)) solnData(DFUN_VAR,i,j,k) = d3
+           if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4) .and. &
+              abs(d3) < abs(d5) .and. abs(d3) < abs(d6) .and. abs(d3) < abs(d7) .and. &
+              abs(d3) < abs(d8) .and. abs(d3) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d3
 
-           !if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d4
- 
-           !solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
-           !solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
-           !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-x0)**2+(ycell-y0)**2) - r0
-           !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.08/2.))/0.08)) - ycell
-           !solnData(DFUN_VAR,i,j,k) = (0.08/128.)*(4+cos(2*acos(-1.0)*(sqrt(xcell**2+zcell**2))/0.08))-ycell 
-           !solnData(DFUN_VAR,i,j,k) = (1.0/128. )*(4 + cos(2*acos(-1.0)*(xcell-(1.0/2.0))/1.0)) - ycell
-           !solnData(DFUN_VAR,i,j,k) = (0.0273/128. )*(4 + cos(2*acos(-1.0)*(xcell-(0.0273/2.))/0.0273)) - ycell
-           !solnData(DFUN_VAR,i,j,k) = (0.0023/128.0)*(4 + cos(2*acos(-1.0)*(xcell-(0.0023/2.))/0.0023)) - ycell
-           !solnData(DFUN_VAR,i,j,k) = (0.08/128. )*(4 + cos(2*acos(-1.0)*(xcell)/0.08)) - ycell
-           !solnData(DFUN_VAR,i,j,k) = 0.5 - ycell
+           if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1) .and. &
+              abs(d4) < abs(d5) .and. abs(d4) < abs(d6) .and. abs(d4) < abs(d7) .and. &
+              abs(d4) < abs(d8) .and. abs(d4) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d4
+
+           if(abs(d5) < abs(d2) .and. abs(d5) < abs(d3) .and. abs(d5) < abs(d4) .and. &
+              abs(d5) < abs(d1) .and. abs(d5) < abs(d6) .and. abs(d5) < abs(d7) .and. &
+              abs(d5) < abs(d8) .and. abs(d5) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d5
+
+           if(abs(d6) < abs(d2) .and. abs(d6) < abs(d3) .and. abs(d6) < abs(d4) .and. &
+              abs(d6) < abs(d5) .and. abs(d6) < abs(d1) .and. abs(d6) < abs(d7) .and. &
+              abs(d6) < abs(d8) .and. abs(d6) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d6
+
+           if(abs(d7) < abs(d2) .and. abs(d7) < abs(d3) .and. abs(d7) < abs(d4) .and. &
+              abs(d7) < abs(d5) .and. abs(d7) < abs(d6) .and. abs(d7) < abs(d1) .and. &
+              abs(d7) < abs(d8) .and. abs(d7) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d7
+
+           if(abs(d8) < abs(d2) .and. abs(d8) < abs(d3) .and. abs(d8) < abs(d4) .and. &
+              abs(d8) < abs(d5) .and. abs(d8) < abs(d6) .and. abs(d8) < abs(d7) .and. &
+              abs(d8) < abs(d1) .and. abs(d8) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d8
+
+           if(abs(d9) < abs(d2) .and. abs(d9) < abs(d3) .and. abs(d9) < abs(d4) .and. &
+              abs(d9) < abs(d5) .and. abs(d9) < abs(d6) .and. abs(d9) < abs(d7) .and. &
+              abs(d9) < abs(d8) .and. abs(d9) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d9
 
            solnData(TEMP_VAR,i,j,k) = 0.0
-
-           !if(ycell .le. 9.6729 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.) solnData(TEMP_VAR,i,j,k) = (9.6729 - ycell)/9.6729
 
            if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
@@ -270,37 +235,6 @@ subroutine Simulation_initBlock(blockId)
 
 
            end if
-
-           !if(ycell .le. 0.2922 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.2922-ycell)/0.2922
-
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
-             !solnData(TEMP_VAR,i,j,k) = 0.1*(0.08-ycell)/0.08
-           !  solnData(TEMP_VAR,i,j,k) = (solnData(DFUN_VAR,i,j,k)*1.0)/(solnData(DFUN_VAR,i,j,k)+ycell)
-           !else
-           !  solnData(TEMP_VAR,i,j,k) = 0.0
-           !end if
-
-           !solnData(TEMP_VAR,i,j,k) = 0.0          
- 
-           !solnData(DFUN_VAR,i,j,k) = 0.5 - ycell
-
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.) then
-           !  solnData(TEMP_VAR,i,j,k) = 0.1185 + (-0.1185/erf(solnX))*(erf(ycell)/(2*sqrt(0.25)))
-           !else
-           !  solnData(TEMP_VAR,i,j,k) = 0.0
-           !end if
-
-           !if (solnData(DFUN_VAR,i,j,k) .ge. 0) then
-
-              !solnData(TEMP_VAR,i,j,k) = 0.0
-           !   faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-
-           !else
-
-           !   solnData(TEMP_VAR,i,j,k) = 0.0
-           !   faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-
-           !end if
 
         enddo
      enddo

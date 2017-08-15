@@ -281,7 +281,7 @@
 
         !- kpd - 
         real :: th,aa,xijl,xijr, &
-                a1,a2,cri,xid,xij,xidl,xidr,yid,yidr,yidl,yij,yijl,yijr,bb,mT
+                a1,a2,cri,xid,xij,xidl,xidr,yid,yidr,yidl,yij,yijl,yijr,bb,mfl,mfr,mT
         integer :: i,j,k
         real, parameter :: eps = 1E-13
 
@@ -312,7 +312,7 @@
         sigy = 0.
         w = 0.
         icrv = 0
-        !bb   = (rho2/rho1) - 1.0
+        bb   = (rho2/rho1) - 1.0
 
         !- kpd - Need to loop through one guard cell on each side to set jumps 
         !           when they cross block boundaries
@@ -332,16 +332,16 @@
                  
                  cri = crv(i+1,j,k)*(1.-th) + crv(i,j,k)*th
     
-                 mT = mdot(i+1,j,k)*(1.-th) + mdot(i,j,k)*th
-                 !mT = 0.5*(mdot(i+1,j,k)+mdot(i,j,k))
-
                  xijl = xit*crv(i,j,k)                 !- kpd - sigma*K. Used for jump in pressure
                  xijr = xit*crv(i+1,j,k)               !- kpd - sigma*K. Used for jump in pressure
                  xidl = 0.                             !- kpd - Used for jump in gradient
                  xidr = 0.                             !- kpd - Used for jump in gradient
+                 mfl  = bb*mdot(i,j,k)*mdot(i,j,k)
+                 mfr  = bb*mdot(i+1,j,k)*mdot(i+1,j,k)
 
                  xij = xijl*th + xijr*(1.-th)          !- kpd - Jump in value
                  xid = xidl*th + xidr*(1.-th)          !- kpd - Jump in gradient. Equal to 0 here.
+                 mT  = mfl*th  + mfr*(1.-th)
                  
                  if (iSmear  .eq. 1) then
 
@@ -351,23 +351,12 @@
                  rho1x(i+1,j,k) = rho1x(i+1,j,k)*(rho1/rho2)/aa
                  rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2/rho2)/aa
 
-                 !aa = rho1x(i+1,j,k) + rho2x(i+1,j,k)
- 
-                 bb = (1./aa) - 1.
-
-                 !aa = th*(rho1) + (1.-th)*(rho2) 
-                 !rho1x(i+1,j,k) = rho1x(i+1,j,k)*(rho1)/aa
-                 !rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2)/aa
-
-
-                 ! - Akash
-
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   - xij/aa/dx**2 - xid*th*(rho1/rho2)/aa/dx      + (bb*mT*mT)/aa/dx**2
-                 w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx - (bb*mT*mT)/aa/dx**2
+                 w(i,j,k)   = w(i,j,k)   - xij/aa/dx**2 - xid*th*(rho1/rho2)/aa/dx      + mT/aa/dx**2
+                 w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx - mT/aa/dx**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx + (bb*mT*mT)/aa/dx           !- kpd - sigma*K/rho/dx 
+                 sigx(i+1,j,k) = - xij/aa/dx + mT/aa/dx           !- kpd - sigma*K/rho/dx 
          
                  else
 
@@ -389,16 +378,17 @@
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
 
                  cri = crv(i,j,k)*(1.-th) + crv(i+1,j,k)*th
-                 mT = mdot(i,j,k)*(1.-th) + mdot(i+1,j,k)*th
-                 !mT   = 0.5*(mdot(i,j,k)+mdot(i+1,j,k))
 
                  xijl = xit*crv(i,j,k)
                  xijr = xit*crv(i+1,j,k)
                  xidl = 0. 
                  xidr = 0.
+                 mfl  = bb*mdot(i,j,k)*mdot(i,j,k)
+                 mfr  = bb*mdot(i+1,j,k)*mdot(i+1,j,k)
 
                  xij = xijl*(1.-th) + xijr*th
                  xid = xidl*(1.-th) + xidr*th
+                 mT  = mfl*(1.-th)  + mfr*th
 
                  if (iSmear  .eq. 1) then
 
@@ -408,22 +398,12 @@
                  rho1x(i+1,j,k) = rho1x(i+1,j,k)*(rho1/rho2)/aa
                  rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2/rho2)/aa   
 
-                 !aa = rho1x(i+1,j,k) + rho2x(i+1,j,k)
-
-                 bb = (1./aa) - 1.
-
-                 !aa = th*(rho1) + (1.-th)*(rho2)
-                 !rho1x(i+1,j,k) = rho1x(i+1,j,k)*(rho1)/aa
-                 !rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho2)/aa
-
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   + xij/aa/dx**2 + xid*(1.-th)*(rho2/rho2)/aa/dx - (bb*mT*mT)/aa/dx**2
-                 w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx      + (bb*mT*mT)/aa/dx**2
+                 w(i,j,k)   = w(i,j,k)   + xij/aa/dx**2 + xid*(1.-th)*(rho2/rho2)/aa/dx - mT/aa/dx**2
+                 w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx      + mT/aa/dx**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx - (bb*mT*mT)/aa/dx
-
-!print*,"Jump X2",i,j,th,aa,rho1x(i+1,j,k)+rho2x(i+1,j,k),xij,"-->",w(i,j,k),w(i+1,j,k),sigx(i+1,j,k)
+                 sigx(i+1,j,k) = xij/aa/dx - mT/aa/dx
 
                  else
 
@@ -445,16 +425,17 @@
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
 
                  cri = crv(i,j+1,k)*(1.-th) + crv(i,j,k)*th
-                 mT = mdot(i,j+1,k)*(1.-th) + mdot(i,j,k)*th
-                 !mT = 0.5*(mdot(i,j+1,k)+mdot(i,j,k))
 
                  yijl = xit*crv(i,j,k)
                  yijr = xit*crv(i,j+1,k)
                  yidl = 0. 
                  yidr = 0.
+                 mfl  = bb*mdot(i,j,k)*mdot(i,j,k)
+                 mfr  = bb*mdot(i,j+1,k)*mdot(i,j+1,k)
 
                  yij = yijl*th + yijr*(1.-th)
                  yid = yidl*th + yidr*(1.-th)
+                 mT  = mfl*th  + mfr*(1.-th)
 
                  if (iSmear  .eq. 1) then
 
@@ -464,22 +445,12 @@
                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
 
-                 !aa = rho1y(i,j+1,k) + rho2y(i,j+1,k)
-
-                 bb = (1./aa) - 1.
-
-                 !aa = th*(rho1) + (1.-th)*(rho2)
-                 !rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1)/aa
-                 !rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2)/aa
-
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k) - yij/aa/dy**2 - yid*th*(rho1/rho2)/aa/dy         + (bb*mT*mT)/aa/dy**2
-                 w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy- (bb*mT*mT)/aa/dy**2
+                 w(i,j,k)   = w(i,j,k) - yij/aa/dy**2 - yid*th*(rho1/rho2)/aa/dy         + mT/aa/dy**2
+                 w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy- mT/aa/dy**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy + (bb*mT*mT)/aa/dy
-
-!print*,"Jump Y1",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
+                 sigy(i,j+1,k) = - yij/aa/dy + mT/aa/dy
 
                  else
 
@@ -501,16 +472,17 @@
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) 
  
                  cri = crv(i,j,k)*(1.-th) + crv(i,j+1,k)*th
-                 mT = mdot(i,j,k)*(1.-th) + mdot(i,j+1,k)*th
-                 !mT = 0.5*(mdot(i,j,k)+mdot(i,j+1,k))
 
                  yijl = xit*crv(i,j,k)
                  yijr = xit*crv(i,j+1,k)
                  yidl = 0. 
                  yidr = 0.
+                 mfl  = bb*mdot(i,j,k)*mdot(i,j,k)
+                 mfr  = bb*mdot(i,j+1,k)*mdot(i,j+1,k)
 
                  yij = yijl*(1.-th) + yijr*th
                  yid = yidl*(1.-th) + yidr*th
+                 mT  = mfl*(1.-th)  + mfr*th
 
                  if (iSmear  .eq. 1) then
 
@@ -520,22 +492,12 @@
                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa  
 
-                 !aa = rho1y(i,j+1,k) + rho2y(i,j+1,k)
-
-                 bb = (1./aa) - 1.
-
-                 !aa = th*(rho1) + (1.-th)*(rho2)
-                 !rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1)/aa
-                 !rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2)/aa
-
                  !- kpd - "w" is the Source term for Pressure Eqn
-                 w(i,j,k)   = w(i,j,k)   + yij/aa/dy**2 + yid*(1.-th)*(rho2/rho2)/aa/dy - (bb*mT*mT)/aa/dy**2
-                 w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy      + (bb*mT*mT)/aa/dy**2
+                 w(i,j,k)   = w(i,j,k)   + yij/aa/dy**2 + yid*(1.-th)*(rho2/rho2)/aa/dy - mT/aa/dy**2
+                 w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy      + mT/aa/dy**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy - (bb*mT*mT)/aa/dy
-
-!print*,"Jump Y2",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
+                 sigy(i,j+1,k) = yij/aa/dy - mT/aa/dy
 
                  else
 
@@ -549,33 +511,10 @@
 
               end if
 
-              !--------------------------------------------------------------
-              !--------------------------------------------------------------
-
-
            end do
         end do
-
-
-!        do j = jy1,jy2
-!           do i = ix1,ix2
-!              if(mph_meshMe.eq. 0) print*,"CURV",i,j,sigx(i,j,k),sigy(i,j,k),w(i,j,k)
-!           end do
-!        end do
-
 
         !- kpd - This is done for post-processing to visualize where jumps were applied...
         crv = crv*icrv
 
-
-
-!        do i = ix1-1,ix2+1
-!           do j = jy1-1,jy2+1
-!              print*,"Second Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
-!           end do
-!        end do
-
-
       end subroutine mph_KPDcurvature2DC
-
-
