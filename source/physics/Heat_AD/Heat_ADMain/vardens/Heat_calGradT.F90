@@ -27,7 +27,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
             th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
             th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
 
-            Tx  = 0.5*((T(i,j,k) - ht_Tsat)/(th2*dx) + (ht_Tsat-T(i,j,k))/(th*dx))
+            Tx  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dx) + (ht_Tsat-T(i,j,k))/(th2*dx))
 
         else if((abs(s(i-1,j,k)) .le. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
@@ -86,7 +86,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
             th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
             th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
 
-            Ty  = 0.5*((T(i,j,k) - ht_Tsat)/(th2*dy) + (ht_Tsat-T(i,j,k))/(th*dy))
+            Ty  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dy) + (ht_Tsat-T(i,j,k))/(th2*dy))
 
         else if((abs(s(i,j-1,k)) .le. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 

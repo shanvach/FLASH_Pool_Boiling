@@ -27,7 +27,7 @@ St =  0.0879      # R113  1.0 atm
 #St =  0.1275      # FC-72 1.0 atm
 #St =   0.1643      # FC-72 0.7 atm
 
-iConvU = 0
+iConvU = 3
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
@@ -46,7 +46,7 @@ vis2 = 47.6290  # R113
 #vis2 = 1.0       # FC-72
 
 # Thermal Properties 
-thco1 = 1.0
+thco1 = 0.0
 thco2 = 6.7006   # R113
 #thco2 = 27.16    # Water
 #thco2 = 1.0      # FC-72
@@ -82,15 +82,15 @@ geometry	= "cartesian"
 
 #       Size of computational volume
 xmin =    0.0
-xmax =    1.5
+xmax =    1.25
 ymin =    0.0
-ymax =    6.0
+ymax =    5.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
 xr_boundary_type = "neumann_ins"
 yl_boundary_type = "neumann_ins"
-yr_boundary_type = "outflow_ins"
+yr_boundary_type = "neumann_ins"
 
 #      Poisson Solver Boundary Conditions
 xl_mg_boundary_type = "outflow"
@@ -112,8 +112,8 @@ restart         = .false.
 nend = 2000000000
 tmax            = 100.0
 cflflg          = 1
-cfl             = 0.5
-sigma		= 0.2
+cfl             = 1.0
+sigma		= 1.0
 dtspec          = 1.0
 dtinit          = 1.0
 tstep_change_factor=1.0
@@ -131,11 +131,11 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 1.0
-checkpointFileIntervalStep = 10000
+checkpointFileIntervalTime = 0.1
+#checkpointFileIntervalStep = 10000
 
-plotFileIntervalTime = 0.05
-plotFileIntervalStep = 1000000
+plotFileIntervalTime = 0.005
+#plotFileIntervalStep = 1000000
 
 ##	AMR parameters
 nblockx	= 3
@@ -145,7 +145,7 @@ lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 5000
+nrefs           = 1000
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1

@@ -136,7 +136,7 @@ subroutine Simulation_initBlock(blockId)
                    0.5*del(KAXIS)
 
            ! Main Bubble
-           r0 =  0.2
+           r0 =  0.05
            x0 =  0.0
            z0 =  0.0
            y0 =  r0*cos((30.0/180.0)*acos(-1.0))
@@ -187,41 +187,41 @@ subroutine Simulation_initBlock(blockId)
 
            ! Multiple bubble setup         
            
-           if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4) .and. &
-              abs(d1) < abs(d5) .and. abs(d1) < abs(d6) .and. abs(d1) < abs(d7) .and. &
-              abs(d1) < abs(d8) .and. abs(d1) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d1
+           !if(abs(d1) < abs(d2) .and. abs(d1) < abs(d3) .and. abs(d1) < abs(d4) .and. &
+           !   abs(d1) < abs(d5) .and. abs(d1) < abs(d6) .and. abs(d1) < abs(d7) .and. &
+           !   abs(d1) < abs(d8) .and. abs(d1) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d1
 
-           if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4) .and. &
-              abs(d2) < abs(d5) .and. abs(d2) < abs(d6) .and. abs(d2) < abs(d7) .and. &
-              abs(d2) < abs(d8) .and. abs(d2) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d2
+           !if(abs(d2) < abs(d1) .and. abs(d2) < abs(d3) .and. abs(d2) < abs(d4) .and. &
+           !   abs(d2) < abs(d5) .and. abs(d2) < abs(d6) .and. abs(d2) < abs(d7) .and. &
+           !   abs(d2) < abs(d8) .and. abs(d2) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d2
 
-           if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4) .and. &
-              abs(d3) < abs(d5) .and. abs(d3) < abs(d6) .and. abs(d3) < abs(d7) .and. &
-              abs(d3) < abs(d8) .and. abs(d3) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d3
+           !if(abs(d3) < abs(d2) .and. abs(d3) < abs(d1) .and. abs(d3) < abs(d4) .and. &
+           !   abs(d3) < abs(d5) .and. abs(d3) < abs(d6) .and. abs(d3) < abs(d7) .and. &
+           !   abs(d3) < abs(d8) .and. abs(d3) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d3
 
-           if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1) .and. &
-              abs(d4) < abs(d5) .and. abs(d4) < abs(d6) .and. abs(d4) < abs(d7) .and. &
-              abs(d4) < abs(d8) .and. abs(d4) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d4
+           !if(abs(d4) < abs(d2) .and. abs(d4) < abs(d3) .and. abs(d4) < abs(d1) .and. &
+           !   abs(d4) < abs(d5) .and. abs(d4) < abs(d6) .and. abs(d4) < abs(d7) .and. &
+           !   abs(d4) < abs(d8) .and. abs(d4) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d4
 
-           if(abs(d5) < abs(d2) .and. abs(d5) < abs(d3) .and. abs(d5) < abs(d4) .and. &
-              abs(d5) < abs(d1) .and. abs(d5) < abs(d6) .and. abs(d5) < abs(d7) .and. &
-              abs(d5) < abs(d8) .and. abs(d5) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d5
+           !if(abs(d5) < abs(d2) .and. abs(d5) < abs(d3) .and. abs(d5) < abs(d4) .and. &
+           !   abs(d5) < abs(d1) .and. abs(d5) < abs(d6) .and. abs(d5) < abs(d7) .and. &
+           !   abs(d5) < abs(d8) .and. abs(d5) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d5
 
-           if(abs(d6) < abs(d2) .and. abs(d6) < abs(d3) .and. abs(d6) < abs(d4) .and. &
-              abs(d6) < abs(d5) .and. abs(d6) < abs(d1) .and. abs(d6) < abs(d7) .and. &
-              abs(d6) < abs(d8) .and. abs(d6) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d6
+           !if(abs(d6) < abs(d2) .and. abs(d6) < abs(d3) .and. abs(d6) < abs(d4) .and. &
+           !   abs(d6) < abs(d5) .and. abs(d6) < abs(d1) .and. abs(d6) < abs(d7) .and. &
+           !   abs(d6) < abs(d8) .and. abs(d6) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d6
 
-           if(abs(d7) < abs(d2) .and. abs(d7) < abs(d3) .and. abs(d7) < abs(d4) .and. &
-              abs(d7) < abs(d5) .and. abs(d7) < abs(d6) .and. abs(d7) < abs(d1) .and. &
-              abs(d7) < abs(d8) .and. abs(d7) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d7
+           !if(abs(d7) < abs(d2) .and. abs(d7) < abs(d3) .and. abs(d7) < abs(d4) .and. &
+           !   abs(d7) < abs(d5) .and. abs(d7) < abs(d6) .and. abs(d7) < abs(d1) .and. &
+           !   abs(d7) < abs(d8) .and. abs(d7) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d7
 
-           if(abs(d8) < abs(d2) .and. abs(d8) < abs(d3) .and. abs(d8) < abs(d4) .and. &
-              abs(d8) < abs(d5) .and. abs(d8) < abs(d6) .and. abs(d8) < abs(d7) .and. &
-              abs(d8) < abs(d1) .and. abs(d8) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d8
+           !if(abs(d8) < abs(d2) .and. abs(d8) < abs(d3) .and. abs(d8) < abs(d4) .and. &
+           !   abs(d8) < abs(d5) .and. abs(d8) < abs(d6) .and. abs(d8) < abs(d7) .and. &
+           !   abs(d8) < abs(d1) .and. abs(d8) < abs(d9)) solnData(DFUN_VAR,i,j,k) = d8
 
-           if(abs(d9) < abs(d2) .and. abs(d9) < abs(d3) .and. abs(d9) < abs(d4) .and. &
-              abs(d9) < abs(d5) .and. abs(d9) < abs(d6) .and. abs(d9) < abs(d7) .and. &
-              abs(d9) < abs(d8) .and. abs(d9) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d9
+           !if(abs(d9) < abs(d2) .and. abs(d9) < abs(d3) .and. abs(d9) < abs(d4) .and. &
+           !   abs(d9) < abs(d5) .and. abs(d9) < abs(d6) .and. abs(d9) < abs(d7) .and. &
+           !   abs(d9) < abs(d8) .and. abs(d9) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d9
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
