@@ -172,41 +172,41 @@ SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
 
 #endif
 
-!      aixr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-!      aixl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-!      aiyr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-!      aiyl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-
-!#if NDIM == 3
-!      aizr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-!      aizl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-!#endif
-
-      aixr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/4.0d0*&
-             (3.0d0*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)+xnorm(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/4.0d0*&
-             (rhoxr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-
-      aixl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/4.0d0*&
-             (3.0d0*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)+xnorm(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/4.0d0*&
-             (rhoxl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-
-      aiyr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/4.0d0*&
-             (3.0d0*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)+ynorm(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/4.0d0*&
-             (rhoyr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-
-      aiyl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/4.0d0*&
-             (3.0d0*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)+ynorm(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/4.0d0*&
-             (rhoyl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aixr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aixl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoxl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aiyr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aiyl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhoyl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
 
 #if NDIM == 3
-      aizr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/4.0d0*&
-             (3.0d0*znorm(ix1:ix2,jy1:jy2,kz1:kz2)+znorm(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/4.0d0*&
-             (rhozr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
-
-      aizl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/4.0d0*&
-             (3.0d0*znorm(ix1:ix2,jy1:jy2,kz1:kz2)+znorm(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/4.0d0*&
-             (rhozl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aizr = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+      aizl = mdot(ix1:ix2,jy1:jy2,kz1:kz2)*znorm(ix1:ix2,jy1:jy2,kz1:kz2)*(rhozl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
 #endif
+
+!      aixr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/4.0d0*&
+!             (3.0d0*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)+xnorm(ix1+1:ix2+1,jy1:jy2,kz1:kz2))/4.0d0*&
+!             (rhoxr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+!      aixl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/4.0d0*&
+!             (3.0d0*xnorm(ix1:ix2,jy1:jy2,kz1:kz2)+xnorm(ix1-1:ix2-1,jy1:jy2,kz1:kz2))/4.0d0*&
+!             (rhoxl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+!      aiyr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/4.0d0*&
+!             (3.0d0*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)+ynorm(ix1:ix2,jy1+1:jy2+1,kz1:kz2))/4.0d0*&
+!             (rhoyr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+!      aiyl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/4.0d0*&
+!             (3.0d0*ynorm(ix1:ix2,jy1:jy2,kz1:kz2)+ynorm(ix1:ix2,jy1-1:jy2-1,kz1:kz2))/4.0d0*&
+!             (rhoyl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+!#if NDIM == 3
+!      aizr = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/4.0d0*&
+!             (3.0d0*znorm(ix1:ix2,jy1:jy2,kz1:kz2)+znorm(ix1:ix2,jy1:jy2,kz1+1:kz2+1))/4.0d0*&
+!             (rhozr - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+
+!      aizl = (3.0d0*mdot(ix1:ix2,jy1:jy2,kz1:kz2)+mdot(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/4.0d0*&
+!             (3.0d0*znorm(ix1:ix2,jy1:jy2,kz1:kz2)+znorm(ix1:ix2,jy1:jy2,kz1-1:kz2-1))/4.0d0*&
+!             (rhozl - smrh(ix1:ix2,jy1:jy2,kz1:kz2))
+!#endif
 
       divv(ix1:ix2,jy1:jy2,kz1:kz2) =           &
          ( uni(ix1+1:ix2+1,jy1:jy2,kz1:kz2) -   &

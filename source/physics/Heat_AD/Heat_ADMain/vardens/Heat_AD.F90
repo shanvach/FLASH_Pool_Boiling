@@ -9,9 +9,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "Heat_AD.h"
 #include "Flash.h"
 
-   use Heat_AD_interface, only: Heat_Solve,Heat_RHS,Heat_calGradT,&
-                                Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,&
-                                Heat_extrapGradT_3D,Heat_calGradT_3D
+   use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
+                                Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
+                                Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -89,7 +89,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
-     call Heat_RHS(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_central(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      del(DIR_X),del(DIR_Y),del(DIR_Z),&

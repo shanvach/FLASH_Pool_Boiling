@@ -15,7 +15,7 @@ module Heat_AD_interface
     end interface
 
     interface
-       subroutine Heat_RHS(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
+       subroutine Heat_RHS_upwind(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
                            rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
@@ -25,7 +25,35 @@ module Heat_AD_interface
          integer, intent(in) :: ix1, ix2, jy1, jy2
          real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
          real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
-       end subroutine Heat_RHS
+       end subroutine Heat_RHS_upwind
+    end interface
+
+    interface
+       subroutine Heat_RHS_central(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
+                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
+         implicit none
+         real, dimension(:,:,:), intent(inout) :: T_rhs
+         real, dimension(:,:,:), intent(in) :: T_o
+         real, dimension(:,:,:), intent(in) :: u,v
+         real, intent(in) :: dx, dy, dz, inRe
+         integer, intent(in) :: ix1, ix2, jy1, jy2
+         real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
+       end subroutine Heat_RHS_central
+    end interface
+
+    interface
+       subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
+                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
+         implicit none
+         real, dimension(:,:,:), intent(inout) :: T_rhs
+         real, dimension(:,:,:), intent(in) :: T_o
+         real, dimension(:,:,:), intent(in) :: u,v
+         real, intent(in) :: dx, dy, dz, inRe
+         integer, intent(in) :: ix1, ix2, jy1, jy2
+         real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
+       end subroutine Heat_RHS_weno3
     end interface
 
     interface
@@ -51,6 +79,16 @@ module Heat_AD_interface
          real,    INTENT(IN) :: timeEndAdv, dt, dtOld
        end subroutine Heat_AD
     end interface 
+
+   interface 
+      subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
+        implicit none
+        real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
+        real, intent(in) :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2
+      end subroutine Heat_calGradT_central
+   end interface
 
    interface 
       subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
