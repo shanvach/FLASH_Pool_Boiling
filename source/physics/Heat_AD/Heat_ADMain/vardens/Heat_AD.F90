@@ -90,7 +90,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
-     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_central(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      del(DIR_X),del(DIR_Y),del(DIR_Z),&
@@ -107,7 +107,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #if NDIM == 3
-     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_3D(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      facezData(VELC_FACE_VAR,:,:,:),&
