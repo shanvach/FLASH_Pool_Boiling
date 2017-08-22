@@ -2,6 +2,9 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
 #include "Flash.h"
 
+#define SECOND_ORDER_UPWIND
+!#define THIRD_ORDER_UPWIND
+
    implicit none
    real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
    real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
@@ -49,40 +52,55 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
    ny_plus = max(nyconv,0.)
    ny_mins = min(nyconv,0.)
 
-   Tlx_plus = (Tnl_o(ix1+1:ix2+1,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1:jy2,k))/dx
-   Tlx_mins = (Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1-1:ix2-1,jy1:jy2,k))/dx
+#ifdef SECOND_ORDER_UPWIND
+   !---Second Order Upwind-------!
+   Tlx_plus = (+4*Tnl_o(ix1+1:ix2+1,jy1:jy2,k)-3*Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1+2:ix2+2,jy1:jy2,k))/(2.0*dx)
+   Tlx_mins = (-4*Tnl_o(ix1-1:ix2-1,jy1:jy2,k)+3*Tnl_o(ix1:ix2,jy1:jy2,k)+Tnl_o(ix1-2:ix2-2,jy1:jy2,k))/(2.0*dx)
 
-   Tly_plus = (Tnl_o(ix1:ix2,jy1+1:jy2+1,k)-Tnl_o(ix1:ix2,jy1:jy2,k))/dy
-   Tly_mins = (Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1-1:jy2-1,k))/dy
+   Tly_plus = (+4*Tnl_o(ix1:ix2,jy1+1:jy2+1,k)-3*Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1+2:jy2+2,k))/(2.0*dy)
+   Tly_mins = (-4*Tnl_o(ix1:ix2,jy1-1:jy2-1,k)+3*Tnl_o(ix1:ix2,jy1:jy2,k)+Tnl_o(ix1:ix2,jy1-2:jy2-2,k))/(2.0*dy)
 
-   Tvx_plus = (Tnv_o(ix1+1:ix2+1,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1:jy2,k))/dx
-   Tvx_mins = (Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1-1:ix2-1,jy1:jy2,k))/dx
+   Tvx_plus = (+4*Tnv_o(ix1+1:ix2+1,jy1:jy2,k)-3*Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1+2:ix2+2,jy1:jy2,k))/(2.0*dx)
+   Tvx_mins = (-4*Tnv_o(ix1-1:ix2-1,jy1:jy2,k)+3*Tnv_o(ix1:ix2,jy1:jy2,k)+Tnv_o(ix1-2:ix2-2,jy1:jy2,k))/(2.0*dx)
 
-   Tvy_plus = (Tnv_o(ix1:ix2,jy1+1:jy2+1,k)-Tnv_o(ix1:ix2,jy1:jy2,k))/dy
-   Tvy_mins = (Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1-1:jy2-1,k))/dy
+   Tvy_plus = (+4*Tnv_o(ix1:ix2,jy1+1:jy2+1,k)-3*Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1+2:jy2+2,k))/(2.0*dy)
+   Tvy_mins = (-4*Tnv_o(ix1:ix2,jy1-1:jy2-1,k)+3*Tnv_o(ix1:ix2,jy1:jy2,k)+Tnv_o(ix1:ix2,jy1-2:jy2-2,k))/(2.0*dy)
+   !-----------------------------!
+#endif
+
+#ifdef THIRD_ORDER_UPWIND
+   !---Third Order Upwind--------!
+   Tlx_plus = (-2*Tnl_o(ix1-1:ix2-1,jy1:jy2,k)+6*Tnl_o(ix1+1:ix2+1,jy1:jy2,k) &
+               -3*Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1+2:ix2+2,jy1:jy2,k))/(6.0*dx)
+
+   Tlx_mins = (+2*Tnl_o(ix1+1:ix2+1,jy1:jy2,k)-6*Tnl_o(ix1-1:ix2-1,jy1:jy2,k) &
+               +3*Tnl_o(ix1:ix2,jy1:jy2,k)+Tnl_o(ix1-2:ix2-2,jy1:jy2,k))/(6.0*dx)
+
+   Tly_plus = (-2*Tnl_o(ix1:ix2,jy1-1:jy2-1,k)+6*Tnl_o(ix1:ix2,jy1+1:jy2+1,k) &
+               -3*Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1+2:jy2+2,k))/(6.0*dy)
+
+   Tly_mins = (+2*Tnl_o(ix1:ix2,jy1+1:jy2+1,k)-6*Tnl_o(ix1:ix2,jy1-1:jy2-1,k) &
+               +3*Tnl_o(ix1:ix2,jy1:jy2,k)+Tnl_o(ix1:ix2,jy1-2:jy2-2,k))/(6.0*dy)
+
+   Tvx_plus = (-2*Tnv_o(ix1-1:ix2-1,jy1:jy2,k)+6*Tnv_o(ix1+1:ix2+1,jy1:jy2,k) &
+               -3*Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1+2:ix2+2,jy1:jy2,k))/(6.0*dx)
+
+   Tvx_mins = (+2*Tnv_o(ix1+1:ix2+1,jy1:jy2,k)-6*Tnv_o(ix1-1:ix2-1,jy1:jy2,k) &
+               +3*Tnv_o(ix1:ix2,jy1:jy2,k)+Tnv_o(ix1-2:ix2-2,jy1:jy2,k))/(6.0*dx)
+
+   Tvy_plus = (-2*Tnv_o(ix1:ix2,jy1-1:jy2-1,k)+6*Tnv_o(ix1:ix2,jy1+1:jy2+1,k) &
+               -3*Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1+2:jy2+2,k))/(6.0*dy)
+
+   Tvy_mins = (+2*Tnv_o(ix1:ix2,jy1+1:jy2+1,k)-6*Tnv_o(ix1:ix2,jy1-1:jy2-1,k) &
+               +3*Tnv_o(ix1:ix2,jy1:jy2,k)+Tnv_o(ix1:ix2,jy1-2:jy2-2,k))/(6.0*dy)
+   !-----------------------------!
+#endif
 
    Tnl(ix1:ix2,jy1:jy2,k) = Tnl_i(ix1:ix2,jy1:jy2,k) + dt_ext*pf(ix1:ix2,jy1:jy2,k)*(-nx_mins*Tlx_plus-nx_plus*Tlx_mins &
                                                                                      -ny_mins*Tly_plus-ny_plus*Tly_mins)
 
    Tnv(ix1:ix2,jy1:jy2,k) = Tnv_i(ix1:ix2,jy1:jy2,k) + dt_ext*(1.0-pf(ix1:ix2,jy1:jy2,k))*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
                                                                                            -ny_mins*Tvy_plus-ny_plus*Tvy_mins)
-  !do j =jy1,jy2
-  ! do i=ix1,ix2
-
-  !    if((s(i,j,k)*s(i+1,j,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i-1,j,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i,j+1,k) .le. 0.) .or. &
-  !       (s(i,j,k)*s(i,j-1,k) .le. 0.)) then
- 
-  !       Tnl_res = Tnl_res + (Tnl_o(i,j,k)-Tnl(i,j,k))**2
-  !       Tnv_res = Tnv_res + (Tnv_o(i,j,k)-Tnv(i,j,k))**2
-
-  !    end if
-
-
-  ! end do
-  !end do
-
    Tnl_res = sum(sum(sum((mflg*(Tnl_o(:,:,:)-Tnl(:,:,:)))**2,1),1))
    Tnv_res = sum(sum(sum((mflg*(Tnv_o(:,:,:)-Tnv(:,:,:)))**2,1),1))
 

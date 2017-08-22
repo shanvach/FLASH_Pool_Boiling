@@ -6,8 +6,8 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
 #include "Heat_AD.h"
 
-!#define FOUP
-#define CENT
+!#define FIRST_ORDER_UPWIND
+#define SECOND_ORDER_CENTRAL
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_rhs
@@ -174,14 +174,14 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
     Tyy = alph(i,j,k)*(coeff*(Ty_plus-Tij)/dy - coeff*(Tij-Ty_mins)/dy)/dy
     Tzz = alph(i,j,k)*(coeff*(Tz_plus-Tij)/dz - coeff*(Tij-Tz_mins)/dz)/dz
 
-#ifdef FOUP
+#ifdef FIRST_ORDER_UPWIND
     T_rhs(i,j,k) = ((-(u_plus*(Tij-Tx_mins)/dx+u_mins*(Tx_plus-Tij)/dx)&
                      -(v_plus*(Tij-Ty_mins)/dy+v_mins*(Ty_plus-Tij)/dy)&
                      -(w_plus*(Tij-Tz_mins)/dz+w_mins*(Tz_plus-Tij)/dz))&
                      +(Txx+Tyy+Tzz))      
 #endif
 
-#ifdef CENT
+#ifdef SECOND_ORDER_CENTRAL
     T_rhs(i,j,k) = - u_conv*(Txp-Txm)/(dxp+dxm) &
                    - v_conv*(Typ-Tym)/(dyp+dym) &
                    - w_conv*(Tzp-Tzm)/(dzp+dzm) &
