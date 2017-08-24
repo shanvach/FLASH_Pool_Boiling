@@ -1,6 +1,6 @@
 subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
-         use Heat_AD_data
+    use Heat_AD_data
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
@@ -93,6 +93,10 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
          Tx = (Tx_plus - Tx_mins)/(2*dx)
          Ty = (Ty_plus - Ty_mins)/(2*dy)
 
+         !--------------------------------------------------------------------------!
+         !----------------------------Calculate Fluxes------------------------------!
+         !--------------------------------------------------------------------------!
+
          if (pf(i,j,k) .eq. 0.) then
           
             Tnl(i,j,k) = ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty) 
@@ -105,6 +109,5 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
    
       end do
     end do
-#endif
 
 end subroutine Heat_calGradT_central

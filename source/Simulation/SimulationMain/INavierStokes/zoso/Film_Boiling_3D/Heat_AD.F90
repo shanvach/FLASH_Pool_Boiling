@@ -11,7 +11,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_calGradT_3D_central,&
-                                Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central
+                                Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,Heat_RHS_weno3,&
+                                Heat_RHS_3D_weno3
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -85,7 +86,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
-     call Heat_RHS_upwind(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      del(DIR_X),del(DIR_Y),del(DIR_Z),&
@@ -101,7 +102,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #if NDIM == 3
-     call Heat_RHS_3D(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      facezData(VELC_FACE_VAR,:,:,:),&

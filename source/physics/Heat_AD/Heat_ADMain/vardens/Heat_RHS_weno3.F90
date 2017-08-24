@@ -25,8 +25,8 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real :: coeff
   real :: tol
   real :: rhoc,rhoxm,rhoym,rhoxp,rhoyp
-  real :: thxp1, thxp2, thxp3, thxm1, thxm2, thxm3
-  real :: thyp1, thyp2, thyp3, thym1, thym2, thym3
+  real :: thxp1, thxm1
+  real :: thyp1, thym1
 
   real :: eps, &
           s1r,s2r,s3r,s4r,s5r,s1l,s2l,s3l,s4l,s5l, &
@@ -66,29 +66,68 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      Tij = T_o(i,j,k)
 
      thxp1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
-     thxp2 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+2,j,k))))
-     thxp3 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+3,j,k))))
      thxm1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
-     thxm2 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-2,j,k))))
-     thxm3 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-3,j,k))))
-
      thyp1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
-     thyp2 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+2,k))))
-     thyp3 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+3,k))))
      thym1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
-     thym2 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-2,k))))
-     thym3 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-3,k))))
 
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) Tx_plus = (ht_Tsat-Tij)/thxp1 + Tij
-     ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) Tx_mins = (ht_Tsat-Tij)/thxm1 + Tij
-     ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) Ty_plus = (ht_Tsat-Tij)/thyp1 + Tij
-     ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) Ty_mins = (ht_Tsat-Tij)/thym1 + Tij
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
+
+        if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
+        Tx_plus = (ht_Tsat-Tij)/thxp1 + Tij
+
+        else
+        Tx_plus = (2*ht_Tsat + (2*thxp1*thxp1 - 2)*Tij + (-thxp1*thxp1 + thxp1)*T_o(i-1,j,k))/(thxp1 + thxp1*thxp1)
+
+        end if
+
+      end if
+      ! End of Case 1 !
+
+
+      ! Case 2 !
+      if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
+
+         if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
+         Tx_mins = (ht_Tsat-Tij)/thxm1 + Tij
+
+         else
+         Tx_mins = (2*ht_Tsat + (2*thxm1*thxm1 - 2)*Tij + (-thxm1*thxm1 + thxm1)*T_o(i+1,j,k))/(thxm1 + thxm1*thxm1)
+
+         end if
+
+      end if
+      ! End of Case 2 !
+
+      ! Case 3 !
+      if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
+
+         if(s(i,j,k)*s(i,j-1,k) .le. 0.0d0) then
+         Ty_plus = (ht_Tsat-Tij)/thyp1 + Tij
+
+         else
+         Ty_plus = (2*ht_Tsat + (2*thyp1*thyp1 - 2)*Tij + (-thyp1*thyp1 + thyp1)*T_o(i,j-1,k))/(thyp1 + thyp1*thyp1)
+
+         end if
+
+       end if
+       ! End of Case 3 !
+
+       ! Case 4 !
+       if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
+
+          if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
+          Ty_mins = (ht_Tsat-Tij)/thym1 + Tij
+
+          else
+          Ty_mins = (2*ht_Tsat + (2*thym1*thym1 - 2)*Tij + (-thym1*thym1 + thym1)*T_o(i,j+1,k))/(thym1 + thym1*thym1)
+
+          end if
+
+        end if
+        ! End of Case 4 ! 
 
      !______________________Advection Terms_______________________!
 
@@ -101,11 +140,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4r = T_o(i+1,j,k)
         s5r = T_o(i+2,j,k)
 
-        if(s(i,j,k)*s(i-2,j,k) .le. 0.0) s1r = ((ht_Tsat-Tij)/thxm2) + Tij
-        if(s(i,j,k)*s(i-1,j,k) .le. 0.0) s2r = ((ht_Tsat-Tij)/thxm1) + Tij
-        if(s(i,j,k)*s(i+1,j,k) .le. 0.0) s4r = ((ht_Tsat-Tij)/thxp1) + Tij
-        if(s(i,j,k)*s(i+2,j,k) .le. 0.0) s5r = ((ht_Tsat-Tij)/thxp2) + Tij
- 
         rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
               +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
         rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
@@ -133,11 +167,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4r = T_o(i+2,j,k)
         s5r = T_o(i+3,j,k)
 
-        if(s(i,j,k)*s(i-1,j,k) .le. 0.0) s1r = ((ht_Tsat-Tij)/thxm1) + Tij
-        if(s(i,j,k)*s(i+1,j,k) .le. 0.0) s3r = ((ht_Tsat-Tij)/thxp1) + Tij
-        if(s(i,j,k)*s(i+2,j,k) .le. 0.0) s4r = ((ht_Tsat-Tij)/thxp2) + Tij
-        if(s(i,j,k)*s(i+3,j,k) .le. 0.0) s5r = ((ht_Tsat-Tij)/thxp3) + Tij
- 
         rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
               +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
         rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
@@ -167,11 +196,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4l = T_o(i,j,k)
         s5l = T_o(i+1,j,k)
 
-        if(s(i,j,k)*s(i-3,j,k) .le. 0.0) s1l = ((ht_Tsat-Tij)/thxm3) + Tij
-        if(s(i,j,k)*s(i-2,j,k) .le. 0.0) s2l = ((ht_Tsat-Tij)/thxm2) + Tij
-        if(s(i,j,k)*s(i-1,j,k) .le. 0.0) s3l = ((ht_Tsat-Tij)/thxm1) + Tij
-        if(s(i,j,k)*s(i+1,j,k) .le. 0.0) s5l = ((ht_Tsat-Tij)/thxp1) + Tij
- 
         rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
               +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
         rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
@@ -199,11 +223,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4l = T_o(i+1,j,k)
         s5l = T_o(i+2,j,k)
 
-        if(s(i,j,k)*s(i-2,j,k) .le. 0.0) s1l = ((ht_Tsat-Tij)/thxm2) + Tij
-        if(s(i,j,k)*s(i-1,j,k) .le. 0.0) s2l = ((ht_Tsat-Tij)/thxm1) + Tij
-        if(s(i,j,k)*s(i+1,j,k) .le. 0.0) s4l = ((ht_Tsat-Tij)/thxp1) + Tij
-        if(s(i,j,k)*s(i+2,j,k) .le. 0.0) s5l = ((ht_Tsat-Tij)/thxp2) + Tij
- 
         rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
               +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
         rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
@@ -242,11 +261,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4r = T_o(i,j+1,k)
         s5r = T_o(i,j+2,k)
 
-        if(s(i,j,k)*s(i,j-2,k) .le. 0.0) s1r = ((ht_Tsat-Tij)/thym2) + Tij
-        if(s(i,j,k)*s(i,j-1,k) .le. 0.0) s2r = ((ht_Tsat-Tij)/thym1) + Tij
-        if(s(i,j,k)*s(i,j+1,k) .le. 0.0) s4r = ((ht_Tsat-Tij)/thyp1) + Tij
-        if(s(i,j,k)*s(i,j+2,k) .le. 0.0) s5r = ((ht_Tsat-Tij)/thyp2) + Tij
- 
         rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
               +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
         rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
@@ -274,11 +288,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4r = T_o(i,j+2,k)
         s5r = T_o(i,j+3,k)
 
-        if(s(i,j,k)*s(i,j-1,k) .le. 0.0) s1r = ((ht_Tsat-Tij)/thym1) + Tij
-        if(s(i,j,k)*s(i,j+1,k) .le. 0.0) s3r = ((ht_Tsat-Tij)/thyp1) + Tij
-        if(s(i,j,k)*s(i,j+2,k) .le. 0.0) s4r = ((ht_Tsat-Tij)/thyp2) + Tij
-        if(s(i,j,k)*s(i,j+3,k) .le. 0.0) s5r = ((ht_Tsat-Tij)/thyp3) + Tij
- 
         rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
               +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
         rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
@@ -308,11 +317,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4l = T_o(i,j,k)
         s5l = T_o(i,j+1,k)
 
-        if(s(i,j,k)*s(i,j-3,k) .le. 0.0) s1l = ((ht_Tsat-Tij)/thym3) + Tij
-        if(s(i,j,k)*s(i,j-2,k) .le. 0.0) s2l = ((ht_Tsat-Tij)/thym2) + Tij
-        if(s(i,j,k)*s(i,j-1,k) .le. 0.0) s3l = ((ht_Tsat-Tij)/thym1) + Tij
-        if(s(i,j,k)*s(i,j+1,k) .le. 0.0) s5l = ((ht_Tsat-Tij)/thyp1) + Tij
- 
         rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
               +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
         rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
@@ -340,11 +344,6 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
         s4l = T_o(i,j+1,k)
         s5l = T_o(i,j+2,k)
 
-        if(s(i,j,k)*s(i,j-2,k) .le. 0.0) s1l = ((ht_Tsat-Tij)/thym2) + Tij
-        if(s(i,j,k)*s(i,j-1,k) .le. 0.0) s2l = ((ht_Tsat-Tij)/thym1) + Tij
-        if(s(i,j,k)*s(i,j+1,k) .le. 0.0) s4l = ((ht_Tsat-Tij)/thyp1) + Tij
-        if(s(i,j,k)*s(i,j+2,k) .le. 0.0) s5l = ((ht_Tsat-Tij)/thyp2) + Tij
- 
         rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
               +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
         rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &

@@ -462,9 +462,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(j - NGUARD - 1)*del(JAXIS)  +  &
                   0.5*del(JAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2)
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2)
 
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
+         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,1) = 0.1-rc
          
       end do
      end do
