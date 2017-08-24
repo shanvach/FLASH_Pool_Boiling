@@ -135,27 +135,20 @@
         do j = jy1-1,jy2+1
          do i = ix1-1,ix2+1
 
-              if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+              if(s(i,j,k)*s(i+1,j,k) .le. 0.) mflg(i+1,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+1,k) .le. 0.) mflg(i,j+1,k)   = 1.0
+              if(s(i,j,k)*s(i-1,j,k) .le. 0.) mflg(i-1,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-1,k) .le. 0.) mflg(i,j-1,k)   = 1.0
 
-                  mflg(i,j,k)   = 1.0
-                  mflg(i+1,j,k) = 1.0     
-                  mflg(i-1,j,k) = 1.0
-                  !mflg(i-2,j,k) = 1.0
-                  mflg(i+2,j,k) = 1.0
-                  !mflg(i+3,j,k) = 1.0
+              if(s(i,j,k)*s(i+2,j,k) .le. 0.) mflg(i+2,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+2,k) .le. 0.) mflg(i,j+2,k)   = 1.0
+              if(s(i,j,k)*s(i-2,j,k) .le. 0.) mflg(i-2,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-2,k) .le. 0.) mflg(i,j-2,k)   = 1.0
 
-              end if
-
-              if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
-
-                  mflg(i,j,k)   = 1.0
-                  mflg(i,j+1,k) = 1.0
-                  mflg(i,j-1,k) = 1.0
-                  !mflg(i,j-2,k) = 1.0
-                  mflg(i,j+2,k) = 1.0
-                  !mflg(i,j+3,k) = 1.0
-
-              end if
+              if(s(i,j,k)*s(i+3,j,k) .le. 0.) mflg(i+3,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+3,k) .le. 0.) mflg(i,j+3,k)   = 1.0
+              if(s(i,j,k)*s(i-3,j,k) .le. 0.) mflg(i-3,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-3,k) .le. 0.) mflg(i,j-3,k)   = 1.0
 
          end do
         end do
@@ -176,9 +169,6 @@
                a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                     pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              !rho1x(i,j,k) = a1*a2/rho1
-              !rho2x(i,j,k) = (1. - a1*a2)/rho2
-
                rho1x(i,j,k) = a1*a2/(rho1/rho2)
                rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
 
@@ -196,9 +186,6 @@
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-
-           !   !rho1y(i,j,k) = a1*a2/rho1
-           !   !rho2y(i,j,k) = (1. - a1*a2)/rho2
 
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
@@ -221,12 +208,6 @@
              s(ix1-1:ix2-1,jy1:jy2,kz1))/2./dx)**2 &
              + ((s(ix1:ix2,jy1+1:jy2+1,kz1) - &
              s(ix1:ix2,jy1-1:jy2-1,kz1))/2./dy)**2 )
-
-        !do i = ix1-1,ix2+1
-        !   do j = jy1-1,jy2+1
-        !      print*,"First Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
-        !   end do
-        !end do
 
       end subroutine mph_KPDcurvature2DAB
 

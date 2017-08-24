@@ -1,6 +1,6 @@
 subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
-        
-    use Heat_AD_data
+
+         use Heat_AD_data
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
@@ -8,10 +8,9 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
     real, intent(in) :: dx,dy,dz
     integer, intent(in) :: ix1,ix2,jy1,jy2
 
-    real :: th,tol,th2
+    real :: th,tol
     integer :: i,j,k
-    real :: Tij,Tipj,Timj,Tijp,Tijm,dxp,dxm,dyp,dym,Tx,Ty,Tax,Tbx,Tay,Tby,dyc,dxc,Tpx,Tmx,Tpy,Tmy
-    logical :: int_xp,int_xm,int_yp,int_ym
+    real :: Tij,Tx_plus,Tx_mins,Ty_plus,Ty_mins,Tx,Ty,Tz
 
     tol = 0.01
 
@@ -20,78 +19,79 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
     do i=ix1,ix2
       do j=jy1,jy2
 
-         Tipj = T(i+1,j,k)
-         Timj = T(i-1,j,k)
-         Tijp = T(i,j+1,k)
-         Tijm = T(i,j-1,k)
-         Tij  = T(i,j,k)
-         Tmx  = T(i,j,k)
-         Tpx  = T(i,j,k)
-         Tmy  = T(i,j,k)
-         Tpy  = T(i,j,k)
+         Tx_plus = T(i+1,j,k)
+         Tx_mins = T(i-1,j,k)
+         Ty_plus = T(i,j+1,k)
+         Ty_mins = T(i,j-1,k)
+         Tij     = T(i,j,k)
 
-         dxp = dx
-         dxm = dx
-         dym = dy
-         dyp = dy
+         ! Case 1 !
+         if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
 
-         int_xp = .FALSE.
-         int_xm = .FALSE.
-         int_yp = .FALSE.
-         int_ym = .FALSE.
+             th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
 
-         if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+             if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
+             Tx_plus = (ht_Tsat-Tij)/th + Tij
 
-            Tpx = T(i,j,k)
-            th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
-      
-            dxp = th*dx
-            Tipj = ht_Tsat
+             else
+             Tx_plus = (2*ht_Tsat + (2*th*th - 2)*Tij + (-th*th + th)*T(i-1,j,k))/(th + th*th)
 
-            int_xp = .TRUE.
+             end if
 
          end if
+         ! End of Case 1 !
 
-         if(s(i,j,k)*s(i-1,j,k) .le. 0.) then
 
-            Tmx = T(i,j,k)
-            th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
+         ! Case 2 !
+         if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
 
-            dxm = th*dx
-            Timj = ht_Tsat
+             th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
 
-            int_xm = .TRUE.
+             if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
+             Tx_mins = (ht_Tsat-Tij)/th + Tij
 
-         end if
+             else
+             Tx_mins = (2*ht_Tsat + (2*th*th - 2)*Tij + (-th*th + th)*T(i+1,j,k))/(th + th*th)
 
-         if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
-
-            Tpy = T(i,j,k)
-            th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
-
-            dyp = th*dy
-            Tijp = ht_Tsat
-
-            int_yp = .TRUE.
+             end if
 
          end if
+         ! End of Case 2 !
 
-         if(s(i,j,k)*s(i,j-1,k) .le. 0.) then
+         ! Case 3 !
+         if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
 
-            Tmy = T(i,j,k)
-            th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
+             th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
 
-            dym = th*dy
-            Tijm = ht_Tsat
+             if(s(i,j,k)*s(i,j-1,k) .le. 0.0d0) then
+             Ty_plus = (ht_Tsat-Tij)/th + Tij
 
-            int_ym = .TRUE.
+             else
+             Ty_plus = (2*ht_Tsat + (2*th*th - 2)*Tij + (-th*th + th)*T(i,j-1,k))/(th + th*th)
+
+             end if
 
          end if
+         ! End of Case 3 !
 
-         Tx = ((-dxp**2)*(Timj) + (dxp**2)*(Tmx) - (dxm**2)*(Tpx) + (dxm**2)*(Tipj))/(dxp*dxm*(dxp+dxm))
-         Ty = ((-dyp**2)*(Tijm) + (dyp**2)*(Tmy) - (dym**2)*(Tpy) + (dym**2)*(Tijp))/(dyp*dym*(dyp+dym))
+         ! Case 4 !
+         if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
 
-         !if(int_xm .or. int_xp .or. int_ym .or. int_yp) then
+             th = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
+
+             if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
+             Ty_mins = (ht_Tsat-Tij)/th + Tij
+
+             else
+             Ty_mins = (2*ht_Tsat + (2*th*th - 2)*Tij + (-th*th + th)*T(i,j+1,k))/(th + th*th)
+
+             end if
+
+         end if
+         ! End of Case 4 ! 
+
+         Tx = (Tx_plus - Tx_mins)/(2*dx)
+         Ty = (Ty_plus - Ty_mins)/(2*dy)
 
          if (pf(i,j,k) .eq. 0.) then
           
@@ -102,10 +102,9 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
             Tnv(i,j,k) = ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty)
          
          end if
-
-         !end if
-                           
+   
       end do
     end do
+#endif
 
 end subroutine Heat_calGradT_central

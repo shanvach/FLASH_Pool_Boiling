@@ -2,8 +2,8 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
 
 #include "Flash.h"
 
-!#define FIRST_ORDER_UPWIND
-#define SECOND_ORDER_UPWIND
+#define FIRST_ORDER_UPWIND
+!#define SECOND_ORDER_UPWIND
 
     implicit none
     real, dimension(:,:,:), intent(inout) :: Tnl,Tnv

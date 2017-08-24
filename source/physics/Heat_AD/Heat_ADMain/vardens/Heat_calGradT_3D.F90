@@ -25,18 +25,20 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
         !-----------------------------X - Direction--------------------------------!
         !--------------------------------------------------------------------------!
 
+        Tx = 0.0
+
         if((s(i+1,j,k)*s(i,j,k) .le. 0.0) .and. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
             th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
             th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
             Tx  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dx) + (ht_Tsat-T(i,j,k))/(th2*dx))
 
-        else if((abs(s(i-1,j,k)) .le. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
+        else if((abs(s(i-1,j,k)) .lt. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
 
             if(s(i-1,j,k)*s(i,j,k) .le. 0.0) then
 
-                if((abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))) .gt. tol) then
+                if((abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))) .ge. tol) then
 
                     th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
                     Tx = (T(i,j,k)-ht_Tsat)/(th*dx)
@@ -57,7 +59,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             if(s(i+1,j,k)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .ge. tol) then
 
                   th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
                   Tx = (ht_Tsat-T(i,j,k))/(th*dx)
@@ -81,17 +83,19 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
         !-----------------------------Y - Direction--------------------------------!
         !--------------------------------------------------------------------------!
 
+        Ty = 0.0
+
         if((s(i,j+1,k)*s(i,j,k) .le. 0.0) .and. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 
             th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
             th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
             Ty  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dy) + (ht_Tsat-T(i,j,k))/(th2*dy))
 
-        else if((abs(s(i,j-1,k)) .le. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
+        else if((abs(s(i,j-1,k)) .lt. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 
             if(s(i,j-1,k)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .ge. tol) then
 
                   th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
                   Ty = (T(i,j,k)-ht_Tsat)/(th*dy)
@@ -114,7 +118,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
             if(s(i,j+1,k)*s(i,j,k) .le. 0.0) then
 
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .ge. tol) then
 
                   th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
                   Ty = (ht_Tsat-T(i,j,k))/(th*dy)
@@ -137,17 +141,19 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
         !-----------------------------Z - Direction--------------------------------!
         !--------------------------------------------------------------------------!
 
+        Tz = 0.0
+
         if((s(i,j,k+1)*s(i,j,k) .le. 0.0) .and. (s(i,j,k-1)*s(i,j,k) .le. 0.0)) then
 
             th  =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1))))
             th2 =  max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))))
             Tz  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dz) + (ht_Tsat-T(i,j,k))/(th2*dz))
 
-        else if((abs(s(i,j,k-1)) .le. abs(s(i,j,k+1))) .or. (s(i,j,k-1)*s(i,j,k) .le. 0.0)) then
+        else if((abs(s(i,j,k-1)) .lt. abs(s(i,j,k+1))) .or. (s(i,j,k-1)*s(i,j,k) .le. 0.0)) then
 
             if(s(i,j,k-1)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1))) .ge. tol) then
 
                   th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1)))
                   Tz = (T(i,j,k)-ht_Tsat)/(th*dz)
@@ -169,7 +175,7 @@ subroutine Heat_calGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,n
 
             if(s(i,j,k+1)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))) .ge. tol) then
 
                   th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1))))
                   Tz = (ht_Tsat-T(i,j,k))/(th*dz)

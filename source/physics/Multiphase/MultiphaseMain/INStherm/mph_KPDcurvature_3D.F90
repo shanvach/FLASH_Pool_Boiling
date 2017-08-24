@@ -133,56 +133,40 @@
         do j = jy1-1,jy2+1
          do i = ix1-1,ix2+1
 
-              if(s(i,j,k)*s(i+1,j,k) .le. 0.) then
+              if(s(i,j,k)*s(i+1,j,k) .le. 0.) mflg(i+1,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+1,k) .le. 0.) mflg(i,j+1,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k+1) .le. 0.) mflg(i,j,k+1)   = 1.0
+              if(s(i,j,k)*s(i-1,j,k) .le. 0.) mflg(i-1,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-1,k) .le. 0.) mflg(i,j-1,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k-1) .le. 0.) mflg(i,j,k-1)   = 1.0
 
-                  mflg(i,j,k)   = 1.0
-                  mflg(i+1,j,k) = 1.0
+              if(s(i,j,k)*s(i+2,j,k) .le. 0.) mflg(i+2,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+2,k) .le. 0.) mflg(i,j+2,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k+2) .le. 0.) mflg(i,j,k+2)   = 1.0
+              if(s(i,j,k)*s(i-2,j,k) .le. 0.) mflg(i-2,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-2,k) .le. 0.) mflg(i,j-2,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k-2) .le. 0.) mflg(i,j,k-2)   = 1.0
 
-                  mflg(i-1,j,k) = 1.0
-                  mflg(i-2,j,k) = 1.0
-                  mflg(i-3,j,k) = 1.0
-                  mflg(i-4,j,k) = 1.0
+              if(s(i,j,k)*s(i+3,j,k) .le. 0.) mflg(i+3,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+3,k) .le. 0.) mflg(i,j+3,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k+3) .le. 0.) mflg(i,j,k+3)   = 1.0
+              if(s(i,j,k)*s(i-3,j,k) .le. 0.) mflg(i-3,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-3,k) .le. 0.) mflg(i,j-3,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k-3) .le. 0.) mflg(i,j,k-3)   = 1.0
 
-                  mflg(i+2,j,k) = 1.0
-                  mflg(i+3,j,k) = 1.0
-                  mflg(i+4,j,k) = 1.0
-                  mflg(i+5,j,k) = 1.0
+              if(s(i,j,k)*s(i+4,j,k) .le. 0.) mflg(i+4,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+4,k) .le. 0.) mflg(i,j+4,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k+4) .le. 0.) mflg(i,j,k+4)   = 1.0
+              if(s(i,j,k)*s(i-4,j,k) .le. 0.) mflg(i-4,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-4,k) .le. 0.) mflg(i,j-4,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k-4) .le. 0.) mflg(i,j,k-4)   = 1.0
 
-              end if
-
-              if(s(i,j,k)*s(i,j+1,k) .le. 0.) then
-
-                  mflg(i,j,k)   = 1.0
-                  mflg(i,j+1,k) = 1.0
-
-                  mflg(i,j-1,k) = 1.0
-                  mflg(i,j-2,k) = 1.0
-                  mflg(i,j-3,k) = 1.0
-                  mflg(i,j-4,k) = 1.0
-
-                  mflg(i,j+2,k) = 1.0
-                  mflg(i,j+3,k) = 1.0
-                  mflg(i,j+4,k) = 1.0
-                  mflg(i,j+5,k) = 1.0
-
-              end if
-
-              if(s(i,j,k)*s(i,j,k+1) .le. 0.) then
-
-                  mflg(i,j,k)   = 1.0
-                  mflg(i,j,k+1) = 1.0
-
-                  mflg(i,j,k-1) = 1.0
-                  mflg(i,j,k-2) = 1.0
-                  mflg(i,j,k-3) = 1.0
-                  mflg(i,j,k-4) = 1.0
-
-                  mflg(i,j,k+2) = 1.0
-                  mflg(i,j,k+3) = 1.0
-                  mflg(i,j,k+4) = 1.0
-                  mflg(i,j,k+5) = 1.0
-
-              end if
+              if(s(i,j,k)*s(i+5,j,k) .le. 0.) mflg(i+5,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+5,k) .le. 0.) mflg(i,j+5,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k+5) .le. 0.) mflg(i,j,k+5)   = 1.0
+              if(s(i,j,k)*s(i-5,j,k) .le. 0.) mflg(i-5,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-5,k) .le. 0.) mflg(i,j-5,k)   = 1.0
+              if(s(i,j,k)*s(i,j,k-5) .le. 0.) mflg(i,j,k-5)   = 1.0
 
          end do
         end do

@@ -20,7 +20,11 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
     do i=ix1,ix2
       do j=jy1,jy2
 
-!___________X DIR_______________!
+        !--------------------------------------------------------------------------!
+        !-----------------------------X - Direction--------------------------------!
+        !--------------------------------------------------------------------------!
+
+        Tx = 0.0
 
         if((s(i+1,j,k)*s(i,j,k) .le. 0.0) .and. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
@@ -29,12 +33,11 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
             Tx  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dx) + (ht_Tsat-T(i,j,k))/(th2*dx))
 
-        else if((abs(s(i-1,j,k)) .le. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
-
+        else if((abs(s(i-1,j,k)) .lt. abs(s(i+1,j,k))) .or. (s(i-1,j,k)*s(i,j,k) .le. 0.0)) then
 
             if(s(i-1,j,k)*s(i,j,k) .le. 0.0) then
 
-                if((abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))) .gt. tol) then
+                if((abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))) .ge. tol) then
 
                     th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
                     Tx = (T(i,j,k)-ht_Tsat)/(th*dx)
@@ -57,7 +60,7 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
             if(s(i+1,j,k)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))) .ge. tol) then
 
                   th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
                   Tx = (ht_Tsat-T(i,j,k))/(th*dx)
@@ -74,11 +77,15 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
                 Tx = (T(i+1,j,k)-T(i,j,k))/dx
 
              
-            end if
+            end if           
 
         endif
 
-!___________Y DIR_______________!
+        !--------------------------------------------------------------------------!
+        !-----------------------------Y - Direction--------------------------------!
+        !--------------------------------------------------------------------------!
+
+        Ty = 0.0
 
         if((s(i,j+1,k)*s(i,j,k) .le. 0.0) .and. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 
@@ -88,11 +95,11 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
             Ty  = 0.5*((T(i,j,k) - ht_Tsat)/(th*dy) + (ht_Tsat-T(i,j,k))/(th2*dy))
 
-        else if((abs(s(i,j-1,k)) .le. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
+        else if((abs(s(i,j-1,k)) .lt. abs(s(i,j+1,k))) .or. (s(i,j-1,k)*s(i,j,k) .le. 0.0)) then
 
             if(s(i,j-1,k)*s(i,j,k) .le. 0.0) then
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))) .ge. tol) then
 
                   th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
                   Ty = (T(i,j,k)-ht_Tsat)/(th*dy)
@@ -111,12 +118,12 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
             end if
 
-      else if((abs(s(i,j-1,k)) .gt. abs(s(i,j+1,k))) .or. (s(i,j+1,k)*s(i,j,k) .le. 0.0)) then
+       else if((abs(s(i,j-1,k)) .gt. abs(s(i,j+1,k))) .or. (s(i,j+1,k)*s(i,j,k) .le. 0.0)) then
 
             if(s(i,j+1,k)*s(i,j,k) .le. 0.0) then
 
 
-                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .gt. tol) then
+                if(abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) .ge. tol) then
 
                   th = (abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
                   Ty = (ht_Tsat-T(i,j,k))/(th*dy)
@@ -135,19 +142,22 @@ subroutine Heat_calGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,mflg)
 
             end if
 
-
         endif
 
+        !--------------------------------------------------------------------------!
+        !----------------------------Calculate Fluxes------------------------------!
+        !--------------------------------------------------------------------------!
+
         if (pf(i,j,k) .eq. 0.) then
-          
-            Tnl(i,j,k) = ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty) 
-         
+
+            Tnl(i,j,k) = ( + nx(i,j,k)*Tx + ny(i,j,k)*Ty)
+
         else
-         
+
             Tnv(i,j,k) = ( - nx(i,j,k)*Tx - ny(i,j,k)*Ty)
-         
+
         end if
-                          
+                         
       end do
     end do
 

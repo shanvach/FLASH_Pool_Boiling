@@ -48,7 +48,7 @@
         !- kpd- Set the sign using the ORIGINAL distance function
         do j = jy1,jy2
            do i = ix1,ix2
-              sgn(i,j,k) = soo(i,j,k)/sqrt(soo(i,j,k)**2+minCellDiag**2)
+              sgn(i,j,k) = soo(i,j,k)/abs(soo(i,j,k)+eps)
            end do
         end do
 

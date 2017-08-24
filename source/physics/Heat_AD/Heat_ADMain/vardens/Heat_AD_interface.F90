@@ -159,6 +159,16 @@ module Heat_AD_interface
       end subroutine Heat_calGradT_3D
    end interface
 
+   interface 
+      subroutine Heat_calGradT_3D_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,nx,ny,nz,mflg)
+        implicit none
+        real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,nz,mflg
+        real, intent(in) :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+      end subroutine Heat_calGradT_3D_central
+   end interface
+
    interface
       subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,kz1,kz2,Tnl_res,Tnv_res,mflg)
         implicit none

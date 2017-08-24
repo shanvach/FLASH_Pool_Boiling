@@ -12,7 +12,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
-                                Heat_RHS_3D_weno3
+                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -214,7 +214,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      ! Calculate Heat Flux in known phase
 
 #if NDIM == 2
-     call Heat_calGradT(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
+     call Heat_calGradT_central(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                         solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -223,7 +223,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #if NDIM == 3
-     call Heat_calGradT_3D(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
+     call Heat_calGradT_3D_central(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                         solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&

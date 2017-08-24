@@ -2,7 +2,8 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
 #include "Flash.h"
 
-#define SECOND_ORDER_UPWIND
+#define FIRST_ORDER_UPWIND
+!#define SECOND_ORDER_UPWIND
 !#define THIRD_ORDER_UPWIND
 
    implicit none
@@ -51,6 +52,22 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
    ny_plus = max(nyconv,0.)
    ny_mins = min(nyconv,0.)
+
+#ifdef FIRST_ORDER_UPWIND
+   !---First Order Upwind-------!
+   Tlx_plus = (Tnl_o(ix1+1:ix2+1,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1:jy2,k))/dx
+   Tlx_mins = (Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1-1:ix2-1,jy1:jy2,k))/dx
+
+   Tly_plus = (Tnl_o(ix1:ix2,jy1+1:jy2+1,k)-Tnl_o(ix1:ix2,jy1:jy2,k))/dy
+   Tly_mins = (Tnl_o(ix1:ix2,jy1:jy2,k)-Tnl_o(ix1:ix2,jy1-1:jy2-1,k))/dy
+
+   Tvx_plus = (Tnv_o(ix1+1:ix2+1,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1:jy2,k))/dx
+   Tvx_mins = (Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1-1:ix2-1,jy1:jy2,k))/dx
+
+   Tvy_plus = (Tnv_o(ix1:ix2,jy1+1:jy2+1,k)-Tnv_o(ix1:ix2,jy1:jy2,k))/dy
+   Tvy_mins = (Tnv_o(ix1:ix2,jy1:jy2,k)-Tnv_o(ix1:ix2,jy1-1:jy2-1,k))/dy
+   !-----------------------------!
+#endif
 
 #ifdef SECOND_ORDER_UPWIND
    !---Second Order Upwind-------!
@@ -101,6 +118,7 @@ subroutine Heat_extrapGradT(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_re
 
    Tnv(ix1:ix2,jy1:jy2,k) = Tnv_i(ix1:ix2,jy1:jy2,k) + dt_ext*(1.0-pf(ix1:ix2,jy1:jy2,k))*(-nx_mins*Tvx_plus-nx_plus*Tvx_mins &
                                                                                            -ny_mins*Tvy_plus-ny_plus*Tvy_mins)
+
    Tnl_res = sum(sum(sum((mflg*(Tnl_o(:,:,:)-Tnl(:,:,:)))**2,1),1))
    Tnv_res = sum(sum(sum((mflg*(Tnv_o(:,:,:)-Tnv(:,:,:)))**2,1),1))
 
