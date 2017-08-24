@@ -6,8 +6,8 @@ subroutine Heat_RHS_3D(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
 #include "Heat_AD.h"
 
-!#define FIRST_ORDER_UPWIND
-#define SECOND_ORDER_CENTRAL
+#define FIRST_ORDER_UPWIND
+!#define SECOND_ORDER_CENTRAL
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_rhs

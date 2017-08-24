@@ -10,7 +10,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "Flash.h"
 
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
-                                Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,&
+                                Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_calGradT_3D_central,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
@@ -217,7 +217,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #if NDIM == 3
-     call Heat_calGradT_3D(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
+     call Heat_calGradT_3D_central(solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                         solnData(TEMP_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&

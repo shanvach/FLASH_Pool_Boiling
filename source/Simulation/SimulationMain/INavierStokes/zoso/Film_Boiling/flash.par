@@ -22,7 +22,7 @@ Pr = 1.0
 #St = 0.561
 St = 0.2
 
-iConvU = 1
+iConvU = 0
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0

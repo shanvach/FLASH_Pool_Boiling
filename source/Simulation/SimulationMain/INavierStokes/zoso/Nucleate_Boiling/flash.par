@@ -27,7 +27,7 @@ St =  0.0879      # R113  1.0 atm
 #St =  0.1275      # FC-72 1.0 atm
 #St =   0.1643      # FC-72 0.7 atm
 
-iConvU = 3
+iConvU = 0
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
@@ -46,7 +46,7 @@ vis2 = 47.6290  # R113
 #vis2 = 1.0       # FC-72
 
 # Thermal Properties 
-thco1 = 0.0
+thco1 = 1.0
 thco2 = 6.7006   # R113
 #thco2 = 27.16    # Water
 #thco2 = 1.0      # FC-72
@@ -81,9 +81,9 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin =    0.0
+xmin =   -1.25
 xmax =    1.25
-ymin =    0.0
+ymin =    0.00
 ymax =    5.00
 
 #       Boundary conditions
@@ -112,8 +112,8 @@ restart         = .false.
 nend = 2000000000
 tmax            = 100.0
 cflflg          = 1
-cfl             = 1.0
-sigma		= 1.0
+cfl             = 0.1
+sigma		= 0.1
 dtspec          = 1.0
 dtinit          = 1.0
 tstep_change_factor=1.0
@@ -139,9 +139,9 @@ plotFileIntervalTime = 0.005
 
 ##	AMR parameters
 nblockx	= 3
-nblocky	= 12 
+nblocky	= 6 
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 4
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 

@@ -20,7 +20,7 @@ Pr = 1.7386
 # Stefan Number
 St = 0.0037
 
-iConvU = 3
+iConvU = 0
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
