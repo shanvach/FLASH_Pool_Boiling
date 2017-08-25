@@ -43,7 +43,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
               else
 
-                  if(s(i,j,kz1) .gt. 0.0) then
+                  if(s(i,j,kz1) .ge. 0.0) then
 
                         smhv(i,j,kz1) = 1.0
   
@@ -111,7 +111,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
               else
 
-                  if(s(i,j,k) .gt. 0.0) then
+                  if(s(i,j,k) .ge. 0.0) then
 
                         smhv(i,j,k) = 1.0
   

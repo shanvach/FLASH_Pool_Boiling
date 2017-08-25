@@ -379,6 +379,40 @@ Module ins_interface
  end interface
 
  interface
+    SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
+                           visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
+                           mdot,smrh,xnorm,ynorm,crv,s,pf)
+
+      implicit none
+      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
+      REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y,rho2y
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,crv,s,pf
+      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
+
+    END SUBROUTINE
+ end interface
+
+ interface
+      SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
+                           ix1,ix2,jy1,jy2,kz1,kz2, &
+                           dx,dy,dz,ru,rv,rw,visc,  &
+                           rho1x,rho2x,rho1y,rho2y, &
+                           rho1z,rho2z,gravX, gravY, gravZ,&
+                           mdot,smrh,xnorm,ynorm,znorm,crv)
+
+      implicit none
+      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
+      REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x,rho2x, rho1y, rho2y
+      REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z
+      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,smrh,xnorm,ynorm,znorm,crv
+      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
+
+      END SUBROUTINE
+ end interface
+
+ interface
     SUBROUTINE ins_divergence_PC(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
                                 ix1gc,ix2gc,jy1gc,jy2gc,kz1gc,kz2gc,&
                                 dx,dy,dz,divv,s,pf,xnorm,ynorm,znorm,smrh,mdot,&

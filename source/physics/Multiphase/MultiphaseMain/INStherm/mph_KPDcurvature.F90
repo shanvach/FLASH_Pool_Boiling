@@ -150,6 +150,11 @@
               if(s(i,j,k)*s(i-3,j,k) .le. 0.) mflg(i-3,j,k)   = 1.0
               if(s(i,j,k)*s(i,j-3,k) .le. 0.) mflg(i,j-3,k)   = 1.0
 
+              if(s(i,j,k)*s(i+3,j,k) .le. 0.) mflg(i+4,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j+3,k) .le. 0.) mflg(i,j+4,k)   = 1.0
+              if(s(i,j,k)*s(i-3,j,k) .le. 0.) mflg(i-4,j,k)   = 1.0
+              if(s(i,j,k)*s(i,j-3,k) .le. 0.) mflg(i,j-4,k)   = 1.0
+
          end do
         end do
 
