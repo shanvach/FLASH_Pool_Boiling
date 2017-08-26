@@ -44,16 +44,10 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   do j=jy1,jy2
      do i=ix1,ix2
 
-     rhoxm = (smrh(i,j,k) + smrh(i-1,j,k))/2.0d0 - smrh(i,j,k)
-     rhoym = (smrh(i,j,k) + smrh(i,j-1,k))/2.0d0 - smrh(i,j,k)
-
-     rhoxp = (smrh(i,j,k) + smrh(i+1,j,k))/2.0d0 - smrh(i,j,k)
-     rhoyp = (smrh(i,j,k) + smrh(i,j+1,k))/2.0d0 - smrh(i,j,k)
-
-     ul = u(i,j,k)   !+ (mdot(i,j,k)*nrmx(i,j,k)*rhoxm)
-     ur = u(i+1,j,k) !+ (mdot(i,j,k)*nrmx(i,j,k)*rhoxp)
-     vl = v(i,j,k)   !+ (mdot(i,j,k)*nrmy(i,j,k)*rhoym)
-     vr = v(i,j+1,k) !+ (mdot(i,j,k)*nrmy(i,j,k)*rhoyp)
+     ul = u(i,j,k)
+     ur = u(i+1,j,k)
+     vl = v(i,j,k)
+     vr = v(i,j+1,k)
 
      coeff = inRe/ht_Pr
 

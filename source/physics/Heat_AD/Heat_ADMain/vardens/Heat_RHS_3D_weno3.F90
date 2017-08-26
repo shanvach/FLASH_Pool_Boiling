@@ -44,22 +44,14 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
   do j=jy1,jy2
      do i=ix1,ix2
 
-     rhoxm = (smrh(i,j,k) + smrh(i-1,j,k))/2.0d0 - smrh(i,j,k)
-     rhoym = (smrh(i,j,k) + smrh(i,j-1,k))/2.0d0 - smrh(i,j,k)
-     rhozm = (smrh(i,j,k) + smrh(i,j,k-1))/2.0d0 - smrh(i,j,k)
+     ur = u(i+1,j,k)
+     ul = u(i,j,k)
 
-     rhoxp = (smrh(i,j,k) + smrh(i+1,j,k))/2.0d0 - smrh(i,j,k)
-     rhoyp = (smrh(i,j,k) + smrh(i,j+1,k))/2.0d0 - smrh(i,j,k)
-     rhozp = (smrh(i,j,k) + smrh(i,j,k+1))/2.0d0 - smrh(i,j,k)
+     vr = v(i,j+1,k)
+     vl = v(i,j,k)
 
-     ur = u(i+1,j,k) !+ mdot(i,j,k)*nrmx(i,j,k)*rhoxp
-     ul = u(i,j,k)   !+ mdot(i,j,k)*nrmx(i,j,k)*rhoxm
-
-     vr = v(i,j+1,k) !+ mdot(i,j,k)*nrmy(i,j,k)*rhoyp
-     vl = v(i,j,k)   !+ mdot(i,j,k)*nrmy(i,j,k)*rhoym
-
-     wr = w(i,j,k+1) !+ mdot(i,j,k)*nrmz(i,j,k)*rhozp
-     wl = w(i,j,k)   !+ mdot(i,j,k)*nrmz(i,j,k)*rhozm
+     wr = w(i,j,k+1)
+     wl = w(i,j,k)
 
      Tx_plus = T_o(i+1,j,k)
      Tx_mins = T_o(i-1,j,k)
@@ -86,89 +78,17 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
-
-        !if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
-        Tx_plus = (ht_Tsat-Tij)/thxp1 + Tij
-
-        !else
-        !Tx_plus = (2*ht_Tsat + (2*thxp1*thxp1 - 2)*Tij + (-thxp1*thxp1 + thxp1)*T_o(i-1,j,k))/(thxp1 + thxp1*thxp1)
-
-        !end if
-
-      end if
-      ! End of Case 1 !
-
-
-      ! Case 2 !
-      if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
-
-         !if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
-         Tx_mins = (ht_Tsat-Tij)/thxm1 + Tij
-
-         !else
-         !Tx_mins = (2*ht_Tsat + (2*thxm1*thxm1 - 2)*Tij + (-thxm1*thxm1 + thxm1)*T_o(i+1,j,k))/(thxm1 + thxm1*thxm1)
-
-         !end if
-
-      end if
-      ! End of Case 2 !
-
-      ! Case 3 !
-      if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
-
-         !if(s(i,j,k)*s(i,j-1,k) .le. 0.0d0) then
-         Ty_plus = (ht_Tsat-Tij)/thyp1 + Tij
-
-         !else
-         !Ty_plus = (2*ht_Tsat + (2*thyp1*thyp1 - 2)*Tij + (-thyp1*thyp1 + thyp1)*T_o(i,j-1,k))/(thyp1 + thyp1*thyp1)
-
-         !end if
-
-       end if
-       ! End of Case 3 !
-
-       ! Case 4 !
-       if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
-
-          !if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
-          Ty_mins = (ht_Tsat-Tij)/thym1 + Tij
-
-          !else
-          !Ty_mins = (2*ht_Tsat + (2*thym1*thym1 - 2)*Tij + (-thym1*thym1 + thym1)*T_o(i,j+1,k))/(thym1 + thym1*thym1)
-
-          !end if
-
-        end if
-        ! End of Case 4 ! 
-
-      ! Case 5 !
-      if(s(i,j,k)*s(i,j,k+1) .le. 0.d0) then
-
-         !if(s(i,j,k)*s(i,j,k-1) .le. 0.0d0) then
-         Tz_plus = (ht_Tsat-Tij)/thzp1 + Tij
-
-         !else
-         !Tz_plus = (2*ht_Tsat + (2*thzp1*thzp1 - 2)*Tij + (-thzp1*thzp1 + thzp1)*T_o(i,j,k-1))/(thzp1 + thzp1*thzp1)
-
-         !end if
-
-       end if
-       ! End of Case 5 !
-
-       ! Case 6 !
-       if(s(i,j,k)*s(i,j,k-1) .le. 0.d0) then
-
-          !if(s(i,j,k)*s(i,j,k+1) .le. 0.d0) then
-          Tz_mins = (ht_Tsat-Tij)/thzm1 + Tij
-
-          !else
-          !Tz_mins = (2*ht_Tsat + (2*thzm1*thzm1 - 2)*Tij + (-thzm1*thzm1 + thzm1)*T_o(i,j,k+1))/(thzm1 + thzm1*thzm1)
-
-          !end if
-
-       end if
-       ! End of Case 6 ! 
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) Tx_plus = (ht_Tsat-Tij)/thxp1 + Tij
+     ! Case 2 !
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) Tx_mins = (ht_Tsat-Tij)/thxm1 + Tij
+     ! Case 3 !
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) Ty_plus = (ht_Tsat-Tij)/thyp1 + Tij
+     ! Case 4 !
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) Ty_mins = (ht_Tsat-Tij)/thym1 + Tij
+     ! Case 5 !
+     if(s(i,j,k)*s(i,j,k+1) .le. 0.d0) Tz_plus = (ht_Tsat-Tij)/thzp1 + Tij
+     ! Case 6 !
+     if(s(i,j,k)*s(i,j,k-1) .le. 0.d0) Tz_mins = (ht_Tsat-Tij)/thzm1 + Tij
 
      !______________________Advection Terms_______________________!
 

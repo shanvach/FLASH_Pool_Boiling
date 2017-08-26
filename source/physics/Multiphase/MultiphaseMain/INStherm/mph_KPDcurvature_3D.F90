@@ -400,7 +400,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx + mT/aa/dx
+                 sigx(i+1,j,k) = - xij/aa/dx !+ mT/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -444,7 +444,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx - mT/aa/dx
+                 sigx(i+1,j,k) = xij/aa/dx !- mT/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -487,7 +487,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy + mT/aa/dy
+                 sigy(i,j+1,k) = - yij/aa/dy !+ mT/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -529,7 +529,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy - mT/aa/dy
+                 sigy(i,j+1,k) = yij/aa/dy !- mT/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -572,7 +572,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = - zij/aa/dz + mT/aa/dz
+                 sigz(i,j,k+1) = - zij/aa/dz !+ mT/aa/dz
 
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
@@ -614,7 +614,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = zij/aa/dz - mT/aa/dz
+                 sigz(i,j,k+1) = zij/aa/dz !- mT/aa/dz
 
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1

@@ -1276,6 +1276,369 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                wzplus  = (wni(i,j,k+1) + wni(i,j-1,k+1))*0.5
                wzminus = (wni(i,j,k) + wni(i,j-1,k))*0.5
 
+               !----------------- WENO3 X-Direction ------------!
+               if (uxplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = vni(i-2,j,k)
+                s2r = vni(i-1,j,k)
+                s3r = vni(i,j,k)
+                s4r = vni(i+1,j,k)
+                s5r = vni(i+2,j,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                  ! u = (-) Upwind
+
+                s1r = vni(i-1,j,k)
+                s2r = vni(i,j,k)
+                s3r = vni(i+1,j,k)
+                s4r = vni(i+2,j,k)
+                s5r = vni(i+3,j,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+
+               if (uxminus .gt. 0) then     ! u = (+) Downwind  
+
+                s1l = vni(i-3,j,k)
+                s2l = vni(i-2,j,k)
+                s3l = vni(i-1,j,k)
+                s4l = vni(i,j,k)
+                s5l = vni(i+1,j,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                   ! u = (-) Upwind
+
+                s1l = vni(i-2,j,k)
+                s2l = vni(i-1,j,k)
+                s3l = vni(i,j,k)
+                s4l = vni(i+1,j,k)
+                s5l = vni(i+2,j,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               frx = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               flx = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
+
+               !----------------- WENO3 Y-Direction ------------!
+               if (vyplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = vni(i,j-2,k)
+                s2r = vni(i,j-1,k)
+                s3r = vni(i,j,k)
+                s4r = vni(i,j+1,k)
+                s5r = vni(i,j+2,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                   ! u = (-) Upwind
+
+                s1r = vni(i,j-1,k)
+                s2r = vni(i,j,k)
+                s3r = vni(i,j+1,k)
+                s4r = vni(i,j+2,k)
+                s5r = vni(i,j+3,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+               if (vyminus .gt. 0) then     ! u = (+) Downwind
+
+                s1l = vni(i,j-3,k)
+                s2l = vni(i,j-2,k)
+                s3l = vni(i,j-1,k)
+                s4l = vni(i,j,k)
+                s5l = vni(i,j+1,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                    ! u = (-) Upwind
+
+                s1l = vni(i,j-2,k)
+                s2l = vni(i,j-1,k)
+                s3l = vni(i,j,k)
+                s4l = vni(i,j+1,k)
+                s5l = vni(i,j+2,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               fry = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               fly = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
+
+               !----------------- WENO3 Z-Direction ------------!
+               if (wzplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = vni(i,j,k-2)
+                s2r = vni(i,j,k-1)
+                s3r = vni(i,j,k)
+                s4r = vni(i,j,k+1)
+                s5r = vni(i,j,k+2)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                   ! u = (-) Upwind
+
+                s1r = vni(i,j,k-1)
+                s2r = vni(i,j,k)
+                s3r = vni(i,j,k+1)
+                s4r = vni(i,j,k+2)
+                s5r = vni(i,j,k+3)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+               if (wzminus .gt. 0) then     ! u = (+) Downwind
+
+                s1l = vni(i,j,k-3)
+                s2l = vni(i,j,k-2)
+                s3l = vni(i,j,k-1)
+                s4l = vni(i,j,k)
+                s5l = vni(i,j,k+1)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                    ! u = (-) Upwind
+
+                s1l = vni(i,j,k-2)
+                s2l = vni(i,j,k-1)
+                s3l = vni(i,j,k)
+                s4l = vni(i,j,k+1)
+                s5l = vni(i,j,k+2)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               frz = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               flz = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
 
                ! Diffusion Terms
 
@@ -1399,6 +1762,369 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                wzplus  = (wni(i,j,k+1) + wni(i,j,k))*0.5
                wzminus = (wni(i,j,k-1) + wni(i,j,k))*0.5
 
+               !----------------- WENO3 X-Direction ------------!
+               if (uxplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = wni(i-2,j,k)
+                s2r = wni(i-1,j,k)
+                s3r = wni(i,j,k)
+                s4r = wni(i+1,j,k)
+                s5r = wni(i+2,j,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                  ! u = (-) Upwind
+
+                s1r = wni(i-1,j,k)
+                s2r = wni(i,j,k)
+                s3r = wni(i+1,j,k)
+                s4r = wni(i+2,j,k)
+                s5r = wni(i+3,j,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+
+               if (uxminus .gt. 0) then     ! u = (+) Downwind  
+
+                s1l = wni(i-3,j,k)
+                s2l = wni(i-2,j,k)
+                s3l = wni(i-1,j,k)
+                s4l = wni(i,j,k)
+                s5l = wni(i+1,j,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                   ! u = (-) Upwind
+
+                s1l = wni(i-2,j,k)
+                s2l = wni(i-1,j,k)
+                s3l = wni(i,j,k)
+                s4l = wni(i+1,j,k)
+                s5l = wni(i+2,j,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               frx = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               flx = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
+
+               !----------------- WENO3 Y-Direction ------------!
+               if (vyplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = wni(i,j-2,k)
+                s2r = wni(i,j-1,k)
+                s3r = wni(i,j,k)
+                s4r = wni(i,j+1,k)
+                s5r = wni(i,j+2,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                   ! u = (-) Upwind
+
+                s1r = wni(i,j-1,k)
+                s2r = wni(i,j,k)
+                s3r = wni(i,j+1,k)
+                s4r = wni(i,j+2,k)
+                s5r = wni(i,j+3,k)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+               if (vyminus .gt. 0) then     ! u = (+) Downwind
+
+                s1l = wni(i,j-3,k)
+                s2l = wni(i,j-2,k)
+                s3l = wni(i,j-1,k)
+                s4l = wni(i,j,k)
+                s5l = wni(i,j+1,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                    ! u = (-) Upwind
+
+                s1l = wni(i,j-2,k)
+                s2l = wni(i,j-1,k)
+                s3l = wni(i,j,k)
+                s4l = wni(i,j+1,k)
+                s5l = wni(i,j+2,k)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               fry = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               fly = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
+
+               !----------------- WENO3 Z-Direction ------------!
+               if (wzplus .gt. 0) then     ! u = (+) Downwind
+
+                s1r = wni(i,j,k-2)
+                s2r = wni(i,j,k-1)
+                s3r = wni(i,j,k)
+                s4r = wni(i,j,k+1)
+                s5r = wni(i,j,k+2)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 1./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 3./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r =  2./6.*s1r - 7./6.*s2r + 11./6.*s3r
+                fT2r = -1./6.*s2r + 5./6.*s3r +  2./6.*s4r
+                fT3r =  2./6.*s3r + 5./6.*s4r -  1./6.*s5r
+
+               else                   ! u = (-) Upwind
+
+                s1r = wni(i,j,k-1)
+                s2r = wni(i,j,k)
+                s3r = wni(i,j,k+1)
+                s4r = wni(i,j,k+2)
+                s5r = wni(i,j,k+3)
+
+                rIS1r = 13./12.*(    s1r  - 2.*s2r +    s3r )**2. &
+                      +  1./4. *(    s1r  - 4.*s2r + 3.*s3r )**2.
+                rIS2r = 13./12.*(    s2r  - 2.*s3r +    s4r )**2. &
+                      +  1./4. *(    s2r           -    s4r )**2.
+                rIS3r = 13./12.*(    s3r  - 2.*s4r +    s5r )**2. &
+                      +  1./4. *( 3.*s3r  - 4.*s4r +    s5r )**2.
+
+                aT1r = 3./10. /  ( eps + rIS1r )**2.
+                aT2r = 6./10. /  ( eps + rIS2r )**2.
+                aT3r = 1./10. /  ( eps + rIS3r )**2.
+
+                a1r = aT1r / ( aT1r + aT2r +aT3r )
+                a2r = aT2r / ( aT1r + aT2r +aT3r )
+                a3r = aT3r / ( aT1r + aT2r +aT3r )
+
+                fT1r = -1./6.*s1r + 5./6.*s2r +  2./6.*s3r
+                fT2r =  2./6.*s2r + 5./6.*s3r -  1./6.*s4r
+                fT3r =  11./6.*s3r - 7./6.*s4r + 2./6.*s5r
+
+               end if
+
+               if (wzminus .gt. 0) then     ! u = (+) Downwind
+
+                s1l = wni(i,j,k-3)
+                s2l = wni(i,j,k-2)
+                s3l = wni(i,j,k-1)
+                s4l = wni(i,j,k)
+                s5l = wni(i,j,k+1)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 1./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 3./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l =  2./6.*s1l - 7./6.*s2l + 11./6.*s3l
+                fT2l = -1./6.*s2l + 5./6.*s3l +  2./6.*s4l
+                fT3l =  2./6.*s3l + 5./6.*s4l -  1./6.*s5l
+
+               else                    ! u = (-) Upwind
+
+                s1l = wni(i,j,k-2)
+                s2l = wni(i,j,k-1)
+                s3l = wni(i,j,k)
+                s4l = wni(i,j,k+1)
+                s5l = wni(i,j,k+2)
+
+                rIS1l = 13./12.*(    s1l  - 2.*s2l +    s3l )**2. &
+                      +  1./4. *(    s1l  - 4.*s2l + 3.*s3l )**2.
+                rIS2l = 13./12.*(    s2l  - 2.*s3l +    s4l )**2. &
+                      +  1./4. *(    s2l           -    s4l )**2.
+                rIS3l = 13./12.*(    s3l  - 2.*s4l +    s5l )**2. &
+                      +  1./4. *( 3.*s3l  - 4.*s4l +    s5l )**2.
+
+                aT1l = 3./10. /  ( eps + rIS1l )**2.
+                aT2l = 6./10. /  ( eps + rIS2l )**2.
+                aT3l = 1./10. /  ( eps + rIS3l )**2.
+
+                a1l = aT1l / ( aT1l + aT2l +aT3l )
+                a2l = aT2l / ( aT1l + aT2l +aT3l )
+                a3l = aT3l / ( aT1l + aT2l +aT3l )
+
+                fT1l = -1./6.*s1l + 5./6.*s2l +  2./6.*s3l
+                fT2l =  2./6.*s2l + 5./6.*s3l -  1./6.*s4l
+                fT3l =  11./6.*s3l - 7./6.*s4l + 2./6.*s5l
+
+               end if
+
+               !---------------------------------------------------------
+               !- WENO3 interpolated VEL values at cell center
+               !---------------------------------------------------------
+               frz = a1r*fT1r + a2r*fT2r + a3r*fT3r
+               flz = a1l*fT1l + a2l*fT2l + a3l*fT3l
+               !---------------------------------------------------------
+               !---------------------------------------------------------
 
                ! Diffusion Terms
 
@@ -1417,31 +2143,31 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                ! velcoity jump source terms
                aicc = 0.5*(smrh(i,j,k)+smrh(i,j,k-1))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(ynorm(i,j,k)+ynorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
 
                aixr = 0.5*(smrh(i+1,j,k)+smrh(i+1,j,k-1))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(ynorm(i,j,k)+ynorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
 
                aixl = 0.5*(smrh(i-1,j,k)+smrh(i-1,j,k-1))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(ynorm(i,j,k)+ynorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
 
                aiyr = 0.5*(smrh(i,j+1,k)+smrh(i,j+1,k-1))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(xnorm(i,j,k)+xnorm(i,j,k-1)) 
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1)) 
 
                aiyl = 0.5*(smrh(i,j-1,k)+smrh(i,j-1,k-1))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(xnorm(i,j,k)+xnorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
  
                aizr = 0.5*(smrh(i,j,k+1)+smrh(i,j,k))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(ynorm(i,j,k)+ynorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
 
                aizl = 0.5*(smrh(i,j,k-1)+smrh(i,j,k-2))*&
                       0.5*(mdot(i,j,k)+mdot(i,j,k-1))*&
-                      0.5*(ynorm(i,j,k)+ynorm(i,j,k-1))
+                      0.5*(znorm(i,j,k)+znorm(i,j,k-1))
 
                dsdxp = (aixr - aicc)*dx1
                dsdxm = (aicc - aixl)*dx1
