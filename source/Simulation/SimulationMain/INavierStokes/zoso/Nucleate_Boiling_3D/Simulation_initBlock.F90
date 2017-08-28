@@ -87,14 +87,23 @@ subroutine Simulation_initBlock(blockId)
   !nyb = blIndSize(2)
   !nzb = blIndSize(3)
 
-  fn(1) = -1938.3
-  fn(2) = -958.9
-  fn(3) =  3255.2
-  fn(4) = -1911.5
-  fn(5) =  420.5
-  fn(6) = -10.0
-  fn(7) = -09.2
-  fn(8) =  1.0
+  !fn(1) = -1938.3
+  !fn(2) = -958.9
+  !fn(3) =  3255.2
+  !fn(4) = -1911.5
+  !fn(5) =  420.5
+  !fn(6) = -10.0
+  !fn(7) = -09.2
+  !fn(8) =  1.0
+
+  fn(1) = -2306.64
+  fn(2) =  2719.50
+  fn(3) = -866.15
+  fn(4) = -130.75
+  fn(5) =  106.30
+  fn(6) = -1.25
+  fn(7) = -6.87
+  fn(8) =  0.99
 
   ! Get Coord and Bsize for the block:
   ! Bounding box:
@@ -136,10 +145,12 @@ subroutine Simulation_initBlock(blockId)
                    0.5*del(KAXIS)
 
            ! Main Bubble
-           r0 =  0.05
+           !r0 =  0.05
+           r0 =  0.1
            x0 =  0.0
            z0 =  0.0
-           y0 =  r0*cos((30.0/180.0)*acos(-1.0))
+           !y0 =  r0*cos((30.0/180.0)*acos(-1.0))
+           y0 =  r0*cos((54.0/180.0)*acos(-1.0))
 
            ! Auxiallary Bubbles
            r1 =  0.05
@@ -225,7 +236,8 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+           !if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+           if(ycell .le. 0.3792 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
            solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
                                       fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &

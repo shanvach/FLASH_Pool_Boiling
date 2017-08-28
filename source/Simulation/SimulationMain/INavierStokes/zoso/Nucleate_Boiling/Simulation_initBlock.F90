@@ -196,6 +196,7 @@ subroutine Simulation_initBlock(blockId)
 
            !r0 = 0.05
            r0 = 0.1
+           !r0 = 3.4285
            r_test = 0.25
 
            !x0 = 0.12d0
@@ -205,6 +206,7 @@ subroutine Simulation_initBlock(blockId)
            !x1 = -0.12d0
            !y1 = r0*cos((30.0/180.0)*acos(-1.0))
            y1 = r0*cos((54.0/180.0)*acos(-1.0))
+           !y1 = r0*cos((35.0/180.0)*acos(-1.0))
 
            x0 =  0.0d0
            x1 =  0.0d0
@@ -304,7 +306,7 @@ subroutine Simulation_initBlock(blockId)
  
            !if(ycell .le. 8.7308) solnData(TEMP_VAR,i,j,k) = (8.7308 - ycell)/8.7308
      
-           !if(ycell .le. 9.6729 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.6729 - ycell)/9.6729
+           !if(ycell .le. 9.9714 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.9714 - ycell)/9.9714
 
            !if(ycell .le. 9.9035 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.9035 - ycell)/9.9035
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.3578
