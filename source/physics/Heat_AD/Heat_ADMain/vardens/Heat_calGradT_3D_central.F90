@@ -15,9 +15,9 @@ subroutine Heat_calGradT_3D_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,
 
      tol = 0.01
 
-do k=kz1,kz2
-  do j=jy1,jy2
-    do i=ix1,ix2
+   do k=kz1,kz2
+    do j=jy1,jy2
+     do i=ix1,ix2
 
      Tx_plus = T(i+1,j,k)
      Tx_mins = T(i-1,j,k)
@@ -143,8 +143,8 @@ do k=kz1,kz2
          
      end if
                           
+     end do
     end do
-  end do
-end do
+   end do
 
 end subroutine Heat_calGradT_3D_central

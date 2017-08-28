@@ -109,10 +109,13 @@ subroutine Heat_extrapGradT_3D(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,nz,ix1,ix2,jy1,jy2,
                                                                    -ny_mins*Tvy_plus-ny_plus*Tvy_mins &
                                                                    -nz_mins*Tvz_plus-nz_plus*Tvz_mins)
 
-    Tnl_res = sum(sum(sum((mflg*(Tnl_o(:,:,:)-Tnl(:,:,:)))**2,1),1))
-    Tnv_res = sum(sum(sum((mflg*(Tnv_o(:,:,:)-Tnv(:,:,:)))**2,1),1))
+    Tnl_res = sum(sum(sum((mflg(ix1:ix2,jy1:jy2,kz1:kz2)*(Tnl_o(ix1:ix2,jy1:jy2,kz1:kz2)-&
+                                                          Tnl(ix1:ix2,jy1:jy2,kz1:kz2)))**2,1),1))
 
-    Tnl_res = sqrt(Tnl_res/size(Tnl))
-    Tnv_res = sqrt(Tnv_res/size(Tnv))
+    Tnv_res = sum(sum(sum((mflg(ix1:ix2,jy1:jy2,kz1:kz2)*(Tnv_o(ix1:ix2,jy1:jy2,kz1:kz2)-&
+                                                          Tnv(ix1:ix2,jy1:jy2,kz1:kz2)))**2,1),1))
+
+    Tnl_res = sqrt(Tnl_res/size(Tnl(ix1:ix2,jy1:jy2,kz1:kz2)))
+    Tnv_res = sqrt(Tnv_res/size(Tnv(ix1:ix2,jy1:jy2,kz1:kz2)))
 
 end subroutine Heat_extrapGradT_3D

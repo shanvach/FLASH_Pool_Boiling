@@ -3,6 +3,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
+  use Heat_AD_interface, only: Heat_GFMstencil_o1, Heat_GFMstencil_o2
 
 #include "Heat_AD.h"
 
@@ -27,6 +28,8 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real :: rhoc,rhoxm,rhoym,rhoxp,rhoyp
   real :: thxp1, thxm1
   real :: thyp1, thym1
+  real :: thxp2, thxm2
+  real :: thyp2, thym2
 
   real :: eps, &
           s1r,s2r,s3r,s4r,s5r,s1l,s2l,s3l,s4l,s5l, &
@@ -59,69 +62,85 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
      Tij = T_o(i,j,k)
 
-     thxp1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k))))
-     thxm1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k))))
-     thyp1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))))
-     thym1 = max(tol,abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k))))
+     thxp1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
+     thxm1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i-1,j,k)))
+     thyp1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k)))
+     thym1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j-1,k)))
+
+     thxp2 = abs(s(i-1,j,k))/(abs(s(i-1,j,k))+abs(s(i+1,j,k)))
+     thxm2 = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i-1,j,k)))
+     thyp2 = abs(s(i,j-1,k))/(abs(s(i,j-1,k))+abs(s(i,j+1,k)))
+     thym2 = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j-1,k)))
 
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
      if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
 
-        !if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
-        Tx_plus = (ht_Tsat-Tij)/thxp1 + Tij
+           if(thxp1 .gt. tol) then
+           call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,thxp1)
 
-        !else
-        !Tx_plus = (2*ht_Tsat + (2*thxp1*thxp1 - 2)*Tij + (-thxp1*thxp1 + thxp1)*T_o(i-1,j,k))/(thxp1 + thxp1*thxp1)
+           else if(thxp1 .le. tol .and. s(i,j,k)*s(i-1,j,k) .gt. 0.d0) then
+           call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
 
-        !end if
+           else
+           call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,tol)
 
-      end if
-      ! End of Case 1 !
+           endif
 
+     end if
+     ! End of Case 1 !
 
-      ! Case 2 !
-      if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
+     ! Case 2 !
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
 
-         !if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
-         Tx_mins = (ht_Tsat-Tij)/thxm1 + Tij
+           if(thxm1 .gt. tol) then
+           call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,thxm1)
 
-         !else
-         !Tx_mins = (2*ht_Tsat + (2*thxm1*thxm1 - 2)*Tij + (-thxm1*thxm1 + thxm1)*T_o(i+1,j,k))/(thxm1 + thxm1*thxm1)
+           else if(thxm1 .le. tol .and. s(i,j,k)*s(i+1,j,k) .gt. 0.d0) then
+           call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
 
-         !end if
+           else
+           call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,tol)
 
-      end if
-      ! End of Case 2 !
+           endif
 
-      ! Case 3 !
-      if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
+     end if
+     ! End of Case 2 !
 
-         !if(s(i,j,k)*s(i,j-1,k) .le. 0.0d0) then
-         Ty_plus = (ht_Tsat-Tij)/thyp1 + Tij
+     ! Case 3 !
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
 
-         !else
-         !Ty_plus = (2*ht_Tsat + (2*thyp1*thyp1 - 2)*Tij + (-thyp1*thyp1 + thyp1)*T_o(i,j-1,k))/(thyp1 + thyp1*thyp1)
+           if(thyp1 .gt. tol) then
+           call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,thyp1)
 
-         !end if
+           else if(thyp1 .le. tol .and. s(i,j,k)*s(i,j-1,k) .gt. 0.d0) then
+           call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
 
-       end if
-       ! End of Case 3 !
+           else
+           call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,tol)
 
-       ! Case 4 !
-       if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
+           endif
 
-          !if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
-          Ty_mins = (ht_Tsat-Tij)/thym1 + Tij
+     end if
+     ! End of Case 3 !
 
-          !else
-          !Ty_mins = (2*ht_Tsat + (2*thym1*thym1 - 2)*Tij + (-thym1*thym1 + thym1)*T_o(i,j+1,k))/(thym1 + thym1*thym1)
+     ! Case 4 !
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
 
-          !end if
+           if(thym1 .gt. tol) then
+           call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,thym1)
 
-        end if
-        ! End of Case 4 ! 
+           else if(thym1 .le. tol .and. s(i,j,k)*s(i,j+1,k) .gt. 0.d0) then
+           call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
+
+           else
+           call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,tol)
+
+           endif
+
+     end if
+     ! End of Case 4 ! 
 
      !______________________Advection Terms_______________________!
 

@@ -180,4 +180,18 @@ module Heat_AD_interface
       end subroutine Heat_extrapGradT_3D
    end interface
 
+   interface
+      subroutine Heat_GFMstencil_o1(Tg,Ti,Tsat,th)
+        implicit none
+        real, intent(inout) :: Tg
+        real, intent(in) :: Ti,th,Tsat
+      end subroutine
+
+      subroutine Heat_GFMstencil_o2(Tg,Ti,Tip,Tsat,th)
+        implicit none
+        real, intent(inout) :: Tg
+        real, intent(in) :: Ti,Tip,th,Tsat
+      end subroutine
+   end interface
+
 end module Heat_AD_interface

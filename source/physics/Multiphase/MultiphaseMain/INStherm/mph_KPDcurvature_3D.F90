@@ -125,7 +125,10 @@
 
         visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
 
-        !alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)     
+        !alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco2/cp2)/(thco1/cp1) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  
+
+        !alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = 1.0/alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
+   
         alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) 
 
 
