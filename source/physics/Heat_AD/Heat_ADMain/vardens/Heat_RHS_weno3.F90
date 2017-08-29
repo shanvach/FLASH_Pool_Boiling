@@ -80,11 +80,15 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
            if(thxp1 .gt. tol) then
            call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,thxp1)
 
-           else if(thxp1 .le. tol .and. s(i,j,k)*s(i-1,j,k) .gt. 0.d0) then
-           call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
+           else 
+        
+                if(s(i,j,k)*s(i-1,j,k) .gt. 0.d0) then
+                call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
 
-           else
-           call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,tol)
+                else
+                call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,tol)
+
+                endif
 
            endif
 
@@ -97,11 +101,15 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
            if(thxm1 .gt. tol) then
            call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,thxm1)
 
-           else if(thxm1 .le. tol .and. s(i,j,k)*s(i+1,j,k) .gt. 0.d0) then
-           call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
+           else 
 
-           else
-           call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,tol)
+                if(s(i,j,k)*s(i+1,j,k) .gt. 0.d0) then
+                call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
+
+                else
+                call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,tol)
+
+                endif
 
            endif
 
@@ -114,13 +122,17 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
            if(thyp1 .gt. tol) then
            call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,thyp1)
 
-           else if(thyp1 .le. tol .and. s(i,j,k)*s(i,j-1,k) .gt. 0.d0) then
-           call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
+           else 
 
-           else
-           call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,tol)
+                if(s(i,j,k)*s(i,j-1,k) .gt. 0.d0) then
+                call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
 
-           endif
+                else
+                call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,tol)
+
+                endif
+
+           end if
 
      end if
      ! End of Case 3 !
@@ -131,11 +143,15 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
            if(thym1 .gt. tol) then
            call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,thym1)
 
-           else if(thym1 .le. tol .and. s(i,j,k)*s(i,j+1,k) .gt. 0.d0) then
-           call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
+           else 
 
-           else
-           call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,tol)
+                if(s(i,j,k)*s(i,j+1,k) .gt. 0.d0) then
+                call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
+
+                else
+                call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,tol)
+
+                endif
 
            endif
 
