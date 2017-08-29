@@ -91,7 +91,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
 
-                if(s(i,j,k)*s(i-1,j,k) .gt. 0.d0) then
+                if(s(i,j,k)*s(i-1,j,k) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
 
                 else
@@ -112,7 +112,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
         
-                if(s(i,j,k)*s(i+1,j,k) .gt. 0.d0) then
+                if(s(i,j,k)*s(i+1,j,k) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
 
                 else
@@ -133,7 +133,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
 
-                if(s(i,j,k)*s(i,j-1,k) .gt. 0.d0) then
+                if(s(i,j,k)*s(i,j-1,k) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
 
                 else
@@ -154,7 +154,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
 
-                if(s(i,j,k)*s(i,j+1,k) .gt. 0.d0) then
+                if(s(i,j,k)*s(i,j+1,k) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
 
                 else
@@ -175,7 +175,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
 
-                if(s(i,j,k)*s(i,j,k-1) .gt. 0.d0) then
+                if(s(i,j,k)*s(i,j,k-1) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Tz_plus,T_o(i,j,k-1),ht_Tsat,thzp2)
 
                 else
@@ -196,7 +196,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
            else 
 
-                if(s(i,j,k)*s(i,j,k+1) .gt. 0.d0) then
+                if(s(i,j,k)*s(i,j,k+1) .ge. 0.d0) then
                 call Heat_GFMstencil_o1(Tz_mins,T_o(i,j,k+1),ht_Tsat,thzm2)
 
                 else

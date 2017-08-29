@@ -53,7 +53,7 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
 
                 else 
 
-                        if(s(i,j,k)*s(i-2,j,k) .gt. 0.d0) then
+                        if(s(i,j,k)*s(i-2,j,k) .ge. 0.d0) then
                         call Heat_GFMstencil_o2(Tx_plus,T(i-1,j,k),T(i-2,j,k),ht_Tsat,thxp2)
 
                         else
@@ -82,7 +82,7 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
 
                 else 
 
-                        if(s(i,j,k)*s(i+2,j,k) .gt. 0.d0) then
+                        if(s(i,j,k)*s(i+2,j,k) .ge. 0.d0) then
                         call Heat_GFMstencil_o2(Tx_mins,T(i+1,j,k),T(i+2,j,k),ht_Tsat,thxm2)
 
                         else
@@ -110,7 +110,7 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
 
                 else 
 
-                        if(s(i,j,k)*s(i,j-2,k) .gt. 0.d0) then
+                        if(s(i,j,k)*s(i,j-2,k) .ge. 0.d0) then
                         call Heat_GFMstencil_o2(Ty_plus,T(i,j-1,k),T(i,j-2,k),ht_Tsat,thyp2)
 
                         else
@@ -139,7 +139,7 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
 
                 else 
 
-                        if(s(i,j,k)*s(i,j+2,k) .gt. 0.d0) then
+                        if(s(i,j,k)*s(i,j+2,k) .ge. 0.d0) then
                         call Heat_GFMstencil_o2(Ty_mins,T(i,j+1,k),T(i,j+2,k),ht_Tsat,thym2)
 
                         else
