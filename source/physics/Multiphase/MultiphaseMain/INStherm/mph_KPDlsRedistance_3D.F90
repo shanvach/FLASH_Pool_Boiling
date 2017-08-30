@@ -36,7 +36,8 @@
         do k = kz1,kz2
            do j = jy1,jy2
               do i = ix1,ix2
-                 sgn(i,j,k) = soo(i,j,k)/abs(soo(i,j,k)+eps)
+                 !sgn(i,j,k) = soo(i,j,k)/(abs(soo(i,j,k))+eps)
+                 sgn(i,j,k) = soo(i,j,k)/sqrt((soo(i,j,k)**2)+(dx**2))
               end do
            end do
         end do
