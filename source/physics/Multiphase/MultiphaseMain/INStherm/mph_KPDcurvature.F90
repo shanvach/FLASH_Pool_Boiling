@@ -344,7 +344,7 @@
                  w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx - mT/aa/dx**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx !+ mT/aa/dx           !- kpd - sigma*K/rho/dx 
+                 sigx(i+1,j,k) = - xij/aa/dx + mT/aa/dx           !- kpd - sigma*K/rho/dx 
          
                  else
 
@@ -391,7 +391,7 @@
                  w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx      + mT/aa/dx**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx !- mT/aa/dx
+                 sigx(i+1,j,k) = xij/aa/dx - mT/aa/dx
 
                  else
 
@@ -438,7 +438,7 @@
                  w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy- mT/aa/dy**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy !+ mT/aa/dy
+                 sigy(i,j+1,k) = - yij/aa/dy + mT/aa/dy
 
                  else
 
@@ -485,7 +485,7 @@
                  w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy      + mT/aa/dy**2
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy !- mT/aa/dy
+                 sigy(i,j+1,k) = yij/aa/dy - mT/aa/dy
 
                  else
 
