@@ -83,8 +83,8 @@ sten = 0.9944
 hfit = 100
 
 # Number of level-set redistancing iterations
-inls = 10
-lsit = 10
+inls = 1
+lsit = 1
 
 
 #       Grid dimensionality and geometry
@@ -161,10 +161,10 @@ checkpointFileIntervalTime = 1000.0
 plotFileIntervalTime = 25.00
 
 ##	AMR parameters
-nblockx	= 2
-nblocky	= 8
+nblockx	= 1
+nblocky	= 4
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 4
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
