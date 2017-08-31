@@ -366,6 +366,8 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
 
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
+                                   + dt*so(i,j,k)*(ur-ul)/dx &
+                                   + dt*so(i,j,k)*(vr-vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell)
 
            end do
