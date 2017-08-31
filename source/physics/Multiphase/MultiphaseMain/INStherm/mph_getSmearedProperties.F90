@@ -36,12 +36,12 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
          do j=jy1,jy2
            do i=ix1,ix2
 
-              if(abs(s(i,j,kz1)) .le. sp) then ! Symmetric smearing - AD
-              !if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
+              !if(abs(s(i,j,kz1)) .le. sp) then ! Symmetric smearing - AD
+              !!if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
 
-              smhv(i,j,kz1) = 0.5 + s(i,j,kz1)/(2*sp) + sin(2*pi*s(i,j,kz1)/(2*sp))/(2*pi)
+              !smhv(i,j,kz1) = 0.5 + s(i,j,kz1)/(2*sp) + sin(2*pi*s(i,j,kz1)/(2*sp))/(2*pi)
 
-              else
+              !else
 
                   if(s(i,j,kz1) .ge. 0.0) then
 
@@ -53,7 +53,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
                   end if
 
-              end if
+              !end if
 
 
            end do
@@ -104,12 +104,12 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
          do j=jy1,jy2
            do i=ix1,ix2
 
-              if(abs(s(i,j,k)) .le. sp) then ! Symmetric smearing - AD
-              !if(abs(s(i,j,k)) .le. sp .and. s(i,j,k) .lt. 0.0) then ! Asymmetric smearing - AD
+              !if(abs(s(i,j,k)) .le. sp) then ! Symmetric smearing - AD
+              !!if(abs(s(i,j,k)) .le. sp .and. s(i,j,k) .lt. 0.0) then ! Asymmetric smearing - AD
 
-              smhv(i,j,k) = 0.5 + s(i,j,k)/(2*sp) + sin(2*pi*s(i,j,k)/(2*sp))/(2*pi)
+              !smhv(i,j,k) = 0.5 + s(i,j,k)/(2*sp) + sin(2*pi*s(i,j,k)/(2*sp))/(2*pi)
 
-              else
+              !else
 
                   if(s(i,j,k) .ge. 0.0) then
 
@@ -121,7 +121,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
                   end if
 
-              end if
+              !end if
 
 
            end do
