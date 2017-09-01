@@ -52,8 +52,8 @@ sten = 0.9994
 hfit = 200
 
 # Number of level-set redistancing iterations
-inls = 10
-lsit = 10
+inls = 1
+lsit = 1
 
 
 #       Grid dimensionality and geometry
@@ -62,12 +62,12 @@ geometry	= "cartesian"
 
 #       Size of computational volume
 
-xmin =    0.0
-xmax =    0.01
-ymin =    0.0
-ymax =    0.01
-zmin =    0.0
-zmax =    0.01
+xmin =    0.0000
+xmax =    0.0255
+ymin =    0.0000
+ymax =    0.0255
+zmin =    0.0000
+zmax =    0.0255
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -96,7 +96,7 @@ restart         = .false.
 #nend            = 10000000
 #nend = 2
 nend = 7500000
-tmax            = 0.0006
+tmax            = 0.002
 cflflg          = 1
 cfl             = 0.1
 sigma		= 0.1
@@ -119,22 +119,22 @@ pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 500.
-checkpointFileIntervalStep = 400000000 
+#checkpointFileIntervalStep = 400000000 
 
-plotFileIntervalTime = 0.00003
-plotFileIntervalStep = 1250
+plotFileIntervalTime = 0.0001
+#plotFileIntervalStep = 1250
 
 ##	AMR parameters
-nblockx	= 3 #4
-nblocky	= 3 #8
-nblockz = 3
+nblockx	= 2 #4
+nblocky	= 2 #8
+nblockz = 2
 
 lrefine_min	= 1
-lrefine_max     = 1
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000000
+nrefs           = 5000
 refine_var_1    = "dfun"
 refine_cutoff_1 = .1
 derefine_cutoff_1 = -.1

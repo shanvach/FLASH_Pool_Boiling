@@ -94,12 +94,12 @@ subroutine Heat_AD_init(blockCount,blockList)
         else 
 
 
-        a_I   = 1 - 0.005/(0.005+abs(solnData(DFUN_VAR,i,j,k)))
+        a_I   = 1 - 0.008/(0.008+abs(solnData(DFUN_VAR,i,j,k)))
         b_I   = 0.99
         soln   = 0.
-        h     = (b_I-a_I)/200
+        h     = (b_I-a_I)/500
 
-        do iter=1,200
+        do iter=1,500
 
              x1 = a_I + h*(iter-1)
              x2 = a_I + h*(iter)
