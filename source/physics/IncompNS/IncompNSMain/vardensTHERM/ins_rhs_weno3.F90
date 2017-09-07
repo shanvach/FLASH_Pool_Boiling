@@ -337,48 +337,47 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
 
              ! Method 1 - Smeared Density at Cell Centers
 
-             !aicc = 0.5*(smrh(i,j,kz1)+smrh(i-1,j,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
-             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
-
-             !aixr = 0.5*(smrh(i,j,kz1)+smrh(i+1,j,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
-             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
-
-             !aixl = 0.5*(smrh(i-1,j,kz1)+smrh(i-2,j,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
-             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
-
-             !aiyr = 0.5*(smrh(i,j+1,kz1)+smrh(i-1,j+1,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
-             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1)) 
-
-             !aiyl = 0.5*(smrh(i,j-1,kz1)+smrh(i-1,j-1,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
-             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
-
-
-             ! Method 2 - Smeared Density at Cell Faces
-
-             aicc = (rho1x(i,j,kz1)+rho2x(i,j,kz1))*&
+             aicc = 0.5*(smrh(i,j,kz1)+smrh(i-1,j,kz1))*&
                     0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
                     0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
 
-             aixr = (rho1x(i+1,j,kz1)+rho2x(i+1,j,kz1))*&
+             aixr = 0.5*(smrh(i,j,kz1)+smrh(i+1,j,kz1))*&
                     0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
                     0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
 
-             aixl = (rho1x(i-1,j,kz1)+rho2x(i-1,j,kz1))*&
+             aixl = 0.5*(smrh(i-1,j,kz1)+smrh(i-2,j,kz1))*&
                     0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
                     0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
 
-             aiyr = (rho1x(i,j+1,kz1)+rho2x(i,j+1,kz1))*&
+             aiyr = 0.5*(smrh(i,j+1,kz1)+smrh(i-1,j+1,kz1))*&
                     0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
                     0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1)) 
 
-             aiyl = (rho1x(i,j-1,kz1)+rho2x(i,j-1,kz1))*&
+             aiyl = 0.5*(smrh(i,j-1,kz1)+smrh(i-1,j-1,kz1))*&
                     0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
                     0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
+
+             ! Method 2 - Smeared Density at Cell Faces
+
+             !aicc = (rho1x(i,j,kz1)+rho2x(i,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
+             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
+
+             !aixr = (rho1x(i+1,j,kz1)+rho2x(i+1,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
+             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
+
+             !aixl = (rho1x(i-1,j,kz1)+rho2x(i-1,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
+             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
+
+             !aiyr = (rho1x(i,j+1,kz1)+rho2x(i,j+1,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
+             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1)) 
+
+             !aiyl = (rho1x(i,j-1,kz1)+rho2x(i,j-1,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i-1,j,kz1))*&
+             !       0.5*(xnorm(i,j,kz1)+xnorm(i-1,j,kz1))
 
              dsdxp = (aixr - aicc)*dx1
              dsdxm = (aicc - aixl)*dx1
@@ -675,47 +674,47 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
 
              ! Method 1 - Smeared Density at Cell Centers
 
-             !aicc = 0.5*(smrh(i,j,kz1)+smrh(i,j-1,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             aicc = 0.5*(smrh(i,j,kz1)+smrh(i,j-1,kz1))*&
+                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             !aixr = 0.5*(smrh(i+1,j,kz1)+smrh(i+1,j-1,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             aixr = 0.5*(smrh(i+1,j,kz1)+smrh(i+1,j-1,kz1))*&
+                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             !aixl = 0.5*(smrh(i-1,j,kz1)+smrh(i-1,j-1,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             aixl = 0.5*(smrh(i-1,j,kz1)+smrh(i-1,j-1,kz1))*&
+                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             !aiyr = 0.5*(smrh(i,j+1,kz1)+smrh(i,j,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             aiyr = 0.5*(smrh(i,j+1,kz1)+smrh(i,j,kz1))*&
+                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             !aiyl = 0.5*(smrh(i,j-1,kz1)+smrh(i,j-2,kz1))*&
-             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             aiyl = 0.5*(smrh(i,j-1,kz1)+smrh(i,j-2,kz1))*&
+                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
              ! Method 1 - Smeared Density at Cell Faces
 
-             aicc = (rho1y(i,j,kz1)+rho1y(i,j,kz1))*&
-                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             !aicc = (rho1y(i,j,kz1)+rho1y(i,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             aixr = (rho1y(i+1,j,kz1)+rho1y(i+1,j,kz1))*&
-                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             !aixr = (rho1y(i+1,j,kz1)+rho1y(i+1,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             aixl = (rho1y(i-1,j,kz1)+rho1y(i-1,j,kz1))*&
-                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             !aixl = (rho1y(i-1,j,kz1)+rho1y(i-1,j,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             aiyr = (rho1y(i,j+1,kz1)+rho1y(i,j+1,kz1))*&
-                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             !aiyr = (rho1y(i,j+1,kz1)+rho1y(i,j+1,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
-             aiyl = (rho1y(i,j-1,kz1)+rho1y(i,j-1,kz1))*&
-                    0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
-                    0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
+             !aiyl = (rho1y(i,j-1,kz1)+rho1y(i,j-1,kz1))*&
+             !       0.5*(mdot(i,j,kz1)+mdot(i,j-1,kz1))*&
+             !       0.5*(ynorm(i,j,kz1)+ynorm(i,j-1,kz1))
 
              dsdxp = (aixr - aicc)*dx1
              dsdxm = (aicc - aixl)*dx1
