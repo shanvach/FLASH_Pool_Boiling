@@ -146,11 +146,13 @@ subroutine Simulation_initBlock(blockId)
 
            ! Main Bubble
            !r0 =  0.05
-           r0 =  0.1
+           !r0 =  0.1
+           r0 = 3.3599
            x0 =  0.0
            z0 =  0.0
            !y0 =  r0*cos((30.0/180.0)*acos(-1.0))
-           y0 =  r0*cos((54.0/180.0)*acos(-1.0))
+           !y0 =  r0*cos((54.0/180.0)*acos(-1.0))
+           y0 =  r0*cos((35.0/180.0)*acos(-1.0))
 
            ! Auxiallary Bubbles
            r1 =  0.05
@@ -236,17 +238,19 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           !if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
-           if(ycell .le. 0.3792 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+           if(ycell .le. 9.7721 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721
 
-           solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
-                                      fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &
-                                      fn(7)*(ycell**1) + fn(8)
+           !!if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
+           !if(ycell .le. 0.3792 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
 
-           if (solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
+           !solnData(TEMP_VAR,i,j,k) = fn(1)*(ycell**7) + fn(2)*(ycell**6) + fn(3)*(ycell**5) + &
+           !                           fn(4)*(ycell**4) + fn(5)*(ycell**3) + fn(6)*(ycell**2) + &
+           !                           fn(7)*(ycell**1) + fn(8)
+
+           !if (solnData(TEMP_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
 
-           end if
+           !end if
 
         enddo
      enddo
