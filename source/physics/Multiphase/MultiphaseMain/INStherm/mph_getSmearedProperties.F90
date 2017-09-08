@@ -21,15 +21,11 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
          pi = acos(-1.0)
 
-         !sp=3.d0*min(dx,dy)
+         !sp=0.5*dx
          !smhv(ix1:ix2,jy1:jy2,kz1) = &
          !        (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1)/sp))/2.d0
 
-         !smhv(ix1:ix2,jy1:jy2,kz1) = pf(ix1:ix2,jy1:jy2,kz1)
-
-         !smrh(ix1:ix2,jy1:jy2,kz1) = &
-         !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
-
+         !smrh(ix1:ix2,jy1:jy2,kz1) = rho2/rho2 + (rho2/rho1 - rho2/rho2)*smhv(ix1:ix2,jy1:jy2,kz1)
 
          sp = 1.5*dx
 
@@ -37,7 +33,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
            do i=ix1,ix2
 
               if(abs(s(i,j,kz1)) .le. sp) then ! Symmetric smearing - AD
-              !!if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
+              !if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
 
               smhv(i,j,kz1) = 0.5 + s(i,j,kz1)/(2*sp) + sin(2*pi*s(i,j,kz1)/(2*sp))/(2*pi)
 
@@ -57,7 +53,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
 
            end do
-        end do
+         end do
 
          smrh(ix1:ix2,jy1:jy2,kz1) = &
                  (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
@@ -87,25 +83,22 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
 
 
-         pi = acos(-1.0)
+       pi = acos(-1.0)
 
-         !sp=2.d0*min(dx,dy)
-         !smhv(ix1:ix2,jy1:jy2,kz1:kz2) = &
-         !        (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1:kz2)/sp))/2.d0
+       !sp=0.5*dx
+       !smhv(ix1:ix2,jy1:jy2,kz1:kz2) = &
+       !         (1.d0 + derf(s(ix1:ix2,jy1:jy2,kz1:kz2)/sp))/2.d0
 
-         !smhv(ix1:ix2,jy1:jy2,kz1:kz2) = pf(ix1:ix2,jy1:jy2,kz1:kz2)
+       !smrh(ix1:ix2,jy1:jy2,kz1:kz2) = rho2/rho2 + (rho2/rho1 - rho2/rho2)*smhv(ix1:ix2,jy1:jy2,kz1:kz2)
 
-         !smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
-         !        (rho2/rho2) + (rho2/rho1 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+       sp = 1.5*dx
 
-        sp = 1.5*dx
-
-        do k=kz1,kz2
-         do j=jy1,jy2
-           do i=ix1,ix2
+       do k=kz1,kz2
+        do j=jy1,jy2
+          do i=ix1,ix2
 
               if(abs(s(i,j,k)) .le. sp) then ! Symmetric smearing - AD
-              !!if(abs(s(i,j,k)) .le. sp .and. s(i,j,k) .lt. 0.0) then ! Asymmetric smearing - AD
+              !if(abs(s(i,j,k)) .le. sp .and. s(i,j,k) .lt. 0.0) then ! Asymmetric smearing - AD
 
               smhv(i,j,k) = 0.5 + s(i,j,k)/(2*sp) + sin(2*pi*s(i,j,k)/(2*sp))/(2*pi)
 
@@ -128,10 +121,10 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
         end do
        end do      
 
-         smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
-                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
+       smrh(ix1:ix2,jy1:jy2,kz1:kz2) = &
+               (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1:kz2)
 
-         smrh(ix1:ix2,jy1:jy2,kz1:kz2) = 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2)
+       smrh(ix1:ix2,jy1:jy2,kz1:kz2) = 1./smrh(ix1:ix2,jy1:jy2,kz1:kz2)
 
 
 end subroutine mph_getSmearedProperties3D

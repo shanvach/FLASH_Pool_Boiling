@@ -275,10 +275,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   
          if(axis == IAXIS) then ! Level 3a
  
-           select case(gridDataStruct)
-  
-             case(CENTER)
-  
+            if(gridDataStruct == CENTER) then
+
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
@@ -299,14 +297,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
     
                end if
 
-             case(WORK)
+            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
   
-             case default
+            else
 
                if(ivar == VELC_FACE_VAR) then
                
@@ -336,13 +334,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-           end select
+           end if
  
          else if (axis == JAXIS) then ! Level 3a
  
-           select case(gridDataStruct)
-
-             case(CENTER)
+             if(gridDataStruct == CENTER) then
 
                if (ivar == TEMP_VAR) then
 
@@ -372,14 +368,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-             case(WORK)
+             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
-             case default
+             else
 
                if(ivar == VELC_FACE_VAR) then
                
@@ -409,7 +405,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-           end select 
+           end if
   
          else if (axis == KAXIS) then ! Level 3a
            ! KAXIS BCs for face == LOW
@@ -419,9 +415,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
          if(axis == IAXIS) then ! Level 3b
 
-           select case(gridDataStruct)
-
-             case(CENTER)
+           if(gridDataStruct == CENTER) then
 
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
@@ -443,14 +437,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-             case(WORK)
+            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
-             case default
+            else
 
               if (ivar == VELC_FACE_VAR) then
               
@@ -488,14 +482,12 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
               endif
 
-           end select  
+           end if
   
          else if (axis == JAXIS) then ! Level 3b
 
-           select case(gridDataStruct)
-
-             case(CENTER)
-
+            if(gridDataStruct == CENTER) then
+          
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
@@ -516,14 +508,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-            case(WORK)
+            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
-            case default
+            else
 
                if(isFace) then
                k=2*guard+2                         
@@ -538,7 +530,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                enddo
                endif
  
-            end select
+            end if
   
          else if (axis == KAXIS) then ! Level 3b
            ! KAXIS BCs for face == HIGH

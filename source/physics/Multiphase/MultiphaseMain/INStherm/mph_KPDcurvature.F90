@@ -126,11 +126,9 @@
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
-        visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2   + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)
+        visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)       
+        !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = 1./(vis2/vis2 + (vis2/vis1   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k))
 
-        !alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = (thco2/cp2)/(thco2/cp2) + ((thco2/cp2)/(thco1/cp1) - (thco2/cp2)/(thco2/cp2))*smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)
-        !alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = 1.0/alph(ix1-1:ix2+1,jy1-1:jy2+1,k)
-     
         alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*pf(ix1-1:ix2+1,jy1-1:jy2+1,k)
 
 
@@ -168,8 +166,8 @@
         rho1x = 0.
         rho2x = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do j = jy1-1,jy2+1
-           do i = ix1-1,ix2+1
+        do j = jy1,jy2
+           do i = ix1,ix2+1
 
 
                a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                      
@@ -186,8 +184,8 @@
         rho1y = 0.
         rho2y = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do i = ix1-1,ix2+1
-           do j = jy1-1,jy2+1
+        do i = ix1,ix2
+           do j = jy1,jy2+1
 
 
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           

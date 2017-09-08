@@ -321,8 +321,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     gcMask(DFUN_VAR) = .TRUE.
     gcMask(AAJUNK_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work = intval;
 #endif
@@ -353,8 +353,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work = intval;
 #endif
@@ -466,8 +466,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
 #endif
     call Grid_fillGuardCells(CENTER,ALLDIR,&
