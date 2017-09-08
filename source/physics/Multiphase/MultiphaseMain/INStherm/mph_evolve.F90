@@ -96,8 +96,8 @@ if(mph_flag == 1) then
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work= intval;
 #endif
@@ -197,8 +197,8 @@ if(mph_flag == 1) then
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work= intval;
 #endif

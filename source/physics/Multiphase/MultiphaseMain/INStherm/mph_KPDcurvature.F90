@@ -126,6 +126,7 @@
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
+        !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *pf(ix1-1:ix2+1,jy1-1:jy2+1,k)
         visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)       
         !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = 1./(vis2/vis2 + (vis2/vis1   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k))
 
