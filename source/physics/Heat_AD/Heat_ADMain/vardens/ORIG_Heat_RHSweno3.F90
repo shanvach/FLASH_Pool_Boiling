@@ -75,16 +75,87 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
+
+           if(thxp1 .gt. tol) then
+           call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,thxp1)
+
+           else 
+        
+                if(s(i,j,k)*s(i-1,j,k) .ge. 0.d0) then
+                call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
+
+                else
+                call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,tol)
+
+                endif
+
+           endif
+
+     end if
      ! End of Case 1 !
+
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
+
+           if(thxm1 .gt. tol) then
+           call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,thxm1)
+
+           else 
+
+                if(s(i,j,k)*s(i+1,j,k) .ge. 0.d0) then
+                call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
+
+                else
+                call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,tol)
+
+                endif
+
+           endif
+
+     end if
      ! End of Case 2 !
+
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
+
+           if(thyp1 .gt. tol) then
+           call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,thyp1)
+
+           else 
+
+                if(s(i,j,k)*s(i,j-1,k) .ge. 0.d0) then
+                call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
+
+                else
+                call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,tol)
+
+                endif
+
+           end if
+
+     end if
      ! End of Case 3 !
+
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
+
+           if(thym1 .gt. tol) then
+           call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,thym1)
+
+           else 
+
+                if(s(i,j,k)*s(i,j+1,k) .ge. 0.d0) then
+                call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
+
+                else
+                call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,tol)
+
+                endif
+
+           endif
+
+     end if
      ! End of Case 4 ! 
 
      !______________________Advection Terms_______________________!

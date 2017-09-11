@@ -84,129 +84,22 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) then
-
-           if(thxp1 .gt. tol) then
-           call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,thxp1)
-
-           else 
-
-                if(s(i,j,k)*s(i-1,j,k) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Tx_plus,T_o(i-1,j,k),ht_Tsat,thxp2)
-
-                else
-                call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
      ! End of Case 1 !
-
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) then
-
-           if(thxm1 .gt. tol) then
-           call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,thxm1)
-
-           else 
-        
-                if(s(i,j,k)*s(i+1,j,k) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Tx_mins,T_o(i+1,j,k),ht_Tsat,thxm2)
-
-                else
-                call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
      ! End of Case 2 !
-
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) then
-
-           if(thyp1 .gt. tol) then
-           call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,thyp1)
-
-           else 
-
-                if(s(i,j,k)*s(i,j-1,k) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Ty_plus,T_o(i,j-1,k),ht_Tsat,thyp2)
-
-                else
-                call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
      ! End of Case 3 !
-
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) then
-
-           if(thym1 .gt. tol) then
-           call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,thym1)
-
-           else 
-
-                if(s(i,j,k)*s(i,j+1,k) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Ty_mins,T_o(i,j+1,k),ht_Tsat,thym2)
-
-                else
-                call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
      ! End of Case 4 ! 
-
      ! Case 5 !
-     if(s(i,j,k)*s(i,j,k+1) .le. 0.d0) then
-
-           if(thzp1 .gt. tol) then
-           call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Tsat,thzp1)
-
-           else 
-
-                if(s(i,j,k)*s(i,j,k-1) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Tz_plus,T_o(i,j,k-1),ht_Tsat,thzp2)
-
-                else
-                call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i,j,k+1) .le. 0.d0) call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Tsat,max(tol,thzp1))
      ! End of Case 5 !
-
      ! Case 6 !
-     if(s(i,j,k)*s(i,j,k-1) .le. 0.d0) then
-
-           if(thzm1 .gt. tol) then
-           call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Tsat,thzm1)
-
-           else 
-
-                if(s(i,j,k)*s(i,j,k+1) .ge. 0.d0) then
-                call Heat_GFMstencil_o1(Tz_mins,T_o(i,j,k+1),ht_Tsat,thzm2)
-
-                else
-                call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Tsat,tol)
-
-                endif
-
-           endif
-
-     end if
+     if(s(i,j,k)*s(i,j,k-1) .le. 0.d0) call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Tsat,max(tol,thzm1))
      ! End of Case 6 ! 
 
      !______________________Advection Terms_______________________!
