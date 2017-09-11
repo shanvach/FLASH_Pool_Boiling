@@ -467,7 +467,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               else
 
                         if(isFace) then
-                        k=2*guard+1                         
+                        k=2*guard+2                         
                         do i=1,guard
                         regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         enddo
