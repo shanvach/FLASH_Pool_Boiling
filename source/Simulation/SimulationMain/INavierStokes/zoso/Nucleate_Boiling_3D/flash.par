@@ -85,12 +85,19 @@ geometry	= "cartesian"
 #zmin =   -1.00
 #zmax =    1.00
 
-xmin = -25.0
-xmax =  25.0
-ymin =  00.0
-ymax = 100.0
-zmin = -25.0
-zmax =  25.0
+#xmin = -25.0
+#xmax =  25.0
+#ymin =  00.0
+#ymax = 100.0
+#zmin = -25.0
+#zmax =  25.0
+
+xmin = -7.000
+xmax =  7.000
+ymin =  0.000
+ymax = 28.000
+zmin = -7.000
+zmax =  7.000
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -125,8 +132,8 @@ cflflg          = 1
 #cfl             = 0.1
 #sigma		= 0.1
 
-cfl		= 1.0
-sigma		= 1.0
+cfl		= 0.5
+sigma		= 0.5
 
 dtspec          = 1.00
 dtinit          = 1.00
@@ -148,11 +155,13 @@ convertToConsvdInMeshInterp = .false.
 
 #checkpointFileIntervalTime = 1.0
 #checkpointFileIntervalStep = 400000000 
-checkpointFileIntervalTime = 100.0
+#checkpointFileIntervalTime = 100.0
+checkpointFileIntervalTime = 1.0
 
 #plotFileIntervalTime = 0.01
 #plotFileIntervalStep = 1000000
-plotFileIntervalTime = 25.0
+#plotFileIntervalTime = 25.0
+plotFileIntervalTime = 0.5
 
 ##	AMR parameters
 nblockx	= 2

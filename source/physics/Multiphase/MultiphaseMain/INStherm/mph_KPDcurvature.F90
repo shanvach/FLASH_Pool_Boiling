@@ -52,8 +52,8 @@
         !- kpd - Compute the curvature ---------------
 
         crv = 0.
-        do j = jy1-1,jy2+1
-           do i = ix1-1,ix2+1    
+        do j = jy1,jy2
+           do i = ix1,ix2
               !----------------------------------------------------
               !- kpd - 2 phi gradients per face method
               !----------------------------------------------------
@@ -167,8 +167,8 @@
         rho1x = 0.
         rho2x = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do j = jy1,jy2
-           do i = ix1,ix2+1
+        do j = jy1-1,jy2+1
+           do i = ix1-1,ix2+1
 
 
                a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                      
@@ -185,8 +185,8 @@
         rho1y = 0.
         rho2y = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do i = ix1,ix2
-           do j = jy1,jy2+1
+        do i = ix1-1,ix2+1
+           do j = jy1-1,jy2+1
 
 
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           

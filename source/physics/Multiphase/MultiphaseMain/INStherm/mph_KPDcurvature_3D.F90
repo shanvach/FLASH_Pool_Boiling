@@ -183,9 +183,9 @@
         !rho1x = 0.
         !rho2x = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do k = kz1,kz2
-           do j = jy1,jy2
-              do i = ix1,ix2+1
+        do k = kz1-1,kz2+1
+           do j = jy1-1,jy2+1
+              do i = ix1-1,ix2+1
 
               rho1x(i,j,k) = 0.
               rho2x(i,j,k) = 0.
@@ -214,9 +214,9 @@
         !rho1y = 0.
         !rho2y = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do i = ix1,ix2
-           do k = kz1,kz2
-              do j = jy1,jy2+1
+        do i = ix1-1,ix2+1
+           do k = kz1-1,kz2+1
+              do j = jy1-1,jy2+1
 
               rho1y(i,j,k) = 0.
               rho2y(i,j,k) = 0.
@@ -245,9 +245,9 @@
         !rho1z = 0.
         !rho2z = 0.
         !- kpd - Loop through boundary and interior cell faces
-        do i = ix1,ix2
-           do j = jy1,jy2
-              do k = kz1,kz2+1
+        do i = ix1-1,ix2+1
+           do j = jy1-1,jy2+1
+              do k = kz1-1,kz2+1
 
               rho1z(i,j,k) = 0.
               rho2z(i,j,k) = 0.

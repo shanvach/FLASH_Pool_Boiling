@@ -306,7 +306,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   
             else
 
-               if(ivar == VELC_FACE_VAR) then
+               if(ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
                
                         if (isFace) then
 
@@ -377,7 +377,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
              else
 
-               if(ivar == VELC_FACE_VAR) then
+               if(ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
                
                         if (isFace) then 
 
@@ -446,7 +446,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             else
 
-              if (ivar == VELC_FACE_VAR) then
+              if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
               
                         if (isFace) then
 
