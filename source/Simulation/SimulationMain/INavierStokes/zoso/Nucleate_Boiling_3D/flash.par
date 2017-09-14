@@ -132,8 +132,8 @@ cflflg          = 1
 #cfl             = 0.1
 #sigma		= 0.1
 
-cfl		= 0.5
-sigma		= 0.5
+cfl		= 0.3
+sigma		= 0.3
 
 dtspec          = 1.00
 dtinit          = 1.00
@@ -156,20 +156,20 @@ convertToConsvdInMeshInterp = .false.
 #checkpointFileIntervalTime = 1.0
 #checkpointFileIntervalStep = 400000000 
 #checkpointFileIntervalTime = 100.0
-checkpointFileIntervalTime = 1.0
+checkpointFileIntervalTime = 0.2
 
 #plotFileIntervalTime = 0.01
 #plotFileIntervalStep = 1000000
 #plotFileIntervalTime = 25.0
-plotFileIntervalTime = 0.5
+plotFileIntervalTime = 0.1
 
 ##	AMR parameters
-nblockx	= 2
-nblocky	= 4
-nblockz = 2
+nblockx	= 4
+nblocky	= 8
+nblockz = 4
 
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 4
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
