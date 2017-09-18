@@ -112,6 +112,17 @@ module Heat_AD_interface
    end interface
 
    interface
+      subroutine Heat_extrapGradT_weno3(Tnl,Tnv,T,s,pf,dx,dy,dz,nx,ny,ix1,ix2,jy1,jy2,Tnl_res,Tnv_res,mflg)
+        implicit none
+        real, dimension(:,:,:), intent(inout) :: Tnl,Tnv
+        real, dimension(:,:,:), intent(in) :: T,s,pf,nx,ny,mflg
+        real, intent(in) :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2
+        real, intent(out) :: Tnl_res,Tnv_res
+      end subroutine Heat_extrapGradT_weno3
+   end interface
+
+   interface
       subroutine Heat_calMdot(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2,kz1,kz2)
         implicit none
         real, dimension(:,:,:), intent(inout) :: mdot

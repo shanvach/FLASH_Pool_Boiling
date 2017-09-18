@@ -12,7 +12,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
-                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central
+                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
