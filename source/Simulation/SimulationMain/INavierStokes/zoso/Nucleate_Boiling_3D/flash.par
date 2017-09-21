@@ -117,11 +117,11 @@ geometry	= "cartesian"
 #zmax =  7.000
 
 xmin = -1.0
-xmax = -1.0
+xmax =  1.0
 ymin =  0.0
 ymax =  2.0
 zmin = -1.0
-zmax = -1.0
+zmax =  1.0
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
