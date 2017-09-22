@@ -72,7 +72,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   if(dr_simTime .ge. 1600.00) then
 
-  ht_Tsat = 0.4
+  ht_Tsat = 0.2
 
   do lb=1,blockCount
 
