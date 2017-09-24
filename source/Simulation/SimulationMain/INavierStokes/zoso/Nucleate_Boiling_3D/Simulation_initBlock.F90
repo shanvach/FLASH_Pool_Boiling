@@ -216,12 +216,12 @@ subroutine Simulation_initBlock(blockId)
            !! Main Bubble
            !!r0 =  0.05
            !r0 =  0.1
-           !!r0 = 3.3599
-           !x0 =  0.0
-           !z0 =  0.0
+           r0 =  3.3599
+           x0 =  0.0
+           z0 =  0.0
            !!y0 =  r0*cos((30.0/180.0)*acos(-1.0))
            !!y0 =  r0*cos((54.0/180.0)*acos(-1.0))
-           !y0 =  r0*cos((35.0/180.0)*acos(-1.0))
+           y0 =  r0*cos((35.0/180.0)*acos(-1.0))
 
            !! Auxiallary Bubbles
            !r1 =  0.1
@@ -275,7 +275,7 @@ subroutine Simulation_initBlock(blockId)
            !z8 = -2.2419
 
            !! Distance functions
-           !d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
+           d1 = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            !d2 = r1 - sqrt((xcell-x1)**2+(ycell-y1)**2+(zcell-z1)**2)
            !d3 = r1 - sqrt((xcell-x2)**2+(ycell-y2)**2+(zcell-z2)**2)
            !d4 = r1 - sqrt((xcell-x3)**2+(ycell-y3)**2+(zcell-z3)**2)
@@ -286,7 +286,7 @@ subroutine Simulation_initBlock(blockId)
            !d9 = r1 - sqrt((xcell-x8)**2+(ycell-y8)**2+(zcell-z8)**2)
 
            !! Single bubble setup
-           !!solnData(DFUN_VAR,i,j,k) = d1
+           solnData(DFUN_VAR,i,j,k) = d1
 
            !! Multiple bubble setup         
            
@@ -326,9 +326,11 @@ subroutine Simulation_initBlock(blockId)
            !   abs(d9) < abs(d5) .and. abs(d9) < abs(d6) .and. abs(d9) < abs(d7) .and. &
            !   abs(d9) < abs(d8) .and. abs(d9) < abs(d1)) solnData(DFUN_VAR,i,j,k) = d9
 
-           !solnData(TEMP_VAR,i,j,k) = 0.0
+           solnData(TEMP_VAR,i,j,k) = 0.0
 
-           !!if(ycell .le. 9.7721 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721
+           if(ycell .le. 9.7721 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721
+
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.1
 
            !if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
            !!!if(ycell .le. 0.3792 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) then
@@ -342,21 +344,21 @@ subroutine Simulation_initBlock(blockId)
 
            !end if
 
-           !_______________PRODUCTION RUN PROBLEM 1_____________________!
+           !!_______________PRODUCTION RUN PROBLEM 1_____________________!
 
-           solnData(DFUN_VAR,i,j,k) = 1E10
+           !solnData(DFUN_VAR,i,j,k) = 1E10
 
-           do Nuc_Index=1,17
+           !do Nuc_Index=1,17
 
-            Nuc_dfun  = Nuc_radii(Nuc_Index) -  sqrt((xcell-Nuc_sites_x(Nuc_Index))**2+(ycell-Nuc_sites_y(Nuc_Index))**2+(zcell-Nuc_sites_z(Nuc_Index))**2);
+           ! Nuc_dfun  = Nuc_radii(Nuc_Index) -  sqrt((xcell-Nuc_sites_x(Nuc_Index))**2+(ycell-Nuc_sites_y(Nuc_Index))**2+(zcell-Nuc_sites_z(Nuc_Index))**2);
             
-            if(abs(solnData(DFUN_VAR,i,j,k)) > abs(Nuc_dfun)) solnData(DFUN_VAR,i,j,k) = Nuc_dfun
+           ! if(abs(solnData(DFUN_VAR,i,j,k)) > abs(Nuc_dfun)) solnData(DFUN_VAR,i,j,k) = Nuc_dfun
                 
-           end do
+           !end do
 
-           solnData(TEMP_VAR,i,j,k) = -2.0769
-           if(ycell .le. 0.4 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (((0.4 - ycell)*1.0)+(ycell*(-2.0769)))/0.4
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
+           !solnData(TEMP_VAR,i,j,k) = -2.0769
+           !if(ycell .le. 0.4 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (((0.4 - ycell)*1.0)+(ycell*(-2.0769)))/0.4
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
         
 
         enddo
