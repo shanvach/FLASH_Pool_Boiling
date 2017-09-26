@@ -1,0 +1,17 @@
+/home/akash/FLASH4/bin/setup.py INavierStokes/zoso/Nucleate_Boiling_Microgravity -2d -auto -nxb=20 -nyb=20 -opt -maxblocks=10 -gridinterpolation=native +pm4dev -objdir=Nucleate_Boiling_Microgravity -site=splash.seas.gwu.edu Bittree=0 
+
+Expanded Command line
+--with-library=mpi --with-unit=IO --unit=Grid --gridinterpolation=monotonic INavierStokes/zoso/Nucleate_Boiling_Microgravity --2d --auto --nxb=20 --nyb=20 --opt --maxblocks=10 --gridinterpolation=native --unit=Grid --objdir=Nucleate_Boiling_Microgravity --site=splash.seas.gwu.edu
+
+Defined Setup Variables:
+
+Bittree --> 0 <type 'int'>
+FlashAvoidOrrery --> True <type 'bool'>
+Grid --> PM4DEV <type 'str'>
+fixedBlockSize --> True <type 'bool'>
+maxBlocks --> 10 <type 'int'>
+nDim --> 2 <type 'int'>
+nxb --> 20 <type 'int'>
+nyb --> 20 <type 'int'>
+nzb --> 1 <type 'int'>
+
