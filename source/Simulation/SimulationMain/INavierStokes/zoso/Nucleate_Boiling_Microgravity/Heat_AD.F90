@@ -74,58 +74,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
      mph_rho2 = 170 - 0.1*(dr_simTime-1600.00)
 
-     do lb = 1,blockCount
-
-        blockID = blockList(lb)
-
-        ! Get blocks dx, dy ,dz:
-        call Grid_getDeltas(blockID,del)
-
-        ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-        do j = blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)
-           do i = blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
-
-                if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) solnData(TEMP_VAR,i,j,1) = ht_Tsat                
-
-           end do
-        end do
-
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-     end do
-
-   else if (dr_simTime .gt. 1900.00) then
-
-     do lb = 1,blockCount
-
-        blockID = blockList(lb)
-
-        ! Get blocks dx, dy ,dz:
-        call Grid_getDeltas(blockID,del)
-
-        ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-        do j = blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)
-           do i = blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
-
-                if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) solnData(TEMP_VAR,i,j,1) = ht_Tsat                
-
-           end do
-        end do
-
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-     end do
-
    end if
 
    do step = 1,1 ! RK-2 Loop

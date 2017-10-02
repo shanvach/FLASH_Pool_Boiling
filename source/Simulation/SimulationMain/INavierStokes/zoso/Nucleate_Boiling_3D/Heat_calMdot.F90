@@ -13,7 +13,7 @@ subroutine Heat_calMdot(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2,kz1,k
      real :: SRP,alpha
 
      SRP = (ht_St*ins_invRe)/(ht_Pr)
-     alpha = 0.0  
+     alpha = alpha_v/alpha_l 
 
      ! Mass Flux Equation
      mdot(ix1:ix2,jy1:jy2,kz1:kz2) = SRP*(Tnl(ix1:ix2,jy1:jy2,kz1:kz2)+alpha*Tnv(ix1:ix2,jy1:jy2,kz1:kz2))
