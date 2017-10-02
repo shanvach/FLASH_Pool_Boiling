@@ -48,8 +48,8 @@ subroutine Multiphase_init()
   call RuntimeParameters_get("cp1",mph_cp1)
   call RuntimeParameters_get("cp2",mph_cp2)
 
-  mph_cp1 = mph_cp1*mph_rho1
-  mph_cp2 = mph_cp2*mph_rho2
+  !mph_cp1 = mph_cp1*mph_rho1
+  !mph_cp2 = mph_cp2*mph_rho2
 
  if (mph_meshMe .eq. MASTER_PE) then
      write(*,*) 'mph_rho1=',mph_rho1
