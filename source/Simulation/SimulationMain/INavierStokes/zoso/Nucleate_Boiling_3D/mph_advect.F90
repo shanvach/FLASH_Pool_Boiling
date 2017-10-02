@@ -1,6 +1,6 @@
 subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
-!#define NUCLEATE_BOILING
+#define NUCLEATE_BOILING
 #include "Flash.h"
 
   ! Modules Use:
@@ -433,7 +433,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
  end if
 
- if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.025) .le. dr_simTime)) then
+ if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.05) .le. dr_simTime)) then
 
   do lb = 1,blockCount
 
@@ -489,8 +489,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(k - NGUARD - 1)*del(KAXIS)  +  &
                   0.5*del(KAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((30.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.08*cos((30.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
+         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.08-rc)) solnData(DFUN_VAR,i,j,k) = 0.08-rc
 
          !rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
          !if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc
