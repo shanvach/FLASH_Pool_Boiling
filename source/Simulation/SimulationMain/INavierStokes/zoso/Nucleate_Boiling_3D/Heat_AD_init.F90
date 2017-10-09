@@ -15,6 +15,7 @@ subroutine Heat_AD_init(blockCount,blockList)
                                  Grid_getBlkCenterCoords
 
    use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+   use Heat_AD_interface, only: Heat_getQmicro
 
    implicit none
 
@@ -32,22 +33,48 @@ subroutine Heat_AD_init(blockCount,blockList)
    integer :: ierr,iter
    real :: maxdfun_local, maxdfun_global
    real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h
+   real :: dxmin
+   real :: del(MDIM)
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
    call RuntimeParameters_get("hfit",ht_hfit)
+   call RuntimeParameters_get("Ab",ht_Ab)
+   call RuntimeParameters_get("Cb",ht_Cb)
+   call RuntimeParameters_get("Bb",ht_Bb)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
      write(*,*) 'ht_Pr   =',ht_Pr
      write(*,*) 'ht_St   =',ht_St
      write(*,*) 'ht_hfit =',ht_hfit
+     write(*,*) 'ht_Ab   =',ht_Ab
+     write(*,*) 'ht_Bb   =',ht_Bb
+     write(*,*) 'ht_Cb   =',ht_Cb
 
    end if
 
    ht_Twall_low  = 1.0
    ht_Twall_high = 0.0
-   ht_Tsat       = 0.5
+   ht_Tsat       = 0.0
    ht_AMR_specs  = 0.0
+
+   dxmin    = 1e10
+
+   do lb = 1,blockCount
+
+     blockID = blockList(lb)
+     call Grid_getDeltas(blockID,del)
+     dxmin = min(dxmin,del(JAXIS))
+
+   end do
+
+   call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
+
+   if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+
+   call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+
+   print *,"qmic: ",ht_qmic
 
 end subroutine Heat_AD_init

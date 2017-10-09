@@ -205,4 +205,12 @@ module Heat_AD_interface
       end subroutine
    end interface
 
+   interface
+      subroutine Heat_getQmicro(qmic,dxmin)
+        implicit none
+        real, intent(inout) :: qmic
+        real, intent(in)    :: dxmin
+      end subroutine Heat_getQmicro
+   end interface
+
 end module Heat_AD_interface

@@ -12,13 +12,13 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
-                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3
+                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells 
 
-   use IncompNS_data, only:ins_invRe
+   use IncompNS_data, only:ins_invRe,ins_meshMe
 
    use Multiphase_data, only: mph_thco1,mph_cp1,mph_thco2,mph_cp2,mph_meshMe,mph_meshNumProcs,mph_rho2
 
@@ -26,7 +26,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Driver_data,  only: dr_nstep,dr_simTime
 
-   use Heat_AD_data, only: ht_AMR_specs
+   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -73,6 +73,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
      mph_rho2 = 170 - 0.1*(dr_simTime-1600.00)
+
+     if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+
+     call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+
+     print *,"qmic: ",ht_qmic
 
    end if
 
@@ -239,6 +245,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
                         solnData(MFLG_VAR,:,:,:))
 #endif
+
+     
+     ! Microlayer contribution - only for nucleate boiling
+     solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(del(DIR_X)*del(DIR_Z)))
 
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)

@@ -16,6 +16,10 @@ module Heat_AD_data
 
      real, save    :: ht_AMR_specs(2)
 
-     real, save    :: ht_Qmic
+     real, save    :: ht_qmic
+
+     real, save    :: ht_dxmin
+
+     real, save    :: ht_Ab, ht_Bb, ht_Cb
 
 end module Heat_AD_data
