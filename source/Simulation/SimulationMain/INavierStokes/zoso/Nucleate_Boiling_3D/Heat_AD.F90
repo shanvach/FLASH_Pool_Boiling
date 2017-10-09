@@ -248,7 +248,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      
      ! Microlayer contribution - only for nucleate boiling
-     solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(del(DIR_X)*del(DIR_Z)))
+     !solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(del(DIR_X)*del(DIR_Z)))
 
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
