@@ -323,7 +323,7 @@
                              solnData(SIGP_VAR,:,:,1),tsigp)
                                                                                                                                                                                                                 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(ALPH_VAR,:,:,1),tptes)
+                            solnData(TMIC_VAR,:,:,1),tptes)
 
 
      tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)

@@ -477,7 +477,7 @@ else if(mph_flag == 0) then
                           mph_sten,mph_crmx,mph_crmn, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                          mph_thco1,mph_thco2,mph_cp1,mph_cp2,solnData(MDOT_VAR,:,:,:))!,blockID)
+                          mph_thco1,mph_thco2,mph_cp1,mph_cp2,solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),blockID)
 
 #elif NDIM == 3 
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
@@ -507,7 +507,7 @@ else if(mph_flag == 0) then
                            facezData(RH1F_FACE_VAR,:,:,:)   , &
                            facezData(RH2F_FACE_VAR,:,:,:)   , &
                            facezData(SIGM_FACE_VAR,:,:,:) ,&
-                           solnData(MDOT_VAR,:,:,:))
+                           solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),blockID)
 
 #endif
      !-----------------------------------------------

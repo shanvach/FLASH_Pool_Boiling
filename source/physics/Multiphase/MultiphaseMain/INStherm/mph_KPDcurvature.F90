@@ -242,15 +242,18 @@
 !=========================================================================
 
         subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot)   
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
         use Heat_AD_data, only : ht_Tsat
 
+        use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         !implicit real*8(a-h,o-z)
         !common/param/re,xit,rho1,rho2,g,sp,ubc,uout,nint
@@ -260,12 +263,15 @@
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                               rho2y,pf,w,sigx,sigy
+                                               rho2y,pf,w,sigx,sigy,tmic
 
         real, dimension(:,:,:), intent(in) :: mdot
 
+        integer, intent(in) :: blockID
+
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
+        real :: ycell
         !- kpd - 
         real :: th,aa,xijl,xijr, &
                 a1,a2,cri,xid,xij,xidl,xidr,yid,yidr,yidl,yij,yijl,yijr,bb,mfl,mfr,mT
@@ -273,6 +279,9 @@
         real, parameter :: eps = 1E-13
 
         integer :: iSmear
+
+        real del(MDIM),bsize(MDIM),coord(MDIM)
+        real, dimension(2,MDIM) :: boundBox
 
 !--------------------------------------------
 !----------------jump conditions ------------
@@ -301,13 +310,27 @@
         icrv = 0
         bb   = (rho2/rho1) - 1.0
 
+        tmic = 0.
+
         !- kpd - Need to loop through one guard cell on each side to set jumps 
         !           when they cross block boundaries
                     !do j = jy1,jy2
                     !   do i = ix1,ix2
         k=1
+
+        call Grid_getDeltas(blockID,del)
+        call Grid_getBlkCenterCoords(blockId,coord)
+        call Grid_getBlkBoundBox(blockId,boundBox)
+
+        bsize(:) = boundBox(2,:) - boundBox(1,:)
+
         do j = jy1-1,jy2
            do i = ix1-1,ix2
+
+
+              ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
 
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
@@ -355,6 +378,8 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
+                 if(ycell==0.5*del(JAXIS)) tmic(i,j,k) = 1.0
+
               end if
 
               !--------------------------------------------------------------
@@ -401,6 +426,8 @@
 
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
+
+                 if(ycell==0.5*del(JAXIS)) tmic(i+1,j,k) = 1.0
 
               end if
 

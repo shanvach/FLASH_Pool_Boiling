@@ -33,6 +33,7 @@ VARIABLE tnvp                   # Tn vapor - Akash
 VARIABLE nrmx                   # Normal x - Akash
 VARIABLE nrmy                   # Normal y - Akash
 VARIABLE nrmz
+VARIABLE tmic
 
 VARIABLE smhv                   # Smeared Heaviside Function - mslee (Akash)
 VARIABLE smrh                   # Smeared density - mslee (Akash)
