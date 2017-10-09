@@ -304,7 +304,7 @@
                              solnData(TNLQ_VAR,:,:,:),tnlp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(TNVP_VAR,:,:,:),tnvp)
+                             solnData(RTES_VAR,:,:,:),tnvp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(NRMX_VAR,:,:,:),nxp)

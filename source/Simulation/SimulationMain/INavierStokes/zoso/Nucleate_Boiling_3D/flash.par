@@ -77,9 +77,9 @@ sten = 1.0
 hfit = 200
 
 # Microlayer parameters
-Ab = 3.0812d-11
-Bb = 6.5426d-7
-Cb = 1.0736d-8
+Ab = 7.0d-9
+Bb = 3.0d-7
+Cb = 1.0d-8
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -164,9 +164,9 @@ checkpointFileIntervalTime = 100.0
 plotFileIntervalTime = 25.0
 
 ##	AMR parameters
-nblockx	= 2
-nblocky	= 4
-nblockz = 2
+nblockx	= 1
+nblocky	= 2
+nblockz = 1
 
 lrefine_min	= 1
 lrefine_max     = 4

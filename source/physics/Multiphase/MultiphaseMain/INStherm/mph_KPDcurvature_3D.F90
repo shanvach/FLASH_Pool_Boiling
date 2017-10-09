@@ -331,6 +331,8 @@
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
 
+        use Multiphase_data, ONLY : mph_baseCount
+
         implicit none
 
 #include "Flash.h"
@@ -425,7 +427,12 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i,j,k) = 1.0
+                 if(ycell==0.5*del(JAXIS) .and. tmic(i,j,k) .eq. 0) then
+
+                        tmic(i,j,k) = 1.0
+                        mph_baseCount = mph_baseCount+1
+
+                 end if
 
               end if
 
@@ -471,7 +478,12 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i+1,j,k) = 1.0
+                 if(ycell==0.5*del(JAXIS) .and. tmic(i+1,j,k) .eq. 0) then
+
+                        tmic(i+1,j,k) = 1.0
+                        mph_baseCount = mph_baseCount+1
+
+                 end if
 
               end if
 
@@ -600,7 +612,12 @@
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i,j,k) = 1.0
+                 if(ycell==0.5*del(JAXIS) .and. tmic(i,j,k) .eq. 0) then 
+
+                        tmic(i,j,k) = 1.0
+                        mph_baseCount = mph_baseCount+1
+
+                 end if
 
               end if
 
@@ -644,7 +661,12 @@
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i,j,k+1) = 1.0
+                 if(ycell==0.5*del(JAXIS) .and. tmic(i,j,k+1) .eq. 0) then 
+
+                        tmic(i,j,k+1) = 1.0
+                        mph_baseCount = mph_baseCount+1
+
+                 end if
 
               end if
 

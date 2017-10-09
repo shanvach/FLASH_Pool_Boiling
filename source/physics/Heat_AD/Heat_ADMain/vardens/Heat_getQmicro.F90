@@ -14,7 +14,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
      real :: Re, Pr, St, rho, We, Pe, Ab, Bb, Cb, Tw, Ts
      real :: dr,r,psi,pi,step
      integer :: N,i
-     real, dimension(1000) :: z1,z2,z3,z4,q
+     real, dimension(500) :: z1,z2,z3,z4,q
 
      qmic = 0.0
 
@@ -34,7 +34,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
-     N  = 1000
+     N  = 500
      dr = r/N
      step = dr
 

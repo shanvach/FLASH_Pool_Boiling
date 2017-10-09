@@ -29,7 +29,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
-                             mph_radius, mph_isAttached, mph_timeStamp
+                             mph_radius, mph_isAttached,mph_timeStamp,mph_baseRadius,&
+                             mph_baseCount,mph_baseCountAll
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -78,7 +79,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: n_avg
   !kpd
   real :: lsDT,lsT,minCellDiag
-  real :: volSum,volSumAll
+  real :: volSum,volSumAll,volSumBase,volSumBaseAll
 
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
@@ -192,6 +193,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     volSum = 0.0
     volSumAll = 0.0
+    volSumBase = 0.0
+    volSumBaseAll = 0.0
 
   do ii=1,1
 
@@ -204,6 +207,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
      ! Get Blocks internal limits indexes:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Point to blocks center and face vars:
         call Grid_getBlkPtr(blockID,solnData,CENTER)
@@ -242,7 +249,15 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
               do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
                  if (solnData(DFUN_VAR,i,j,k) .gt. 0) then
+
+                   ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                            real(j - NGUARD - 1)*del(JAXIS)  +  &
+                            0.5*del(JAXIS)
+
                    volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
+
+                   if(ycell == 0.5*del(JAXIS)) volSumBase = volSumBase + (del(DIR_X) * del(DIR_Z))
+
                  end if
               end do
            end do
@@ -298,6 +313,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if(ii == 1) then
     call MPI_Allreduce(volSum, volSumAll, 1, FLASH_REAL,&
                        MPI_SUM, MPI_COMM_WORLD, ierr)
+    call MPI_Allreduce(volSumBase, volSumBaseAll, 1, FLASH_REAL,&
+                       MPI_SUM, MPI_COMM_WORLD, ierr)
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
@@ -306,6 +323,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #if NDIM == 3
 
     mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
+    mph_baseRadius = acos(-1.0)*sqrt(volSumBaseAll/acos(-1.0)) 
 
 #endif
 

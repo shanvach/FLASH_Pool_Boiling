@@ -43,7 +43,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
 
-  use Multiphase_data, only: mph_bcFlag
+  use Multiphase_data, only: mph_bcFlag,mph_baseCount,mph_baseCountAll
 
   implicit none
 
@@ -66,7 +66,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,blockID,ii,i,j,k
+  integer :: lb,blockID,ii,i,j,k,ierr
 
   real bsize(MDIM),coord(MDIM)
 
@@ -446,6 +446,9 @@ else if(mph_flag == 0) then
     !-----------------------------------------------------
     !- kpd - Loop through current block for curvature 2dC
     !-----------------------------------------------------
+
+    mph_baseCount = 0
+
     do lb = 1,blockCount
      blockID = blockList(lb)
 !    do lb = 1,count
@@ -526,6 +529,9 @@ else if(mph_flag == 0) then
      !-----------------------------------------------
 
     enddo
+
+    call MPI_Allreduce(mph_baseCount, mph_baseCountAll, 1, FLASH_INTEGER,&
+                       MPI_SUM, MPI_COMM_WORLD,ierr)
 
   !--------------------------------------------------------------------------
   !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.

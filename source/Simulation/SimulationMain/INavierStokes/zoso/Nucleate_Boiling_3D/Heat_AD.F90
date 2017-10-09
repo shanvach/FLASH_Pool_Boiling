@@ -20,7 +20,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use IncompNS_data, only:ins_invRe,ins_meshMe
 
-   use Multiphase_data, only: mph_thco1,mph_cp1,mph_thco2,mph_cp2,mph_meshMe,mph_meshNumProcs,mph_rho2
+   use Multiphase_data, only: mph_thco1,mph_cp1,mph_thco2,mph_cp2,mph_meshMe,mph_meshNumProcs,mph_rho2,mph_baseRadius,mph_baseCountAll,mph_baseCount
 
    use Heat_AD_data, only: ht_hfit,ht_Tsat
 
@@ -248,7 +248,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      
      ! Microlayer contribution - only for nucleate boiling
-     !solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(del(DIR_X)*del(DIR_Z)))
+     if(dr_nstep .gt. 1) then
+
+        solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*((ht_qmic*mph_baseRadius)/(mph_baseCountAll*del(DIR_X)*del(DIR_Z)))
+        solnData(RTES_VAR,:,:,:) = solnData(TMIC_VAR,:,:,:)*((ht_qmic*mph_baseRadius)/(mph_baseCountAll*del(DIR_X)*del(DIR_Z)))
+
+     end if
 
      ! Release pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -259,6 +264,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    gcMask = .FALSE.
    gcMask(TNLQ_VAR)=.TRUE.
    gcMask(TNVP_VAR)=.TRUE.
+   gcMask(RTES_VAR)=.TRUE.
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)

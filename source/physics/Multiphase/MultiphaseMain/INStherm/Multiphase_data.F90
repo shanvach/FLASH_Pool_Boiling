@@ -50,6 +50,10 @@ module Multiphase_data
 
   real, save :: mph_radius
 
+  real, save :: mph_baseRadius
+
+  integer, save :: mph_baseCount, mph_baseCountAll
+
   ! For Nucleate Boiling Re-Initialization
 
   logical, save :: mph_isAttached 
