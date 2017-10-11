@@ -14,13 +14,13 @@ subroutine Heat_getQmicro(qmic,dxmin)
      real :: Re, Pr, St, rho, We, Pe, Ab, Bb, Cb, Tw, Ts
      real :: dr,r,psi,pi,step
      integer :: N,i
-     real, dimension(500) :: z1,z2,z3,z4,q
+     real, allocatable, dimension(:) :: z1,z2,z3,z4,q
 
      qmic = 0.0
 
      pi  = acos(-1.d0)
 
-     psi = 35*pi/180
+     psi = 38*pi/180
 
      Re  = 1.0/ins_invRe
      Pr  = ht_Pr
@@ -34,14 +34,20 @@ subroutine Heat_getQmicro(qmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
-     N  = 500
-     dr = r/N
+     dr = 1d-6
      step = dr
+     N = r/dr
+
+     allocate(z1(N))
+     allocate(z2(N))
+     allocate(z3(N))
+     allocate(z4(N))
+     allocate(q(N))
 
      z1(1) = dxmin/2.0
      z2(1) = tan(psi)
      z3(1) = Ab/((dxmin/2.0)**3)
-     z4(1) = 0.0
+     z4(1) = (Re*Pr*z2(1)*Ab)/(St*z1(1))
      dr    = -dr
      q(1)  = (Tw-Ts-(Bb/Re)*z3(1))/(z1(1) + Cb/rho)
      qmic = qmic - dr*q(1)
@@ -57,5 +63,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
         qmic = qmic - step*q(i)
 
      end do
+
+     deallocate(z1,z2,z3,z4,q)
 
 end subroutine Heat_getQmicro

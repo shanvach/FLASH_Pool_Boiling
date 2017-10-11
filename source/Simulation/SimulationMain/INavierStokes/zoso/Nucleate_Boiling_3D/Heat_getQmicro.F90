@@ -20,7 +20,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
 
      pi  = acos(-1.d0)
 
-     psi = 30*pi/180
+     psi = 35*pi/180
 
      Re  = 1.0/ins_invRe
      Pr  = ht_Pr
@@ -34,7 +34,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
-     dr = 1d-4
+     dr = 1d-6
      step = dr
      N = r/dr
 
