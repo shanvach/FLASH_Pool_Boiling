@@ -84,11 +84,11 @@ subroutine Grid_markRefineDerefine()
   !specs(2) = -0.07d0  ! lower boundary of the refinement
   !specs(3) =  0.00d0  ! upper boundary of the refinement
 
-  !specs(2) = -2.0d0
-  !specs(3) =  0.0d0
-
-  specs(2) = -0.0010d0
+  specs(2) = -2.0d0
   specs(3) =  0.0d0
+
+  !specs(2) = -0.0010d0
+  !specs(3) =  0.0d0
 
   !specs(2) = -0.5d0
   !specs(3) =  0.0d0
