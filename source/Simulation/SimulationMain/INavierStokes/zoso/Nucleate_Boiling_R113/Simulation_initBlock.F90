@@ -214,8 +214,8 @@ subroutine Simulation_initBlock(blockId)
            !_________________TEST PROBLEM 1_____________________!
 
            !! Main Bubble
-           r0 =  0.05
-           !r0 =  0.1
+           !r0 =  0.05
+           r0 =  0.1
            !r0 =  3.3599
            !r0 = 0.08
            x0 =  0.0
