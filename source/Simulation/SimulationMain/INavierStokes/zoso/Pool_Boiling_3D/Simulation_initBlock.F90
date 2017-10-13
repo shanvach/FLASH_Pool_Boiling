@@ -214,15 +214,16 @@ subroutine Simulation_initBlock(blockId)
            !_________________TEST PROBLEM 1_____________________!
 
            !! Main Bubble
-           r0 =  0.05
+           !!r0 =  0.05
            !r0 =  0.1
-           !r0 =  3.3599
+           r0 =  3.3599
+           !r0 = 0.0017
            !r0 = 0.08
            x0 =  0.0
            z0 =  0.0
-           y0 =  r0*cos((30.0/180.0)*acos(-1.0))
-           !y0 =  r0*cos((54.0/180.0)*acos(-1.0))
-           !y0 =  r0*cos((35.0/180.0)*acos(-1.0))
+           !y0 =  r0*cos((30.0/180.0)*acos(-1.0))
+           !!y0 =  r0*cos((54.0/180.0)*acos(-1.0))
+           y0 =  r0*cos((35.0/180.0)*acos(-1.0))
 
            !! Auxiallary Bubbles
            !r1 =  0.1
@@ -329,8 +330,9 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           !if(ycell .le. 9.7721 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721
-           if(ycell .le. 0.25 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.25 - ycell)/0.25
+           if(ycell .le. 9.7721 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721
+           !if(ycell .le. 0.0049 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.0049 - ycell)/0.0049
+           !if(ycell .le. 0.3520 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.3520 - ycell)/0.3520
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.1
 

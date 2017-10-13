@@ -1,0 +1,225 @@
+# 	Runtime parameters for the Inflow-Outflow problem.
+
+gr_pmRpDivergenceFree = 1
+gr_pmRpNfieldDivf = 2
+gr_pmRpConsvFluxes = .TRUE.
+gr_pmRpConsvFluxDensities = .FALSE.
+
+# Particles
+pt_maxPerProc=3500
+
+# Inverse of Reynolds Number
+#invRe =  0.0033
+#invRe = 7.4343d-4 
+#invRe = 0.0047
+invRe = 0.005
+
+# Prandtl Number
+#Pr = 7.0
+#Pr = 1.7386  
+#Pr = 10.2751 
+Pr = 10.00
+
+# Stefan Number
+#St = 0.0879 
+#St = 0.0187
+#St = 0.1661 
+St = 0.17
+#St = 0.1
+
+iConvU = 0
+
+# Subgrid Scale model flag (0 no sgs model, 1 sgs model)
+isgs            = 0
+
+# Densities
+rho1 = 1.0
+#rho2 = 203.7057  
+#rho2 = 1624.4 
+#rho2 = 179.5405 
+rho2 = 170.00
+#rho2 = 200.0
+
+# Viscosities
+vis1 = 1.0
+#vis2 = 47.6290 
+#vis2 = 22.22 
+#vis2 = 50.0
+vis2 = 1.0
+
+# Thermal Properties
+#thco1 = 1.0
+#thco2 = 6.7006
+#thco2 = 27.16
+
+thco1 = 1.0
+thco2 = 4.0
+
+cp1   = 1.0
+#cp2   = 1.3602 
+#cp2   = 2.0768
+cp2   = 170.0
+
+# Gravity in the +y direction
+gravX =  0.0
+#gravY = -1.0
+gravY = -2.5d-7
+gravZ =  0.0
+
+# sten is the inverse of the Weber number
+#sten = 0.9951 
+#sten = 0.9994
+#sten = 0.9944 
+#sten = 0.9939
+sten = 1.0
+
+# Number of heat flux extrapolation iterations
+hfit = 200
+
+# Microlayer parameters
+Ab = 7.0d-9
+Bb = 3.0d-7
+Cb = 1.0d-8
+
+# Number of level-set redistancing iterations
+inls = 2
+lsit = 2
+
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+
+
+#       Size of computational volume
+
+#xmin =   -1.00
+#xmax =    1.00
+#ymin =    0.00
+#ymax =    4.00
+#zmin =   -1.00
+#zmax =    1.00
+
+xmin =  0.0
+xmax =  50.0
+ymin =  0.0
+ymax =  100.0
+zmin =  0.0
+zmax =  50.0
+
+#       Boundary conditions
+xl_boundary_type = "neumann_ins"
+xr_boundary_type = "neumann_ins"
+yl_boundary_type = "neumann_ins"
+yr_boundary_type = "neumann_ins"
+zl_boundary_type = "neumann_ins"
+zr_boundary_type = "neumann_ins"
+
+#      Poisson Solver Boundary Conditions
+xl_mg_boundary_type = "outflow"
+xr_mg_boundary_type = "outflow"
+yl_mg_boundary_type = "outflow"
+yr_mg_boundary_type = "outflow"
+zl_mg_boundary_type = "outflow"
+zr_mg_boundary_type = "outflow"
+
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "2D Inflow-Outflow Cylinder problem"
+log_file	= "INS_INOUT.log"
+basenm		= "INS_INOUT_"
+
+restart         = .false.
+#checkPointFileNumber=10
+#plotFileNumber  = 1
+
+nend = 1000000000
+tmax            = 2200.0
+cflflg          = 1
+cfl             = 0.7
+sigma		= 0.7
+dtspec          = 1.00
+dtinit          = 1.00
+tstep_change_factor=1.00
+
+
+#Integration Scheme:
+intschm            = 2
+
+#Plot Variables for Visit
+plot_var_1	= "pres"
+plot_var_2      = "velx"
+plot_var_3      = "vely"
+plot_var_4      = "omgz"
+plot_var_5      = "dust" #divergence
+  
+pfft_setupOnce  = .false.
+convertToConsvdInMeshInterp = .false.
+
+#checkpointFileIntervalTime = 0.1
+#checkpointFileIntervalStep = 400000000 
+checkpointFileIntervalTime = 100.0
+
+#plotFileIntervalTime = 0.01
+#plotFileIntervalStep = 1000000
+plotFileIntervalTime = 25.0
+
+##	AMR parameters
+nblockx	= 1
+nblocky	= 2
+nblockz = 1
+
+lrefine_min	= 1
+lrefine_max     = 4
+mgrid_solveLevelKPD = 1
+lrefine_min_init = 1
+
+nrefs           = 1000
+#refine_var_1    = "dfun"
+#refine_cutoff_1 = .1
+#derefine_cutoff_1 = -.1
+
+enableMaskedGCFill=.true.
+
+##	Flux Conservation for AMR
+flux_correct    = .true.
+
+# Multigrid Convergence tolerance
+# Rickers Multigrid HG:
+mg_maxResidualNorm = 1.e-10
+
+## Multigrid Convergence tolerance
+mgrid_npresmooth = 5
+mgrid_npossmooth = 4
+mgrid_print_norm = .true.
+mgrid_max_residual_norm = 1.e-10
+mgrid_max_vcycles = 20
+
+# BiPCGStab Parameters:
+bipcgs_max_residual_norm = 1.e-10
+bipcgs_max_cycles = 1000
+bipcgs_print_norm = .true.
+
+## Force Direct solve in this level:
+#maxDirectSolveLevel=2
+
+## Pfft Parameters:
+## Use Central Finite Difference discretization operator:
+gr_pfftDiffOpDiscretize = 2
+gr_mgDiffOpDiscretize   = 2
+
+ 
+# HYPRE-Poisson solver settings:
+gr_hyprePrintSolveInfo  = .FALSE.
+gr_hypreInfoLevel       = 1
+gr_hypreMaxIter         = 1000
+#gr_hypreRelTol          = 5.0e-6
+gr_hypreRelTol          = 1.0e-8
+gr_hypreFloor           = 1.0e-16
+#gr_hyprePCType          = "HYPRE_PARASAILS"
+#gr_hyprePCType          = "HYPRE_ILU"
+gr_hyprePCType          = "HYPRE_AMG"
+gr_hypreSolverType      = "HYPRE_PCG"
+#gr_hypreSolverType      = "HYPRE_BICGSTAB"
+#gr_hypreSolverType      = "HYPRE_GMRES"
+#gr_hypreSolverType      = "HYPRE_AMG"
+#gr_hypreSolverType      = "HYPRE_SPLIT"
