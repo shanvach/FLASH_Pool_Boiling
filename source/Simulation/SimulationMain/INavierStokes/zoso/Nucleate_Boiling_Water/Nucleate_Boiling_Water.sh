@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/Nucleate_Boiling_Water  -3d -auto  -nxb=20 -nyb=20 -nzb=20 -opt  -maxblocks=10 -gridinterpolation=native +pm4dev  -objdir=Nucleate_Boiling_Water -site=splash.seas.gwu.edu Bittree=1
