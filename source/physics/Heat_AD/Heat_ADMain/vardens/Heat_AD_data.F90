@@ -22,4 +22,6 @@ module Heat_AD_data
 
      real, save    :: ht_Ab, ht_Bb, ht_Cb
 
+     real, save    :: ht_tWait
+
 end module Heat_AD_data

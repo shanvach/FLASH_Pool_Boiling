@@ -20,7 +20,7 @@ subroutine Multiphase_init()
   use Multiphase_data, ONLY : mph_rho1,mph_rho2,mph_sten, &
                               mph_vis1,mph_vis2,mph_lsit, mph_inls, &
                               mph_meshMe, mph_meshNumProcs, mph_meshComm, &
-                              mph_thco1,mph_thco2,mph_cp1,mph_cp2,mph_isAttached ! Akash
+                              mph_thco1,mph_thco2,mph_cp1,mph_cp2,mph_isAttached,mph_isAttachedAll,mph_timeStampAll ! Akash
  
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, &
@@ -67,5 +67,7 @@ subroutine Multiphase_init()
   endif
 
   mph_isAttached = .true.
+
+  mph_isAttachedAll(:)  = .true.
 
 end subroutine Multiphase_init
