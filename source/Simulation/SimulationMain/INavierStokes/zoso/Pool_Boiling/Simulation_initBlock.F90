@@ -112,22 +112,22 @@ subroutine Simulation_initBlock(blockId)
   sim_nuc_radii(2) = 0.10
   sim_nuc_radii(3) = 0.10
   sim_nuc_radii(4) = 0.05
-  sim_nuc_radii(5) = 0.15
+  sim_nuc_radii(5) = 0.50
   sim_nuc_radii(6) = 0.05
   sim_nuc_radii(7) = 0.10
   sim_nuc_radii(8) = 0.05
   sim_nuc_radii(9) = 0.05
 
 
-  sim_nuc_site_x(1) = -2.00
-  sim_nuc_site_x(2) = -1.50
-  sim_nuc_site_x(3) = -1.00
-  sim_nuc_site_x(4) = -0.50
+  sim_nuc_site_x(1) = -4.00
+  sim_nuc_site_x(2) = -3.00
+  sim_nuc_site_x(3) = -2.00
+  sim_nuc_site_x(4) = -1.00
   sim_nuc_site_x(5) =  0.00
-  sim_nuc_site_x(6) =  0.50
-  sim_nuc_site_x(7) =  1.00
-  sim_nuc_site_x(8) =  1.50
-  sim_nuc_site_x(9) =  2.00
+  sim_nuc_site_x(6) =  1.00
+  sim_nuc_site_x(7) =  2.00
+  sim_nuc_site_x(8) =  3.00
+  sim_nuc_site_x(9) =  4.00
 
   do nuc_index=1,9
 

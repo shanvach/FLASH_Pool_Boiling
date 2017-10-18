@@ -69,19 +69,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    T_resBlock   = 0.0
 
-   if (dr_simTime .ge. 1600.00 .and. dr_simTime .le. 1900.00) then
-
-     ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
-     mph_rho2 = 170 - 0.1*(dr_simTime-1600.00)
-
-     if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
-
-     call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-
-     print *,"qmic: ",ht_qmic
-
-   end if
-
    do step = 1,1 ! RK-2 Loop
     do lb = 1,blockCount
 

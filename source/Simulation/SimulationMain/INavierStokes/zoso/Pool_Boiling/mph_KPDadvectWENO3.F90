@@ -56,7 +56,7 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         xd  = ins_xDampL
         Cb  = 12.0
         Ly  = 10.0
-        Lb  = 05.0
+        Lb  = 08.0
 
 
         call Grid_getDeltas(blockID,del)

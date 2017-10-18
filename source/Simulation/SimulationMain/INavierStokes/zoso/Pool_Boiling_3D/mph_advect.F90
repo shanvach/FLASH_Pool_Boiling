@@ -1,6 +1,6 @@
 subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
-!#define NUCLEATE_BOILING
+#define NUCLEATE_BOILING
 #include "Flash.h"
 
   ! Modules Use:
@@ -25,12 +25,13 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                              Grid_fillGuardCells,    &
                              Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
-  use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
+  use IncompNS_data, ONLY : ins_meshMe,ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
-                             mph_radius, mph_isAttached,mph_timeStamp,mph_baseRadius,&
-                             mph_baseCount,mph_baseCountAll
+                             mph_radius, mph_isAttached, mph_timeStamp, &
+                             mph_isAttachedAll, mph_timeStampAll,&
+                             mph_isAttachedOld
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -42,6 +43,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
+
+  use Heat_AD_data, ONLY: ht_tWait
+
+  use Simulation_data, ONLY: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_radii, sim_nuc_site_z, sim_nucSiteDens
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -73,13 +78,13 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   real bsize(MDIM),coord(MDIM)
   
-  real del(MDIM),xcell,ycell,zcell,rc
+  real del(MDIM),xcell,ycell,zcell,rc,xcellp,zcellp
 
   real    :: r_avg
   integer :: n_avg
   !kpd
   real :: lsDT,lsT,minCellDiag
-  real :: volSum,volSumAll,volSumBase,volSumBaseAll
+  real :: volSum,volSumAll
 
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
@@ -93,6 +98,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: listofBlocks(MAXBLOCKS)
   integer :: count
   integer :: intval
+
+  integer :: nuc_index
+  real    :: nuc_dfun
 
   do lb = 1,blockCount
 
@@ -193,8 +201,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     volSum = 0.0
     volSumAll = 0.0
-    volSumBase = 0.0
-    volSumBaseAll = 0.0
 
   do ii=1,1
 
@@ -207,10 +213,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
      ! Get Blocks internal limits indexes:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Point to blocks center and face vars:
         call Grid_getBlkPtr(blockID,solnData,CENTER)
@@ -249,15 +251,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
               do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
                  if (solnData(DFUN_VAR,i,j,k) .gt. 0) then
-
-                   ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                            real(j - NGUARD - 1)*del(JAXIS)  +  &
-                            0.5*del(JAXIS)
-
                    volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
-
-                   if(ycell == 0.5*del(JAXIS)) volSumBase = volSumBase + (del(DIR_X) * del(DIR_Z))
-
                  end if
               end do
            end do
@@ -313,8 +307,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if(ii == 1) then
     call MPI_Allreduce(volSum, volSumAll, 1, FLASH_REAL,&
                        MPI_SUM, MPI_COMM_WORLD, ierr)
-    call MPI_Allreduce(volSumBase, volSumBaseAll, 1, FLASH_REAL,&
-                       MPI_SUM, MPI_COMM_WORLD, ierr)
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
@@ -323,7 +315,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #if NDIM == 3
 
     mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
-    mph_baseRadius = acos(-1.0)*sqrt(volSumBaseAll/acos(-1.0)) 
 
 #endif
 
@@ -385,7 +376,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     !call sim_trackBubble(blockCount, blockList,vol, cx, cy, vx, vy,xh,yh,xl,yl)
     !if(mph_meshMe == 0) write(100000,'(12f20.12)') real(dr_nStep), timeEndAdv,vol, cx, cy, vx, vy, xh, yh, xl, yl
 
-
 !###################################################################################################################
 
 ! Level set re-initialization for nucleate boiling simulation.
@@ -395,7 +385,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 ! - Akash Dhruv
 
 #ifdef NUCLEATE_BOILING
-  if(mph_isAttached .eqv. .true.) then
+
+if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll(1:sim_nucSiteDens)
+
+do nuc_index =1,sim_nucSiteDens
 
   isAttached = .false.
 
@@ -414,29 +407,46 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-     if((coord(JAXIS) - bsize(JAXIS)/2.0) == 0.0) then
+     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
+              0.5*del(JAXIS)
 
-#if NDIM == 2
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) then
-                isAttached = isAttached .or. .true.
-           else
-                isAttached = isAttached .or. .false.
-           end if  
-        end do
-#endif        
+     if(ycell == 0.5*del(JAXIS)) then
 
-#if NDIM == 3
-       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k) .ge. 0.0) then
-                isAttached = isAttached .or. .true.
-           else
-                isAttached = isAttached .or. .false.
-           end if  
+       do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)-1
+        do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
+
+           xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                    real(i - NGUARD - 1)*del(IAXIS)  +  &
+                    0.5*del(IAXIS)
+
+           xcellp = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                    real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
+                    0.5*del(IAXIS)
+
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                    real(k - NGUARD - 1)*del(KAXIS)  +  &
+                    0.5*del(KAXIS)
+
+           zcellp = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                    real(k+1 - NGUARD - 1)*del(KAXIS)  +  &
+                    0.5*del(KAXIS)
+
+           if((xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index)) .and. &
+              (zcell .le. sim_nuc_site_z(nuc_index)) .and. (zcellp .ge. sim_nuc_site_z(nuc_index))) then
+
+             if ((solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k)   .ge. 0.0) .or. &
+                 (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k+1) .ge. 0.0)) then
+                        
+                        isAttached = isAttached .or. .true.
+             else
+                        isAttached = isAttached .or. .false.
+             end if  
+
+           end if
+
         end do
        end do
-#endif
 
      end if
   
@@ -444,14 +454,16 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   end do
 
-  call MPI_Allreduce(isAttached, mph_isAttached, 1, FLASH_LOGICAL,&
+  call MPI_Allreduce(isAttached, mph_isAttachedAll(nuc_index), 1, FLASH_LOGICAL,&
                      MPI_LOR, MPI_COMM_WORLD, ierr)
 
-  if(mph_isAttached .eqv. .false.) mph_timeStamp = dr_simTime
+  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) &
+    mph_timeStampAll(nuc_index) = dr_simTime
 
- end if
 
- if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.05) .le. dr_simTime)) then
+  mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
+
+  if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
 
   do lb = 1,blockCount
 
@@ -468,29 +480,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-#if NDIM == 2
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                 real(i - NGUARD - 1)*del(IAXIS) +   &
-                 0.5*del(IAXIS)
-
-         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                  real(j - NGUARD - 1)*del(JAXIS)  +  &
-                  0.5*del(JAXIS)
-
-         !rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2)
-         !if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
-         
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2)
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,1) = 0.1-rc
- 
-      end do
-     end do
-#endif
-
-#if NDIM == 3
     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
@@ -503,20 +492,17 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(j - NGUARD - 1)*del(JAXIS)  +  &
                   0.5*del(JAXIS)
 
-         zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-                  real(k - NGUARD - 1)*del(KAXIS)  +  &
+         zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 + &
+                  real(k - NGUARD - 1)*del(KAXIS)  + &
                   0.5*del(KAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.08*cos((30.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.08-rc)) solnData(DFUN_VAR,i,j,k) = 0.08-rc
+         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
 
-         !rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         !if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc
-         
+         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,k) = nuc_dfun
+
       end do
      end do
     end do
-#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
@@ -532,11 +518,11 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #endif
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  end if
 
- mph_isAttached = .true.
- end if
+end do
+
 #endif
-
 ! End of procedure - Akash
 !###################################################################################################################
 
@@ -661,6 +647,5 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a
 
    !print*,"Multiphase 2 Solver Time  ",t_stopMP2-t_startMP2
-
 
 end subroutine

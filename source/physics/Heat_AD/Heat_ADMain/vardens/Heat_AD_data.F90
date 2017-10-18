@@ -24,4 +24,6 @@ module Heat_AD_data
 
      real, save    :: ht_tWait
 
+     real, save    :: ht_psi
+
 end module Heat_AD_data

@@ -30,7 +30,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
                              mph_radius, mph_isAttached, mph_timeStamp, &
-                             mph_isAttachedAll, mph_timeStampAll
+                             mph_isAttachedAll, mph_timeStampAll,&
+                             mph_isAttachedOld
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -375,6 +376,138 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     !call sim_trackBubble(blockCount, blockList,vol, cx, cy, vx, vy,xh,yh,xl,yl)
     !if(mph_meshMe == 0) write(100000,'(12f20.12)') real(dr_nStep), timeEndAdv,vol, cx, cy, vx, vy, xh, yh, xl, yl
 
+!###################################################################################################################
+
+! Level set re-initialization for nucleate boiling simulation.
+! The procedure checks if the bubble has departed the heating surface (boundary),
+! and if it has then it creates a nucleus for the next bubble to grow and
+! continue the cyclic process.
+! - Akash Dhruv
+
+#ifdef NUCLEATE_BOILING
+
+if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll
+
+do nuc_index =1,9
+
+  isAttached = .false.
+
+  do lb = 1,blockCount
+
+     blockID = blockList(lb)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
+              0.5*del(JAXIS)
+
+     if(ycell == 0.5*del(JAXIS)) then
+
+        do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
+
+           xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                    real(i - NGUARD - 1)*del(IAXIS)  +  &
+                    0.5*del(IAXIS)
+
+           xcellp = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                    real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
+                    0.5*del(IAXIS)
+
+           if((xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index))) then
+
+             if ((solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),1) .ge. 0.0)) then
+                        
+                        isAttached = isAttached .or. .true.
+             else
+                        isAttached = isAttached .or. .false.
+             end if  
+
+           end if
+
+        end do
+
+     end if
+  
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+  end do
+
+  call MPI_Allreduce(isAttached, mph_isAttachedAll(nuc_index), 1, FLASH_LOGICAL,&
+                     MPI_LOR, MPI_COMM_WORLD, ierr)
+
+  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) &
+    mph_timeStampAll(nuc_index) = dr_simTime
+
+
+  mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
+
+  if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
+
+  do lb = 1,blockCount
+
+     blockID = blockList(lb)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                 real(i - NGUARD - 1)*del(IAXIS) +   &
+                 0.5*del(IAXIS)
+
+         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                  real(j - NGUARD - 1)*del(JAXIS)  +  &
+                  0.5*del(JAXIS)
+
+         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2)
+
+         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,1) = nuc_dfun
+
+      end do
+     end do
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+  end do
+
+    gcMask = .FALSE.
+    gcMask(DFUN_VAR) = .TRUE.
+#ifdef FLASH_GRID_PARAMESH
+    intval = 1
+    !intval = 2
+    interp_mask_unk = intval;   interp_mask_unk_res = intval;
+    interp_mask_work = intval;
+#endif
+    call Grid_fillGuardCells(CENTER,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  end if
+
+end do
+
+#endif
+! End of procedure - Akash
+!###################################################################################################################
+
    call cpu_time(t_startMP2a)
 
    do ii = 1,mph_lsit
@@ -496,126 +629,5 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a
 
    !print*,"Multiphase 2 Solver Time  ",t_stopMP2-t_startMP2
-
-!###################################################################################################################
-
-! Level set re-initialization for nucleate boiling simulation.
-! The procedure checks if the bubble has departed the heating surface (boundary),
-! and if it has then it creates a nucleus for the next bubble to grow and
-! continue the cyclic process.
-! - Akash Dhruv
-
-#ifdef NUCLEATE_BOILING
-
-do nuc_index =1,9
-
-  if(mph_isAttachedAll(nuc_index) .eqv. .true.) then
-
-  isAttached = .false.
-
-  do lb = 1,blockCount
-
-     blockID = blockList(lb)
-     call Grid_getBlkBoundBox(blockId,boundBox)
-
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
-              0.5*del(JAXIS)
-
-     if(ycell == 0.5*del(JAXIS)) then
-
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-           xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           xcellp = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           if((xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index))) then
-
-             if ((solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),1) .ge. 0.0)) then
-                        
-                        isAttached = isAttached .or. .true.
-             else
-                        isAttached = isAttached .or. .false.
-             end if  
-
-           end if
-
-        end do
-
-     end if
-  
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-  end do
-
-  call MPI_Allreduce(isAttached, mph_isAttachedAll(nuc_index), 1, FLASH_LOGICAL,&
-                     MPI_LOR, MPI_COMM_WORLD, ierr)
-
-  if(mph_isAttachedAll(nuc_index) .eqv. .false.) mph_timeStampAll(nuc_index) = dr_simTime
-
-  end if
-
-  if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
-
-  do lb = 1,blockCount
-
-     blockID = blockList(lb)
-     call Grid_getBlkBoundBox(blockId,boundBox)
-
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-     do j=blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)
-      do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
-
-         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                 real(i - NGUARD - 1)*del(IAXIS) +   &
-                 0.5*del(IAXIS)
-
-         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                  real(j - NGUARD - 1)*del(JAXIS)  +  &
-                  0.5*del(JAXIS)
-
-         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2)
-
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,1) = nuc_dfun
-
-      end do
-     end do
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-  end do
-
- mph_isAttachedAll(nuc_index) = .true.
-
- end if
-
-end do
-
-! End of procedure - Akash
-!###################################################################################################################
 
 end subroutine

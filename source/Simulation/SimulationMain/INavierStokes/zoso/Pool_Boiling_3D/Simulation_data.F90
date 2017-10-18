@@ -31,5 +31,9 @@ module Simulation_data
   real, save :: sim_qIn1, sim_qIn2, sim_qOut1, sim_qOut2
 
   real, save :: sim_waveA
+
+  real, save, dimension(100) :: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_site_z, sim_nuc_radii
+
+  integer, save :: sim_nucSiteDens
  
 end module Simulation_data

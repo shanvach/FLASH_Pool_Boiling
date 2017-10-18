@@ -58,6 +58,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Twall_high = 0.0
    ht_Tsat       = 0.0
    ht_AMR_specs  = 0.0
+   ht_tWait      = 0.15
 
    dxmin    = 1e10
 
