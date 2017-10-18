@@ -112,22 +112,22 @@ subroutine Simulation_initBlock(blockId)
   sim_nuc_radii(2) = 0.10
   sim_nuc_radii(3) = 0.10
   sim_nuc_radii(4) = 0.05
-  sim_nuc_radii(5) = 0.50
+  sim_nuc_radii(5) = 0.75
   sim_nuc_radii(6) = 0.05
   sim_nuc_radii(7) = 0.10
   sim_nuc_radii(8) = 0.05
   sim_nuc_radii(9) = 0.05
 
 
-  sim_nuc_site_x(1) = -4.00
-  sim_nuc_site_x(2) = -3.00
-  sim_nuc_site_x(3) = -2.00
-  sim_nuc_site_x(4) = -1.00
+  sim_nuc_site_x(1) = -3.00
+  sim_nuc_site_x(2) = -2.25
+  sim_nuc_site_x(3) = -1.50
+  sim_nuc_site_x(4) = -0.75
   sim_nuc_site_x(5) =  0.00
-  sim_nuc_site_x(6) =  1.00
-  sim_nuc_site_x(7) =  2.00
-  sim_nuc_site_x(8) =  3.00
-  sim_nuc_site_x(9) =  4.00
+  sim_nuc_site_x(6) =  0.75
+  sim_nuc_site_x(7) =  1.50
+  sim_nuc_site_x(8) =  2.25
+  sim_nuc_site_x(9) =  3.00
 
   do nuc_index=1,9
 
@@ -148,14 +148,19 @@ subroutine Simulation_initBlock(blockId)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-
-           solnData(DFUN_VAR,i,j,k) = 1E10
-
            do nuc_index=1,9
 
            nuc_dfun  = sim_nuc_radii(nuc_index) - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2);
 
-           if(abs(solnData(DFUN_VAR,i,j,k)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,k) = nuc_dfun
+           if (nuc_index == 1) then
+
+                solnData(DFUN_VAR,i,j,k) = nuc_dfun
+
+           else
+
+                solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
+
+           end if
 
            end do
 

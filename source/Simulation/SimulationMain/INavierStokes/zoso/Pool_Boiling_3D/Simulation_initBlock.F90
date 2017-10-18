@@ -118,16 +118,22 @@ subroutine Simulation_initBlock(blockId)
   A0 = sim_waveA
   solnX = 0.50007326145904204295640899471226
 
-  sim_nucSiteDens = 17
+  sim_nucSiteDens = 0
   ht_psi          = (35.0/180.0)*acos(-1.0)
 
   open(unit = 2,file = "sim_nucSites.dat")
 
-  do nuc_index=1,sim_nucSiteDens
+  do
+ 
+     nuc_index = sim_nucSiteDens + 1
 
-     read(2,*)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+     read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+
+     sim_nucSiteDens = nuc_index
 
   end do
+
+  10 continue
 
   close(2)
 
@@ -150,14 +156,21 @@ subroutine Simulation_initBlock(blockId)
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
 
-           solnData(DFUN_VAR,i,j,k) = 1E10
-
            do nuc_index=1,sim_nucSiteDens
 
             nuc_dfun  = sim_nuc_radii(nuc_index) -  sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2);
-            
-            if(abs(solnData(DFUN_VAR,i,j,k)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,k) = nuc_dfun
-                
+  
+
+            if (nuc_index == 1) then
+
+                solnData(DFUN_VAR,i,j,k) = nuc_dfun
+
+            else
+
+                solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
+
+            end if
+          
            end do
 
            solnData(TEMP_VAR,i,j,k) = 0.0

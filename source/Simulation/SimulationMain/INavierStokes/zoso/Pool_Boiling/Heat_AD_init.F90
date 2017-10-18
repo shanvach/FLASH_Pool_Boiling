@@ -66,6 +66,6 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Tsat         =  0.0
    ht_AMR_specs(:) =  0.0
 
-   ht_tWait        =  0.4
+   ht_tWait        =  0.2
 
 end subroutine Heat_AD_init

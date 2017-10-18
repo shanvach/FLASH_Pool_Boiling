@@ -386,7 +386,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #ifdef NUCLEATE_BOILING
 
-if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll
+if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll(1:9)
 
 do nuc_index =1,9
 
@@ -481,7 +481,7 @@ do nuc_index =1,9
 
          nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2)
 
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,1) = nuc_dfun
+         solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
 
       end do
      end do

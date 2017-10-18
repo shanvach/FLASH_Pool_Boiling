@@ -498,7 +498,7 @@ do nuc_index =1,sim_nucSiteDens
 
          nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
 
-         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(nuc_dfun)) solnData(DFUN_VAR,i,j,k) = nuc_dfun
+         solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
 
       end do
      end do
