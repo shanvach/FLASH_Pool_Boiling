@@ -33,6 +33,14 @@ subroutine Simulation_init()
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+ 
+  use Heat_AD_data, ONLY: ht_qmic
+
+  use Multiphase_data, ONLY: mph_baseRadius, mph_baseCountAll, mph_isAttachedAll, mph_isAttachedOld, mph_timeStampAll, mph_isAttached,mph_timeStamp
+
+  use IO_interface, ONLY :  IO_getScalar
+
+  use Driver_data, only: dr_restart
 
 !  use ImBound_data
 
@@ -59,6 +67,16 @@ subroutine Simulation_init()
   call RuntimeParameters_get('waveA',    sim_waveA)
 
   sim_gCell = .true.
+
+  if(dr_restart .eqv. .TRUE.) then
+
+  call IO_getScalar("qmic", ht_qmic)
+  call IO_getScalar("baseradius",mph_baseRadius)
+  call IO_getScalar("basecount",mph_baseCountAll)
+  call IO_getScalar("timestamp",mph_timeStamp)
+  call IO_getScalar("isattached",mph_isAttached)
+
+  end if
 
 !  ! Cylinder setup IB variables:
 !  Ro = 0.5 !0.5

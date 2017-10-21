@@ -27,6 +27,8 @@ subroutine Multiphase_init()
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, &
                                Driver_getComm
 
+  use Driver_data, ONLY: dr_restart
+
   implicit none
   include 'Flash_mpi.h'
 #include "constants.h"
@@ -67,9 +69,13 @@ subroutine Multiphase_init()
 
   endif
 
+  if(dr_restart .eqv. .FALSE.) then
+
   mph_isAttached = .true.
 
   mph_isAttachedAll(:)  = .true.
   mph_isAttachedOld(:)  = .true.
+
+  end if
 
 end subroutine Multiphase_init

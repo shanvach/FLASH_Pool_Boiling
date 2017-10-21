@@ -16,6 +16,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use RuntimeParameters_interface, ONLY : RuntimeParameters_get
    use Heat_AD_interface, only: Heat_getQmicro
+   use Driver_data, only: dr_restart
 
    implicit none
 
@@ -59,21 +60,25 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Tsat       = 0.0
    ht_AMR_specs  = 0.0
 
-   dxmin    = 1e10
+   if(dr_restart .eqv. .FALSE.) then
 
-   do lb = 1,blockCount
+        dxmin    = 1e10
 
-     blockID = blockList(lb)
-     call Grid_getDeltas(blockID,del)
-     dxmin = min(dxmin,del(JAXIS))
+        do lb = 1,blockCount
 
-   end do
+        blockID = blockList(lb)
+        call Grid_getDeltas(blockID,del)
+        dxmin = min(dxmin,del(JAXIS))
 
-   call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
+        end do
 
-   if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+        call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-   call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+
+        call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+
+    end if
 
    print *,"qmic: ",ht_qmic
 
