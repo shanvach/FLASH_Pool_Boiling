@@ -17,6 +17,12 @@ subroutine Heat_AD_init(blockCount,blockList)
    use RuntimeParameters_interface, ONLY : RuntimeParameters_get
    use Heat_AD_interface, only: Heat_getQmicro
 
+   use Simulation_data, only: sim_nucSiteDens, sim_nuc_radii, &
+                              sim_nuc_site_x, sim_nuc_site_y, &
+                              sim_nuc_site_z
+
+   use Driver_data, only: dr_restart
+
    implicit none
 
 #include "constants.h"
@@ -35,6 +41,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h
    real :: dxmin
    real :: del(MDIM)
+   integer :: nuc_index
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
@@ -56,9 +63,32 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    ht_Twall_low  = 1.0
    ht_Twall_high = 0.0
-   ht_Tsat       = 0.0
+   ht_Tsat       = 0.4
    ht_AMR_specs  = 0.0
    ht_tWait      = 0.15
+
+
+   if(dr_restart .eqv. .TRUE.) then
+
+     sim_nucSiteDens = 0
+     ht_psi          = (35.0/180.0)*acos(-1.0)
+
+     open(unit = 2,file = "sim_nucSites.dat")
+
+     do
+       nuc_index = sim_nucSiteDens + 1
+       read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+       sim_nucSiteDens = nuc_index
+
+     end do
+
+     10 continue
+
+     close(2)
+
+     sim_nuc_site_y(1:sim_nucSiteDens) = 0.15*cos(ht_psi)
+
+   end if
 
    dxmin    = 1e10
 
