@@ -1,4 +1,4 @@
-subroutine Heat_getQmicro(qmic,dxmin)
+subroutine Heat_getQmicro(qmic,fmic,dxmin)
 
      use Heat_AD_data, only: ht_Pr, ht_St, ht_Ab, ht_Bb, ht_Cb, ht_Twall_low, ht_Tsat, ht_psi
 
@@ -8,7 +8,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
 
      implicit none
 
-     real, intent(inout) :: qmic
+     real, intent(inout) :: qmic,fmic
      real, intent(in)    :: dxmin
 
      real :: Re, Pr, St, rho, We, Pe, Ab, Bb, Cb, Tw, Ts
@@ -17,6 +17,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
      real, allocatable, dimension(:) :: z1,z2,z3,z4,q
 
      qmic = 0.0
+     fmic = 0.0
 
      Re  = 1.0/ins_invRe
      Pr  = ht_Pr
@@ -57,6 +58,7 @@ subroutine Heat_getQmicro(qmic,dxmin)
 
         q(i)  = (Tw-Ts-(Bb/Re)*z3(i))/(z1(i) + Cb/rho)
         qmic = qmic - step*q(i)
+        fmic = fmic + step*(-z3(i)-(Ab/(z1(i)**3)))
 
      end do
 

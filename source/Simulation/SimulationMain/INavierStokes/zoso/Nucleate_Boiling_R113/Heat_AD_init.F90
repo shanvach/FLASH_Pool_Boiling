@@ -74,12 +74,14 @@ subroutine Heat_AD_init(blockCount,blockList)
 
         call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
         call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
     end if
 
-   print *,"qmic: ",ht_qmic
+   print *,"qmic,fmic: ",ht_qmic,ht_fmic
+
 
 end subroutine Heat_AD_init
