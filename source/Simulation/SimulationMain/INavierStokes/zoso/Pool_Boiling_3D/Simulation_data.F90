@@ -35,5 +35,7 @@ module Simulation_data
   real, save, dimension(100) :: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_site_z, sim_nuc_radii
 
   integer, save :: sim_nucSiteDens
+
+  real, save :: sim_Tbulk
  
 end module Simulation_data

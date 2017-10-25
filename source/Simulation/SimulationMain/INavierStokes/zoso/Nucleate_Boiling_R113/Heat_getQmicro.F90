@@ -35,7 +35,7 @@ subroutine Heat_getQmicro(qmic,fmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
-     dr = 0.3d-4
+     dr = 0.4d-4
      step = dr
      N = r/dr
 
@@ -62,7 +62,7 @@ subroutine Heat_getQmicro(qmic,fmic,dxmin)
 
         q(i)  = (Tw-Ts-(Bb/Re)*z3(i))/(z1(i) + Cb/rho)
         qmic = qmic - step*q(i)
-        fmic = fmic + step*(-z3(i)-(Ab/(z1(i)**3)))
+        fmic = fmic + step*(z3(i)-(Ab/(z1(i)**3)))/(Re/We)
 
      end do
 

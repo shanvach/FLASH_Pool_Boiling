@@ -36,7 +36,7 @@ subroutine Simulation_initBlock(blockId)
                               sim_gCell, sim_waveA, &
                               sim_nuc_site_x, sim_nuc_site_y,&
                               sim_nuc_site_z, sim_nuc_radii,&
-                              sim_nucSiteDens
+                              sim_nucSiteDens, sim_Tbulk
 
   use Grid_interface, ONLY : Grid_getDeltas,         &
                              Grid_getBlkIndexLimits, &
@@ -173,9 +173,9 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-           solnData(TEMP_VAR,i,j,k) = 0.0
+           solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
-           if(ycell .le. 0.25 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.25 - ycell)/0.25  
+           if(ycell .le. 0.30 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.30 - ycell)/0.30  
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
 
@@ -183,7 +183,7 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.15*cos(ht_psi)
+  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

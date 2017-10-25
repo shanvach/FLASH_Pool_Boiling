@@ -26,7 +26,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Driver_data,  only: dr_nstep,dr_simTime
 
-   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin
+   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_fmic, ht_dxmin
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -74,9 +74,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
      mph_rho2 = 165 - 0.0833*(dr_simTime-1600.00)
 
-     if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+     if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
      call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+     call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
      print *,"qmic: ",ht_qmic
 

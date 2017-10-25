@@ -367,7 +367,7 @@
 
         real :: ycell,fmic
 
-        fmic = (ht_fmic*xit*mph_baseRadius)/(mph_baseCountAll*dx*dz)
+        fmic = (ht_fmic*mph_baseRadius*xit)/(mph_baseCountAll*dx*dz)
        
         sigx = 0.
         sigy = 0.

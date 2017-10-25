@@ -17,7 +17,7 @@
 
 subroutine Simulation_sendOutputData()
 
-    use Heat_AD_data, only: ht_qmic
+    use Heat_AD_data, only: ht_qmic,ht_fmic
 
     use Multiphase_data, only: mph_baseRadius, mph_baseCountAll, mph_isAttachedAll, mph_isAttachedOld, mph_timeStampAll
 
@@ -26,6 +26,7 @@ subroutine Simulation_sendOutputData()
     implicit none
 
       call IO_setScalar("qmic", ht_qmic)
+      call IO_setScalar("fmic", ht_fmic)
       call IO_setScalar("baseradius",mph_baseRadius)
       call IO_setScalar("basecount",mph_baseCountAll)
 

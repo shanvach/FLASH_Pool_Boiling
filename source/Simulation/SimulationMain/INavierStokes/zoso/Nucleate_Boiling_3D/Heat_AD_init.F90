@@ -62,26 +62,27 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    if(dr_restart .eqv. .FALSE.) then
 
-        !dxmin    = 1e10
+        dxmin    = 1e10
 
-        !do lb = 1,blockCount
+        do lb = 1,blockCount
 
-        !  blockID = blockList(lb)
-        !  call Grid_getDeltas(blockID,del)
-        !  dxmin = min(dxmin,del(JAXIS))
+          blockID = blockList(lb)
+          call Grid_getDeltas(blockID,del)
+          dxmin = min(dxmin,del(JAXIS))
 
-        !end do
+        end do
 
-        !call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
+        call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-        ht_dxmin = 0.0125
+        !ht_dxmin = 0.01
 
-        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
         call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
    end if
 
-   print *,"qmic: ",ht_qmic
+   print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
 end subroutine Heat_AD_init

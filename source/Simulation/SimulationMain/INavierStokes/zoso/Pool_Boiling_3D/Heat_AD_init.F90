@@ -65,7 +65,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Twall_high = 0.0
    ht_Tsat       = 0.0
    ht_AMR_specs  = 0.0
-   ht_tWait      = 0.15
+   ht_tWait      = 0.20
 
 
    if(dr_restart .eqv. .TRUE.) then
@@ -86,7 +86,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
      close(2)
 
-     sim_nuc_site_y(1:sim_nucSiteDens) = 0.15*cos(ht_psi)
+     sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
    end if
 
@@ -112,6 +112,6 @@ subroutine Heat_AD_init(blockCount,blockList)
 
     end if
 
-   print *,"qmic: ",ht_qmic
+   print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
 end subroutine Heat_AD_init
