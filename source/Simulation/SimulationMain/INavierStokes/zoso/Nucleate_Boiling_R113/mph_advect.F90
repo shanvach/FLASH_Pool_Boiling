@@ -507,8 +507,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(k - NGUARD - 1)*del(KAXIS)  +  &
                   0.5*del(KAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,k) = 0.05-rc
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((35.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
+         if(solnData(DFUN_VAR,i,j,k) < (0.05-rc)) solnData(DFUN_VAR,i,j,k) = 0.05-rc
 
          !rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
          !if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc

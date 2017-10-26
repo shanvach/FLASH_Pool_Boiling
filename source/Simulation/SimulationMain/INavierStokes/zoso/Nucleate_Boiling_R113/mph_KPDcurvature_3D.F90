@@ -558,8 +558,9 @@
                  icrv(i,j,k) = 1
                  icrv(i,j+1,k) = 1
 
-                 if(ycell==0.5*del(JAXIS)) then
-
+                 if(ycell==0.5*del(JAXIS) .and. &
+                   ((pf(i+1,j,k) .eq. 1) .or. (pf(i,j,k+1) .eq. 1) .or. &
+                    (pf(i-1,j,k) .eq. 1) .or. (pf(i,j,k-1) .eq. 1))) then
 
                         if(tmic(i,j,k) .eq. 0) then
 

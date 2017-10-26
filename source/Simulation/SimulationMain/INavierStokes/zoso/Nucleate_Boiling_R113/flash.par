@@ -15,7 +15,7 @@ invRe =  0.0033
 Pr = 7.0
 
 # Stefan Number
-St = 0.09
+St = 0.16
 
 iConvU = 0
 
@@ -50,9 +50,12 @@ sten = 1.0
 hfit = 200
 
 # Microlayer parameters
-Ab = 1.8d-10
-Bb = 2.4d-7
-Cb = 5.5d-9
+Ab = 2.0d-12
+Bb = 8.9d-7
+Cb = 9.7d-8
+
+# Temperatures
+tsat = 0.0
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -68,7 +71,7 @@ geometry	= "cartesian"
 xmin =    0.00
 xmax =    1.00
 ymin =    0.00
-ymax =    2.00
+ymax =    5.00
 zmin =    0.00
 zmax =    1.00
 
@@ -95,17 +98,17 @@ log_file	= "INS_INOUT.log"
 basenm		= "INS_INOUT_"
 
 restart         = .false.
-#checkPointFileNumber=10
+#checkPointFileNumber=3
 #plotFileNumber  = 1
 
 nend = 1000000000
 tmax            = 22.0
 cflflg          = 1
-cfl             = 0.2
-sigma		= 0.2
-dtspec          = 1.00
-dtinit          = 1.00
-tstep_change_factor=1.00
+cfl             = 0.3
+sigma		= 0.3
+dtspec          = 0.5d-4
+dtinit          = 0.5d-4
+tstep_change_factor=1.01
 
 
 #Integration Scheme:
@@ -122,20 +125,22 @@ pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 0.1
+#checkpointFileIntervalStep = 1000
 
 plotFileIntervalTime = 0.01
+#plotFileIntervalStep = 200
 
 ##	AMR parameters
 nblockx	= 1
-nblocky	= 2
+nblocky	= 5
 nblockz = 1
 
 lrefine_min	= 1
-lrefine_max     = 4
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000
+nrefs           = 200
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1

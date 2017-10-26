@@ -176,8 +176,8 @@ subroutine Simulation_initBlock(blockId)
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
            if(ycell .le. 0.30 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.30 - ycell)/0.30  
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
         enddo
      enddo

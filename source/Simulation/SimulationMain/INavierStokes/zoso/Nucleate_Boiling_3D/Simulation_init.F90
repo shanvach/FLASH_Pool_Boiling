@@ -34,7 +34,7 @@ subroutine Simulation_init()
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
-  use Heat_AD_data, ONLY: ht_qmic, ht_fmic
+  use Heat_AD_data, ONLY: ht_qmic, ht_fmic, ht_dxmin
 
   use Multiphase_data, ONLY: mph_baseRadius, mph_baseCountAll, mph_isAttachedAll, mph_isAttachedOld, mph_timeStampAll
 
@@ -72,6 +72,7 @@ subroutine Simulation_init()
 
   call IO_getScalar("qmic", ht_qmic)
   call IO_getScalar("fmic", ht_fmic)
+  call IO_getScalar("microdx",ht_dxmin)
   call IO_getScalar("baseradius",mph_baseRadius)
   call IO_getScalar("basecount",mph_baseCountAll)
 

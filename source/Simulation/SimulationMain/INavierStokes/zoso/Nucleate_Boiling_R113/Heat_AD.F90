@@ -235,7 +235,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      
      ! Microlayer contribution - only for nucleate boiling
-     if(dr_nstep .gt. 1) then
+     if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
         solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*((ht_qmic*mph_baseRadius)/(mph_baseCountAll*del(DIR_X)*del(DIR_Z)))
         solnData(RTES_VAR,:,:,:) = solnData(TMIC_VAR,:,:,:)*((ht_qmic*mph_baseRadius)/(mph_baseCountAll*del(DIR_X)*del(DIR_Z)))

@@ -58,7 +58,7 @@ subroutine Heat_getQmicro(qmic,fmic,dxmin)
 
         q(i)  = (Tw-Ts-(Bb/Re)*z3(i))/(z1(i) + Cb/rho)
         qmic = qmic - step*q(i)
-        fmic = fmic + step*(-z3(i)-(Ab/(z1(i)**3)))
+        fmic = fmic + step*(-z3(i)-(Ab/(z1(i)**3)))/(Re/We)
 
      end do
 
