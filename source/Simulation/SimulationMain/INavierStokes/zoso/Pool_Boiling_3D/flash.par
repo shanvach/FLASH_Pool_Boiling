@@ -15,7 +15,7 @@ invRe = 0.0042
 Pr = 8.4
 
 # Stefan Number
-St = 0.32
+St = 0.58
 
 iConvU = 0
 
@@ -50,13 +50,13 @@ sten = 1.0
 hfit = 200
 
 # Microlayer parameters
-Ab = 9.0d-9
+Ab = 5.0d-10
 Bb = 1.2d-6
 Cb = 2.4d-7
 
 # Temperatures
-tbulk = -0.8333
-tsat  =  0.0
+tbulk =  0.0
+tsat  =  0.45
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -105,8 +105,8 @@ restart         = .false.
 nend = 1000000000
 tmax            = 2500.0
 cflflg          = 1
-cfl             = 0.7
-sigma		= 0.7
+cfl             = 1.0
+sigma		= 1.0
 dtspec          = 1.00
 dtinit          = 1.00
 tstep_change_factor=1.01
@@ -135,7 +135,7 @@ nblocky	= 5
 nblockz = 5
 
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 4
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 

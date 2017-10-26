@@ -35,7 +35,8 @@ subroutine Heat_getQmicro(qmic,fmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
-     dr = 0.95d-4
+     !dr = 0.95d-4
+     dr = 0.87d-4
      !dr = 0.4d-4
      step = dr
      N = r/dr
