@@ -68,6 +68,8 @@ subroutine Simulation_init()
 
   call RuntimeParameters_get('tbulk',   sim_Tbulk)
 
+  call RuntimeParameters_get('tsat',    ht_Tsat)
+
   sim_gCell = .true.
 
   if(dr_restart .eqv. .TRUE.) then

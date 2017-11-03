@@ -35,13 +35,20 @@ subroutine Heat_getQmicro(qmic,fmic,dxmin)
      Ts  = ht_Tsat
 
      r  = dxmin/(2.0*tan(psi))
+
      !dr = 0.95d-4
      !dr = 0.87d-4
      !dr = 0.40d-4
-     dr = 0.7d-4
+     !dr = 0.7d-4
+     !dr = 0.78d-4
+     !dr = 0.81d-4
+     !dr = 0.797d-4
+     !step = dr
+     !N = r/dr
 
+     N   = 150
+     dr  = r/N
      step = dr
-     N = r/dr
 
      allocate(z1(N))
      allocate(z2(N))

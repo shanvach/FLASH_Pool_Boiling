@@ -16,6 +16,8 @@
 
   use Multiphase_data, only: mph_radius
 
+  use Heat_AD_data, only: ht_Nu
+
   implicit none
 
 #include "constants.h"
@@ -377,7 +379,8 @@
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              tpdwdzc,tpdwdzcorn)
 
-     tprds = 2*mph_radius
+     !tprds = 2*mph_radius
+     tprds = ht_Nu
 
          
      ! VORTICITY:

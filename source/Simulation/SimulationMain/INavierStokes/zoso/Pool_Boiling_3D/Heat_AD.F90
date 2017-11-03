@@ -26,7 +26,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Driver_data,  only: dr_nstep,dr_simTime
 
-   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin
+   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -59,8 +59,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real :: Tnl_res, Tnv_res, Tnl_res1, Tnv_res1,Tnl_resBlock,Tnv_resBlock
    real :: T_res,T_res1,T_resBlock
    real :: max_flux, min_flux
-
-
+   real :: Nu
+   integer :: hcounterAll,hcounter
    integer :: iter_count,intval
 
    iter_count = 0
@@ -206,6 +206,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !____________________________________Heat Flux calculation____________________________________________!
 
+   Nu = 0.0
+   hcounter = 0
+
    do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -246,7 +249,26 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(MFLG_VAR,:,:,:))
 #endif
 
-     
+
+     ! Wall heat flux
+     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
+              0.5*del(JAXIS)
+
+     if(ycell == 0.5*del(JAXIS)) then
+
+      do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+          Nu = Nu + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))*(1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
+          hcounter = hcounter + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))
+
+
+        end do
+      end do             
+
+     end if
+
      ! Microlayer contribution - only for nucleate boiling
      !if(dr_nstep .gt. 1) then
 
@@ -269,6 +291,16 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
+   call MPI_Allreduce(hcounter, hcounterAll, 1, FLASH_INTEGER,&
+                      MPI_SUM, MPI_COMM_WORLD, ierr)
+
+   call MPI_Allreduce(Nu, ht_Nu, 1, FLASH_REAL,&
+                      MPI_SUM, MPI_COMM_WORLD, ierr)
+
+   ht_Nu = ht_Nu/hcounterAll
+
+   if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number- ",ht_Nu
+   
 !_________________________________End of Heat Flux calculation_____________________________!
 
 !__________________________Heat Flux extrapolation sub iterations__________________________!

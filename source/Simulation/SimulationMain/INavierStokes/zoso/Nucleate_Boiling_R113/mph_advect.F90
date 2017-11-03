@@ -416,17 +416,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
      if((coord(JAXIS) - bsize(JAXIS)/2.0) == 0.0) then
 
-#if NDIM == 2
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),1) .ge. 0.0) then
-                isAttached = isAttached .or. .true.
-           else
-                isAttached = isAttached .or. .false.
-           end if  
-        end do
-#endif        
-
-#if NDIM == 3
        do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            if (solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k) .ge. 0.0) then
@@ -436,7 +425,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
            end if  
         end do
        end do
-#endif
 
      end if
   
@@ -451,7 +439,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
  end if
 
- if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.2) .le. dr_simTime)) then
+ if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.8) .le. dr_simTime)) then
 
   do lb = 1,blockCount
 
@@ -468,29 +456,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-#if NDIM == 2
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-         xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                 real(i - NGUARD - 1)*del(IAXIS) +   &
-                 0.5*del(IAXIS)
-
-         ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                  real(j - NGUARD - 1)*del(JAXIS)  +  &
-                  0.5*del(JAXIS)
-
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((30.0/180.0)*acos(-1.0)))**2)
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
-         
-         !rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2)
-         !if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,1) = 0.1-rc
- 
-      end do
-     end do
-#endif
-
-#if NDIM == 3
     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
@@ -507,16 +472,12 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(k - NGUARD - 1)*del(KAXIS)  +  &
                   0.5*del(KAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((45.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         if(solnData(DFUN_VAR,i,j,k) < (0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc
-
-         !rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((54.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
-         !if(abs(solnData(DFUN_VAR,i,j,k)) > abs(0.1-rc)) solnData(DFUN_VAR,i,j,k) = 0.1-rc
-         
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((50.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
+         solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),0.1-rc)
+        
       end do
      end do
     end do
-#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
@@ -534,7 +495,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
  mph_isAttached = .true.
+
  end if
+
 #endif
 
 ! End of procedure - Akash

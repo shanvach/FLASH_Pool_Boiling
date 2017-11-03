@@ -220,7 +220,7 @@ subroutine Simulation_initBlock(blockId)
            !r0 = 0.08
            x0 =  0.0
            z0 =  0.0
-           y0 =  r0*cos((45.0/180.0)*acos(-1.0))
+           y0 =  r0*cos((50.0/180.0)*acos(-1.0))
            !y0 =  r0*cos((54.0/180.0)*acos(-1.0))
            !y0 =  r0*cos((35.0/180.0)*acos(-1.0))
 

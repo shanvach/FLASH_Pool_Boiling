@@ -442,7 +442,7 @@
 
                         end if
 
-                        if(dr_nstep .gt. 1) then
+                        if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
                         w(i,j,k)      = w(i,j,k)      - fmic/aa/dx**2
                         w(i+1,j,k)    = w(i+1,j,k)    + fmic/aa/dx**2
@@ -505,7 +505,7 @@
 
                         end if
 
-                        if(dr_nstep .gt. 1) then
+                        if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
                         w(i,j,k)      = w(i,j,k)      + fmic/aa/dx**2
                         w(i+1,j,k)    = w(i+1,j,k)    - fmic/aa/dx**2
@@ -569,7 +569,7 @@
  
                         end if
 
-                        if(dr_nstep .gt. 1) then
+                        if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
                         w(i,j,k)      = w(i,j,k)      - fmic/aa/dy**2
                         w(i,j+1,k)    = w(i,j+1,k)    + fmic/aa/dy**2
@@ -673,7 +673,7 @@
 
                         end if
 
-                        if(dr_nstep .gt. 1) then
+                        if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
                         w(i,j,k)      = w(i,j,k)      - fmic/aa/dz**2
                         w(i,j,k+1)    = w(i,j,k+1)    + fmic/aa/dz**2
@@ -735,7 +735,7 @@
 
                         end if
 
-                        if(dr_nstep .gt. 1) then
+                        if(dr_nstep .gt. 1 .and. mph_baseCountAll .gt. 0) then
 
                         w(i,j,k)      = w(i,j,k)      + fmic/aa/dz**2
                         w(i,j,k+1)    = w(i,j,k+1)    - fmic/aa/dz**2

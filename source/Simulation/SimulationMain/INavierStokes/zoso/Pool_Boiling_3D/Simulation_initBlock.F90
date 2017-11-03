@@ -48,7 +48,7 @@ subroutine Simulation_initBlock(blockId)
 
   use Driver_data, ONLY : dr_simTime
 
-  use Heat_AD_data, ONLY : ht_psi
+  use Heat_AD_data, ONLY : ht_psi, ht_Tsat
 
   implicit none
 
@@ -175,7 +175,7 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
-           if(ycell .le. 0.30 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.30 - ycell)/0.30  
+           if(ycell .le. 0.25 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.25 - ycell)/0.25  
 
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
 
@@ -183,7 +183,7 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+  sim_nuc_site_y(1:sim_nucSiteDens) = 0.1*cos(ht_psi)
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
