@@ -26,7 +26,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Driver_data,  only: dr_nstep,dr_simTime
 
-   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu
+   use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu_l, ht_Nu_t
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -59,7 +59,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real :: Tnl_res, Tnv_res, Tnl_res1, Tnv_res1,Tnl_resBlock,Tnv_resBlock
    real :: T_res,T_res1,T_resBlock
    real :: max_flux, min_flux
-   real :: Nu
+   real :: Nu_l,Nu_t
    integer :: hcounterAll,hcounter
    integer :: iter_count,intval
 
@@ -206,7 +206,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !____________________________________Heat Flux calculation____________________________________________!
 
-   Nu = 0.0
+   Nu_l = 0.0
+   Nu_t = 0.0
    hcounter = 0
 
    do lb = 1,blockCount
@@ -260,8 +261,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-          Nu = Nu + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))*(1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
-          hcounter = hcounter + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))
+          Nu_l = Nu_l + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))*(1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
+          Nu_t = Nu_t + (1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
+          hcounter = hcounter + 1
 
 
         end do
@@ -294,12 +296,17 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    call MPI_Allreduce(hcounter, hcounterAll, 1, FLASH_INTEGER,&
                       MPI_SUM, MPI_COMM_WORLD, ierr)
 
-   call MPI_Allreduce(Nu, ht_Nu, 1, FLASH_REAL,&
+   call MPI_Allreduce(Nu_l, ht_Nu_l, 1, FLASH_REAL,&
                       MPI_SUM, MPI_COMM_WORLD, ierr)
 
-   ht_Nu = ht_Nu/hcounterAll
+   call MPI_Allreduce(Nu_t, ht_Nu_t, 1, FLASH_REAL,&
+                      MPI_SUM, MPI_COMM_WORLD, ierr)
 
-   if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number- ",ht_Nu
+   ht_Nu_l = ht_Nu_l/hcounterAll
+   ht_Nu_t = ht_Nu_t/hcounterAll
+
+   if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number Liq - ",ht_Nu_l
+   if(ins_meshMe .eq. MASTER_PE) Print *,"Wall Nusselt Number Tot - ",ht_Nu_t
    
 !_________________________________End of Heat Flux calculation_____________________________!
 

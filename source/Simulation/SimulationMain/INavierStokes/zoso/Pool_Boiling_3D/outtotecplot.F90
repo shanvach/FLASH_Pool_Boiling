@@ -16,7 +16,7 @@
 
   use Multiphase_data, only: mph_radius
 
-  use Heat_AD_data, only: ht_Nu
+  use Heat_AD_data, only: ht_Nu_l
 
   implicit none
 
@@ -380,7 +380,7 @@
                              tpdwdzc,tpdwdzcorn)
 
      !tprds = 2*mph_radius
-     tprds = ht_Nu
+     tprds = ht_Nu_l
 
          
      ! VORTICITY:

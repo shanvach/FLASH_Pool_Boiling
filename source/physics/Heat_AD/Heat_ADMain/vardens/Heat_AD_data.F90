@@ -26,4 +26,6 @@ module Heat_AD_data
 
      real, save    :: ht_psi
 
+     real, save    :: ht_Nu_l, ht_Nu_t
+
 end module Heat_AD_data
