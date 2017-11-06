@@ -472,7 +472,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                   real(k - NGUARD - 1)*del(KAXIS)  +  &
                   0.5*del(KAXIS)
 
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((50.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((40.0/180.0)*acos(-1.0)))**2+(zcell-0.0)**2)
          solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),0.1-rc)
         
       end do
