@@ -47,7 +47,7 @@ NumBods = 1;
 np_el   = 2; % Points per wet surface element: 2 point segment in 2D.
 
 % Output File names:
-basedir_out = ['/home/akash/FLASH4/source/Simulation/SimulationMain/INavierStokes/2D/wangsz/FallCylinder/matlab/'];
+basedir_out = ['/Users/mvanella/Dropbox/Documents/ADAPTIVE/INS_IB/source/Simulation/SimulationMain/INavierStokes/2D/FallCylinder/'];
 
 writefile = SM_TRUE; %SM_FALSE; 
 
@@ -136,7 +136,7 @@ axis equal
 
 % Test difference of hydrostatic pressure integral with weight:
 grav_vec     = [0 -1.];
-grav_flag    =       1; % 0 = No gravity, 1 with gravity
+grav_flag    =       0; % 0 = No gravity, 1 with gravity
 rhof = 1;
 weight_vol = rhof*pi*(D/2)^2 * L * grav_vec;
 
