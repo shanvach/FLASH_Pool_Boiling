@@ -77,5 +77,7 @@ module ImBound_data
       real, save :: freq_nat,freq_t,omg,Ro,ao
       real, save,allocatable,dimension(:) :: xo,yo,zo
 
+      logical, save :: ib_vel_flg, ib_temp_flg
+
 end module ImBound_data
 

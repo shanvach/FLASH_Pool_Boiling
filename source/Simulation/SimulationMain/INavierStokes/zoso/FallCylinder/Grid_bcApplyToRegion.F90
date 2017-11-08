@@ -352,7 +352,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               case (TEMP_VAR)                         
               k = 2*guard+1 
               do i = 1,guard
-                 if (axis .eq. IAXIS) regionData(i,1:je,1:ke,ivar)= 2*ht_Twall_high-regionData(k-i,1:je,1:ke,ivar)
+                 if (axis .eq. IAXIS) regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
                  if (axis .eq. JAXIS) regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
               end do 
               end select
@@ -667,7 +667,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               case (TEMP_VAR)  
               k = 2*guard+1 
               do i = 1,guard
-                  if (axis .eq. IAXIS) regionData(k-i,1:je,1:ke,ivar)= 2*ht_Twall_high-regionData(i,1:je,1:ke,ivar)
+                  if (axis .eq. IAXIS) regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
                   if (axis .eq. JAXIS) regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
               end do                         
               end select

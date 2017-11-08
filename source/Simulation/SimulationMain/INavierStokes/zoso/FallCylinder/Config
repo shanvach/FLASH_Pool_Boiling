@@ -11,6 +11,13 @@ REQUIRES physics/Heat_AD/Heat_ADMain/constdens
 
 USESETUPVARS Grid
 
+VARIABLE tfrc TYPE: GENERIC
+VARIABLE tfro TYPE: GENERIC
+
+PARTICLEPROP temp REAL
+PARTICLEPROP titp REAL
+PARTICLEPROP ftp REAL 
+PARTICLEPROP tl REAL
 
 # Immersed boundary unit:
 REQUIRES physics/ImBound
