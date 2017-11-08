@@ -74,9 +74,4 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
-  gcMask = .FALSE.
-  gcMask(TEMP_VAR)=.TRUE.
-  call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-
 end subroutine Heat_AD

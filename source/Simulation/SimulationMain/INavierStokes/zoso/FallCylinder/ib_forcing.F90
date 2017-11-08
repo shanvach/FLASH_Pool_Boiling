@@ -70,11 +70,15 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
   real, dimension(ib_stencil,NDIM+1,MDIM) :: ib_phile
 
-  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp
+  integer, dimension(ib_stencil,MDIM) :: ib_ht_ielem
+
+  real, dimension(ib_stencil,NDIM+1) :: ib_ht_phile
+
+  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp,tl
 
   real :: part_Nml(MDIM), part_temp
 
-  integer :: indx(MDIM),gridfl(MDIM),gridfl_center,indx_center
+  integer :: indx(MDIM),gridfl(MDIM)
 
   logical :: force_fl(MDIM),force_dir(MDIM),force_center
 
@@ -292,26 +296,30 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
   if(ib_temp_flg) then
 
+     if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
+
      gridfl(:) = CENTER
      indx(:)   = CONSTANT_ZERO
 
      if (force_center) then
 
-      call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
-                         ib_ielem(:,:,1),hl,FORCE_FLOW)
+        call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
+                         ib_ht_ielem(:,:),tl,FORCE_FLOW)
 
         call ib_interpLpoints(part_Pos,gridfl,                     &
-              del,coord,bsize,ib_ielem(:,:,1),ib_phile(:,:,1),     &
+              del,coord,bsize,ib_ht_ielem(:,:),ib_ht_phile(:,:),     &
               ib_temp,FORCE_FLOW,blockID,CENTER_IND)
 
         ib_Ftemp  = invdt*(part_temp - ib_temp)
         particleData(FTEMP_IND)  = particleData(CENTER_IND) + ib_Ftemp
         particleData(TEMPITP_IND)  = ib_temp
 
-        particleData(TL_PART_PROP) = hl
+        particleData(TL_PART_PROP) = tl
 
-        call ib_extrapEpoints(part_Pos,sb,hl,del,ib_ielem(:,:,1),ib_phile(:,:,1),   &
+        call ib_extrapEpoints(part_Pos,sb,tl,del,ib_ht_ielem(:,:),ib_ht_phile(:,:),   &
                               ib_Ftemp,blockID,CENTER_IND)
+
+     endif
 
      endif
 

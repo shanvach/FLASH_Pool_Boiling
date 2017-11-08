@@ -24,6 +24,8 @@ subroutine sm_surf_MapParticles(ibd)
                                   sm_el01_mapParticles
   use gr_sbData, ONLY : gr_sbBodyInfo
   use Driver_interface, ONLY : Driver_abortFlash
+  use Heat_AD_data, only: ht_Twall_high
+
   implicit none
   
   ! IO variables
@@ -100,7 +102,7 @@ subroutine sm_surf_MapParticles(ibd)
      gr_sbBodyInfo(ibd) % particles(ACCY_PART_PROP,numPart+1:numPart+ptelem) = yacc(1:ptelem)
      gr_sbBodyInfo(ibd) % particles(NMLX_PART_PROP,numPart+1:numPart+ptelem) = xnrm(1:ptelem)
      gr_sbBodyInfo(ibd) % particles(NMLY_PART_PROP,numPart+1:numPart+ptelem) = ynrm(1:ptelem)
-     gr_sbBodyInfo(ibd) % particles(TEMP_PART_PROP,numPart+1:numPart+ptelem) = 1.0
+     gr_sbBodyInfo(ibd) % particles(TEMP_PART_PROP,numPart+1:numPart+ptelem) = ht_Twall_high
 
      gr_sbBodyInfo(ibd) % particles(PRES_PART_PROP,numPart+1:numPart+ptelem) = 0.0
      gr_sbBodyInfo(ibd) % particles(FXVI_PART_PROP,numPart+1:numPart+ptelem) = 0.0
