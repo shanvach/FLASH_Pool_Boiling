@@ -75,7 +75,7 @@ subroutine Simulation_initBlock(blockId)
 
   real :: x3,y3,z3,d4,r1
 
-  real :: fn(8)
+  real :: fn(10)
   real :: x4,x5,x6,x7,x8
   real :: y4,y5,y6,y7,y8
   real :: d5,d6,d7,d8,d9
@@ -124,7 +124,7 @@ subroutine Simulation_initBlock(blockId)
 
   open(unit = 3,file = "sim_thermalBL.dat")
 
-  do bli=1,8
+  do bli=1,10
 
      read(3,*)fn(bli)
 
@@ -186,10 +186,11 @@ subroutine Simulation_initBlock(blockId)
 
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk           
-           do bli=1,8   
-                solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(8-bli)) 
+           do bli=1,10   
+                solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
            end do
            if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+           if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
 
            !solnData(TEMP_VAR,i,j,k) = sim_Tbulk

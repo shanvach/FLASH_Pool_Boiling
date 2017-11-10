@@ -40,6 +40,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Ab",ht_Ab)
    call RuntimeParameters_get("Cb",ht_Cb)
    call RuntimeParameters_get("Bb",ht_Bb)
+   call RuntimeParameters_get("Ra",ht_Ra)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
@@ -49,6 +50,7 @@ subroutine Heat_AD_init(blockCount,blockList)
      write(*,*) 'ht_Ab   =',ht_Ab
      write(*,*) 'ht_Bb   =',ht_Bb
      write(*,*) 'ht_Cb   =',ht_Cb
+     write(*,*) 'ht_Ra   =',ht_Ra
 
    end if
 

@@ -473,7 +473,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                        ins_gravX, ins_gravY, ins_gravZ,           &
                        solnData(MDOT_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
-                       solnData(NRMZ_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                       solnData(NRMZ_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
+                       solnData(TEMP_VAR,:,:,:))
 
      !- kpd - I added this, still a ???
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
@@ -509,7 +510,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                       solnData(SMRH_VAR,:,:,:),&
                       solnData(NRMX_VAR,:,:,:),&
                       solnData(NRMY_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
-                      solnData(DFUN_VAR,:,:,:),solnData(PFUN_VAR,:,:,:))
+                      solnData(DFUN_VAR,:,:,:),solnData(PFUN_VAR,:,:,:),&
+                      solnData(TEMP_VAR,:,:,:))
 
      
 #endif

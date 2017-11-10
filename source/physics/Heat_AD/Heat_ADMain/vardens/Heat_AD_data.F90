@@ -28,4 +28,6 @@ module Heat_AD_data
 
      real, save    :: ht_Nu_l, ht_Nu_t
 
+     real, save    :: ht_Ra = 0
+
 end module Heat_AD_data

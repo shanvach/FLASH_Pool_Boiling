@@ -1,6 +1,6 @@
 SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
-                           mdot,smrh,xnorm,ynorm,crv,s,pf)
+                           mdot,smrh,xnorm,ynorm,crv,s,pf,temp)
 
   !***************************************************************
   ! This subroutine computes the discretization of the RHS of the 
@@ -31,7 +31,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,crv,s,pf
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,crv,s,pf,temp
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
 
       INTEGER:: i, j
@@ -750,7 +750,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                         dx,dy,dz,ru,rv,rw,visc,  &
                         rho1x,rho2x,rho1y,rho2y, &
                         rho1z,rho2z,gravX, gravY, gravZ,&
-                        mdot,smrh,xnorm,ynorm,znorm,crv)
+                        mdot,smrh,xnorm,ynorm,znorm,crv,temp)
 
   !*****************************************************************
   ! This subroutine computes the centered discretization of the RHS 
@@ -777,12 +777,14 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
 
       use IncompNS_data, ONLY : ins_iConvU
 
+      use Heat_AD_data, only: ht_Ra
+
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x, rho2x, rho1y, rho2y 
       REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z 
-      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,xnorm,ynorm,znorm,smrh,crv
+      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,xnorm,ynorm,znorm,smrh,crv,temp
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
 
       INTEGER:: i, j, k
@@ -804,7 +806,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
       REAL:: tyzp, tyzm
       ! additional z-component variables
       REAL:: wzplus, wzminus
-      REAL:: dwdzp, dwdzm
+      REAL:: dwdzp, dwdzm, tempface
 
       REAL:: vvip,vvim,vvjp,vvjm,vvkp,vvkm
 
@@ -1293,6 +1295,9 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                !- kpd - Mixture inverse density
                Mdens = ( rho1x(i,j,k) + rho2x(i,j,k) )
 
+               !- AD - temperature at face for natural convection
+               tempface = 0.5*(temp(i,j,k) + temp(i-1,j,k))
+
                ! calculate RHS for u-momentum
                ru(i,j,k) = - (frx*uxplus - flx*uxminus)/dx &
                            - (fry*vyplus - fly*vyminus)/dy &
@@ -1302,7 +1307,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens*(tzzp - tzzm)*dz1                &
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
-                           + gravX  
+                           + gravX*(1.0  - ht_Ra*tempface)  
  
             enddo
          enddo
@@ -1779,6 +1784,9 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                !- kpd - Mixture inverse density
                Mdens = ( rho1y(i,j,k) + rho2y(i,j,k) ) 
 
+               !- AD - temperature at face for natural convection
+               tempface = 0.5*(temp(i,j,k) + temp(i,j-1,k))
+
                ! calculate RHS for v-momentum
                rv(i,j,k) = - (frx*uxplus - flx*uxminus)/dx &
                            - (fry*vyplus - fly*vyminus)/dy &
@@ -1788,7 +1796,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
-                           + gravY                                      ! Shizhao - gravity term, keep consistence to the solid body 
+                           + gravY*(1.0  - ht_Ra*tempface)           
 
             enddo
          enddo
@@ -2264,6 +2272,9 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                !- kpd - Mixture inverse density
                Mdens = ( rho1z(i,j,k) + rho2z(i,j,k) )
 
+               !- AD - temperature at face for natural convection
+               tempface = 0.5*(temp(i,j,k) + temp(i,j,k-1))
+
                ! calculate RHS for w-momentum
                rw(i,j,k) = - (frx*uxplus - flx*uxminus)/dx &
                            - (fry*vyplus - fly*vyminus)/dy &
@@ -2273,7 +2284,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txzp - txzm)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dy1                &
-                           + gravZ                   
+                           + gravZ* (1.0  - ht_Ra*tempface)                   
             enddo
          enddo
       enddo

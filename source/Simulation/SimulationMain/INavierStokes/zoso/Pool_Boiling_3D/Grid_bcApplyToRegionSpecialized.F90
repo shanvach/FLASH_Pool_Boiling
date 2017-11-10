@@ -566,7 +566,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(guard,1:je,1:ke,ivar)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
