@@ -70,12 +70,12 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin =   -5.00
-xmax =    5.00
+xmin =   -4.00
+xmax =    4.00
 ymin =    0.00
-ymax =   10.00
-zmin =   -5.00
-zmax =    5.00
+ymax =    8.00
+zmin =   -4.00
+zmax =    4.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -131,16 +131,16 @@ checkpointFileIntervalTime = 0.1
 plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 4
-nblocky	= 4
-nblockz = 4
+nblockx	= 12
+nblocky	= 12
+nblockz = 12
 
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 1
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000
+nrefs           = 1000000
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1
