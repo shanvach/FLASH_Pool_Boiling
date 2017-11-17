@@ -12,7 +12,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
-                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro
+                                Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro,&
+                                Heat_getWallflux
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -206,6 +207,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !____________________________________Heat Flux calculation____________________________________________!
 
+   if(mph_meshMe .eq. MASTER_PE) print *,"Entering heat flux calculation"
+
    Nu_l = 0.0
    Nu_t = 0.0
    hcounter = 0
@@ -250,27 +253,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(MFLG_VAR,:,:,:))
 #endif
 
-
-     ! Wall heat flux
-     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
-              0.5*del(JAXIS)
-
-     if(ycell == 0.5*del(JAXIS)) then
-
-      do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-          Nu_l = Nu_l + (1-solnData(PFUN_VAR,i,blkLimits(LOW,JAXIS),k))*(1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
-          Nu_t = Nu_t + (1.0 - solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k))/(0.5*del(JAXIS))
-          hcounter = hcounter + 1
-
-
-        end do
-      end do             
-
-     end if
-
      ! Microlayer contribution - only for nucleate boiling
      !if(dr_nstep .gt. 1) then
 
@@ -292,6 +274,38 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+
+   do lb=1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+ 
+     ! Wall heat flux
+
+     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
+              0.5*del(JAXIS)
+
+     call Heat_getWallflux(solnData(PFUN_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),Nu_l,Nu_t,hcounter,del(JAXIS),ycell,&
+                          blkLimits(LOW,JAXIS),blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+ 
+   end do
 
    call MPI_Allreduce(hcounter, hcounterAll, 1, FLASH_INTEGER,&
                       MPI_SUM, MPI_COMM_WORLD, ierr)

@@ -130,9 +130,9 @@
         alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) 
 
 
-       do k = kz1-1,kz2+1
-        do j = jy1-1,jy2+1
-         do i = ix1-1,ix2+1
+       do k = kz1+2,kz2-2
+        do j = jy1+2,jy2-2
+         do i = ix1+2,ix2-2
 
               if(s(i,j,k)*s(i+1,j,k) .le. 0.) mflg(i+1,j,k)   = 1.0
               if(s(i,j,k)*s(i,j+1,k) .le. 0.) mflg(i,j+1,k)   = 1.0

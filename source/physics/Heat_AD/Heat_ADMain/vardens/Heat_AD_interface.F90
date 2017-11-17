@@ -213,4 +213,15 @@ module Heat_AD_interface
       end subroutine Heat_getQmicro
    end interface
 
+  interface
+        subroutine Heat_getWallflux(pf,T,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2)
+        implicit none
+        real, dimension(:,:,:),intent(in) :: pf, T
+        real, intent(inout) :: Nu_l,Nu_t
+        integer, intent(inout) :: hcounter
+        real, intent(in) :: dy,ycell
+        integer, intent(in) :: jy1,ix1,ix2,kz1,kz2
+        end subroutine Heat_getWallflux
+  end interface
+
 end module Heat_AD_interface

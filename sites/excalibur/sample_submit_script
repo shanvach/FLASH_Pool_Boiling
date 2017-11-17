@@ -1,0 +1,40 @@
+#!/bin/bash
+## The first line (above) specifies the shell to use for parsing the
+## remaining lines of the batch script.
+
+## Required PBS Directives --------------------------------------
+#PBS -A ONRDC36202409
+#PBS -q debug
+#PBS -l select=1:ncpus=32:mpiprocs=32
+#PBS -l walltime=00:10:00
+##PBS -h
+
+## Optional PBS Directives --------------------------------------
+#PBS -N Fr10
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -M email@domain.com
+#PBS -m abe
+#PBS -l ccm=1
+## ccm=1 option for Cluster Compatability Mode, including using
+## executables compiled with Dynamic Shared Libraries 
+
+echo "-- Run Information --"
+echo "PBS_JOBID: $PBS_JOBID "
+date
+echo "Starting directory: $(pwd)"
+echo "PBS_O_WORKDIR: $PBS_O_WORKDIR"
+
+## Execution Block ----------------------------------------------
+# Environment Setup
+# cd to your personal directory in the scratch file system
+cd $PBS_O_WORKDIR
+
+echo "Current directory: $(pwd)"
+echo "PBS_NNODES: $BC_NODE_ALLOC"
+echo "N_MPI: $BC_MPI_TASKS_ALLOC"
+echo "CORES/NODE: $BC_CORES_PER_NODE"
+echo "MEM/NODE: $BC_MEM_PER_NODE"
+echo "---------------------"
+
+aprun -n 144 ./execute > xOut.o$PBS_JOBID
