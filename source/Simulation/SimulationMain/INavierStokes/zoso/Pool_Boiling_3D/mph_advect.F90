@@ -31,7 +31,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
                              mph_radius, mph_isAttached, mph_timeStamp, &
                              mph_isAttachedAll, mph_timeStampAll,&
-                             mph_isAttachedOld
+                             mph_isAttachedOld, mph_nucSiteTemp
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -44,7 +44,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
 
-  use Heat_AD_data, ONLY: ht_tWait
+  use Heat_AD_data, ONLY: ht_tWait, ht_Tnuc
 
   use Simulation_data, ONLY: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_radii, sim_nuc_site_z, sim_nucSiteDens
 
@@ -100,7 +100,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: intval
 
   integer :: nuc_index
-  real    :: nuc_dfun
+  real    :: nuc_dfun, nucSiteTemp
 
   do lb = 1,blockCount
 
@@ -387,10 +387,12 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #ifdef NUCLEATE_BOILING
 
 if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll(1:sim_nucSiteDens)
+if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site temperature - ",mph_nucSiteTemp(1:sim_nucSiteDens)
 
 do nuc_index =1,sim_nucSiteDens
 
-  isAttached = .false.
+  isAttached  = .false.
+  nucSiteTemp = 0.0
 
   do lb = 1,blockCount
 
@@ -441,7 +443,12 @@ do nuc_index =1,sim_nucSiteDens
                         isAttached = isAttached .or. .true.
              else
                         isAttached = isAttached .or. .false.
-             end if  
+             end if 
+
+             nucSiteTemp = (solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k) + &
+                            solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k) + &
+                            solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k+1) + & 
+                            solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k+1))/4.0
 
            end if
 
@@ -457,6 +464,9 @@ do nuc_index =1,sim_nucSiteDens
   call MPI_Allreduce(isAttached, mph_isAttachedAll(nuc_index), 1, FLASH_LOGICAL,&
                      MPI_LOR, MPI_COMM_WORLD, ierr)
 
+  call MPI_Allreduce(nucSiteTemp, mph_nucSiteTemp(nuc_index), 1, FLASH_REAL,&
+                     MPI_MAX, MPI_COMM_WORLD, ierr)
+
   if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) &
     mph_timeStampAll(nuc_index) = dr_simTime
 
@@ -465,6 +475,10 @@ do nuc_index =1,sim_nucSiteDens
 
   if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
 
+  !if(mph_nucSiteTemp(nuc_index) .lt. ht_Tnuc) then
+  !mph_timeStampAll(nuc_index) = dr_simTime 
+
+  !else
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -518,6 +532,8 @@ do nuc_index =1,sim_nucSiteDens
 #endif
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+  !end if
   end if
 
 end do

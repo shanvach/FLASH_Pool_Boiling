@@ -30,4 +30,6 @@ module Heat_AD_data
 
      real, save    :: ht_Ra = 0
 
+     real, save    :: ht_Tnuc
+
 end module Heat_AD_data

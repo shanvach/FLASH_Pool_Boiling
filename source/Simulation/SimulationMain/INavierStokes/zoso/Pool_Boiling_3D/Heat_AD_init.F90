@@ -69,6 +69,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Twall_high = 0.0
    ht_AMR_specs  = 0.0
    ht_tWait      = 0.2
+   ht_Tnuc       = 0.0
 
    if(dr_restart .eqv. .TRUE.) then
 
