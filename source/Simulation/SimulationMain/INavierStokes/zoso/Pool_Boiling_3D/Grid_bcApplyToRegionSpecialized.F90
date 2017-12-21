@@ -324,7 +324,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -396,7 +396,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)= -regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -464,7 +464,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -530,13 +530,13 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)= -regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)=regionData(guard,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -654,13 +654,13 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)= -regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
              
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)=regionData(guard,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
