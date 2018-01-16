@@ -1,0 +1,14 @@
+VARIABLE tpel TYPE: GENERIC
+VARIABLE dfun TYPE: GENERIC
+
+FACEVAR magf
+FACEVAR rh1f
+FACEVAR rh2f
+
+PARAMETER cflflg           INTEGER     1
+PARAMETER cfl              REAL     0.35
+PARAMETER sigma            REAL     0.25
+PARAMETER dtspec           REAL     0.001    
+
+PARAMETER vel_prolong_method INTEGER   1 [0,1] 
+

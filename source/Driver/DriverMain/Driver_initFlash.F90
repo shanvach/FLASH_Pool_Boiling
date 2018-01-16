@@ -74,6 +74,7 @@ subroutine Driver_initFlash()
   use ImBound_interface, ONLY : ImBound_init
   use SolidMechanics_interface, ONLY : SolidMechanics_init
   use Heat_AD_interface, ONLY: Heat_AD_init
+  use Plasma_interface, ONLY: Plasma_init
 
   implicit none       
   
@@ -225,6 +226,8 @@ subroutine Driver_initFlash()
   call Eos_logDiagnostics(.TRUE.)
 
   call Heat_AD_init(blockCount,blockList)
+
+  call Plasma_init(blockCount,blockList,dr_restart)
 
   return
 

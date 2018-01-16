@@ -1,0 +1,25 @@
+#       rectangular domain.
+
+
+#	Config file for the Cold Plasma  module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+
+REQUIRES physics/Plasma
+REQUIRES physics/Plasma/PlasmaMain/coldPlasma
+
+USESETUPVARS Grid
+
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+# Number of guardcells at each boundary
+GUARDCELLS 3
