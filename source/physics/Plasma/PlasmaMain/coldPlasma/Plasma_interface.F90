@@ -38,4 +38,11 @@ module Plasma_interface
         end subroutine
         end interface
 
+        interface
+        subroutine Plasma_get_reactions(Te,Th)
+                implicit none
+                real, intent(in) :: Te, Th
+        end subroutine Plasma_get_reactions
+        end interface
+
 end module Plasma_interface
