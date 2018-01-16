@@ -1,1 +1,0 @@
-../source/Grid/localAPI/gr_interfaceTypeDecl.F90

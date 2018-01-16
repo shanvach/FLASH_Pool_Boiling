@@ -1,1 +1,0 @@
-../source/physics/Heat_AD/Heat_ADMain/vardens/Heat_RHS_3D_weno3.F90
