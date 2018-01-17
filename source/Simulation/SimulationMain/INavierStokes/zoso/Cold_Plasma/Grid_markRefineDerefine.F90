@@ -81,8 +81,8 @@ subroutine Grid_markRefineDerefine()
 
   !! index of the threshold var
   specs(1) = real(DELE_VAR)
-  specs(2) =  1e12  ! lower boundary of the refinement
-  specs(3) =  1e18  ! upper boundary of the refinement
+  specs(2) =  5.0e17  ! lower boundary of the refinement
+  specs(3) =  1.0e18  ! upper boundary of the refinement
   !specs(2) = -5.0d0
   !specs(3) =  0.0d0
 
