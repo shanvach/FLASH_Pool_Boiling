@@ -1,5 +1,8 @@
 module Plasma_data
 
+! declare variables, which can be used as constants during sim.
+! for example: electron mass, charge, ion masses  which do not change with time.
+
         implicit none
         
         integer,save :: pls_cflflg

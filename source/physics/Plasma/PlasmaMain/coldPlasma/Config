@@ -1,7 +1,7 @@
-VARIABLE tpel TYPE: GENERIC
-VARIABLE dfun TYPE: GENERIC
-VARIABLE dele TYPE: GENERIC
-VARIABLE dhv1 TYPE: GENERIC
+VARIABLE tpel TYPE: GENERIC # cell center, Te
+VARIABLE dfun TYPE: GENERIC # distance function
+VARIABLE dele TYPE: GENERIC # ne
+VARIABLE dhv1 TYPE: GENERIC # nh
 VARIABLE dhv2 TYPE: GENERIC
 VARIABLE dhv3 TYPE: GENERIC
 VARIABLE dhv4 TYPE: GENERIC
@@ -12,12 +12,12 @@ VARIABLE dhv8 TYPE: GENERIC
 VARIABLE dhv9 TYPE: GENERIC
 VARIABLE dhv0 TYPE: GENERIC
 
-FACEVAR magf
+FACEVAR magf # face center
 FACEVAR rh1f
 FACEVAR rh2f
 
 PARAMETER cflflg           INTEGER     1
-PARAMETER cfl              REAL     0.35
+PARAMETER cfl              REAL     0.35 # default value of cfl
 PARAMETER sigma            REAL     0.25
 PARAMETER dtspec           REAL     0.001    
 

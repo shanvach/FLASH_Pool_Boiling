@@ -37,7 +37,7 @@ subroutine Plasma_computeDtLocal(blockID,   &
      return
   endif
 
-  dtl = (pls_cfl/pls_dcoeff)*min(dx**2,dy**2)
+  dtl = (pls_cfl/pls_dcoeff)*min(dx**2,dy**2) !adaptive time step
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl

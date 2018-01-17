@@ -1,5 +1,8 @@
 subroutine Plasma_init(blockCount,blockList,restart)
 
+! Read runtime parameters and initialize constants declared in Plasma_data
+! script
+
    use Plasma_data
    use RuntimeParameters_interface, ONLY : RuntimeParameters_get
    use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, &
@@ -33,7 +36,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
    call Driver_getNstep(pls_nstep)
    pls_restart=restart
 
-   pls_dcoeff = 1e3
+   pls_dcoeff = 1e3 ! test electron diffusion coefficient
 
   if (pls_meshMe .eq. MASTER_PE) then
      write(*,*) 'pls_cfl   =',pls_cfl
