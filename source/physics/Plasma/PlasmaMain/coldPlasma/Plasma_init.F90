@@ -33,7 +33,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
    call Driver_getNstep(pls_nstep)
    pls_restart=restart
 
-   pls_dcoeff = 1.0
+   pls_dcoeff = 1e3
 
   if (pls_meshMe .eq. MASTER_PE) then
      write(*,*) 'pls_cfl   =',pls_cfl

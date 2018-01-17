@@ -145,7 +145,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y temp magX magY'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y e He dfun'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -262,7 +262,10 @@
      ! P pressure: p(nxb+1,nyb+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(TPEL_VAR,:,:,1),tpt)
+                            solnData(DELE_VAR,:,:,1),tpt)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV0_VAR,:,:,1),tmdot)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DFUN_VAR,:,:,1),tpdfun)
@@ -314,17 +317,26 @@
       i = TecDat(ijk,arraylb,0)
 
 
-      ! Write Temp:
       arraylb(:,:,1) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)
 
-      ! Write magX:
-      arraylb(:,:,1) = sngl(tpu)
+      arraylb(:,:,1) = sngl(tmdot)
       i = TecDat(ijk,arraylb,0)
 
-      ! Write magY:
-      arraylb(:,:,1) = sngl(tpv)
+      arraylb(:,:,1) = sngl(tpdfun)
       i = TecDat(ijk,arraylb,0)
+
+!      ! Write Temp:
+!      arraylb(:,:,1) = sngl(tpt)
+!      i = TecDat(ijk,arraylb,0)
+
+!      ! Write magX:
+!      arraylb(:,:,1) = sngl(tpu)
+!      i = TecDat(ijk,arraylb,0)
+
+!      ! Write magY:
+!      arraylb(:,:,1) = sngl(tpv)
+!      i = TecDat(ijk,arraylb,0)
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)
 !      i1 = TecDat(pqr,arraylb_c,0)

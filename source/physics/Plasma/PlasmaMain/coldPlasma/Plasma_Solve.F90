@@ -1,4 +1,4 @@
-subroutine Plasma_Solve(T_p, T_o, dt, dx, dy, ix1,ix2, jy1, jy2)
+subroutine Plasma_Solve(T_p, T_o, dfun, dt, dx, dy, ix1,ix2, jy1, jy2, T_res)
 
   use Plasma_data
 
@@ -6,21 +6,19 @@ subroutine Plasma_Solve(T_p, T_o, dt, dx, dy, ix1,ix2, jy1, jy2)
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_p
-  real, dimension(:,:,:), intent(in) :: T_o
+  real, dimension(:,:,:), intent(in) :: T_o, dfun
   real, intent(in) :: dt, dx, dy
   integer, intent(in) :: ix1, ix2, jy1, jy2
 
-  real :: T_res
+  real,intent(out) :: T_res
 
   integer :: i,j
-
-  real :: Tx_plus, Tx_mins, Ty_plus, Ty_mins
 
   do j=jy1,jy2
      do i=ix1,ix2
 
-     T_p(i,j,1) = T_o(i,j,1) + ((dt*pls_dcoeff)/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
-                             + ((dt*pls_dcoeff)/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))
+     T_p(i,j,1) = T_o(i,j,1) + 0.5*(1.0-sign(1.0,dfun(i,j,1)))*((dt*pls_dcoeff)/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
+                             + 0.5*(1.0-sign(1.0,dfun(i,j,1)))*((dt*pls_dcoeff)/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))
 
      end do
   end do 
@@ -30,7 +28,5 @@ subroutine Plasma_Solve(T_p, T_o, dt, dx, dy, ix1,ix2, jy1, jy2)
   end do
 
   T_res = sqrt(T_res/size(T_o))
-
-  print *,T_res
 
 end subroutine Plasma_Solve

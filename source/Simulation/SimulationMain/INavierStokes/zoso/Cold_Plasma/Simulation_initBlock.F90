@@ -103,10 +103,43 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
+  x0 = 0.0
+  y0 = 0.0
+  r0 = 0.5
+
+  solnData(DELE_VAR,:,:,:) = 1e6
+  
+  do i=0,9
+
+    solnData(DHV0_VAR+i,:,:,:) = 1e6
+
+  end do
+
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
      do j=1,blkLimitsGC(HIGH,JAXIS)
         do i=1,blkLimitsGC(HIGH,IAXIS)
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS) +   &
+                   0.5*del(IAXIS)
+
+           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+                   0.5*del(JAXIS)
+
+           
+           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
+
+                solnData(DELE_VAR,i,j,k) = 1e18
+                solnData(DHV0_VAR,i,j,k) = 1e26
+                solnData(DHV1_VAR,i,j,k) = 1e18
+                solnData(DHV2_VAR,i,j,k) = 1e26
+                solnData(DHV9_VAR,i,j,k) = 1e26
+
+           end if
 
           enddo
      enddo

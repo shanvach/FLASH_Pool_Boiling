@@ -103,17 +103,21 @@ subroutine Grid_updateRefinement( nstep,time, gridChanged)
      iopt=1; iempty=1
      call amr_restrict(gr_meshMe,iopt,iempty)
      
+     !print *,"Start markRefineDerefine"
      call Timers_start("markRefineDerefine")
      call Grid_markRefineDerefine()
      call Timers_stop("markRefineDerefine")
-     
+     !print *,"End markRefineDerefine"
+
      call Timers_stop("tree")  !1 of 2 (We restart in gr_updateRefinement)
      !internal routine that does the actual amr refinement and
      !other housekeeping
      
      !write(*,*) 'Before Mark Refine derefine'  
 
+     !print *,"Start gr_updateRefinement"
      call gr_updateRefinement(gridChanged)
+     !print *,"End gr_updateRefinement"
 
      !write(*,*) 'Before Guardcell fill in updateref'
 
@@ -131,7 +135,8 @@ subroutine Grid_updateRefinement( nstep,time, gridChanged)
      pls_outflowgridChanged = gridChanged
   end if
   end if 
- 
+
+  !print *,"End Grid_updateRefinement" 
 
   return
 end subroutine Grid_updateRefinement
