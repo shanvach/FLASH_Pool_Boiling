@@ -1,4 +1,4 @@
-## FLASH4 source for Multiphase, Phase Change and Plasma Dynamics
+## FLASH4 source for Multiphase, Phase Change and Plasma Dynamics.
 
 ### Important note
 
