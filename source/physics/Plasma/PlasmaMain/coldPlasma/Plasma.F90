@@ -1,7 +1,7 @@
 subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Plasma_data
-   use Plasma_interface, only: Plasma_Solve
+   use Plasma_interface, only: Plasma_Solve, Plasma_hvDiffCoeff
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells
@@ -25,7 +25,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT
 
    real :: T_res1,T_res,T_resBlock
-   integer :: ierr
+   integer :: ierr, i
 
    T_resBlock = 0.0
 
@@ -43,13 +43,39 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
+     
+     !obtain diffusion coefficient of heavy particle species
+     do i = 0,9
+       call Plasma_hvDiffCoeff(solnData(DFH0_VAR+i,:,:,:), &
+                               solnData(PRHV_VAR,:,:,:),solnData(TPHV_VAR,:,:,:), &
+                               blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                               blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                               pls_RSCD(i+1), pls_MHSP(i+1)) 
+     end do
+     
+     !obtain diffusion coefficient of electrons
+     call Plasma_elDiffCoeff(solnData(DFEL_VAR,:,:,:),solnData(TPEL_VAR,:,:,:),&
+                             solnData(FVEA_VAR,:,:,:),solnData(FVEI_VAR,:,:,:),&
+                             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
+     
+     !obtain number density of electrons
      oldT = solnData(DELE_VAR,:,:,:)
-
-     call Plasma_Solve(solnData(DELE_VAR,:,:,:), oldT, solnData(DFUN_VAR,:,:,:),&
-                     dt,del(DIR_X),del(DIR_Y),&
-                     blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+     call Plasma_Solve(solnData(DELE_VAR,:,:,:), oldT, &
+                       solnData(DFUN_VAR,:,:,:), solnData(DFEL_VAR,:,:,:),&
+                       dt,del(DIR_X),del(DIR_Y),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+     
+     !obtain number density of heavy species
+     do i=0,9
+        oldT = solnData(DHV0_VAR+i,:,:,:)
+        call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), oldT, &
+                          solnData(DFUN_VAR,:,:,:), solnData(DFH0_VAR+i,:,:,:),&
+                          dt,del(DIR_X),del(DIR_Y),&
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+     end do
 
      T_resBlock = T_resBlock + T_res1
 
