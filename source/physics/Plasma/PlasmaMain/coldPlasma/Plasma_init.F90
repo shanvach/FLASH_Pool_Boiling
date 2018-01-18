@@ -68,8 +68,8 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_MHSP(9) = 16.0 
    pls_MHSP(10) = 14.0 + 16.0
 
-   ! molar mass NaCl
-   pls_MMix = 35.453 + 22.989769 
+   ! molar mass NaCl + H2O
+   pls_MMix = 35.453 + 22.989769 + 18.0
    
   if (pls_meshMe .eq. MASTER_PE) then
      write(*,*) 'pls_cfl   =',pls_cfl
