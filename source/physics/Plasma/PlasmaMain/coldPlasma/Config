@@ -1,12 +1,13 @@
-VARIABLE tpel TYPE: GENERIC # cell center, Te
-VARIABLE tphv TYPE: GENERIC
+VARIABLE tpel TYPE: GENERIC # cell center, Temperature
+VARIABLE tphv TYPE: GENERIC 
 
-VARIABLE prel TYPE: GENERIC
+VARIABLE prel TYPE: GENERIC # cell center pressure
 VARIABLE prhv TYPE: GENERIC
 
 VARIABLE dfun TYPE: GENERIC # distance function
-VARIABLE dele TYPE: GENERIC # ne
-VARIABLE dhv1 TYPE: GENERIC # nh
+
+VARIABLE dele TYPE: GENERIC # number density for electrons
+VARIABLE dhv1 TYPE: GENERIC # number density for heavy particles
 VARIABLE dhv2 TYPE: GENERIC
 VARIABLE dhv3 TYPE: GENERIC
 VARIABLE dhv4 TYPE: GENERIC

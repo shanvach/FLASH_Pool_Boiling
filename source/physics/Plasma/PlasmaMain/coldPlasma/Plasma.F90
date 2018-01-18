@@ -1,7 +1,9 @@
 subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Plasma_data
-   use Plasma_interface, only: Plasma_Solve, Plasma_hvDiffCoeff
+   use Plasma_interface, only: Plasma_Solve, Plasma_hvDiffCoeff,&
+                               Plasma_elDiffCoeff,Plasma_ColFreq
+
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells
@@ -50,10 +52,16 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                solnData(PRHV_VAR,:,:,:),solnData(TPHV_VAR,:,:,:), &
                                blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                                blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                               pls_RSCD(i+1), pls_MHSP(i+1)) 
+                               pls_RSCD(i+1), pls_MHSP(i+1), pls_MMIX(i+1)) 
      end do
      
      !obtain diffusion coefficient of electrons
+
+     call Plasma_ColFreq(solnData(FVEI_VAR,:,:,:), solnData(FVEA_VAR,:,:,:), &
+                         solnData(DELE_VAR,:,:,:), solnData(TPEL_VAR,:,:,:), &
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
+
      call Plasma_elDiffCoeff(solnData(DFEL_VAR,:,:,:),solnData(TPEL_VAR,:,:,:),&
                              solnData(FVEA_VAR,:,:,:),solnData(FVEI_VAR,:,:,:),&
                              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -61,6 +69,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      
      !obtain number density of electrons
      oldT = solnData(DELE_VAR,:,:,:)
+
      call Plasma_Solve(solnData(DELE_VAR,:,:,:), oldT, &
                        solnData(DFUN_VAR,:,:,:), solnData(DFEL_VAR,:,:,:),&
                        dt,del(DIR_X),del(DIR_Y),&
@@ -70,6 +79,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      !obtain number density of heavy species
      do i=0,9
         oldT = solnData(DHV0_VAR+i,:,:,:)
+
         call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), oldT, &
                           solnData(DFUN_VAR,:,:,:), solnData(DFH0_VAR+i,:,:,:),&
                           dt,del(DIR_X),del(DIR_Y),&
@@ -97,7 +107,17 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    if(pls_meshMe .eq. MASTER_PE) print *,"T_res:",T_res
 
   gcMask = .FALSE.
+
   gcMask(DELE_VAR)=.TRUE.
+  gcMask(DFEL_VAR)=.TRUE.
+  gcMask(FVEA_VAR)=.TRUE.
+  gcMask(FVEI_VAR)=.TRUE.
+
+  do i=0,9
+        gcMask(DHV0_VAR+i) = .TRUE.
+        gcMask(DFH0_VAR+i) = .TRUE.  
+  end do
+
   call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 

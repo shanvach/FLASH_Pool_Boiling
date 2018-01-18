@@ -78,11 +78,11 @@ module Plasma_interface
         end interface
         
         interface
-        subroutine Plasma_hvDiffCoeff( DiffCoeff, P_h, T_h, ix1, ix2, jy1, jy2,RSCD, MHSP )
+        subroutine Plasma_hvDiffCoeff( DiffCoeff, P_h, T_h, ix1, ix2, jy1, jy2,RSCD, MHSP, MMIX)
                 implicit none
                 real, dimension(:,:,:), intent(inout) :: DiffCoeff
                 real, dimension(:,:,:), intent(in) :: P_h, T_h
-                real, intent(in) :: RSCD, MHSP
+                real, intent(in) :: RSCD, MHSP, MMIX
                 integer, intent(in) :: ix1, ix2, jy1, jy2       
         end subroutine Plasma_hvDiffCoeff 
         end interface

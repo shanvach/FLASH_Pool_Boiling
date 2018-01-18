@@ -43,7 +43,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_Ce  = 1.60217662e-19
    pls_gam = EXP(0.577) 
    pls_Cpi = 3.14159265359
-   
+
    ! collision diameters for all heavy species
    pls_RSCD(1) = 1.
    pls_RSCD(2) = 1.
