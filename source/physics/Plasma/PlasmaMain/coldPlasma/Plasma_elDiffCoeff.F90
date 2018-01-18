@@ -11,7 +11,7 @@ subroutine Plasma_elDiffCoeff(DiffCoeffel, T_e, Fvea, Fvei, ix1, ix2, jy1, jy2)
    do j=jy1,jy2
      do i=ix1,ix2
 
-     DiffCoeffel(i,j,1) = ( pls_Ckb*11604.519*T_e(i,j,1))/&
+     DiffCoeffel(i,j,1) = ( pls_Ckb*T_e(i,j,1))/&
                           ( pls_Cme*(Fvea(i,j,1)+Fvei(i,j,1)))
    
      end do

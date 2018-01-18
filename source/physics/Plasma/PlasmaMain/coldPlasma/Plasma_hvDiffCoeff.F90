@@ -14,7 +14,7 @@ subroutine Plasma_hvDiffCoeff( DiffCoeff, P_h, T_h, ix1, ix2, jy1, jy2, RSCD, MH
      do i=ix1,ix2
        
      DiffCoeff(i,j,1) = (1e-4)*((2.63e-7)/(( P_h(i,j,1)/101325.0)*( RSCD )**2))* &
-                         (( ((11604.519*T_h(i,j,1))**3)*( MHSP + pls_MMIX )/ &
+                         (( ((T_h(i,j,1))**3)*( MHSP + pls_MMIX )/ &
                          (2*MHSP*pls_MMIX)))**0.5
      end do
   end do
