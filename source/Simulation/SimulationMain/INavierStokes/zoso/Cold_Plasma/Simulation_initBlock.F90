@@ -108,9 +108,9 @@ subroutine Simulation_initBlock(blockId)
   r0 = 0.5
 
   solnData(DELE_VAR,:,:,:) = 1e6       ! particles/m3
-  solnData(PRHV_VAR,:,:,:) = 101e3     ! Pascal  
-  solnData(TPHV_VAR,:,:,:) = 300.0     ! Kelvin
-  solnData(TPEL_VAR,:,:,:) = 0.8*11604 ! Kelvin
+  solnData(PRHV_VAR,:,:,:) = 101e3     ! Pascal, heavy particle pressure  
+  solnData(TPHV_VAR,:,:,:) = 300.0     ! Kelvin, heavy particle temperature
+  solnData(TPEL_VAR,:,:,:) = 0.8*11604 ! Kelvin, electron temperature
   
   do i=0,9
 

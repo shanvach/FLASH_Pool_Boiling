@@ -52,7 +52,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                solnData(PRHV_VAR,:,:,:),solnData(TPHV_VAR,:,:,:), &
                                blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                                blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                               pls_RSCD(i+1), pls_MHSP(i+1), pls_MMIX(i+1)) 
+                               pls_RSCD(i+1), pls_MHSP(i+1)) 
      end do
      
      !obtain diffusion coefficient of electrons
