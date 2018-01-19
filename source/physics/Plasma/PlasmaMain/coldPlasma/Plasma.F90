@@ -27,9 +27,11 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT
 
    real :: T_res1,T_res,T_resBlock
+   real, dimension(10) :: T_resHV, T_resBlockHV
    integer :: ierr, i
 
-   T_resBlock = 0.0
+   T_resBlock      = 0.0
+   T_resBlockHV(:) = 0.0
 
    do lb = 1,blockCount
 
@@ -76,6 +78,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
      
+     T_resBlock = T_resBlock + T_res1
+
      !obtain number density of heavy species
      do i=0,9
         oldT = solnData(DHV0_VAR+i,:,:,:)
@@ -85,9 +89,10 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                           dt,del(DIR_X),del(DIR_Y),&
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
-     end do
+      
+        T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
 
-     T_resBlock = T_resBlock + T_res1
+     end do
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -96,15 +101,28 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    end do
 
-   if(blockCount .gt. 0) T_resBlock = T_resBlock/blockCount
+   if(blockCount .gt. 0) T_resBlock   = T_resBlock/blockCount
+   if(blockCount .gt. 0) T_resBlockHV = T_resBlockHV/blockCount
 
    ! Collect residuals from other processes
    call MPI_Allreduce(T_resBlock, T_res, 1, FLASH_REAL,&
                       MPI_SUM, MPI_COMM_WORLD, ierr)
+   
+   call MPI_Allreduce(T_resBlockHV, T_resHV, 10, FLASH_REAL, &
+                      MPI_SUM, MPI_COMM_WORLD, ierr)
 
-   T_res = T_res/pls_meshNumProcs
+   T_res   = T_res/pls_meshNumProcs
+   T_resHV = T_resHV/pls_meshNumProcs
 
-   if(pls_meshMe .eq. MASTER_PE) print *,"T_res:",T_res
+   if(pls_meshMe .eq. MASTER_PE) then
+      
+        print *,"Ne residual","",":",T_res
+
+        do i=1,10
+          print *,"Nh residual",i,":",T_resHV(i)
+        end do
+
+   endif
 
   gcMask = .FALSE.
 

@@ -42,11 +42,12 @@ restart         = .false.
 
 nend                = 2000000000
 tmax                = 100.0
-cflflg              = 1
-cfl                 = 0.01
-sigma		    = 0.01
-dtspec              = 1.0d-3
-dtinit              = 1.0d-3
+cflflg              = 0
+cfl                 = 1.0d-2
+sigma		    = 1.0d-2
+dtspec              = 1.0d-20
+dtinit              = 1.0d-20
+dtmin		    = 1.0d-20
 tstep_change_factor = 1.0
 
 #Integration Scheme:
@@ -58,8 +59,8 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 0.2
 checkpointFileIntervalStep = 2000
 
-plotFileIntervalTime = 0.000001
-plotFileIntervalStep = 1000
+plotFileIntervalTime = 1.0d-5
+plotFileIntervalStep = 1
 
 ##	AMR parameters
 nblockx	= 5

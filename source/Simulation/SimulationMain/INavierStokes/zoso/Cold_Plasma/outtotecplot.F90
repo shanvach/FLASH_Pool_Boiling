@@ -70,7 +70,8 @@
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes,tprds
+           tpuint, tpvint,tptes,tprds,&
+           tph0, tph1, tph2, tph3, tph4, tph5, tph6, tph7, tph8, tph9
 
   real, dimension(NXB,NYB) :: tptes_c
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
@@ -145,7 +146,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y e He dfun'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfel dfh0'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -211,6 +212,16 @@
      tptes_c = 0.
      tptes_d = 0.
      tprds = 0.
+     tph0 = 0.
+     tph1 = 0.
+     tph2 = 0.
+     tph3 = 0.
+     tph4 = 0.
+     tph5 = 0.
+     tph6 = 0.
+     tph7 = 0.
+     tph8 = 0.
+     tph9 = 0.
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -265,10 +276,43 @@
                             solnData(DELE_VAR,:,:,1),tpt)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV0_VAR,:,:,1),tmdot)
+                            solnData(DHV0_VAR,:,:,1),tph0)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV1_VAR,:,:,1),tph1)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV2_VAR,:,:,1),tph2)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV3_VAR,:,:,1),tph3)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV4_VAR,:,:,1),tph4)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV5_VAR,:,:,1),tph5)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV6_VAR,:,:,1),tph6)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV7_VAR,:,:,1),tph7)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV8_VAR,:,:,1),tph8)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DHV9_VAR,:,:,1),tph9)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DFUN_VAR,:,:,1),tpdfun)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DFEL_VAR,:,:,1),tnx)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DFH0_VAR,:,:,1),tny)
 
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
@@ -320,11 +364,45 @@
       arraylb(:,:,1) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tmdot)
+      arraylb(:,:,1) = sngl(tph0)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph1)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph2)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph3)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph4)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph5)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph6)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph7)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph8)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tph9)
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tpdfun)
       i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tnx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tny)
+      i = TecDat(ijk,arraylb,0)
+
 
 !      ! Write Temp:
 !      arraylb(:,:,1) = sngl(tpt)

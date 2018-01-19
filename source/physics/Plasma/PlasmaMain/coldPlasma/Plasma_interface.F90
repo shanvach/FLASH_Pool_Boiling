@@ -62,15 +62,16 @@ module Plasma_interface
                               isize, jsize, ksize,  &
                               dx, dy, dz,           &
                               blkLimits,blkLimitsGC,&
+                              solnData,&
                               facexData,faceyData,  &
                               facezData,            &
-                              dtLocal, lminloc )
+                              dtLocal, lminloc)
                 implicit none
                 integer, intent(IN) :: blockID
                 integer,dimension(2,MDIM), intent(IN) :: blkLimits,blkLimitsGC
                 integer, intent(IN) :: isize,jsize,ksize
                 real, intent(IN) :: dx, dy, dz
-                real, pointer,dimension(:,:,:,:)  :: facexData,faceyData,facezData
+                real, pointer,dimension(:,:,:,:)  :: solnData,facexData,faceyData,facezData
                 real, intent(INOUT) :: dtLocal
                 integer, intent(INOUT) :: lminloc(5)
 
