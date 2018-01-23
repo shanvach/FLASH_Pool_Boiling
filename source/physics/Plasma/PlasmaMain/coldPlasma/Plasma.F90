@@ -174,15 +174,25 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   gcMask = .FALSE.
 
-  gcMask(DELE_VAR)=.TRUE.
-  gcMask(DFEL_VAR)=.TRUE.
-  gcMask(FVEA_VAR)=.TRUE.
-  gcMask(FVEI_VAR)=.TRUE.
-  gcMask(DHVT_VAR)=.TRUE.
+  gcMask(DELE_VAR)  = .TRUE.
+  gcMask(DFEL_VAR)  = .TRUE.
+  gcMask(FVEA_VAR)  = .TRUE.
+  gcMask(FVEI_VAR)  = .TRUE.
+  gcMask(DHVT_VAR)  = .TRUE.
+  gcMask(TPHV_VAR)  = .TRUE.
+  gcMask(TPEL_VAR)  = .TRUE.
+  gcMask(GNE_VAR)   = .TRUE.
+  gcMask(GNEBZ_VAR) = .TRUE.
+  gcMask(GNERT_VAR) = .TRUE.
 
   do i=0,9
         gcMask(DHV0_VAR+i) = .TRUE.
-        gcMask(DFH0_VAR+i) = .TRUE.  
+        gcMask(DFH0_VAR+i) = .TRUE. 
+        gcMask(GNH0_VAR+i) = .TRUE. 
+  end do
+
+  do i=0,13
+        gcMask(RSP0_VAR+i) = .TRUE.
   end do
 
   call Grid_fillGuardCells(CENTER,ALLDIR,&
