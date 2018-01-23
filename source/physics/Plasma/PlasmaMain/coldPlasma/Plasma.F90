@@ -30,7 +30,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    real :: T_res1,T_res,T_resBlock
    real, dimension(10) :: T_resHV, T_resBlockHV
-   integer :: ierr, i
+   integer :: ierr, i,j,k
 
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
@@ -140,6 +140,23 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
       
         T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
 
+     end do
+
+     k = 1
+     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
+
+                solnData(DELE_VAR,i,j,k) = 1e18 ! Electrons
+                solnData(DHV0_VAR,i,j,k) = 1e26 ! Helium
+                solnData(DHV1_VAR,i,j,k) = 1e18 ! He+
+                solnData(DHV2_VAR,i,j,k) = 1e26 ! Nitrogen 
+                solnData(DHV5_VAR,i,j,k) = 1e26 ! Oxygen
+
+           end if
+
+       end do
      end do
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
