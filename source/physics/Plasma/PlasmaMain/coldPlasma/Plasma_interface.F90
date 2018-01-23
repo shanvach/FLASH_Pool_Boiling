@@ -32,10 +32,10 @@ module Plasma_interface
 
 
         interface
-        subroutine Plasma_Solve(T_p, T_o, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
+        subroutine Plasma_Solve(T_p, T_gen, T_o, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
                 implicit none
                 real, dimension(:,:,:), intent(inout) :: T_p
-                real, dimension(:,:,:), intent(in) :: T_o, dfun, dcoeff
+                real, dimension(:,:,:), intent(in) :: T_o, T_gen, dfun, dcoeff
                 real, intent(in) :: dt, dx, dy
                 integer, intent(in) :: ix1, ix2, jy1, jy2
                 real, intent(out) :: T_res
@@ -98,13 +98,57 @@ module Plasma_interface
         end interface
 
         interface
-        subroutine Plasma_ColFreq(vei, vea, N_e, T_e, ix1, ix2, jy1, jy2)
+        subroutine Plasma_ColFreq(vei, vea, N_a, N_e, T_e, ix1, ix2, jy1, jy2)
                 implicit none
-                real, dimension(:,:,:), intent(in) :: N_e, T_e
+                real, dimension(:,:,:), intent(in) :: N_a, N_e, T_e
                 real, dimension(:,:,:), intent(inout) :: vea, vei
                 real :: Kel, Lna
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_ColFreq
+        end interface
+        
+        interface
+        subroutine Plasma_sumNeutrals(N_as, N_at, ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: N_as
+                real, dimension(:,:,:), intent(inout) :: N_at
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_sumNeutrals
+        end interface
+
+        interface
+        subroutine Plasma_spReactions(RSP0, RSP1, RSP2, RSP3, RSP4, RSP5, RSP6, RSP7,  &
+                                      RSP8, RSP9, RSP10, RSP11, RSP12, RSP13, T_h, T_e,&
+                                      ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(inout) :: RSP0,RSP1,RSP2,RSP3,RSP4,&
+                                                         RSP5,RSP6,RSP7,RSP8,RSP9,&
+                                                         RSP10,RSP11,RSP12,RSP13
+                real, dimension(:,:,:), intent(in) :: T_h, T_e
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_spReactions
+        end interface
+   
+        interface
+        subroutine Plasma_spGeneration(N_h0,N_h1,N_h2,N_h3,N_h4,N_h5,N_h6,& 
+                                       N_h7,N_h8,N_h9,N_e,RSP0,RSP1,RSP2, &
+                                       RSP3,RSP4,RSP5,RSP6,RSP7,RSP8,RSP9,&
+                                       RSP10,RSP11,RSP12,RSP13,GNH0,GNH1, &
+                                       GNH2,GNH3,GNH4,GNH5,GNH6,GNH7,GNH8,&
+                                       GNH9,GNE,GNEBZ,GNERT,ix1,ix2,jy1,jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: N_h0,N_h1,N_h2,N_h3,N_h4,&
+                                                      N_h5,N_h6,N_h7,N_h8,N_h9,&
+                                                      N_e
+                real, dimension(:,:,:), intent(in) :: RSP0,RSP1,RSP2,RSP3,RSP4,&
+                                                      RSP5,RSP6,RSP7,RSP8,RSP9,&
+                                                      RSP10,RSP11,RSP12,RSP13
+                real, dimension(:,:,:), intent(inout) :: GNH0,GNH1,GNH2,GNH3,&
+                                            GNH4,GNH5,GNH6,GNH7,&
+                                            GNH8,GNH9,GNE,GNEBZ,&
+                                            GNERT
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_spGeneration
         end interface
 
 end module Plasma_interface

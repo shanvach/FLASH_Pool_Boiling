@@ -36,5 +36,6 @@ module Plasma_data
         real, save :: pls_Ce  ! elementary charge, C
         real, save :: pls_Cpi ! pi
         real, save :: pls_gam ! Euler's number
+        real, save :: pls_KtoeV ! conversion factor from Kelvin to eV
 
 end module Plasma_data

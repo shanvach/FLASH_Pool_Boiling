@@ -107,15 +107,24 @@ subroutine Simulation_initBlock(blockId)
   y0 = 0.0
   r0 = 0.5
 
-  solnData(DELE_VAR,:,:,:) = 1e6       ! particles/m3
-  solnData(PRHV_VAR,:,:,:) = 101e3     ! Pascal, heavy particle pressure  
-  solnData(TPHV_VAR,:,:,:) = 300.0     ! Kelvin, heavy particle temperature
-  solnData(TPEL_VAR,:,:,:) = 0.8*11604 ! Kelvin, electron temperature
-  
+  solnData(DELE_VAR,:,:,:) = 1e6          ! particles/m3
+  solnData(PRHV_VAR,:,:,:) = 101325.0     ! Pascal, heavy particle pressure  
+  solnData(TPHV_VAR,:,:,:) = 300.0        ! Kelvin, heavy particle temperature
+  solnData(TPEL_VAR,:,:,:) = 0.8*11604.52 ! Kelvin, electron temperature
+  solnData(DHVT_VAR,:,:,:) = 0.0          ! total heavy species
+  solnData(GNE_VAR,:,:,:) = 0.0           ! electron generation rate
+  solnData(GNEBZ_VAR,:,:,:) = 0.0         ! electron generation rate (Boltzmann)
+  solnData(GNERT_VAR,:,:,:) = 0.0         ! ratio
+ 
+  !initialize values of heavy species and generation rates
   do i=0,9
-
     solnData(DHV0_VAR+i,:,:,:) = 1e6
-
+    solnData(GNH0_VAR+i,:,:,:) = 0.0
+  end do
+ 
+  !initialize values for reaction rates of heavy species
+  do i=0,13
+    solnData(RSP0_VAR+i,:,:,:) = 0.0
   end do
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -147,7 +156,7 @@ subroutine Simulation_initBlock(blockId)
           enddo
      enddo
   enddo
-
+  !
   ! Release pointer
   call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
