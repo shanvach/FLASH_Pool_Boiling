@@ -29,7 +29,7 @@ subroutine Plasma_computeDt(pls_mindt,pls_minloc)
   integer,dimension(2,MDIM)::blkLimits,blkLimitsGC
 
   !!coordinate infomration to be passed into physics  
-  real, pointer, dimension(:,:,:,:) :: facexData,faceyData,facezData
+  real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData,facezData
   integer :: isize,jsize,ksize
 
   integer :: i, blockID
@@ -53,7 +53,7 @@ subroutine Plasma_computeDt(pls_mindt,pls_minloc)
      blockID=blockList(i)
 
      call Grid_getDeltas(blockID, del)
-
+     call Grid_getBlkPtr(blockID, solnData,CENTER)
      call Grid_getBlkPtr(blockID, facexData,FACEX)
      call Grid_getBlkPtr(blockID, faceyData,FACEY)
 #if NDIM == 3
@@ -72,12 +72,13 @@ subroutine Plasma_computeDt(pls_mindt,pls_minloc)
                          isize, jsize, ksize,  &
               del(IAXIS),del(JAXIS),del(KAXIS),&
                          blkLimits,blkLimitsGC,&
+                         solnData,&
                          facexData,faceyData,  &
                          facezData,            &
                          dtLocal,lminloc)
 
 
-
+     call Grid_releaseBlkPtr(blockID, solnData, CENTER)
      call Grid_releaseBlkPtr(blockID, facexData, FACEX)
      call Grid_releaseBlkPtr(blockID, faceyData, FACEY)
 #if NDIM == 3

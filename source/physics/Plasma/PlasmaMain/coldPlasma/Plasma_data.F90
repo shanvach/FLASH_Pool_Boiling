@@ -26,5 +26,16 @@ module Plasma_data
 
         real, save :: pls_dcoeff
 
+        real, dimension(10), save :: pls_RSCD ! Collision Diameter, Angstrom
+        real, dimension(10), save :: pls_MHSP ! molar mass of each species  g/mol
+
+        real, save :: pls_MMIX ! molar mass of saline solution
+        
+        real, save :: pls_Ckb ! Boltzmann Constant J/K
+        real, save :: pls_Cme ! electron mass kg
+        real, save :: pls_Ce  ! elementary charge, C
+        real, save :: pls_Cpi ! pi
+        real, save :: pls_gam ! Euler's number
+        real, save :: pls_KtoeV ! conversion factor from Kelvin to eV
 
 end module Plasma_data

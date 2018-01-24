@@ -2,6 +2,7 @@ subroutine Plasma_computeDtLocal(blockID,   &
                               isize, jsize, ksize,  &
                               dx, dy, dz,           &
                               blkLimits,blkLimitsGC,&
+                              solnData,&
                               facexData,faceyData,  &
                               facezData,            &
                               dtLocal, lminloc )
@@ -20,14 +21,14 @@ subroutine Plasma_computeDtLocal(blockID,   &
   integer,dimension(2,MDIM), intent(IN) :: blkLimits,blkLimitsGC
   integer, intent(IN) :: isize,jsize,ksize
   real, intent(IN) :: dx, dy, dz
-  real, pointer,dimension(:,:,:,:)  :: facexData,faceyData,facezData
+  real, pointer,dimension(:,:,:,:)  :: solnData,facexData,faceyData,facezData
   real, intent(INOUT) :: dtLocal
   integer, intent(INOUT) :: lminloc(5)
 
   ! Local variables:
   real, parameter :: eps = 1.e-12
   real :: dtl,pi
-
+  real :: dcoeff
 
   pi = acos(-1.0)
 
@@ -37,7 +38,19 @@ subroutine Plasma_computeDtLocal(blockID,   &
      return
   endif
 
-  dtl = (pls_cfl/pls_dcoeff)*min(dx**2,dy**2) !adaptive time step
+  dcoeff = MAX(MAXVAL(ABS(solnData(DFEL_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH0_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH1_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH2_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH3_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH4_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH5_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH6_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH7_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH8_VAR,:,:,:))),&
+               MAXVAL(ABS(solnData(DFH9_VAR,:,:,:))))
+       
+  dtl = (pls_cfl/dcoeff)*min(dx**2,dy**2) !adaptive time step
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
