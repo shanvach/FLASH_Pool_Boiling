@@ -146,10 +146,10 @@ subroutine Simulation_initBlock(blockId)
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
                 solnData(DELE_VAR,i,j,k) = 1e18 ! Electrons
-                solnData(DHV0_VAR,i,j,k) = 1e26 ! Helium
+                solnData(DHV0_VAR,i,j,k) = 1e26 ! He
                 solnData(DHV1_VAR,i,j,k) = 1e18 ! He+
-                solnData(DHV2_VAR,i,j,k) = 1e26 ! Nitrogen 
-                solnData(DHV5_VAR,i,j,k) = 1e26 ! Oxygen
+                solnData(DHV2_VAR,i,j,k) = 1e26 ! N2 
+                solnData(DHV5_VAR,i,j,k) = 1e26 ! O2
 
            end if
 

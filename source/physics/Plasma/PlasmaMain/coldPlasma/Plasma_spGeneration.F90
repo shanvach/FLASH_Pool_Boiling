@@ -33,25 +33,30 @@ subroutine Plasma_spGeneration(N_h0,N_h1,N_h2,N_h3,N_h4,N_h5,N_h6,&
                        RSP2(i,j,1)*N_h1(i,j,1)*N_h2(i,j,1)
         GNH2(i,j,1)  = RSP5(i,j,1)*N_h4(i,j,1)*N_h3(i,j,1)  +  &
                        RSP12(i,j,1)*N_h4(i,j,1)*N_h9(i,j,1) -  &
-                       RSP2(i,j,1)*N_h3(i,j,1)*N_h0(i,j,1)  -  &
+                       RSP2(i,j,1)*N_h1(i,j,1)*N_h2(i,j,1)  -  &
                        RSP3(i,j,1)*N_e(i,j,1)*N_h2(i,j,1)
         GNH3(i,j,1)  = RSP2(i,j,1)*N_h1(i,j,1)*N_h2(i,j,1)  +  &
                        RSP3(i,j,1)*N_e(i,j,1)*N_h2(i,j,1)   -  &
                        RSP4(i,j,1)*N_e(i,j,1)*N_h3(i,j,1)   -  &
                        RSP5(i,j,1)*N_h3(i,j,1)*N_h4(i,j,1)
         GNH4(i,j,1)  = RSP4(i,j,1)*N_e(i,j,1)*N_h3(i,j,1)   -  &
+                       RSP5(i,j,1)*N_h4(i,j,1)*N_h3(i,j,1)  -  &
                        RSP11(i,j,1)*N_h4(i,j,1)*N_h6(i,j,1) -  &
-                       RSP12(i,j,1)*N_h4(i,j,1)*N_h9(i,j,1)
+                       RSP12(i,j,1)*N_h4(i,j,1)*N_h9(i,j,1) -  &
+                       RSP13(i,j,1)*N_h5(i,j,1)*N_h4(i,j,1) 
         GNH5(i,j,1)  = RSP10(i,j,1)*N_h6(i,j,1)*N_h8(i,j,1) -  &
-                       (RSP6(i,j,1)+RSP7(i,j,1)+RSP8(i,j,1))*  &
-                       N_e(i,j,1)*N_h5(i,j,1)
+                       ((RSP6(i,j,1)+RSP7(i,j,1)+RSP8(i,j,1))* &
+                         N_e(i,j,1)*N_h5(i,j,1)) -             &
+                       RSP13(i,j,1)*N_h4(i,j,1)*N_h5(i,j,1)
         GNH6(i,j,1)  = RSP7(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   -  &
                        RSP10(i,j,1)*N_h6(i,j,1)*N_h8(i,j,1) -  &
                        RSP11(i,j,1)*N_h4(i,j,1)*N_h6(i,j,1)
         GNH7(i,j,1)  = RSP8(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   -  &
                        RSP9(i,j,1)*N_e(i,j,1)*N_h7(i,j,1)
-        GNH8(i,j,1)  = RSP6(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   +  &
-                       RSP9(i,j,1)*N_e(i,j,1)*N_h7(i,j,1)  -  &
+        GNH8(i,j,1)  = RSP7(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   +  &
+                       RSP9(i,j,1)*N_e(i,j,1)*N_h7(i,j,1)   +  &
+                       RSP12(i,j,1)*N_h4(i,j,1)*N_h9(i,j,1) +  &
+                       RSP13(i,j,1)*N_h4(i,j,1)*N_h5(i,j,1) -  &
                        RSP10(i,j,1)*N_h6(i,j,1)*N_h8(i,j,1)
         GNH9(i,j,1)  = RSP11(i,j,1)*N_h4(i,j,1)*N_h6(i,j,1) +  &
                        RSP13(i,j,1)*N_h4(i,j,1)*N_h5(i,j,1) -  &
@@ -61,11 +66,13 @@ subroutine Plasma_spGeneration(N_h0,N_h1,N_h2,N_h3,N_h4,N_h5,N_h6,&
                        RSP3(i,j,1)*N_e(i,j,1)*N_h2(i,j,1)   +  &
                        RSP6(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   +  &
                        RSP8(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   +  & 
+                       RSP10(i,j,1)*N_h6(i,j,1)*N_h8(i,j,1) +  &
                        RSP11(i,j,1)*N_h4(i,j,1)*N_h6(i,j,1) -  &
-                       RSP1(i,j,1)*N_e(i,j,1)*N_h1(i,j,1)    -  &
-                       RSP4(i,j,1)*N_e(i,j,1)*N_h2(i,j,1)   -  &
+                       RSP1(i,j,1)*N_e(i,j,1)*N_h1(i,j,1)   -  &
+                       RSP3(i,j,1)*N_e(i,j,1)*N_h2(i,j,1)   -  &
+                       RSP4(i,j,1)*N_e(i,j,1)*N_h3(i,j,1)   -  &
                        RSP7(i,j,1)*N_e(i,j,1)*N_h5(i,j,1)   -  &
-                       RSP9(i,j,1)*N_e(i,j,1)*N_h9(i,j,1) 
+                       RSP9(i,j,1)*N_e(i,j,1)*N_h7(i,j,1) 
         !compare with Boltzmann Equilibrium
         GNEBZ(i,j,1) = GNH1(i,j,1) + GNH3(i,j,1) + &
                        GNH7(i,j,1) - GNH6(i,j,1)
