@@ -433,7 +433,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
  end if
 
- if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 1.00) .le. dr_simTime)) then
+ if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.30) .le. dr_simTime)) then
 
   do lb = 1,blockCount
 
@@ -465,9 +465,12 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
          !rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((38.0/180.0)*acos(-1.0)))**2)
          !if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
          
-         rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((54.0/180.0)*acos(-1.0)))**2)
-         if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
+         !rc = sqrt((xcell-0.0)**2 + (ycell-0.05*cos((54.0/180.0)*acos(-1.0)))**2)
+         !if(abs(solnData(DFUN_VAR,i,j,1)) > abs(0.05-rc)) solnData(DFUN_VAR,i,j,1) = 0.05-rc
  
+         rc = sqrt((xcell-0.0)**2 + (ycell-0.1*cos((30.0/180.0)*acos(-1.0)))**2)
+         solnData(DFUN_VAR,i,j,1) = max(solnData(DFUN_VAR,i,j,1),0.1-rc)
+
       end do
      end do
 #endif

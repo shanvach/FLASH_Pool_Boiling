@@ -1,6 +1,6 @@
 subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
 
-        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin
+        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin
 
         use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -45,6 +45,8 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         call RuntimeParameters_get("zDampL",ins_zDampL)
         call RuntimeParameters_get("xDampR",ins_xDampR)
         call RuntimeParameters_get('xmin',    sim_xMin)
+        call RuntimeParameters_get('ymin',    sim_yMin)
+        call RuntimeParameters_get('ymax',    sim_yMax)
 
         !kpd - Froude Number...
         !Fn = 1./(ins_gravX+ins_gravY+ins_gravZ)
@@ -54,9 +56,9 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         xd  = ins_xDampL
-        Cb  = 12.0
-        Ly  = 06.0
-        Lb  = 05.0
+        Cb  = 20.0
+        Ly  = sim_yMax-sim_yMin
+        Lb  = sim_yMax-sim_yMin-1.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -368,17 +370,17 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
               !   print*,"Block15 8,8:",xcell,ycell,s(i,j,k),AA*(s(i,j,k)-ycell)
               !end if
 
-              if(ycell .lt. Lb) then
+              !if(ycell .lt. Lb) then
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell)
 
-              else
-              s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                   - dt*(fry*vr - fly*vl)/dy &
-                                   - ins_dampC*AA*(s(i,j,k)-ycell) &
-                                   - dt*Cb*(ycell-Ly+Lb)/Lb
-              end if
+              !else
+              !s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                     - dt*(fry*vr - fly*vl)/dy &
+              !                     - ins_dampC*AA*(s(i,j,k)-ycell) &
+              !                     - dt*Cb*(ycell-Ly+Lb)/Lb
+              !end if
 
            end do
         end do

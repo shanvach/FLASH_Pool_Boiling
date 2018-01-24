@@ -49,6 +49,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Ab",ht_Ab)
    call RuntimeParameters_get("Cb",ht_Cb)
    call RuntimeParameters_get("Bb",ht_Bb)
+   call RuntimeParameters_get("Ra",ht_Ra)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
@@ -58,12 +59,13 @@ subroutine Heat_AD_init(blockCount,blockList)
      write(*,*) 'ht_Ab   =',ht_Ab
      write(*,*) 'ht_Bb   =',ht_Bb
      write(*,*) 'ht_Cb   =',ht_Cb
+     write(*,*) 'ht_Ra   =',ht_Ra
 
    end if
 
    ht_Twall_low    =  1.0
    ht_Twall_high   =  0.0
-   ht_Tsat         =  0.0
+   ht_Tsat         =  0.4
    ht_AMR_specs(:) =  0.0
 
    dxmin    = 1e10
@@ -79,11 +81,12 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-   if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+   if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
    call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+   call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
-   print *,"qmic: ",ht_qmic
+   print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
    !thermalBL_dt = 0.0001/0.0101
 
