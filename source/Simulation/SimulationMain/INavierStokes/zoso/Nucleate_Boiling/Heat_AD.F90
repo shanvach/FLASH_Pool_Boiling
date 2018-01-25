@@ -389,7 +389,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                 real(j - NGUARD - 1)*del(JAXIS)  +  &
                 0.5*del(JAXIS)
 
-       if(ycell .ge. (2.5-sim_yMin)) solnData(MDOT_VAR,:,j,:) = 1.3*solnData(MDOT_VAR,:,j,:)
+       if(ycell .ge. (3.0-sim_yMin)) solnData(MDOT_VAR,:,j,:) = 1.3*solnData(MDOT_VAR,:,j,:)
       
 
     end do
