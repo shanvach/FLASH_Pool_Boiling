@@ -4,7 +4,8 @@ subroutine Heat_AD_init(blockCount,blockList)
    use Grid_interface, only: Grid_getBlkPtr, Grid_releaseBlkPtr
    use IncompNS_data, only: ins_invRe,ins_meshMe
    use Multiphase_data, only: mph_thco2,mph_vis2,mph_cp2,mph_rho2,&
-                              mph_thco1,mph_vis1,mph_cp1,mph_rho1
+                              mph_thco1,mph_vis1,mph_cp1,mph_rho1,&
+                              mph_timeStampAll
 
    use Grid_interface, ONLY : Grid_getDeltas,         &
                                  Grid_getBlkIndexLimits, &
@@ -41,7 +42,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    real :: beta, chi, soln, a_I, b_I, x1, x2, f1, f2, h
    real :: dxmin
    real :: del(MDIM)
-   integer :: nuc_index
+   integer :: nuc_index,tSI
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
@@ -90,6 +91,12 @@ subroutine Heat_AD_init(blockCount,blockList)
      close(2)
 
      sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+
+     open(unit = 3,file = "sim_timeStamp.dat")
+     do tSI=1,sim_nucSiteDens
+        read(3,*)mph_timeStampAll(tSI)
+     end do
+     close(3)
 
    end if
 

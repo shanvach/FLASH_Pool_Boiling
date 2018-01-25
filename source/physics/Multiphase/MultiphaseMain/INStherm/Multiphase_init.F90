@@ -76,6 +76,13 @@ subroutine Multiphase_init()
   mph_isAttachedAll(:)  = .true.
   mph_isAttachedOld(:)  = .true.
 
+  else
+
+  mph_isAttached = .false.
+
+  mph_isAttachedAll(:) = .false.
+  mph_isAttachedOld(:) = .false.
+
   end if
 
 end subroutine Multiphase_init

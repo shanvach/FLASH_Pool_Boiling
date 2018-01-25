@@ -99,7 +99,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
-  integer :: nuc_index
+  integer :: nuc_index, tSI
   real    :: nuc_dfun, nucSiteTemp
 
   do lb = 1,blockCount
@@ -467,8 +467,17 @@ do nuc_index =1,sim_nucSiteDens
   call MPI_Allreduce(nucSiteTemp, mph_nucSiteTemp(nuc_index), 1, FLASH_REAL,&
                      MPI_MAX, MPI_COMM_WORLD, ierr)
 
-  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) &
-    mph_timeStampAll(nuc_index) = dr_simTime
+  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) then
+
+        mph_timeStampAll(nuc_index) = dr_simTime
+
+        open(unit = 3,file = "sim_timeStamp.dat",status="REPLACE")                
+                do tSI=1,sim_nucSiteDens
+                        write(3,*)mph_timeStampAll(tSI)
+                end do
+        close(3)
+
+  end if
 
 
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
