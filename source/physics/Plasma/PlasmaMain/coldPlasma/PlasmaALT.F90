@@ -4,7 +4,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Plasma_interface, only: Plasma_Solve, Plasma_hvDiffCoeff,     &
                                Plasma_elDiffCoeff,Plasma_ColFreq,    &
                                Plasma_sumNeutrals,Plasma_spReactions,&
-                               Plasma_spGeneration,Plasma_sumIons
+                               Plasma_spGeneration
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -13,8 +13,6 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "constants.h"
 #include "Plasma.h"
 #include "Flash.h"   
-
-!#define DEBUG_PLASMA
 
    include "Flash_mpi.h"
 
@@ -34,6 +32,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, dimension(10) :: T_resHV, T_resBlockHV
    integer :: ierr, i,j,k
 
+   integer :: case_num
+
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
 
@@ -52,10 +52,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      
-     !add all neutral species   
-#ifdef DEBUG_PLASMA
-     print *,"Going into sumNeurtral"
-#endif
+     !add all neutral species
      solnData(DNAT_VAR,:,:,:) = 0.0
      do i = 0,5
        call Plasma_sumNeutrals( solnData(DHV0_VAR+i,:,:,:),solnData(DNAT_VAR,:,:,:), &
@@ -64,20 +61,14 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      end do 
  
      !add all ions (+ and -)
-#ifdef DEBUG_PLASMA
-     print *,"Going into sumIons"
-#endif
      solnData(DNIT_VAR,:,:,:) = 0.0
-     do i = 0,3
+     do i = 6,9
        call Plasma_sumIons(solnData(DHV6_VAR+i,:,:,:),solnData(DNIT_VAR,:,:,:),&
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
      end do
  
      !obtain diffusion coefficient of neutral species
-#ifdef DEBUG_PLASMA
-     print *,"Going into hvDiffCoeff"
-#endif
      do i = 0,5
        call Plasma_hvDiffCoeff(solnData(DFH0_VAR+i,:,:,:), &
                                solnData(PRHV_VAR,:,:,:),solnData(TPHV_VAR,:,:,:), &
@@ -87,9 +78,6 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      end do
      
      !obtain collision frequencies
-#ifdef DEBUG_PLASMA
-     print *,"Going into ColFreq"
-#endif
      call Plasma_ColFreq(solnData(FVEI_VAR,:,:,:), solnData(FVEA_VAR,:,:,:), &
                          solnData(DNAT_VAR,:,:,:), solnData(DELE_VAR,:,:,:), &
                          solnData(TPEL_VAR,:,:,:), &
@@ -98,9 +86,6 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 
      !obtain diffusion coefficient of electrons (and ions)
-#ifdef DEBUG_PLASMA
-     print *,"Going into elDiffCoeff"
-#endif
      call Plasma_elDiffCoeff(solnData(DFIO_VAR,:,:,:),solnData(DFEL_VAR,:,:,:),&
                              solnData(TPEL_VAR,:,:,:),solnData(TPHV_VAR,:,:,:),&
                              solnData(FVEA_VAR,:,:,:),solnData(FVEI_VAR,:,:,:),&
@@ -108,84 +93,94 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
       
      !obtain chemical reaction rates for all species
-#ifdef DEBUG_PLASMA
-     print *,"Going into spReactions"
-#endif
-     call Plasma_spReactions(solnData(RSP0_VAR,:,:,:), solnData(RSP1_VAR,:,:,:),&
-                             solnData(RSP2_VAR,:,:,:), solnData(RSP3_VAR,:,:,:),&
-                             solnData(RSP4_VAR,:,:,:), solnData(RSP5_VAR,:,:,:),&
-                             solnData(RSP6_VAR,:,:,:), solnData(RSP7_VAR,:,:,:),&
-                             solnData(RSP8_VAR,:,:,:), solnData(RSP9_VAR,:,:,:),&
-                             solnData(RSP10_VAR,:,:,:), solnData(RSP11_VAR,:,:,:),&
-                             solnData(RSP12_VAR,:,:,:), solnData(RSP13_VAR,:,:,:),&
-                             solnData(RSP14_VAR,:,:,:), solnData(RSP15_VAR,:,:,:),&
-                             solnData(RSP16_VAR,:,:,:),&
-                             solnData(TPHV_VAR,:,:,:),  solnData(TPEL_VAR,:,:,:),&
-                             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
+     !call Plasma_spReactions(solnData(RSP0_VAR,:,:,:), solnData(RSP1_VAR,:,:,:),&
+     !                        solnData(RSP2_VAR,:,:,:), solnData(RSP3_VAR,:,:,:),&
+     !                        solnData(RSP4_VAR,:,:,:), solnData(RSP5_VAR,:,:,:),&
+     !                        solnData(RSP6_VAR,:,:,:), solnData(RSP7_VAR,:,:,:),&
+     !                        solnData(RSP8_VAR,:,:,:), solnData(RSP9_VAR,:,:,:),&
+     !                        solnData(RSP10_VAR,:,:,:), solnData(RSP11_VAR,:,:,:),&
+     !                        solnData(RSP12_VAR,:,:,:), solnData(RSP13_VAR,:,:,:),&
+     !                        solnData(RSP14_VAR,:,:,:), solnData(RSP15_VAR,:,:,:),&
+     !                        solnData(RSP16_VAR,:,:,:),&
+     !                        solnData(TPHV_VAR,:,:,:),  solnData(TPEL_VAR,:,:,:),&
+     !                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     !                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
 
      !obtain species generation rates using chemical reations
-#ifdef DEBUG_PLASMA
-     print *,"Going into spGeneration"
-#endif
-     call Plasma_spGeneration(solnData(DHV0_VAR,:,:,:), solnData(DHV1_VAR,:,:,:),& 
-                              solnData(DHV2_VAR,:,:,:), solnData(DHV3_VAR,:,:,:),&
-                              solnData(DHV4_VAR,:,:,:), solnData(DHV5_VAR,:,:,:),&
-                              solnData(DHV6_VAR,:,:,:), solnData(DHV7_VAR,:,:,:),&
-                              solnData(DHV8_VAR,:,:,:), solnData(DHV9_VAR,:,:,:),&
-                              solnData(DELE_VAR,:,:,:),                          &
-                              solnData(RSP0_VAR,:,:,:), solnData(RSP1_VAR,:,:,:),&
-                              solnData(RSP2_VAR,:,:,:), solnData(RSP3_VAR,:,:,:),&
-                              solnData(RSP4_VAR,:,:,:), solnData(RSP5_VAR,:,:,:),&
-                              solnData(RSP6_VAR,:,:,:), solnData(RSP7_VAR,:,:,:),&
-                              solnData(RSP8_VAR,:,:,:), solnData(RSP9_VAR,:,:,:),&
-                              solnData(RSP10_VAR,:,:,:),solnData(RSP11_VAR,:,:,:),&
-                              solnData(RSP12_VAR,:,:,:),solnData(RSP13_VAR,:,:,:),&
-                              solnData(RSP14_VAR,:,:,:), solnData(RSP15_VAR,:,:,:),&
-                              solnData(RSP16_VAR,:,:,:),&
-                              solnData(GNH0_VAR,:,:,:), solnData(GNH1_VAR,:,:,:),& 
-                              solnData(GNH2_VAR,:,:,:), solnData(GNH3_VAR,:,:,:),&
-                              solnData(GNH4_VAR,:,:,:), solnData(GNH5_VAR,:,:,:),&
-                              solnData(GNH6_VAR,:,:,:), solnData(GNH7_VAR,:,:,:),&
-                              solnData(GNH8_VAR,:,:,:), solnData(GNH9_VAR,:,:,:),&
-                              solnData(GNE_VAR,:,:,:),  solnData(GNEBZ_VAR,:,:,:),&
-                              solnData(GNERT_VAR,:,:,:),                          &
-                              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )     
+     !call Plasma_spGeneration(solnData(DHV0_VAR,:,:,:), solnData(DHV1_VAR,:,:,:),& 
+     !                         solnData(DHV2_VAR,:,:,:), solnData(DHV3_VAR,:,:,:),&
+     !                         solnData(DHV4_VAR,:,:,:), solnData(DHV5_VAR,:,:,:),&
+     !                         solnData(DHV6_VAR,:,:,:), solnData(DHV7_VAR,:,:,:),&
+     !                         solnData(DHV8_VAR,:,:,:), solnData(DHV9_VAR,:,:,:),&
+     !                         solnData(DELE_VAR,:,:,:),                          &
+     !                         solnData(RSP0_VAR,:,:,:), solnData(RSP1_VAR,:,:,:),&
+     !                         solnData(RSP2_VAR,:,:,:), solnData(RSP3_VAR,:,:,:),&
+     !                         solnData(RSP4_VAR,:,:,:), solnData(RSP5_VAR,:,:,:),&
+     !                         solnData(RSP6_VAR,:,:,:), solnData(RSP7_VAR,:,:,:),&
+     !                         solnData(RSP8_VAR,:,:,:), solnData(RSP9_VAR,:,:,:),&
+     !                         solnData(RSP10_VAR,:,:,:),solnData(RSP11_VAR,:,:,:),&
+     !                         solnData(RSP12_VAR,:,:,:),solnData(RSP13_VAR,:,:,:),&
+     !                         solnData(RSP14_VAR,:,:,:), solnData(RSP15_VAR,:,:,:),&
+     !                         solnData(RSP16_VAR,:,:,:),&
+     !                         solnData(GNH0_VAR,:,:,:), solnData(GNH1_VAR,:,:,:),& 
+     !                         solnData(GNH2_VAR,:,:,:), solnData(GNH3_VAR,:,:,:),&
+     !                         solnData(GNH4_VAR,:,:,:), solnData(GNH5_VAR,:,:,:),&
+     !                         solnData(GNH6_VAR,:,:,:), solnData(GNH7_VAR,:,:,:),&
+     !                         solnData(GNH8_VAR,:,:,:), solnData(GNH9_VAR,:,:,:),&
+     !                         solnData(GNE_VAR,:,:,:),  solnData(GNEBZ_VAR,:,:,:),&
+     !                         solnData(GNERT_VAR,:,:,:),                          &
+     !                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     !                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )     
  
      !obtain number density of electrons
-#ifdef DEBUG_PLASMA
-     print *,"Going into Plasma solve electrons"
-#endif
+     !solnData(GEN_VAR,:,:,:) will be used for all trials, need to define.
+     !with this approach we can eliminate RSPs
+     case_num = 10
+      
+     solnData(GEN_VAR,:,:,:) = 0.0
      oldT = solnData(DELE_VAR,:,:,:)
 
-     call Plasma_Solve(solnData(DELE_VAR,:,:,:), solnData(GNE_VAR,:,:,:), oldT, &
-                       solnData(DFUN_VAR,:,:,:), solnData(DFEL_VAR,:,:,:),&
-                       dt,del(DIR_X),del(DIR_Y),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     call Plasma_spGeneration_ALT( oldT,  case_num,                                    &
+                                   solnData(GEN_VAR,:,:,:),  solnData(DELE_VAR,:,:,:), &
+                                   solnData(TPHV_VAR,:,:,:), solnData(TPEL_VAR,:,:,:) 
+                                   solnData(DHV0_VAR,:,:,:), solnData(DHV1_VAR,:,:,:), &
+                                   solnData(DHV2_VAR,:,:,:), solnData(DHV3_VAR,:,:,:), &
+                                   solnData(DHV4_VAR,:,:,:), solnData(DHV5_VAR,:,:,:), &
+                                   solnData(DHV6_VAR,:,:,:), solnData(DHV7_VAR,:,:,:), &
+                                   solnData(DHV8_VAR,:,:,:), solnData(DHV9_VAR,:,:,:), &
+                                   blkLimits(LOW,IAXIS), blkLimits(HIGH,IAXIS),        &
+                                   blkLimits(LOW,JAXIS), blkLimits(HIGH,JAXIS) )
+                              
+
+     call Plasma_Solve(solnData(DELE_VAR,:,:,:), solnData(GEN_VAR,:,:,:), oldT, &
+                       solnData(DFUN_VAR,:,:,:), solnData(DFEL_VAR,:,:,:),      &
+                       dt,del(DIR_X),del(DIR_Y),                                &
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),              &
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+
      T_resBlock = T_resBlock + T_res1
 
      !obtain number density of heavy species
-#ifdef DEBUG_PLASMA
-     print *,"Going into Plasma solve heavy"
-#endif
      do i=0,5
+        
+        case_num = i
+        solnData(GEN_VAR,:,:,:) = 0.0
         oldT = solnData(DHV0_VAR+i,:,:,:)
 
-        call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), solnData(GNH0_VAR+i,:,:,:), oldT, &
+        call Plasma_spGeneration_ALT( oldT,  case_num,&
+                                      solnData(GEN_VAR,:,:,:),solnData(DELE_VAR,:,:,:), &
+
+        call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), solnData(GEN_VAR,:,:,:), oldT, &
                           solnData(DFUN_VAR,:,:,:),   solnData(DFH0_VAR+i,:,:,:),&
                           dt,del(DIR_X),del(DIR_Y),&
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+
         T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
      end do
      
      !obtain number density of ions
-#ifdef DEBUG_PLASMA
-     print *,"Going into Plasma solve ions"
-#endif
-     do i=0,3
+     do i=6,9
         oldT = solnData(DHV6_VAR+i,:,:,:)
        
         call Plasma_Solve(solnData(DHV6_VAR+i,:,:,:),solnData(GNH6_VAR+i,:,:,:), oldT, &
@@ -193,7 +188,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                           dt,del(DIR_X),del(DIR_Y),&
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
-        T_resBlockHV(i+7) = T_resBlockHV(i+7) + T_res1
+        T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
      end do
 
      k = 1

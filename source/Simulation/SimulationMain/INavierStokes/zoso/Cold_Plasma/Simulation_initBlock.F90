@@ -111,7 +111,8 @@ subroutine Simulation_initBlock(blockId)
   solnData(PRHV_VAR,:,:,:)  = 101325.0     ! Pascal, heavy particle pressure  
   solnData(TPHV_VAR,:,:,:)  = 300.0        ! Kelvin, heavy particle temperature
   solnData(TPEL_VAR,:,:,:)  = 0.8*11604.52 ! Kelvin, electron temperature
-  solnData(DHVT_VAR,:,:,:)  = 0.0          ! total heavy species
+  solnData(DNAT_VAR,:,:,:)  = 0.0          ! total neutral species
+  solnData(DNIT_VAR,:,:,:)  = 0.0          ! total ion species
   solnData(GNE_VAR,:,:,:)   = 0.0          ! electron generation rate
   solnData(GNEBZ_VAR,:,:,:) = 0.0          ! electron generation rate (Boltzmann)
   solnData(GNERT_VAR,:,:,:) = 0.0          ! ratio
@@ -123,7 +124,7 @@ subroutine Simulation_initBlock(blockId)
   end do
  
   !initialize values for reaction rates of heavy species
-  do i=0,13
+  do i=0,16
     solnData(RSP0_VAR+i,:,:,:) = 0.0
   end do
 
@@ -146,10 +147,10 @@ subroutine Simulation_initBlock(blockId)
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
                 solnData(DELE_VAR,i,j,k) = 1e18 ! Electrons
-                solnData(DHV0_VAR,i,j,k) = 1e26 ! He
-                solnData(DHV1_VAR,i,j,k) = 1e18 ! He+
-                solnData(DHV2_VAR,i,j,k) = 1e26 ! N2 
-                solnData(DHV5_VAR,i,j,k) = 1e26 ! O2
+                solnData(DHV0_VAR,i,j,k) = 0.9*1e26 ! He
+                solnData(DHV6_VAR,i,j,k) = 1e18 ! He+
+                solnData(DHV1_VAR,i,j,k) = 0.1*0.8*1e26 ! N2 
+                solnData(DHV2_VAR,i,j,k) = 0.1*0.8*1e26 ! O2
 
            end if
 

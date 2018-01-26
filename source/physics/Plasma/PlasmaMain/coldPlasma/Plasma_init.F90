@@ -37,6 +37,10 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_restart=restart
 
    pls_dcoeff = 1e3 ! test electron diffusion coefficient
+
+   ! He+, N2+, O-, O2+
+   pls_Cmi_net = 6.6464764e-27 + 2*2.3258671e-26 + &
+                 2.6566962e-26 + 2*2.6566962e-26 
    
    pls_Ckb = 1.38064852e-23
    pls_Cme = 9.10938356e-31

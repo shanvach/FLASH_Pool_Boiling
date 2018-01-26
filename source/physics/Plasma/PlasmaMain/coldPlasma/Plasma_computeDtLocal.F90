@@ -45,10 +45,11 @@ subroutine Plasma_computeDtLocal(blockID,   &
                MAXVAL(ABS(solnData(DFH3_VAR,:,:,:))),&
                MAXVAL(ABS(solnData(DFH4_VAR,:,:,:))),&
                MAXVAL(ABS(solnData(DFH5_VAR,:,:,:))),&
-               MAXVAL(ABS(solnData(DFH6_VAR,:,:,:))),&
-               MAXVAL(ABS(solnData(DFH7_VAR,:,:,:))),&
-               MAXVAL(ABS(solnData(DFH8_VAR,:,:,:))),&
-               MAXVAL(ABS(solnData(DFH9_VAR,:,:,:))))
+               MAXVAL(ABS(solnData(DFEL_VAR,:,:,:))))
+               !MAXVAL(ABS(solnData(DFH6_VAR,:,:,:))),&
+               !MAXVAL(ABS(solnData(DFH7_VAR,:,:,:))),&
+               !MAXVAL(ABS(solnData(DFH8_VAR,:,:,:))),&
+               !MAXVAL(ABS(solnData(DFH9_VAR,:,:,:))))
        
   dtl = (pls_cfl/dcoeff)*min(dx**2,dy**2) !adaptive time step
 
