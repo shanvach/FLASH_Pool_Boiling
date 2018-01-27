@@ -43,6 +43,8 @@ subroutine Heat_AD_init(blockCount,blockList)
    real :: dxmin
    real :: del(MDIM)
    integer :: nuc_index,tSI
+   real, dimension(MDIM)  :: coord,bsize
+   real ::  boundBox(2,MDIM),ycell
 
    call RuntimeParameters_get("Pr",ht_Pr)
    call RuntimeParameters_get("St",ht_St)
@@ -74,6 +76,8 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    if(dr_restart .eqv. .TRUE.) then
 
+     if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 1"
+
      sim_nucSiteDens = 0
      ht_psi          = (35.0/180.0)*acos(-1.0)
 
@@ -92,6 +96,12 @@ subroutine Heat_AD_init(blockCount,blockList)
 
      sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
+   end if
+
+   if(dr_restart .eqv. .TRUE.) then
+
+     if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 2"
+
      open(unit = 3,file = "sim_timeStamp.dat")
      do tSI=1,sim_nucSiteDens
         read(3,*)mph_timeStampAll(tSI)
@@ -99,7 +109,6 @@ subroutine Heat_AD_init(blockCount,blockList)
      close(3)
 
    end if
-
 
    if(dr_restart .eqv. .FALSE.) then
 
@@ -122,6 +131,6 @@ subroutine Heat_AD_init(blockCount,blockList)
 
     end if
 
-   print *,"qmic,fmic: ",ht_qmic,ht_fmic
+    if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
 end subroutine Heat_AD_init

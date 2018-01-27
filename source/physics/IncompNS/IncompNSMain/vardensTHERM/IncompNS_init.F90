@@ -84,7 +84,7 @@ subroutine IncompNS_init(restart)
      write(*,*) 'ins_iConvU =',ins_iConvU
   endif
 
-  print *,"ins_iConvU: ",ins_iConvU
+   if (ins_meshMe .eq. MASTER_PE) print *,"ins_iConvU: ",ins_iConvU
 
   ! Call multiphase variables initialization routine:
   call Multiphase_init()
