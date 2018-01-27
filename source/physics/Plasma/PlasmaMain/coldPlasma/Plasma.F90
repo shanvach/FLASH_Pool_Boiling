@@ -202,11 +202,16 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
-                solnData(DELE_VAR,i,j,k) = 1e18         ! Electrons
+                solnData(DELE_VAR,i,j,k) = 0.99*1e18    ! Electrons
                 solnData(DHV0_VAR,i,j,k) = 0.9*1e26     ! He
-                solnData(DHV6_VAR,i,j,k) = 1e18         ! He+
                 solnData(DHV1_VAR,i,j,k) = 0.1*0.8*1e26 ! N2 
                 solnData(DHV2_VAR,i,j,k) = 0.1*0.2*1e26 ! O2
+                solnData(DHV6_VAR,i,j,k) = 0.9*1e18     ! He+
+                solnData(DHV7_VAR,i,j,k) = 0.1*0.8*1e18 ! N2+
+                solnData(DHV8_VAR,i,j,k) = 0.1*0.2*1e18 ! O2+
+                solnData(DHV9_VAR,i,j,k) = 0.01*1e18    ! O-
+                solnData(DNAT_VAR,i,j,k) = 1e26         !neutrals
+                solnData(DNIT_VAR,i,j,k) = 1e18         !ions
 
            end if
 
