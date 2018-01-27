@@ -20,9 +20,9 @@ subroutine Plasma_Solve(T_p, T_gen, T_o, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1,
      !                        + 0.5*(1.0-sign(1.0,dfun(i,j,1)))*(dt*T_gen(i,j,1))
 
 
-     T_p(i,j,1) = T_o(i,j,1) + ((dt*dcoeff(i,j,1))/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
-                             + ((dt*dcoeff(i,j,1))/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))&
-                             + (dt*T_gen(i,j,1))
+     T_p(i,j,1) = T_o(i,j,1) + (dt*T_gen(i,j,1)) & 
+                             + ((dt*dcoeff(i,j,1))/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1)) &
+                             + ((dt*dcoeff(i,j,1))/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1)) 
 
      !set minimum value to avoid negative density
      if (T_p(i,j,1).le.1e3) then
