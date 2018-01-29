@@ -25,7 +25,9 @@ module Plasma_data
         integer, save :: pls_prol_method
 
         real, save :: pls_dcoeff
-
+  
+        real, dimension(10), save :: pls_NJET !source from beam     
+   
         real, dimension(10), save :: pls_RSCD ! Collision Diameter, Angstrom
         real, dimension(10), save :: pls_MHSP ! molar mass of each species  g/mol
 
