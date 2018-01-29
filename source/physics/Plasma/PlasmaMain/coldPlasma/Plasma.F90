@@ -4,7 +4,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Plasma_interface, only: Plasma_Solve, Plasma_hvDiffCoeff,     &
                                Plasma_elDiffCoeff,Plasma_ColFreq,    &
                                Plasma_sumNeutrals,Plasma_spReactions,&
-                               Plasma_spGeneration,Plasma_sumIons
+                               Plasma_spGeneration,Plasma_sumIons,   &
+                               Plasma_Feed
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -28,11 +29,28 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
    real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
-   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT
+
+   
+   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT 
 
    real :: T_res1,T_res,T_resBlock
    real, dimension(10) :: T_resHV, T_resBlockHV
    integer :: ierr, i,j,k
+   
+   real, dimension(1) :: rand_noise
+   real :: plasma_source !scalar, plasma source rate for species m-3 s-1
+   real :: nrel, nrna, nrni !nrh0, nrh1, nrh2, nrh6, nrh7, nrh8, nrh9 
+
+   nrel = 0.99*1e18       ! Electrons
+   nrna = 1e26            ! neutral
+   nrni = 1e18            ! ions
+   !nrh0 = 0.90*1e26       ! He
+   !nrh1 = 0.10*0.80*1e26  ! N2
+   !nrh2 = 0.10*0.20*1e26  ! O2
+   !nrh6 = 0.90*1e18       ! He+
+   !nrh7 = 0.10*0.80*1e18  ! N2+
+   !nrh8 = 0.10*0.20*1e18  ! O2+
+   !nrh9 = 0.01*1e18       ! O-
 
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
@@ -51,6 +69,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
      
      !add all neutral species   
 #ifdef DEBUG_PLASMA
@@ -157,12 +176,21 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #ifdef DEBUG_PLASMA
      print *,"Going into Plasma solve electrons"
 #endif
-     oldT = solnData(DELE_VAR,:,:,:)
 
-     call Plasma_Solve(solnData(DELE_VAR,:,:,:), solnData(GNE_VAR,:,:,:), oldT, &
+     !plasma jet feed rate
+     plasma_source = nrel
+     call Plasma_Feed(plasma_source,rand_noise,                           &
+                      solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
+                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
+                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+     !reference density value
+     oldT = solnData(DELE_VAR,:,:,:)
+     !solve for new density
+     call Plasma_Solve(solnData(DELE_VAR,:,:,:), solnData(GNE_VAR,:,:,:), & 
+                       oldT, solnData(FEED_VAR,:,:,:),                    &
                        solnData(DFUN_VAR,:,:,:), solnData(DFEL_VAR,:,:,:),&
-                       dt,del(DIR_X),del(DIR_Y),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       dt,del(DIR_X),del(DIR_Y),                          &
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),        &
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
      T_resBlock = T_resBlock + T_res1
 
@@ -171,12 +199,20 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      print *,"Going into Plasma solve heavy"
 #endif
      do i=0,5
+        !feed rate from source
+        plasma_source = pls_NJET(i+1)
+        call Plasma_Feed(plasma_source,rand_noise,                           &
+                         solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+        !reference density values
         oldT = solnData(DHV0_VAR+i,:,:,:)
-
-        call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), solnData(GNH0_VAR+i,:,:,:), oldT, &
-                          solnData(DFUN_VAR,:,:,:),   solnData(DFH0_VAR+i,:,:,:),&
-                          dt,del(DIR_X),del(DIR_Y),&
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+        !sove for new density
+        call Plasma_Solve(solnData(DHV0_VAR+i,:,:,:), solnData(GNH0_VAR+i,:,:,:),&
+                          oldT, solnData(FEED_VAR,:,:,:),                        &
+                          solnData(DFUN_VAR,:,:,:), solnData(DFH0_VAR+i,:,:,:),&
+                          dt,del(DIR_X),del(DIR_Y),                              &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),            &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
         T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
      end do
@@ -186,37 +222,45 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      print *,"Going into Plasma solve ions"
 #endif
      do i=0,3
+        !feed rate from source
+        plasma_source = pls_NJET(i+7)
+        call Plasma_Feed(plasma_source,rand_noise,                              &
+                         solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),     &
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),            &
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+        !reference density values
         oldT = solnData(DHV6_VAR+i,:,:,:)
-       
-        call Plasma_Solve(solnData(DHV6_VAR+i,:,:,:),solnData(GNH6_VAR+i,:,:,:), oldT, &
-                          solnData(DFUN_VAR,:,:,:),  solnData(DFEL_VAR,:,:,:),&
-                          dt,del(DIR_X),del(DIR_Y),&
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+        !solve for new density
+        call Plasma_Solve(solnData(DHV6_VAR+i,:,:,:),solnData(GNH6_VAR+i,:,:,:),& 
+                          oldT, solnData(FEED_VAR,:,:,:),                       &
+                          solnData(DFUN_VAR,:,:,:),  solnData(DFEL_VAR,:,:,:),  &
+                          dt,del(DIR_X),del(DIR_Y),                             &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),           &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
         T_resBlockHV(i+7) = T_resBlockHV(i+7) + T_res1
      end do
 
-     k = 1
-     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+     !k = 1
+     !do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+     ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
 
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
-                solnData(DELE_VAR,i,j,k) = 0.99*1e18    ! Electrons
-                solnData(DHV0_VAR,i,j,k) = 0.9*1e26     ! He
-                solnData(DHV1_VAR,i,j,k) = 0.1*0.8*1e26 ! N2 
-                solnData(DHV2_VAR,i,j,k) = 0.1*0.2*1e26 ! O2
-                solnData(DHV6_VAR,i,j,k) = 0.9*1e18     ! He+
-                solnData(DHV7_VAR,i,j,k) = 0.1*0.8*1e18 ! N2+
-                solnData(DHV8_VAR,i,j,k) = 0.1*0.2*1e18 ! O2+
-                solnData(DHV9_VAR,i,j,k) = 0.01*1e18    ! O-
-                solnData(DNAT_VAR,i,j,k) = 1e26         !neutrals
-                solnData(DNIT_VAR,i,j,k) = 1e18         !ions
+                !solnData(DELE_VAR,i,j,k) = solnData(DELE_VAR,i,j,k) + dt*nrel    ! Electrons
+                !solnData(DHV0_VAR,i,j,k) = solnData(DHV0_VAR,i,j,k) + dt*nrh0    ! He
+                !solnData(DHV1_VAR,i,j,k) = solnData(DHV1_VAR,i,j,k) + dt*nrh1    ! N2 
+                !solnData(DHV2_VAR,i,j,k) = solnData(DHV2_VAR,i,j,k) + dt*nrh2    ! O2
+                !solnData(DHV6_VAR,i,j,k) = solnData(DHV6_VAR,i,j,k) + dt*nrh6    ! He+
+                !solnData(DHV7_VAR,i,j,k) = solnData(DHV7_VAR,i,j,k) + dt*nrh7    ! N2+
+                !solnData(DHV8_VAR,i,j,k) = solnData(DHV8_VAR,i,j,k) + dt*nrh8    ! O2+
+                !solnData(DHV9_VAR,i,j,k) = solnData(DHV9_VAR,i,j,k) + dt*nrh9    ! O-
+                !solnData(DNAT_VAR,i,j,k) = solnData(DNAT_VAR,i,j,k) + dt*nrna    !neutrals
+                !solnData(DNIT_VAR,i,j,k) = solnData(DNIT_VAR,i,j,k) + dt*nrni    !ions
 
-           end if
+           !end if
 
-       end do
-     end do
+       !end do
+     !end do
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
