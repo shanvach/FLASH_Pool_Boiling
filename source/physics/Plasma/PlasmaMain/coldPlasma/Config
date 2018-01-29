@@ -78,3 +78,4 @@ PARAMETER dtspec           REAL     0.001
 
 PARAMETER vel_prolong_method INTEGER   1 [0,1] 
 
+PARAMETER pct_noise REAL 0.1

@@ -51,6 +51,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    !nrh7 = 0.10*0.80*1e18  ! N2+
    !nrh8 = 0.10*0.20*1e18  ! O2+
    !nrh9 = 0.01*1e18       ! O-
+   plasma_source = 0.0
 
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
@@ -178,7 +179,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
      !plasma jet feed rate
-     plasma_source = nrel
+     !plasma_source = nrel
      call Plasma_Feed(plasma_source,rand_noise,                           &
                       solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
@@ -200,7 +201,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
      do i=0,5
         !feed rate from source
-        plasma_source = pls_NJET(i+1)
+        !plasma_source = pls_NJET(i+1)
         call Plasma_Feed(plasma_source,rand_noise,                           &
                          solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
@@ -223,7 +224,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
      do i=0,3
         !feed rate from source
-        plasma_source = pls_NJET(i+7)
+        !plasma_source = pls_NJET(i+7)
         call Plasma_Feed(plasma_source,rand_noise,                              &
                          solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),     &
                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),            &

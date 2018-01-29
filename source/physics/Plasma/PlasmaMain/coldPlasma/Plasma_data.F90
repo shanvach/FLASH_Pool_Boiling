@@ -41,4 +41,6 @@ module Plasma_data
         real, save :: pls_gam ! Euler's number
         real, save :: pls_KtoeV ! conversion factor from Kelvin to eV
 
+        real, save :: pls_pct_noise ! percentage noise
+
 end module Plasma_data

@@ -17,6 +17,9 @@ xmax =  2.50
 ymin = -2.50
 ymax =  2.50
 
+# plasma percentage noise parameters
+pct_noise = 0.2
+
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
 xr_boundary_type = "neumann_ins"
@@ -45,9 +48,9 @@ tmax                = 100.0
 cflflg              = 0
 cfl                 = 1.0d-2
 sigma		    = 1.0d-2
-dtspec              = 1.0d-10
-dtinit              = 1.0d-10
-dtmin 	            = 1.0d-10
+dtspec              = 1.0d-8
+dtinit              = 1.0d-8
+dtmin 	            = 1.0d-8
 tstep_change_factor = 1.0
 
 #Integration Scheme:
@@ -66,11 +69,11 @@ plotFileIntervalStep = 2000
 nblockx	= 5
 nblocky	= 5
 lrefine_min	= 1
-lrefine_max     = 4
+lrefine_max     = 1
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000
+nrefs           = 1000000
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1
