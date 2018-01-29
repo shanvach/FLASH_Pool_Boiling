@@ -32,10 +32,10 @@ module Plasma_interface
 
 
         interface
-        subroutine Plasma_Solve(T_p, T_gen, T_o, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
+        subroutine Plasma_Solve(T_p, T_gen, T_o, T_source, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
                 implicit none
                 real, dimension(:,:,:), intent(inout) :: T_p
-                real, dimension(:,:,:), intent(in) :: T_o, T_gen, dfun, dcoeff
+                real, dimension(:,:,:), intent(in) :: T_o, T_source, T_gen, dfun, dcoeff
                 real, intent(in) :: dt, dx, dy
                 integer, intent(in) :: ix1, ix2, jy1, jy2
                 real, intent(out) :: T_res
@@ -162,6 +162,17 @@ module Plasma_interface
                                             GNERT
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_spGeneration
+        end interface
+
+        interface
+        subroutine Plasma_Feed(constant_rate,noise,feed_rate,distfunc,ix1,ix2,jy1,jy2)
+                implicit none
+                real, intent(in) :: constant_rate
+                real, dimension(:), intent(in) :: noise
+                real, dimension(:,:,:), intent(in) :: distfunc
+                real, dimension(:,:,:), intent(inout) :: feed_rate
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_Feed
         end interface
 
 end module Plasma_interface
