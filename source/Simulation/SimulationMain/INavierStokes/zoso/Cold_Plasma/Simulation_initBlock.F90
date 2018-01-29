@@ -72,7 +72,9 @@ subroutine Simulation_initBlock(blockId)
   real :: nuc_dfun
   integer :: nuc_index
   real :: fn(8)
- 
+
+  real :: dt
+  dt = 1e-9 
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -107,12 +109,12 @@ subroutine Simulation_initBlock(blockId)
   y0 = 0.0
   r0 = 0.5
 
-  solnData(DELE_VAR,:,:,:)  = 1e6          ! particles/m3
+  solnData(DELE_VAR,:,:,:)  = 4e6          ! particles/m3
   solnData(PRHV_VAR,:,:,:)  = 101325.0     ! Pascal, heavy particle pressure  
   solnData(TPHV_VAR,:,:,:)  = 300.0        ! Kelvin, heavy particle temperature
   solnData(TPEL_VAR,:,:,:)  = 0.8*11604.52 ! Kelvin, electron temperature
-  solnData(DNAT_VAR,:,:,:)  = 0.0          ! total neutral species
-  solnData(DNIT_VAR,:,:,:)  = 0.0          ! total ion species
+  solnData(DNAT_VAR,:,:,:)  = 6e6          ! total neutral species
+  solnData(DNIT_VAR,:,:,:)  = 4e6          ! total ion species
   solnData(GNE_VAR,:,:,:)   = 0.0          ! electron generation rate
   solnData(GNEBZ_VAR,:,:,:) = 0.0          ! electron generation rate (Boltzmann)
   solnData(GNERT_VAR,:,:,:) = 0.0          ! ratio
@@ -146,16 +148,16 @@ subroutine Simulation_initBlock(blockId)
 
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
-                solnData(DELE_VAR,i,j,k) = 0.99*1e18    ! Electrons
-                solnData(DHV0_VAR,i,j,k) = 0.9*1e26     ! He
-                solnData(DHV1_VAR,i,j,k) = 0.1*0.8*1e26 ! N2 
-                solnData(DHV2_VAR,i,j,k) = 0.1*0.2*1e26 ! O2
-                solnData(DHV6_VAR,i,j,k) = 0.9*1e18     ! He+
-                solnData(DHV7_VAR,i,j,k) = 0.1*0.8*1e18 ! N2+
-                solnData(DHV8_VAR,i,j,k) = 0.1*0.2*1e18 ! O2+
-                solnData(DHV9_VAR,i,j,k) = 0.01*1e18    ! O-
-                solnData(DNAT_VAR,i,j,k) = 1e26         !neutrals
-                solnData(DNIT_VAR,i,j,k) = 1e18         !ions
+                solnData(DELE_VAR,i,j,k) = solnData(DELE_VAR,i,j,k) + dt*0.99*1e18    ! Electrons
+                solnData(DHV0_VAR,i,j,k) = solnData(DHV0_VAR,i,j,k) + dt*0.9*1e26     ! He
+                solnData(DHV1_VAR,i,j,k) = solnData(DHV1_VAR,i,j,k) + dt*0.1*0.8*1e26 ! N2 
+                solnData(DHV2_VAR,i,j,k) = solnData(DHV2_VAR,i,j,k) + dt*0.1*0.2*1e26 ! O2
+                solnData(DHV6_VAR,i,j,k) = solnData(DHV6_VAR,i,j,k) + dt*0.9*1e18     ! He+
+                solnData(DHV7_VAR,i,j,k) = solnData(DHV7_VAR,i,j,k) + dt*0.1*0.8*1e18 ! N2+
+                solnData(DHV8_VAR,i,j,k) = solnData(DHV8_VAR,i,j,k) + dt*0.1*0.2*1e18 ! O2+
+                solnData(DHV9_VAR,i,j,k) = solnData(DHV9_VAR,i,j,k) + dt*0.01*1e18    ! O-
+                solnData(DNAT_VAR,i,j,k) = solnData(DNAT_VAR,i,j,k) + dt*1e26         !neutrals
+                solnData(DNIT_VAR,i,j,k) = solnData(DNIT_VAR,i,j,k) + dt*1e18         !ions
 
            end if
 
