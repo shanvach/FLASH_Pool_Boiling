@@ -65,6 +65,8 @@ VARIABLE gne TYPE: GENERIC # electron generation rates
 VARIABLE gnebz TYPE: GENERIC
 VARIABLE gnert TYPE: GENERIC
 
+VARIABLE feed TYPE: GENERIC
+
 FACEVAR magf # face center
 FACEVAR rh1f
 FACEVAR rh2f
