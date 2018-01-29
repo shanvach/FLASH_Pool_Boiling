@@ -56,9 +56,9 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         xd  = ins_xDampL
-        Cb  = 20.0
-        Ly  = 3.5
-        Lb  = 2.5
+        Cb  = 6.0
+        Ly  = sim_yMax-sim_yMin
+        Lb  = sim_yMax-sim_yMin-3.0
 
 
         call Grid_getDeltas(blockID,del)

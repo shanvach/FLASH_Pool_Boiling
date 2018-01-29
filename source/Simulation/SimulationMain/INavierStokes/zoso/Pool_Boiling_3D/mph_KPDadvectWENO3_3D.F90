@@ -64,9 +64,9 @@
 
         pi = 3.14159265359
 
-        Cb  = 20.0
+        Cb  = sim_yMax-sim_yMin
         Ly  = sim_yMax-sim_yMin
-        Lb  = sim_yMax-sim_yMin-1.0
+        Lb  = sim_yMax-sim_yMin-5.0
 
         !- kpd - Froude base damping distance...
         !xd  = sim_xMax - (2.*pi*(Fn**2.))

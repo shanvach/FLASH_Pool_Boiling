@@ -381,18 +381,18 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
  
     ! Artificial sink condition ~ Only for Nucleate Boiling
-    bsize(:) = boundBox(2,:) - boundBox(1,:)
+    !bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-    do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+    !do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
 
-       ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                real(j - NGUARD - 1)*del(JAXIS)  +  &
-                0.5*del(JAXIS)
+    !   ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+    !            real(j - NGUARD - 1)*del(JAXIS)  +  &
+    !            0.5*del(JAXIS)
 
        !if(ycell .ge. 2.5) solnData(MDOT_VAR,:,j,:) = solnData(MDOT_VAR,:,j,:)*(1+(ycell/20.0))
       
 
-    end do
+    !end do
 
     ! Release pointers
 
