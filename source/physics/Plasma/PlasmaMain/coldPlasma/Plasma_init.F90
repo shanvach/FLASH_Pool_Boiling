@@ -75,6 +75,18 @@ subroutine Plasma_init(blockCount,blockList,restart)
 
    ! molar mass NaCl + H2O
    pls_MMix = 35.453 + 22.989769 + 18.0
+
+   ! plasma feed rate from jet
+   pls_NJET(1) = 0.90*1e26
+   pls_NJET(2) = 0.10*0.80*1e26
+   pls_NJET(3) = 0.10*0.20*1e26
+   pls_NJET(4) = 0.0
+   pls_NJET(5) = 0.0
+   pls_NJET(6) = 0.0
+   pls_NJET(7) = 0.90*1e18
+   pls_NJET(8) = 0.10*0.80*1e18
+   pls_NJET(9) = 0.10*0.20*1e18
+   pls_NJET(10)= 0.01*1e18
    
   if (pls_meshMe .eq. MASTER_PE) then
      write(*,*) 'pls_cfl   =',pls_cfl
