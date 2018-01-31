@@ -108,15 +108,15 @@ subroutine Simulation_initBlock(blockId)
   A0 = sim_waveA
   solnX = 0.50007326145904204295640899471226
 
-  sim_nuc_radii(1) = 0.05
-  sim_nuc_radii(2) = 0.10
-  sim_nuc_radii(3) = 0.10
-  sim_nuc_radii(4) = 0.05
-  sim_nuc_radii(5) = 0.75
-  sim_nuc_radii(6) = 0.05
-  sim_nuc_radii(7) = 0.10
-  sim_nuc_radii(8) = 0.05
-  sim_nuc_radii(9) = 0.05
+  sim_nuc_radii(1) = 0.12
+  sim_nuc_radii(2) = 0.17
+  sim_nuc_radii(3) = 0.15
+  sim_nuc_radii(4) = 0.10
+  sim_nuc_radii(5) = 0.30
+  sim_nuc_radii(6) = 0.12
+  sim_nuc_radii(7) = 0.15
+  sim_nuc_radii(8) = 0.17
+  sim_nuc_radii(9) = 0.10
 
 
   sim_nuc_site_x(1) = -3.00
@@ -131,7 +131,7 @@ subroutine Simulation_initBlock(blockId)
 
   do nuc_index=1,9
 
-        sim_nuc_site_y(nuc_index) = sim_nuc_radii(nuc_index)*cos((35.0/180.0)*acos(-1.0))
+        sim_nuc_site_y(nuc_index) = sim_nuc_radii(nuc_index)*cos((30.0/180.0)*acos(-1.0))
 
   end do
 
@@ -166,13 +166,14 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = 0.0
 
-           if(ycell .le. 0.25 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.25 - ycell)/0.25
+           !if(ycell .le. 2.0 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
+           if(ycell .le. 2.0) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
 
           enddo
      enddo
   enddo
 
-  sim_nuc_site_y(:) = 0.05*cos((35.0/180.0)*acos(-1.0))
+  sim_nuc_site_y(:) = 0.1*cos((30.0/180.0)*acos(-1.0))
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

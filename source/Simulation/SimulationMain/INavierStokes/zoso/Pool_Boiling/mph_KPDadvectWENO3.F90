@@ -1,6 +1,6 @@
 subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
 
-        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin
+        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin
 
         use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -54,9 +54,9 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         xd  = ins_xDampL
-        Cb  = 12.0
-        Ly  = 10.0
-        Lb  = 08.0
+        Cb  = 10.0
+        Ly  = sim_yMax-sim_yMin
+        Lb  = sim_yMax-sim_yMin-5.0
 
 
         call Grid_getDeltas(blockID,del)
