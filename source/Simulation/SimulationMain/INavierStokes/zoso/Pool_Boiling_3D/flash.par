@@ -47,7 +47,7 @@ gravZ =  0.0
 sten = 1.0
 
 # Number of heat flux extrapolation iterations
-hfit = 50
+hfit = 10
 
 # Microlayer parameters
 Ab = 5.4d-10
@@ -57,6 +57,9 @@ Cb = 2.4d-7
 # Temperatures
 tbulk =  0.0
 tsat  =  0.4
+
+# Nucleation frequency
+twait =  0.2
 
 # Natural convection parameter
 Ra = 0.00
@@ -100,14 +103,14 @@ log_file	= "INS_INOUT.log"
 basenm		= "INS_INOUT_"
 
 restart         = .false.
-#checkPointFileNumber = 19
+#checkPointFileNumber = 1
 #plotFileNumber  = 1
 
 nend = 1000000000
 tmax            = 2500.0
 cflflg          = 1
-cfl             = 1.0
-sigma		= 1.0
+cfl             = 0.7
+sigma		= 0.7
 dtspec          = 1.0
 dtinit          = 1.0
 tstep_change_factor=1.05

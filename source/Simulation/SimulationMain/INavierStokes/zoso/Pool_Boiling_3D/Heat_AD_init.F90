@@ -54,24 +54,24 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Bb",ht_Bb)
    call RuntimeParameters_get("tsat",ht_Tsat)
    call RuntimeParameters_get("Ra",ht_Ra)
+   call RuntimeParameters_get("twait",ht_tWait)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
-     write(*,*) 'ht_Pr   =',ht_Pr
-     write(*,*) 'ht_St   =',ht_St
-     write(*,*) 'ht_hfit =',ht_hfit
-     write(*,*) 'ht_Ab   =',ht_Ab
-     write(*,*) 'ht_Bb   =',ht_Bb
-     write(*,*) 'ht_Cb   =',ht_Cb
-     write(*,*) 'ht_Tsat =',ht_Tsat
-     write(*,*) 'ht_Ra   =',ht_Ra
-
+     write(*,*) 'ht_Pr    =',ht_Pr
+     write(*,*) 'ht_St    =',ht_St
+     write(*,*) 'ht_hfit  =',ht_hfit
+     write(*,*) 'ht_Ab    =',ht_Ab
+     write(*,*) 'ht_Bb    =',ht_Bb
+     write(*,*) 'ht_Cb    =',ht_Cb
+     write(*,*) 'ht_Tsat  =',ht_Tsat
+     write(*,*) 'ht_Ra    =',ht_Ra
+     write(*,*) 'ht_tWait =',ht_tWait
    end if
 
    ht_Twall_low  = 1.0
    ht_Twall_high = 0.0
    ht_AMR_specs  = 0.0
-   ht_tWait      = 0.2
    ht_Tnuc       = 0.0
 
    if(dr_restart .eqv. .TRUE.) then
