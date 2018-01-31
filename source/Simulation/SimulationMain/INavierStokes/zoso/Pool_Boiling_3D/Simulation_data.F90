@@ -37,5 +37,7 @@ module Simulation_data
   integer, save :: sim_nucSiteDens
 
   real, save :: sim_Tbulk
+
+  real, save :: sim_sinkB
  
 end module Simulation_data

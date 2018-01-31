@@ -3,7 +3,8 @@
      subroutine mph_KPDadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,blockID)
 
         use Simulation_data, ONLY : sim_xMax, sim_xMin, sim_yMin, &
-                                    sim_yMax, sim_zMin, sim_zMax
+                                    sim_yMax, sim_zMin, sim_zMax, &
+                                    sim_sinkB
 
         use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -64,7 +65,7 @@
 
         pi = 3.14159265359
 
-        Cb  = sim_yMax-sim_yMin
+        Cb  = sim_sinkB
         Ly  = sim_yMax-sim_yMin
         Lb  = sim_yMax-sim_yMin-5.0
 

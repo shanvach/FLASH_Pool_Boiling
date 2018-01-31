@@ -61,6 +61,9 @@ tsat  =  0.4
 # Nucleation frequency
 twait =  0.2
 
+# Level set sink strength
+sinkB = 10.0
+
 # Natural convection parameter
 Ra = 0.00
 

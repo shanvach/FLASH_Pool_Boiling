@@ -30,7 +30,8 @@ subroutine Simulation_init()
   use Driver_interface, ONLY : Driver_abortFlash
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
-                              sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk
+                              sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
+                              sim_sinkB
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
@@ -69,6 +70,9 @@ subroutine Simulation_init()
   call RuntimeParameters_get('tbulk',   sim_Tbulk)
 
   call RuntimeParameters_get('tsat',    ht_Tsat)
+
+  call RuntimeParameters_get('sinkB',   sim_sinkB)
+
 
   sim_gCell = .true.
 
