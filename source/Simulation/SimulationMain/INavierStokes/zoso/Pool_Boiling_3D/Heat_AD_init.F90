@@ -102,11 +102,11 @@ subroutine Heat_AD_init(blockCount,blockList)
 
      if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 2"
 
-     open(unit = 3,file = "sim_timeStamp.dat")
-     do tSI=1,sim_nucSiteDens
-        read(3,*)mph_timeStampAll(tSI)
-     end do
-     close(3)
+     !open(unit = 3,file = "sim_timeStamp.dat")
+     !do tSI=1,sim_nucSiteDens
+     !   read(3,*)mph_timeStampAll(tSI)
+     !end do
+     !close(3)
 
    end if
 
