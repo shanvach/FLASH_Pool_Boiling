@@ -25,8 +25,8 @@ subroutine Plasma_Solve(T_p, T_gen, T_o, T_source, dfun, dcoeff, dt, dx, dy, ix1
                              + ((dt*dcoeff(i,j,1))/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))  
 
      !set minimum value to avoid negative density
-     if (T_p(i,j,1).le.1e3) then
-        T_p(i,j,1) = 1e3
+     if (T_p(i,j,1).le.1e6) then
+        T_p(i,j,1) = 1e6
      end if
 
      end do

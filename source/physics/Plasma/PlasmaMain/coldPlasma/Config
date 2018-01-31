@@ -65,7 +65,10 @@ VARIABLE gne TYPE: GENERIC # electron generation rates
 VARIABLE gnebz TYPE: GENERIC
 VARIABLE gnert TYPE: GENERIC
 
-VARIABLE feed TYPE: GENERIC
+VARIABLE feed TYPE: GENERIC # for plasma feed
+
+VARIABLE epot TYPE: GENERIC # electric potential
+VARIABLE dqnt TYPE: GENERIC # RHS for Poisson Solver
 
 FACEVAR magf # face center
 FACEVAR rh1f

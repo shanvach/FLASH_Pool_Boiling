@@ -174,5 +174,24 @@ module Plasma_interface
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_Feed
         end interface
+        
+        interface
+        subroutine Plasma_netCharge(dqn, dnit_pos, dnit_neg, dele, ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: dnit_pos, dnit_neg, dele
+                real, dimension(:,:,:), intent(inout) :: dqn
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_netCharge        
+        end interface
+
+        interface
+        subroutine Plasma_elPotential(ppold, distfunc, pp, dqn, dx, dy,ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: dqn, distfunc
+                real, dimension(:,:,:), intent(inout) :: pp, ppold
+                real, intent(in) :: dx, dy
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_elPotential
+        end interface
 
 end module Plasma_interface

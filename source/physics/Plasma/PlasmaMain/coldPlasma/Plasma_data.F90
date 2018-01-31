@@ -43,4 +43,7 @@ module Plasma_data
 
         real, save :: pls_pct_noise ! percentage noise
 
+        real, save :: pls_epsilon0 !permitivity of free space
+        real, save :: pls_l2target !l2 norm of error target for convergence
+
 end module Plasma_data

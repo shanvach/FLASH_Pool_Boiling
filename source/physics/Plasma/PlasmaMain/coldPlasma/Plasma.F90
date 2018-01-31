@@ -5,7 +5,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                Plasma_elDiffCoeff,Plasma_ColFreq,    &
                                Plasma_sumNeutrals,Plasma_spReactions,&
                                Plasma_spGeneration,Plasma_sumIons,   &
-                               Plasma_Feed
+                               Plasma_Feed, Plasma_netCharge,        &
+                               Plasma_elPotential
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -31,7 +32,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
    
-   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT 
+   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldT, oldPhi
 
    real :: T_res1,T_res,T_resBlock
    real, dimension(10) :: T_resHV, T_resBlockHV
@@ -88,12 +89,33 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      print *,"Going into sumIons"
 #endif
      solnData(DNIT_VAR,:,:,:) = 0.0
-     do i = 0,3
+     do i = 0,2
        call Plasma_sumIons(solnData(DHV6_VAR+i,:,:,:),solnData(DNIT_VAR,:,:,:),&
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
      end do
- 
+
+     !find net charge density in domain
+#ifdef DEBUG_PLASMA
+     print *,"Going into netCharge"
+#endif
+       call Plasma_netCharge(solnData(DQNT_VAR,:,:,:),solnData(DNIT_VAR,:,:,:),&
+                             solnData(DHV9_VAR,:,:,:),solnData(DELE_VAR,:,:,:),&
+                             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+
+     !find induced potential
+#ifdef DEBUG_PLASMA
+     print *,"Going into elPotential"
+#endif
+       solnData(EPOT_VAR,:,:,:) = 0.0
+       oldPhi = solnData(EPOT_VAR,:,:,:)
+       call Plasma_elPotential(oldPhi,solnData(DFUN_VAR,:,:,:),&
+                               solnData(EPOT_VAR,:,:,:),solnData(DQNT_VAR,:,:,:),&
+                               del(DIR_X),del(DIR_Y),&
+                               blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                               blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
+
      !obtain diffusion coefficient of neutral species
 #ifdef DEBUG_PLASMA
      print *,"Going into hvDiffCoeff"
@@ -306,6 +328,9 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   gcMask(GNE_VAR)   = .TRUE.
   gcMask(GNEBZ_VAR) = .TRUE.
   gcMask(GNERT_VAR) = .TRUE.
+
+  gcMask(DQNT_VAR) = .TRUE.
+  gcMask(EPOT_VAR) = .TRUE.
 
   do i=0,9
         gcMask(DHV0_VAR+i) = .TRUE.

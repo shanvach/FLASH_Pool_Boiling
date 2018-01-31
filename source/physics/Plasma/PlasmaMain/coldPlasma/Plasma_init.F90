@@ -12,7 +12,8 @@ subroutine Plasma_init(blockCount,blockList,restart)
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells
 
-   use Plasma_interface, only: Plasma_Feed
+   use Plasma_interface, only: Plasma_Feed, Plasma_sumIons,&
+                               Plasma_netCharge, Plasma_elPotential
 
    implicit none
 
@@ -35,6 +36,8 @@ subroutine Plasma_init(blockCount,blockList,restart)
    real, dimension(1) :: rand_noise
    real :: plasma_source !scalar, plasma source rate for species m-3 s-1
    real :: nrel, nrna, nrni !nrh0, nrh1, nrh2, nrh6, nrh7, nrh8, nrh9 
+
+   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldPhi
 
    nrel = 0.99*1e18       ! Electrons
    nrna = 1e26            ! neutral
@@ -60,12 +63,16 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_Cmi_net = 6.6464764e-27 + 2*2.3258671e-26 + &
                  2.6566962e-26 + 2*2.6566962e-26 
    
+   pls_epsilon0 = 8.85418782e-12
+   pls_l2target = 1e-7
+
    pls_Ckb = 1.38064852e-23
    pls_Cme = 9.10938356e-31
    pls_Ce  = 1.60217662e-19
    pls_gam = EXP(0.577) 
    pls_Cpi = 3.14159265359
    pls_KtoeV = 1.0/11604.52
+   
 
    ! collision diameters for all heavy species
    pls_RSCD(1) = 1.0
@@ -158,6 +165,29 @@ subroutine Plasma_init(blockCount,blockList,restart)
 
         solnData(DHV6_VAR+i,:,:,:) = solnData(DHV6_VAR+i,:,:,:) + solnData(FEED_VAR,:,:,:)*pls_dtspec
      end do
+ 
+     !sum all ions
+     solnData(DNIT_VAR,:,:,:) = 0.0
+     do i = 0,2
+       call Plasma_sumIons(solnData(DHV6_VAR+i,:,:,:),solnData(DNIT_VAR,:,:,:),&
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+     end do
+   
+     !find net charge density
+     call Plasma_netCharge(solnData(DQNT_VAR,:,:,:),solnData(DNIT_VAR,:,:,:),&
+                           solnData(DHV9_VAR,:,:,:),solnData(DELE_VAR,:,:,:),&
+                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+  
+     solnData(EPOT_VAR,:,:,:) = 0.0  
+     !find induced electric potential
+     oldPhi = solnData(EPOT_VAR,:,:,:)
+     call Plasma_elPotential(oldPhi,solnData(DFUN_VAR,:,:,:),&
+                             solnData(EPOT_VAR,:,:,:),solnData(DQNT_VAR,:,:,:),&
+                             del(DIR_X),del(DIR_Y),&
+                             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
 
      ! Release block pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -167,6 +197,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
   gcMask = .FALSE.
 
   gcMask(DELE_VAR)  = .TRUE.
+  gcMask(EPOT_VAR)  = .TRUE.
 
   do i=0,9
         gcMask(DHV0_VAR+i) = .TRUE.
