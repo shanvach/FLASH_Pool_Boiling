@@ -167,7 +167,7 @@ subroutine Simulation_initBlock(blockId)
            solnData(TEMP_VAR,i,j,k) = 0.0
 
            !if(ycell .le. 2.0 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
-           if(ycell .le. 2.0) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
+           if(ycell .le. 2.0 .and. xcell .ge. -4.0 .and. xcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = (2.0 - ycell)/2.0
 
           enddo
      enddo

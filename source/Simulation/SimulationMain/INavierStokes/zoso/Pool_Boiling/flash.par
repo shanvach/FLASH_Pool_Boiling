@@ -62,8 +62,8 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin = -4.00
-xmax =  4.00
+xmin = -8.00
+xmax =  8.00
 ymin =  0.00
 ymax = 16.00
 
@@ -116,7 +116,7 @@ checkpointFileIntervalTime = 0.2
 plotFileIntervalTime = 0.05
 
 ##	AMR parameters
-nblockx	= 12
+nblockx	= 24
 nblocky	= 24
 lrefine_min	= 1
 lrefine_max     = 1
