@@ -615,7 +615,8 @@
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
                                       - dt*(frz*wr - flz*wl)/dz &
-                                      - dt*Cb*(ycell-Ly+Lb)/Lb
+                                      - dt*Cb*(ycell-Lb)/Lb
+                                      !- dt*Cb*(ycell-Ly+Lb)/Lb
               end if
 
 

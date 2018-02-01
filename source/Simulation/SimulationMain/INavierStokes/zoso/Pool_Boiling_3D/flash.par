@@ -62,7 +62,7 @@ tsat  =  0.4
 twait =  0.2
 
 # Level set sink strength
-sinkB = 10.0
+sinkB = 5.0
 
 # Natural convection parameter
 Ra = 0.00
