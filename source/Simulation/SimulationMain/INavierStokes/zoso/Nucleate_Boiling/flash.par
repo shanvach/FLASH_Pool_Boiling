@@ -80,6 +80,9 @@ gravZ =  0.0
 #sten = 0.9934
 sten = 1.0
 
+# Nucleation frequency
+twait = 0.3
+
 # Number of heat flux extrapolation iterations
 hfit = 50
 

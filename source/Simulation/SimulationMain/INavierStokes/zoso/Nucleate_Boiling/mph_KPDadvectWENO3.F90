@@ -370,17 +370,17 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
               !   print*,"Block15 8,8:",xcell,ycell,s(i,j,k),AA*(s(i,j,k)-ycell)
               !end if
 
-              if(ycell .lt. Lb) then
+              !if(ycell .lt. Lb) then
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell)
 
-              else
-              s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                   - dt*(fry*vr - fly*vl)/dy &
-                                   - ins_dampC*AA*(s(i,j,k)-ycell) &
-                                   - dt*Cb*(ycell-Ly+Lb)/Lb
-              end if
+              !else
+              !s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                     - dt*(fry*vr - fly*vl)/dy &
+              !                     - ins_dampC*AA*(s(i,j,k)-ycell) &
+              !                     - dt*Cb*(ycell-Ly+Lb)/Lb
+              !end if
 
            end do
         end do

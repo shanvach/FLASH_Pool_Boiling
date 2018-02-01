@@ -66,7 +66,9 @@ subroutine Simulation_initBlock(blockId)
 
   real :: A0
 
-  real :: A, B, emp, fs, x0, y0, r0, solnX, x1, y1, x2, y2, d1, d2, d3, r_test
+  real :: A, B, emp, fs, x0, y0, r0, solnX, x1, y1, x2, y2, d1, d2, d3,&
+          r_test,d_buf
+
   real :: x3,x4,x5,x6,y3,y4,y5,y6
   real :: d4,d5,d6,d7
   real :: fn(8)
@@ -234,6 +236,8 @@ subroutine Simulation_initBlock(blockId)
            d6 = r0 - sqrt((xcell-x5)**2+(ycell-y5)**2)
            d7 = r0 - sqrt((xcell-x6)**2+(ycell-y6)**2)
 
+           d_buf = ycell-(sim_yMax-sim_yMin-3.0)
+
            solnData(DFUN_VAR,i,j,k) = d3
 
            !if(abs(d1)<abs(d3)) then
@@ -283,7 +287,7 @@ subroutine Simulation_initBlock(blockId)
            !if(ycell .le. 0.2 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.2-ycell)/0.2
 
            if(ycell .le. 0.5 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.5-ycell)/0.5
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.4
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0 .and. ycell .lt. (sim_yMax-sim_yMin-3.0)) solnData(TEMP_VAR,i,j,k) = 0.4
 
            !if(ycell .le. 0.3781 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.3781-ycell)/0.3781
 
