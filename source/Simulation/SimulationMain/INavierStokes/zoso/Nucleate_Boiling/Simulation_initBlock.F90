@@ -225,7 +225,7 @@ subroutine Simulation_initBlock(blockId)
            y4 = y1
            y5 = y1
            y6 = y1
-           y1 = 3.5d0
+           y1 = 3.0d0
 
 
            d1 = r_test - sqrt((xcell-x0)**2+(ycell-y0)**2)
@@ -237,7 +237,7 @@ subroutine Simulation_initBlock(blockId)
            d7 = r0 - sqrt((xcell-x6)**2+(ycell-y6)**2)
 
            !d_buf = ycell-(sim_yMax-sim_yMin-3.0)
-           d_buf = 2.0 - sqrt((xcell-0.0d0)**2+(ycell-6.0d0)**2)
+           d_buf = 2.0 - sqrt((xcell-0.0d0)**2+(ycell-8.5d0)**2)
 
            solnData(DFUN_VAR,i,j,k) = max(d3,d_buf)
 
