@@ -19,6 +19,8 @@ subroutine Heat_AD_init(blockCount,blockList)
  
    use Heat_AD_interface, ONLY: Heat_getQmicro
 
+   use Simulation_data, ONLY: sim_sinkB
+
    implicit none
 
 #include "constants.h"
@@ -54,14 +56,16 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    if (ins_meshMe .eq. MASTER_PE) then
 
-     write(*,*) 'ht_Pr    =',ht_Pr
-     write(*,*) 'ht_St    =',ht_St
-     write(*,*) 'ht_hfit  =',ht_hfit
-     write(*,*) 'ht_Ab    =',ht_Ab
-     write(*,*) 'ht_Bb    =',ht_Bb
-     write(*,*) 'ht_Cb    =',ht_Cb
-     write(*,*) 'ht_Ra    =',ht_Ra
-     write(*,*) 'ht_tWait =',ht_tWait
+     write(*,*) 'ht_Pr     =',ht_Pr
+     write(*,*) 'ht_St     =',ht_St
+     write(*,*) 'ht_hfit   =',ht_hfit
+     write(*,*) 'ht_Ab     =',ht_Ab
+     write(*,*) 'ht_Bb     =',ht_Bb
+     write(*,*) 'ht_Cb     =',ht_Cb
+     write(*,*) 'ht_Ra     =',ht_Ra
+     write(*,*) 'ht_tWait  =',ht_tWait
+     write(*,*) 'sim_sinkB =',sim_sinkB
+
    end if
 
    ht_Twall_low    =  1.0

@@ -30,6 +30,6 @@ module Simulation_data
 
   real, save :: sim_qIn1, sim_qIn2, sim_qOut1, sim_qOut2
 
-  real, save :: sim_waveA
+  real, save :: sim_waveA, sim_sinkB
  
 end module Simulation_data
