@@ -118,6 +118,11 @@ subroutine Simulation_initBlock(blockId)
   solnData(GNE_VAR,:,:,:)   = 0.0          ! electron generation rate
   solnData(GNEBZ_VAR,:,:,:) = 0.0          ! electron generation rate (Boltzmann)
   solnData(GNERT_VAR,:,:,:) = 0.0          ! ratio
+
+  facexData(RH1F_FACE_VAR,:,:,:) = 1.0
+  faceyData(RH1F_FACE_VAR,:,:,:) = 1.0
+  facexData(RH2F_FACE_VAR,:,:,:) = 1.0
+  faceyData(RH2F_FACE_VAR,:,:,:) = 1.0
  
   !initialize values of heavy species and generation rates
   do i=0,9

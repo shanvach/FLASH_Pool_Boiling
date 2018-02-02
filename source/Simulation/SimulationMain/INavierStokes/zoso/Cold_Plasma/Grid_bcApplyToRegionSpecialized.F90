@@ -273,6 +273,25 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
  
             if(gridDataStruct == CENTER) then
 
+
+               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+            else if(gridDataStruct == WORK) then
+
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
@@ -284,11 +303,29 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
  
             if(gridDataStruct == CENTER) then
 
+               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+
                k = 2*guard+1
                do i = 1,guard
                regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
+               end if
+
+            else if(gridDataStruct == WORK) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+ 
            end if
   
          else if (axis == KAXIS) then ! Level 3a
@@ -301,6 +338,24 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
            if(gridDataStruct == CENTER) then
 
+               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+           else if(gridDataStruct == WORK) then
+
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
@@ -312,10 +367,29 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             if(gridDataStruct == CENTER) then
           
+               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
+
+               end if
+
+           else if(gridDataStruct == WORK) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
 
             end if
   

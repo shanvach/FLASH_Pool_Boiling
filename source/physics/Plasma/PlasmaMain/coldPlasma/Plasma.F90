@@ -10,13 +10,17 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
-                             Grid_fillGuardCells
+                             Grid_fillGuardCells, Grid_solvePoisson, &
+                             GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
+                             GRID_PDE_BND_DIRICHLET
+
    implicit none
 #include "constants.h"
 #include "Plasma.h"
 #include "Flash.h"   
 
 !#define DEBUG_PLASMA
+!#define DEBUG_POISSON
 
    include "Flash_mpi.h"
 
@@ -26,7 +30,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real,    INTENT(IN) :: timeEndAdv, dt, dtOld
 
    integer ::  blockID,lb
-   real ::  del(MDIM)
+   real, dimension(MDIM)  :: coord,bsize,del
+   real ::  boundBox(2,MDIM)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
    real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
@@ -41,6 +46,12 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, dimension(1) :: rand_noise
    real :: plasma_source !scalar, plasma source rate for species m-3 s-1
    real :: nrel, nrna, nrni !nrh0, nrh1, nrh2, nrh6, nrh7, nrh8, nrh9 
+   real :: xcell,ycell,poisfact
+
+   real, parameter :: pi = acos(-1.0)
+
+   integer, dimension(6) :: bc_types
+   real, dimension(2,6)  :: bc_values = 0. 
 
    nrel = 0.99*1e18       ! Electrons
    nrna = 1e26            ! neutral
@@ -57,9 +68,25 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
 
+   ! Poisson BCs
+   bc_types(1) = GRID_PDE_BND_NEUMANN ! X - Low
+   bc_types(2) = GRID_PDE_BND_NEUMANN ! X - High
+   bc_types(3) = GRID_PDE_BND_NEUMANN ! Y - Low
+   bc_types(4) = GRID_PDE_BND_NEUMANN ! Y - High
+
+   !bc_types(1) = GRID_PDE_BND_DIRICHLET ! X - Low
+   !bc_types(2) = GRID_PDE_BND_DIRICHLET ! X - High
+   !bc_types(3) = GRID_PDE_BND_DIRICHLET ! Y - Low
+   !bc_types(4) = GRID_PDE_BND_DIRICHLET ! Y - High
+
    do lb = 1,blockCount
 
      blockID = blockList(lb)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Get blocks dx, dy ,dz:
      call Grid_getDeltas(blockID,del)
@@ -99,22 +126,33 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #ifdef DEBUG_PLASMA
      print *,"Going into netCharge"
 #endif
+
+     solnData(EPOT_VAR,:,:,:) = 0.0
+
+#ifdef DEBUG_POISSON
+     do j=1,blkLimitsGC(HIGH,JAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS) +   &
+                   0.5*del(IAXIS)
+
+           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+                   0.5*del(JAXIS)
+
+           solnData(DQNT_VAR,i,j,1) = -8*pi*pi*cos(2*pi*xcell)*cos(2*pi*ycell)
+           !solnData(DQNT_VAR,i,j,1) = -8*pi*pi*sin(2*pi*xcell)*sin(2*pi*ycell)
+
+        end do
+     end do
+#else
        call Plasma_netCharge(solnData(DQNT_VAR,:,:,:),solnData(DNIT_VAR,:,:,:),&
                              solnData(DHV9_VAR,:,:,:),solnData(DELE_VAR,:,:,:),&
                              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
 
-     !find induced potential
-#ifdef DEBUG_PLASMA
-     print *,"Going into elPotential"
 #endif
-       solnData(EPOT_VAR,:,:,:) = 0.0
-       oldPhi = solnData(EPOT_VAR,:,:,:)
-       call Plasma_elPotential(oldPhi,solnData(DFUN_VAR,:,:,:),&
-                               solnData(EPOT_VAR,:,:,:),solnData(DQNT_VAR,:,:,:),&
-                               del(DIR_X),del(DIR_Y),&
-                               blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                               blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
 
      !obtain diffusion coefficient of neutral species
 #ifdef DEBUG_PLASMA
@@ -330,7 +368,6 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   gcMask(GNERT_VAR) = .TRUE.
 
   gcMask(DQNT_VAR) = .TRUE.
-  gcMask(EPOT_VAR) = .TRUE.
 
   do i=0,9
         gcMask(DHV0_VAR+i) = .TRUE.
@@ -345,5 +382,15 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
+
+  poisfact = 1.0
+  call Grid_solvePoisson (EPOT_VAR, DQNT_VAR, bc_types, bc_values, poisfact)
+
+  gcMask = .FALSE.
+  gcMask(EPOT_VAR) = .TRUE.
+
+  call Grid_fillGuardCells(CENTER,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  
 
 end subroutine Plasma
