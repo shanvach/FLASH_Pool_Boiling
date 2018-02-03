@@ -57,6 +57,7 @@ Cb = 2.4d-7
 # Temperatures
 tbulk =  0.0
 tsat  =  0.4
+tnuc  =  0.6
 
 # Nucleation frequency
 twait =  0.2

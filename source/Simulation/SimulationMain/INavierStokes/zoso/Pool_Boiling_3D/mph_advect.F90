@@ -484,10 +484,10 @@ do nuc_index =1,sim_nucSiteDens
 
   if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
 
-  !if(mph_nucSiteTemp(nuc_index) .lt. ht_Tnuc) then
-  !mph_timeStampAll(nuc_index) = dr_simTime 
+  if(mph_nucSiteTemp(nuc_index) .lt. ht_Tnuc) then
+  mph_timeStampAll(nuc_index) = dr_simTime 
 
-  !else
+  else
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -542,7 +542,7 @@ do nuc_index =1,sim_nucSiteDens
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-  !end if
+  end if
   end if
 
 end do

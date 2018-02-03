@@ -55,6 +55,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("tsat",ht_Tsat)
    call RuntimeParameters_get("Ra",ht_Ra)
    call RuntimeParameters_get("twait",ht_tWait)
+   call RuntimeParameters_get("tnuc",ht_Tnuc)
 
    if (ins_meshMe .eq. MASTER_PE) then
      write(*,*) 'ht_Pr     =',ht_Pr
@@ -67,12 +68,12 @@ subroutine Heat_AD_init(blockCount,blockList)
      write(*,*) 'ht_Ra     =',ht_Ra
      write(*,*) 'ht_tWait  =',ht_tWait
      write(*,*) 'sim_sinkB =',sim_sinkB
+     write(*,*) 'ht_Tnuc   =',ht_Tnuc
    end if
 
    ht_Twall_low  = 1.0
    ht_Twall_high = 0.0
    ht_AMR_specs  = 0.0
-   ht_Tnuc       = 0.0
 
    if(dr_restart .eqv. .TRUE.) then
 
