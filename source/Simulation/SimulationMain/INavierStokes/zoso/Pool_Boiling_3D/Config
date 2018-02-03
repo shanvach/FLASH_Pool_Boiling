@@ -57,7 +57,7 @@ PARAMETER tsat	 	 REAL  0.0
 
 PARAMETER twait		 REAL  0.3
 
-PARAMETER sinkB	         REAL  5.0
+PARAMETER sinkB	         REAL  1.0
 
 # Number of guardcells at each boundary
 GUARDCELLS 3
