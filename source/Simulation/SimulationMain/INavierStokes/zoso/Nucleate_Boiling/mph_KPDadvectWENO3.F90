@@ -58,7 +58,7 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
         xd  = ins_xDampL
         Cb  = sim_sinkB
         Ly  = sim_yMax-sim_yMin
-        Lb  = sim_yMax-sim_yMin-5.0
+        Lb  = sim_yMax-sim_yMin-2.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -379,7 +379,7 @@ subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy &
                                    - ins_dampC*AA*(s(i,j,k)-ycell) &
-                                   - dt*Cb*(ycell-Lb)/Lb
+                                   - dt*Cb*(ycell-Lb)/(Ly-Lb)
                                    !- dt*Cb*(ycell-Ly+Lb)/Lb
               end if
 
