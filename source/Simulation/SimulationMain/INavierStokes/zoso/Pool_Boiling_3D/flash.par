@@ -57,13 +57,13 @@ Cb = 2.4d-7
 # Temperatures
 tbulk =  0.0
 tsat  =  0.4
-tnuc  =  0.6
+tnuc  =  0.0
 
 # Nucleation frequency
-twait =  0.2
+twait =  0.4
 
 # Level set sink strength
-sinkB = 1.0
+sinkB = 0.75
 
 # Natural convection parameter
 Ra = 0.00
@@ -77,12 +77,12 @@ geometry	= "cartesian"
 
 
 #       Size of computational volume
-xmin =   -4.00
-xmax =    4.00
+xmin =   -8.00
+xmax =    8.00
 ymin =    0.00
 ymax =    8.00
-zmin =   -4.00
-zmax =    4.00
+zmin =   -8.00
+zmax =    8.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -138,9 +138,9 @@ checkpointFileIntervalTime = 0.1
 plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 12
+nblockx	= 24
 nblocky	= 12
-nblockz = 12
+nblockz = 24
 
 lrefine_min	= 1
 lrefine_max     = 1
