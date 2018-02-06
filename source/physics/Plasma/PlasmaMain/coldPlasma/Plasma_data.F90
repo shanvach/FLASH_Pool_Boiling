@@ -31,6 +31,8 @@ module Plasma_data
         real, dimension(10), save :: pls_RSCD ! Collision Diameter, Angstrom
         real, dimension(10), save :: pls_MHSP ! molar mass of each species  g/mol
 
+        real, dimension(21), save :: pls_poly_coef !polynomial coeffs ne feed
+
         real, save :: pls_MMIX    ! molar mass of saline solution
         real, save :: pls_Cmi_net ! mass of all ions (kg)
         
