@@ -112,6 +112,30 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_NJET(8) = 0.10*0.80*1e18
    pls_NJET(9) = 0.10*0.20*1e18
    pls_NJET(10)= 0.01*1e18
+
+   !polynomial coefficients for plasma feed signal
+   !done for time and ne without exponential multipliers
+   pls_poly_coef(1) = -2.10573490e-12 !deg=21  
+   pls_poly_coef(2) =  2.03425802e-10  
+   pls_poly_coef(3) = -8.35852479e-09   
+   pls_poly_coef(4) =  1.81617147e-07
+   pls_poly_coef(5) = -1.92312862e-06  
+   pls_poly_coef(6) = -5.59439123e-07   
+   pls_poly_coef(7) =  2.56926246e-04  
+   pls_poly_coef(8) = -1.97710134e-03
+   pls_poly_coef(9) = -2.00464277e-02   
+   pls_poly_coef(10)=  4.39665324e-01  
+   pls_poly_coef(11)= -1.26430164e+00  
+   pls_poly_coef(12)= -4.85148152e+01
+   pls_poly_coef(13)=  8.47468391e+02  
+   pls_poly_coef(14)= -7.64615720e+03   
+   pls_poly_coef(15)=  4.58111902e+04  
+   pls_poly_coef(16)= -1.94151558e+05
+   pls_poly_coef(17)=  5.89224888e+05  
+   pls_poly_coef(18)= -1.25902363e+06   
+   pls_poly_coef(19)=  1.80413835e+06  
+   pls_poly_coef(20)= -1.55885637e+06
+   pls_poly_coef(21)=  6.14457398e+05 !deg=0
    
   if (pls_meshMe .eq. MASTER_PE) then
      write(*,*) 'pls_cfl   =',pls_cfl
