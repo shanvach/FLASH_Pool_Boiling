@@ -14,6 +14,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                              GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
                              GRID_PDE_BND_DIRICHLET
 
+   use Driver_data, only: dr_simTime
+ 
    implicit none
 #include "constants.h"
 #include "Plasma.h"
@@ -44,9 +46,22 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    integer :: ierr, i,j,k
    
    real, dimension(1) :: rand_noise
-   real :: plasma_source !scalar, plasma source rate for species m-3 s-1
+   real :: plasma_source    !scalar, plasma source rate for species m-3 s-1
    real :: nrel, nrna, nrni !nrh0, nrh1, nrh2, nrh6, nrh7, nrh8, nrh9 
    real :: xcell,ycell,poisfact
+
+   !variables for feed rate
+   logical, save :: pls_bullet_flg = .false.
+   logical, save :: pls_feed_flg = .false.
+   real, save :: pls_bullet_freq = 50e-6
+   real, save :: pls_feed_start = 3e-6
+   real, save :: pls_feed_end = 12e-6
+   real, save :: pls_bullet_timeStamp = 0.0
+   real, save :: pls_feed_timeStamp = 0.0
+   real, save :: pls_feed_gate = 0.0
+   real, save :: pls_freq_gate = 0.0
+   real, save :: feed_rate = 0.0
+   !end variable for feed rate
 
    real, parameter :: pi = acos(-1.0)
 
@@ -56,14 +71,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    nrel = 0.99*1e18       ! Electrons
    nrna = 1e26            ! neutral
    nrni = 1e18            ! ions
-   !nrh0 = 0.90*1e26       ! He
-   !nrh1 = 0.10*0.80*1e26  ! N2
-   !nrh2 = 0.10*0.20*1e26  ! O2
-   !nrh6 = 0.90*1e18       ! He+
-   !nrh7 = 0.10*0.80*1e18  ! N2+
-   !nrh8 = 0.10*0.20*1e18  ! O2+
-   !nrh9 = 0.01*1e18       ! O-
-   plasma_source = 0.0
+   plasma_source = 0.0    ! avg val of species in jet 
 
    T_resBlock      = 0.0
    T_resBlockHV(:) = 0.0
@@ -233,17 +241,74 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                               blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                               blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )     
  
+     plasma_source = 0.0
      !obtain number density of electrons
 #ifdef DEBUG_PLASMA
-     print *,"Going into Plasma solve electrons"
+     print *,"Going into feed rate of charged particles"
 #endif
 
-     !plasma jet feed rate
-     !plasma_source = nrel
+     !*****************************************************************************!     
+     !*****************************************************************************!
+     !plasma jet feed rate for electrons and ions
+
+     !Check if bullet frequency criteria met
+     pls_freq_gate = dr_simTime - pls_bullet_timeStamp 
+    
+     if( (pls_bullet_flg .eqv. .false.) .and. (pls_freq_gate.ge.pls_bullet_freq) ) then
+        pls_feed_timeStamp = dr_simTime
+        pls_bullet_flg = .true.
+     end if
+
+     !Check if feed rate criteria met
+     !pls_feed_gate = dr_simTime - pls_feed_timeStamp
+
+     if(pls_bullet_flg .eqv. .true.) then
+ 
+        pls_feed_gate = dr_simTime - pls_feed_timeStamp
+
+        if( (pls_feed_flg .eqv. .false.) .and. (pls_feed_gate.ge.pls_feed_start) ) then
+           pls_feed_flg = .true.
+        end if
+
+        !Check if feed rate can be computed
+        if (pls_feed_flg .eqv. .true.) then
+
+           if((pls_feed_gate.ge.pls_feed_start).and.&
+              (pls_feed_gate.le.pls_feed_end)) then
+
+              plasma_source = 0.0
+              ! nom nom      
+              do j=1,21
+                 plasma_source = plasma_source + & 
+                                 1e18*pls_poly_coef(j)*(1e6*pls_feed_gate**(21-j))
+              end do
+         
+           end if    
+
+           !Initialize values for next bullet
+           if (pls_feed_gate.gt.pls_feed_end) then
+              pls_bullet_flg = .false.
+              pls_feed_flg = .false.
+              pls_bullet_timeStamp = dr_simTime
+           end if
+
+        end if    
+
+     end if    
+
+     !*****************************************************************************!
+     !*****************************************************************************! 
+
      call Plasma_Feed(plasma_source,rand_noise,                           &
                       solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+
+     !number density of electrons
+#ifdef DEBUG_PLASMA
+     print *,"Going into Plasma solve electrons"
+#endif
+
      !reference density value
      oldT = solnData(DELE_VAR,:,:,:)
      !solve for new density
@@ -254,14 +319,31 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),        &
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
      T_resBlock = T_resBlock + T_res1
+      
+     !number density of ions
+#ifdef DEBUG_PLASMA
+     print *,"Going into Plasma solve ions"
+#endif
+     do i=0,3
+        !reference density values
+        oldT = solnData(DHV6_VAR+i,:,:,:)
+        !solve for new density
+        call Plasma_Solve(solnData(DHV6_VAR+i,:,:,:),solnData(GNH6_VAR+i,:,:,:),& 
+                          oldT, solnData(FEED_VAR,:,:,:),                       &
+                          solnData(DFUN_VAR,:,:,:),  solnData(DFEL_VAR,:,:,:),  &
+                          dt,del(DIR_X),del(DIR_Y),                             &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),           &
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+        T_resBlockHV(i+7) = T_resBlockHV(i+7) + T_res1
+     end do
 
      !obtain number density of heavy species
 #ifdef DEBUG_PLASMA
      print *,"Going into Plasma solve heavy"
 #endif
      do i=0,5
-        !feed rate from source
-        !plasma_source = pls_NJET(i+1)
+        !feed rate from source, added at every time step
+        plasma_source = pls_NJET(i+1)
         call Plasma_Feed(plasma_source,rand_noise,                           &
                          solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),  &
                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),         &
@@ -278,51 +360,6 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         T_resBlockHV(i+1) = T_resBlockHV(i+1) + T_res1
      end do
      
-     !obtain number density of ions
-#ifdef DEBUG_PLASMA
-     print *,"Going into Plasma solve ions"
-#endif
-     do i=0,3
-        !feed rate from source
-        !plasma_source = pls_NJET(i+7)
-        call Plasma_Feed(plasma_source,rand_noise,                              &
-                         solnData(FEED_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),     &
-                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),            &
-                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
-        !reference density values
-        oldT = solnData(DHV6_VAR+i,:,:,:)
-        !solve for new density
-        call Plasma_Solve(solnData(DHV6_VAR+i,:,:,:),solnData(GNH6_VAR+i,:,:,:),& 
-                          oldT, solnData(FEED_VAR,:,:,:),                       &
-                          solnData(DFUN_VAR,:,:,:),  solnData(DFEL_VAR,:,:,:),  &
-                          dt,del(DIR_X),del(DIR_Y),                             &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),           &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
-        T_resBlockHV(i+7) = T_resBlockHV(i+7) + T_res1
-     end do
-
-     !k = 1
-     !do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-     ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
-
-                !solnData(DELE_VAR,i,j,k) = solnData(DELE_VAR,i,j,k) + dt*nrel    ! Electrons
-                !solnData(DHV0_VAR,i,j,k) = solnData(DHV0_VAR,i,j,k) + dt*nrh0    ! He
-                !solnData(DHV1_VAR,i,j,k) = solnData(DHV1_VAR,i,j,k) + dt*nrh1    ! N2 
-                !solnData(DHV2_VAR,i,j,k) = solnData(DHV2_VAR,i,j,k) + dt*nrh2    ! O2
-                !solnData(DHV6_VAR,i,j,k) = solnData(DHV6_VAR,i,j,k) + dt*nrh6    ! He+
-                !solnData(DHV7_VAR,i,j,k) = solnData(DHV7_VAR,i,j,k) + dt*nrh7    ! N2+
-                !solnData(DHV8_VAR,i,j,k) = solnData(DHV8_VAR,i,j,k) + dt*nrh8    ! O2+
-                !solnData(DHV9_VAR,i,j,k) = solnData(DHV9_VAR,i,j,k) + dt*nrh9    ! O-
-                !solnData(DNAT_VAR,i,j,k) = solnData(DNAT_VAR,i,j,k) + dt*nrna    !neutrals
-                !solnData(DNIT_VAR,i,j,k) = solnData(DNIT_VAR,i,j,k) + dt*nrni    !ions
-
-           !end if
-
-       !end do
-     !end do
-
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
