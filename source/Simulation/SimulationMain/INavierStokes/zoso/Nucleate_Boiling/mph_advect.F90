@@ -42,6 +42,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
 
+  use Heat_AD_data, only: ht_tWait
+
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
