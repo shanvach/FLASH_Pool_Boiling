@@ -130,6 +130,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
      end do
 
+     solnData(DNIT_VAR,:,:,:) = solnData(DNIT_VAR,:,:,:) - solnData(DHV9_VAR,:,:,:)
+
      !find net charge density in domain
 #ifdef DEBUG_PLASMA
      print *,"Going into netCharge"
@@ -257,6 +259,9 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      if( (pls_bullet_flg .eqv. .false.) .and. (pls_freq_gate.ge.pls_bullet_freq) ) then
         pls_feed_timeStamp = dr_simTime
         pls_bullet_flg = .true.
+     else
+        pls_feed_timeStamp = pls_feed_timeStamp
+        pls_bullet_flg = .false.
      end if
 
      !Check if feed rate criteria met
@@ -268,6 +273,8 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
         if( (pls_feed_flg .eqv. .false.) .and. (pls_feed_gate.ge.pls_feed_start) ) then
            pls_feed_flg = .true.
+        else
+           pls_feed_flg = .false.
         end if
 
         !Check if feed rate can be computed
@@ -282,17 +289,23 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                  plasma_source = plasma_source + & 
                                  1e18*pls_poly_coef(j)*(1e6*pls_feed_gate**(21-j))
               end do
+
+           else
+              plasma_source = 0.0
          
            end if    
+        
+        end if
 
-           !Initialize values for next bullet
-           if (pls_feed_gate.gt.pls_feed_end) then
-              pls_bullet_flg = .false.
-              pls_feed_flg = .false.
-              pls_bullet_timeStamp = dr_simTime
-           end if
+        !Initialize values for next bullet
+        if (pls_feed_gate.gt.pls_feed_end) then
+           plasma_source = 0.0
+           pls_bullet_flg = .false.
+           pls_feed_flg = .false.
+           pls_bullet_timeStamp = dr_simTime
+        end if
 
-        end if    
+        !end if    
 
      end if    
 
