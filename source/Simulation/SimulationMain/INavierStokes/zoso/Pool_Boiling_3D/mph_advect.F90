@@ -467,27 +467,14 @@ do nuc_index =1,sim_nucSiteDens
   call MPI_Allreduce(nucSiteTemp, mph_nucSiteTemp(nuc_index), 1, FLASH_REAL,&
                      MPI_MAX, MPI_COMM_WORLD, ierr)
 
-  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) then
-
-        mph_timeStampAll(nuc_index) = dr_simTime
-
-        open(unit = 3,file = "sim_timeStamp.dat",status="REPLACE")                
-                do tSI=1,sim_nucSiteDens
-                        write(3,*)mph_timeStampAll(tSI)
-                end do
-        close(3)
-
-  end if
-
+  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) mph_timeStampAll(nuc_index) = dr_simTime
 
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
 
-  if((mph_isAttachedAll(nuc_index) .eqv. .false.) .and. ((mph_timeStampAll(nuc_index) + ht_tWait) .le. dr_simTime)) then
+  if( (mph_isAttachedAll(nuc_index) .eqv. .false.) .and. &
+      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime) .and. &
+      (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
 
-  if(mph_nucSiteTemp(nuc_index) .lt. ht_Tnuc) then
-  mph_timeStampAll(nuc_index) = dr_simTime 
-
-  else
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -542,7 +529,6 @@ do nuc_index =1,sim_nucSiteDens
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-  end if
   end if
 
 end do

@@ -21,6 +21,8 @@ subroutine Simulation_sendOutputData()
 
     use Multiphase_data, only: mph_baseRadius, mph_baseCountAll, mph_isAttachedAll, mph_isAttachedOld, mph_timeStampAll
 
+    use Simulation_data, only: sim_nucSiteDens
+
     use IO_interface, ONLY :  IO_setScalar
 
     implicit none
@@ -28,7 +30,7 @@ subroutine Simulation_sendOutputData()
       call IO_setScalar("qmic", ht_qmic)
       call IO_setScalar("baseradius",mph_baseRadius)
       call IO_setScalar("basecount",mph_baseCountAll)
-
+      call IO_setScalar("nucsitedens",sim_nucSiteDens)
 
 end subroutine Simulation_sendOutputData
 

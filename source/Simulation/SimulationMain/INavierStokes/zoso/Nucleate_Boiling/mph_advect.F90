@@ -435,7 +435,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
  end if
 
- if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + 0.30) .le. dr_simTime)) then
+ if((mph_isAttached .eqv. .false.) .and. ((mph_timeStamp + ht_tWait) .le. dr_simTime)) then
 
   do lb = 1,blockCount
 

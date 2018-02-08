@@ -128,11 +128,11 @@ restart         = .false.
 
 nend = 2000000000
 tmax            = 100.0
-cflflg          = 1
+cflflg          = 0
 cfl             = 0.7
 sigma		= 0.7
-dtspec          = 1.0
-dtinit          = 1.0
+dtspec          = 2.0d-4
+dtinit          = 2.0d-4
 tstep_change_factor=1.00
 
 #Integration Scheme:
@@ -148,12 +148,12 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 1.0
-#checkpointFileIntervalStep = 10000
+#checkpointFileIntervalTime = 1.0
+checkpointFileIntervalStep = 100000
 #checkpointFileIntervalTime = 1000.0
 
-plotFileIntervalTime = 0.1
-#plotFileIntervalStep = 1000000
+#plotFileIntervalTime = 0.1
+plotFileIntervalStep = 500
 #plotFileIntervalTime = 25.00
 
 ##	AMR parameters

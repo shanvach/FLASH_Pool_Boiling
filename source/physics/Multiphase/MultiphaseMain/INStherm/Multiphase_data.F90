@@ -59,10 +59,10 @@ module Multiphase_data
   logical, save :: mph_isAttached 
   real, save :: mph_timeStamp
 
-  logical, save, dimension(100) :: mph_isAttachedAll
-  logical, save, dimension(100) :: mph_isAttachedOld
-  real, save, dimension(100) :: mph_timeStampAll
-  real, save, dimension(100) :: mph_nucSiteTemp
+  logical, save, allocatable :: mph_isAttachedAll(:)
+  logical, save, allocatable :: mph_isAttachedOld(:)
+  real,    save, allocatable :: mph_timeStampAll(:)
+  real,    save, allocatable :: mph_nucSiteTemp(:)
 
   integer, save :: mph_bcFlag(NXB,NZB,MAXBLOCKS*10)
 

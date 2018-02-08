@@ -20,7 +20,8 @@ subroutine Multiphase_init()
   use Multiphase_data, ONLY : mph_rho1,mph_rho2,mph_sten, &
                               mph_vis1,mph_vis2,mph_lsit, mph_inls, &
                               mph_meshMe, mph_meshNumProcs, mph_meshComm, &
-                              mph_thco1,mph_thco2,mph_cp1,mph_cp2,mph_isAttached,mph_isAttachedAll,mph_isAttachedOld ! Akash
+                              mph_thco1,mph_thco2,mph_cp1,mph_cp2,mph_isAttached,mph_isAttachedAll,mph_isAttachedOld, &
+                              mph_timeStampAll,mph_nucSiteTemp ! Akash
  
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
@@ -28,6 +29,8 @@ subroutine Multiphase_init()
                                Driver_getComm
 
   use Driver_data, ONLY: dr_restart
+
+  use Simulation_data, ONLY: sim_nucSiteDens
 
   implicit none
   include 'Flash_mpi.h'
@@ -66,7 +69,31 @@ subroutine Multiphase_init()
      write(*,*) 'mph_thco2=',mph_thco2
      write(*,*) 'mph_cp1=',mph_cp1
      write(*,*) 'mph_cp2=',mph_cp2
-
+     write(*,*) 'sim_nucSiteDens=',sim_nucSiteDens
   endif
+
+  if(dr_restart .eqv. .FALSE.) then
+
+  allocate(mph_timeStampAll(sim_nucSiteDens))
+  allocate(mph_isAttachedAll(sim_nucSiteDens))
+  allocate(mph_isAttachedOld(sim_nucSiteDens))
+  allocate(mph_nucSiteTemp(sim_nucSiteDens))
+
+  mph_isAttached = .true.
+  mph_isAttachedAll(:) = .true.
+  mph_isAttachedOld(:) = .true.
+  mph_timeStampAll(:)  = 0.0
+
+  else
+
+  allocate(mph_isAttachedAll(sim_nucSiteDens))
+  allocate(mph_isAttachedOld(sim_nucSiteDens))
+  allocate(mph_nucSiteTemp(sim_nucSiteDens))
+
+  mph_isAttached = .false.
+  mph_isAttachedAll(:) = .false.
+  mph_isAttachedOld(:) = .false.
+
+  end if
 
 end subroutine Multiphase_init

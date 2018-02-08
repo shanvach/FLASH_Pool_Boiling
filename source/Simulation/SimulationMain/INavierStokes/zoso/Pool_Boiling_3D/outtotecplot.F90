@@ -16,7 +16,7 @@
 
   use Multiphase_data, only: mph_radius
 
-  use Heat_AD_data, only: ht_Nu_l
+  use Heat_AD_data, only: ht_Nu_l,ht_Nu_t
 
   implicit none
 
@@ -107,6 +107,7 @@
              'elapsed time'
          
     close(33)
+
  endif
 
  ! write timestep data to filetime.XX on each processor
@@ -115,6 +116,23 @@
   write(33,66) count, time, dt, istep,blockcount,timer
   close(33)
 
+  if(mype .eq. MASTER_PE) then
+
+   if(firstfileflag .eq. 0) then
+
+        open(unit=44, file="IOData/data_heatFlux",status='replace')
+        write(44,*)time,ht_Nu_l,ht_Nu_t
+        close(44)
+
+   else
+
+        open(unit=44, file="IOData/data_heatFlux", status='old', position='append')
+        write(44,*)time,ht_Nu_l,ht_Nu_t
+        close(44)
+
+   end if
+
+  end if
 
   ! -- data.XXXX.XX --
   nxc = NXB + NGUARD + 1
