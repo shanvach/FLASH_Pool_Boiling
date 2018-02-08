@@ -301,7 +301,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
               0.5*del(JAXIS)
 
      call Heat_getWallflux(solnData(PFUN_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),Nu_l,Nu_t,hcounter,del(JAXIS),ycell,&
-                          blkLimits(LOW,JAXIS),blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
+                          blkLimits(LOW,JAXIS),blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),blockID)
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
  
