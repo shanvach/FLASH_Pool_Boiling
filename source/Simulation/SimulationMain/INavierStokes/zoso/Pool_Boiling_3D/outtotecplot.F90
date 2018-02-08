@@ -161,7 +161,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz diam'//NULLCHR,  &
+             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz Hflux'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -324,7 +324,7 @@
                              solnData(TNLQ_VAR,:,:,:),tnlp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(RTES_VAR,:,:,:),tnvp)
+                             solnData(TNVP_VAR,:,:,:),tnvp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(NRMX_VAR,:,:,:),nxp)
@@ -398,8 +398,10 @@
                              tpdwdzc,tpdwdzcorn)
 
      !tprds = 2*mph_radius
-     tprds = ht_Nu_l
+     !tprds = ht_Nu_l
 
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(RTES_VAR,:,:,:),tprds)
          
      ! VORTICITY:
      ! ---------

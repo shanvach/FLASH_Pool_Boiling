@@ -1,4 +1,4 @@
-subroutine Heat_getWallflux(pf,T,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2,blockID)
+subroutine Heat_getWallflux(pf,T,Hf,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2,blockID)
 
      use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
 
@@ -6,7 +6,8 @@ subroutine Heat_getWallflux(pf,T,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2
 #include "constants.h"
 
      implicit none
-     real, dimension(:,:,:),intent(in) :: pf, T
+     real, dimension(:,:,:),intent(in)    :: pf, T
+     real, dimension(:,:,:),intent(inout) :: Hf
      integer, intent(in) :: blockID
      real, intent(inout) :: Nu_l,Nu_t
      integer, intent(inout) :: hcounter
@@ -44,6 +45,8 @@ subroutine Heat_getWallflux(pf,T,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2
                 Nu_l = Nu_l + (1.0 - pf(i,jy1,k))*(1.0 - T(i,jy1,k))/(0.5*dy)
                 Nu_t = Nu_t + (1.0 -  T(i,jy1,k))/(0.5*dy)
                 hcounter = hcounter + 1
+
+                Hf(i,jy1,k) = (1.0 - pf(i,jy1,k))*(1.0 - T(i,jy1,k))/(0.5*dy)
 
           end if
 

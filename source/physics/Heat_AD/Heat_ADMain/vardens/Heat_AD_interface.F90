@@ -214,9 +214,10 @@ module Heat_AD_interface
    end interface
 
   interface
-        subroutine Heat_getWallflux(pf,T,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2,blockID)
+        subroutine Heat_getWallflux(pf,T,Hf,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,kz2,blockID)
         implicit none
-        real, dimension(:,:,:),intent(in) :: pf, T
+        real, dimension(:,:,:),intent(in)    :: pf, T
+        real, dimension(:,:,:),intent(inout) :: Hf
         integer, intent(in) :: blockID
         real, intent(inout) :: Nu_l,Nu_t
         integer, intent(inout) :: hcounter

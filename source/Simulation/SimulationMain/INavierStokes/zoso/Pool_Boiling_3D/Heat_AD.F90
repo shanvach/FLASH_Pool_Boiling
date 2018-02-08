@@ -270,11 +270,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    gcMask = .FALSE.
    gcMask(TNLQ_VAR)=.TRUE.
    gcMask(TNVP_VAR)=.TRUE.
-   gcMask(RTES_VAR)=.TRUE.
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-
 
    do lb=1,blockCount
 
@@ -300,7 +298,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
               real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
               0.5*del(JAXIS)
 
-     call Heat_getWallflux(solnData(PFUN_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),Nu_l,Nu_t,hcounter,del(JAXIS),ycell,&
+     call Heat_getWallflux(solnData(PFUN_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),solnData(RTES_VAR,:,:,:),Nu_l,Nu_t,hcounter,del(JAXIS),ycell,&
                           blkLimits(LOW,JAXIS),blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),blockID)
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -321,7 +319,14 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number Liq - ",ht_Nu_l
    if(ins_meshMe .eq. MASTER_PE) Print *,"Wall Nusselt Number Tot - ",ht_Nu_t
-   
+  
+   ! Apply BC
+   gcMask = .FALSE.
+   gcMask(RTES_VAR)=.TRUE.
+
+   call Grid_fillGuardCells(CENTER,ALLDIR,&
+        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS) 
+
 !_________________________________End of Heat Flux calculation_____________________________!
 
 !__________________________Heat Flux extrapolation sub iterations__________________________!
