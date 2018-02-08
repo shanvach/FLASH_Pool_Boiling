@@ -70,6 +70,7 @@ subroutine IO_writeUserArray ()
   offset = 0
   datasetNameLen = 7
 
+  if(io_globalMe .eq. MASTER_PE) then
   call io_h5write_generic_real_arr(io_globalMe, &
        io_chkptFileID, &
        mph_timeStampAll, &
@@ -78,5 +79,6 @@ subroutine IO_writeUserArray ()
        offset, &
        "nuctime", &
        datasetNameLen)
+  endif
 
 end subroutine IO_writeUserArray

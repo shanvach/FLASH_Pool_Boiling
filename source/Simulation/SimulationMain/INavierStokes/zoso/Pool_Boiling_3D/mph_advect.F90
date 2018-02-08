@@ -386,8 +386,16 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #ifdef NUCLEATE_BOILING
 
-if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site truth value - ",mph_isAttachedAll(1:sim_nucSiteDens)
-if(ins_meshMe .eq. MASTER_PE)print *,"Nucleation site temperature - ",mph_nucSiteTemp(1:sim_nucSiteDens)
+if(ins_meshMe .eq. MASTER_PE) then
+        print *,"Nucleation site, truth value, temperature and time stamp"
+        do nuc_index = 1,sim_nucSiteDens
+              print *,mph_isAttachedAll(nuc_index),mph_nucSiteTemp(nuc_index),mph_timeStampAll(nuc_index)
+        end do
+end if
+
+!if(ins_meshMe .eq. MASTER_PE)write (*,*)"Nucleation site truth value - ",mph_isAttachedAll(1:sim_nucSiteDens)
+!if(ins_meshMe .eq. MASTER_PE)write (*,*)"Nucleation site temperature - ",(mph_nucSiteTemp(1:sim_nucSiteDens))
+!if(ins_meshMe .eq. MASTER_PE)write (*,*)"Nucleation site time        - ",(mph_timeStampAll(1:sim_nucSiteDens))
 
 do nuc_index =1,sim_nucSiteDens
 

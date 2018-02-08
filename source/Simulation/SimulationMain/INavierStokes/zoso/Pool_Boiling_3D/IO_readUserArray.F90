@@ -64,8 +64,9 @@ subroutine IO_readUserArray ()
   implicit none
 
 #include "constants.h"
+  include"Flash_mpi.h"
 
-  integer :: offset, datasetNameLen
+  integer :: offset, datasetNameLen,ierr
   
   offset = 0
   datasetNameLen = 7 
@@ -76,6 +77,9 @@ subroutine IO_readUserArray ()
 
   allocate(mph_timeStampAll(sim_nucSiteDens))
 
+  mph_timeStampAll(:) = 0.0
+
+  if(io_globalMe .eq. MASTER_PE) then
   call io_h5read_generic_real_arr( &
        io_chkptFileID, &
        mph_timeStampAll, &
@@ -84,5 +88,8 @@ subroutine IO_readUserArray ()
        offset, &
        "nuctime", &
        datasetNameLen)
+  end if
+
+  call MPI_BCAST(mph_timeStampAll, sim_nucSiteDens, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
 end subroutine IO_readUserArray
