@@ -25,7 +25,7 @@ subroutine Simulation_init()
 
   use Grid_data, only : gr_meshMe
 
-  use Driver_data, ONLY: dr_simTime
+  use Driver_data, ONLY: dr_simTime, dr_restart
 
   use Driver_interface, ONLY : Driver_abortFlash
 
@@ -34,6 +34,10 @@ subroutine Simulation_init()
                               sim_sinkB
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+
+  use IO_interface, ONLY: IO_getScalar
+
+  use Heat_AD_data, ONLY: ht_qmic, ht_fmic
 
 !  use ImBound_data
 
@@ -61,6 +65,11 @@ subroutine Simulation_init()
 
   call RuntimeParameters_get('sinkB',    sim_sinkB)
 
+  if(dr_restart .eqv. .true.) then
+        call IO_getScalar("fmic",ht_fmic)
+        call IO_getScalar("qmic",ht_qmic)
+  end if
+ 
   sim_gCell = .true.
 
 !  ! Cylinder setup IB variables:

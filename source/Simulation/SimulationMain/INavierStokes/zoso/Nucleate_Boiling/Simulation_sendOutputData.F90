@@ -17,20 +17,12 @@
 
 subroutine Simulation_sendOutputData()
 
-    use Heat_AD_data, only: ht_qmic, ht_fmic
-
-    use Multiphase_data, only: mph_baseRadius, mph_baseCountAll, mph_isAttachedAll, mph_isAttachedOld, mph_timeStampAll
-
-    use Simulation_data, only: sim_nucSiteDens
-
+    use Heat_AD_data, only: ht_fmic,ht_qmic
     use IO_interface, ONLY :  IO_setScalar
 
     implicit none
 
     call IO_setScalar("qmic", ht_qmic)
     call IO_setScalar("fmic", ht_fmic)
-    call IO_setScalar("baseradius",mph_baseRadius)
-    call IO_setScalar("basecount",mph_baseCountAll)
-    call IO_setScalar("nucsitedens",sim_nucSiteDens)
 
 end subroutine Simulation_sendOutputData

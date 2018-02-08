@@ -21,6 +21,8 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use Simulation_data, ONLY: sim_sinkB
 
+   use Driver_data, only: dr_restart
+
    implicit none
 
 #include "constants.h"
@@ -73,23 +75,21 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Tsat         =  0.0
    ht_AMR_specs(:) =  0.0
 
-   dxmin    = 1e10
+   if(dr_restart .eqv. .false.) then
+        dxmin    = 1e10
+        do lb = 1,blockCount
+                blockID = blockList(lb)
+                call Grid_getDeltas(blockID,del)
+                dxmin = min(dxmin,del(JAXIS))
+        end do
 
-   do lb = 1,blockCount
+        call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-     blockID = blockList(lb)
-     call Grid_getDeltas(blockID,del)
+        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
-     dxmin = min(dxmin,del(JAXIS))
-
-   end do
-
-   call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
-
-   if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
-
-   call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-   call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+   end if
 
    if(ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
