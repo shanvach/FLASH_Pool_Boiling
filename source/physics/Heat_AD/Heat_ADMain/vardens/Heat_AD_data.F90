@@ -32,4 +32,6 @@ module Heat_AD_data
 
      real, save    :: ht_Tnuc
 
+     real, save    :: ht_convel
+
 end module Heat_AD_data

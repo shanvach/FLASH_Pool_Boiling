@@ -226,4 +226,14 @@ module Heat_AD_interface
         end subroutine Heat_getWallflux
   end interface
 
+  interface
+        subroutine Heat_getConvel(mdot,smrh,xnorm,ynorm,znorm,uconv,ix1,ix2,jy1,jy2,kz1,kz2)
+        implicit none
+        real,intent(in),dimension(:,:,:) :: mdot,smrh
+        real,intent(in),dimension(:,:,:) :: xnorm,ynorm,znorm
+        real,intent(inout) :: uconv
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        end subroutine Heat_getConvel
+  end interface
+
 end module Heat_AD_interface
