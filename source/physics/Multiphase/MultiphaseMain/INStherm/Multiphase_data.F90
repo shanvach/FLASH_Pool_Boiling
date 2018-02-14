@@ -66,4 +66,6 @@ module Multiphase_data
 
   integer, save :: mph_bcFlag(NXB,NZB,MAXBLOCKS*10)
 
+  logical, save :: mph_redistanceFlg
+
 end module Multiphase_data

@@ -206,7 +206,7 @@
              s(ix1-1:ix2-1,jy1:jy2,kz1))/2./dx)**2 &
              + ((s(ix1:ix2,jy1+1:jy2+1,kz1) - &
              s(ix1:ix2,jy1-1:jy2-1,kz1))/2./dy)**2 )
-
+        
         nrmy(ix1:ix2,jy1:jy2,kz1) =           &
            (( s(ix1:ix2,jy1+1:jy2+1,kz1) -   &
              s(ix1:ix2,jy1-1:jy2-1,kz1) )/2./dy)/ &
@@ -214,6 +214,24 @@
              s(ix1-1:ix2-1,jy1:jy2,kz1))/2./dx)**2 &
              + ((s(ix1:ix2,jy1+1:jy2+1,kz1) - &
              s(ix1:ix2,jy1-1:jy2-1,kz1))/2./dy)**2 )
+
+        !nrmx(ix1-1:ix2+1,jy1-1:jy2+1,kz1) =           &
+        !   (( s(ix1:ix2+2,jy1-1:jy2+1,kz1) -   &
+        !      s(ix1-2:ix2,jy1-1:jy2+1,kz1) )/2./dx)/ &
+        !     sqrt( ((s(ix1:ix2+2,jy1-1:jy2+1,kz1) - &
+        !             s(ix1-2:ix2,jy1-1:jy2+1,kz1))/2./dx)**2 &
+        !         + ((s(ix1-1:ix2+1,jy1:jy2+2,kz1) - &
+        !             s(ix1-1:ix2+1,jy1-2:jy2,kz1))/2./dy)**2 )
+
+        !nrmy(ix1-1:ix2+1,jy1-1:jy2+1,kz1) =           &
+        !   (( s(ix1-1:ix2+1,jy1:jy2+2,kz1) -   &
+        !      s(ix1-1:ix2+1,jy1-2:jy2,kz1) )/2./dy)/ &
+        !     sqrt( ((s(ix1:ix2+2,jy1-1:jy2+1,kz1) - &
+        !             s(ix1-2:ix2,jy1-1:jy2+1,kz1))/2./dx)**2 &
+        !         + ((s(ix1-1:ix2+1,jy1:jy2+2,kz1) - &
+        !             s(ix1-1:ix2+1,jy1-2:jy2,kz1))/2./dy)**2 )
+
+
 
       end subroutine mph_KPDcurvature2DAB
 

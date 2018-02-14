@@ -227,13 +227,13 @@ module Heat_AD_interface
   end interface
 
   interface
-        subroutine Heat_getConvel(mdot,smrh,xnorm,ynorm,znorm,uconv,ix1,ix2,jy1,jy2,kz1,kz2)
+        subroutine Heat_getQin(mdot,smrh,dfun,nrmx,nrmy,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,qin)
         implicit none
-        real,intent(in),dimension(:,:,:) :: mdot,smrh
-        real,intent(in),dimension(:,:,:) :: xnorm,ynorm,znorm
-        real,intent(inout) :: uconv
+        real,intent(in),dimension(:,:,:) :: mdot,smrh,dfun,nrmx,nrmy
+        real,intent(in) :: dx,dy,dz
+        real,intent(inout) :: qin
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
-        end subroutine Heat_getConvel
+        end subroutine Heat_getQin
   end interface
 
 end module Heat_AD_interface
