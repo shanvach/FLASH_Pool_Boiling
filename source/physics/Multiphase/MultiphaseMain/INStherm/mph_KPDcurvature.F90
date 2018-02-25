@@ -396,7 +396,7 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i,j,k) = 1.0
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) tmic(i,j,k) = 1.0
 
               end if
 
@@ -445,7 +445,7 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(ycell==0.5*del(JAXIS)) tmic(i+1,j,k) = 1.0
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) tmic(i+1,j,k) = 1.0
 
               end if
 

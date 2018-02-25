@@ -102,6 +102,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: nuc_index, tSI
   real    :: nuc_dfun, nucSiteTemp
 
+  real    :: tol=1E-12
+
   do lb = 1,blockCount
 
          blockID = blockList(lb)
@@ -421,7 +423,7 @@ do nuc_index =1,sim_nucSiteDens
               real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
               0.5*del(JAXIS)
 
-     if(ycell == 0.5*del(JAXIS)) then
+     if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
 
        do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)-1
         do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1

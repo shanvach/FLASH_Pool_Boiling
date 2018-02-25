@@ -83,6 +83,7 @@ subroutine Multiphase_init()
   mph_isAttachedAll(:) = .true.
   mph_isAttachedOld(:) = .true.
   mph_timeStampAll(:)  = 0.0
+  mph_nucSiteTemp(:)   = 0.0
 
   else
 

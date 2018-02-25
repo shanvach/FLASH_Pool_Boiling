@@ -18,7 +18,7 @@ subroutine Heat_getWallflux(pf,T,Hf,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,
      real del(MDIM),bsize(MDIM),coord(MDIM)
      real, dimension(2,MDIM) :: boundBox
      real :: xcell, zcell
-
+     real :: tol=1E-12
 
      call Grid_getDeltas(blockID,del)
      call Grid_getBlkCenterCoords(blockId,coord)
@@ -26,7 +26,7 @@ subroutine Heat_getWallflux(pf,T,Hf,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,
 
      bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-     if(ycell == 0.5*dy) then
+     if(abs(ycell-0.5*dy) .le. tol) then
 
       do k=kz1,kz2
        do i=ix1,ix2
