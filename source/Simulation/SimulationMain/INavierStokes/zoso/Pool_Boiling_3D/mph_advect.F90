@@ -102,7 +102,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: nuc_index, tSI
   real    :: nuc_dfun, nucSiteTemp
 
-  real    :: tol=1E-12
+  real    :: tol=1E-13
 
   do lb = 1,blockCount
 
