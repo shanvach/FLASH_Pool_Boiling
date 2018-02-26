@@ -5,8 +5,8 @@
 #----------------------------------------------------------------------------
 
 # Programming environment GNU or INTEL:
-PE_ENV =GNU
-#PE_ENV =INTEL
+#PE_ENV =GNU
+PE_ENV =INTEL
 
 
 LIB_BASE   =/groups/balarasgrp/Software/$(PE_ENV)
@@ -23,11 +23,18 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-BLAS_PATH    =$(LIB_BASE)/openblas
-LAPACK_PATH  =$(LIB_BASE)/openblas
-#HYPRE_PATH   =$(LIB_BASE)/hypre2.9.0b
-HYPRE_PATH = /groups/balarasgrp/akash/hypre
-SUPERLU_PATH =$(LIB_BASE)/SuperLU4.3
+#BLAS_PATH = $(LIB_BASE)/openblas
+BLAS_PATH  = 
+
+#LAPACK_PATH = $(LIB_BASE)/openblas
+LAPACK_PATH  =
+
+#HYPRE_PATH   = $(LIB_BASE)/hypre2.9.0b
+#HYPRE_PATH   = /groups/balarasgrp/akash/hypre
+HYPRE_PATH    = /home/akashdhruv/hypre-2.11.2/src/hypre
+
+#SUPERLU_PATH = $(LIB_BASE)/SuperLU4.3
+SUPERLU_PATH  = 
 
 # Current directory:
 export cur-dir := $(shell pwd)
@@ -68,7 +75,7 @@ PP      = -D
 ifeq ($(PE_ENV), INTEL)
 
 # INTEL flags:
-FFLAGS_OPT   = -c -r8 -i4 -O3 -real_size 64 -diag-disable 10120
+FFLAGS_OPT   = -c -r8 -i4 -O3 -real_size 64 -xSSE4.2  -align array32byte -diag-disable 10120
 FFLAGS_DEBUG = -c -g -r8 -i4 -O0 -check bounds -check format \
 -check output_conversion  -warn error -real_size 64 -check uninit \
 -traceback -fp-stack-check -diag-disable 10120 -fpe0 -check pointers
@@ -130,7 +137,7 @@ FFLAGS_HYPRE = -I${HYPRE_PATH}/include
 
 ifeq ($(PE_ENV), INTEL)
 
-LFLAGS_OPT   = -diag-disable 10120 -O3 -o
+LFLAGS_OPT   = -xSSE4.2  -align array32byte -diag-disable 10120 -O3 -o
 LFLAGS_DEBUG = -diag-disable 10120 -o
 LFLAGS_TEST  = -diag-disable 10120 -O3 -o
 
