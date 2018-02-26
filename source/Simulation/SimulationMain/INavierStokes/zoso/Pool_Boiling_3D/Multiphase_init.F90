@@ -79,7 +79,7 @@ subroutine Multiphase_init()
   allocate(mph_isAttachedOld(sim_nucSiteDens))
   allocate(mph_nucSiteTemp(sim_nucSiteDens))
 
-  mph_isAttached = .true.
+  mph_isAttached       = .true.
   mph_isAttachedAll(:) = .true.
   mph_isAttachedOld(:) = .true.
   mph_timeStampAll(:)  = 0.0
@@ -91,9 +91,10 @@ subroutine Multiphase_init()
   allocate(mph_isAttachedOld(sim_nucSiteDens))
   allocate(mph_nucSiteTemp(sim_nucSiteDens))
 
-  mph_isAttached = .false.
+  mph_isAttached       = .false.
   mph_isAttachedAll(:) = .false.
   mph_isAttachedOld(:) = .false.
+  mph_nucSiteTemp(:)   = 0.0
 
   end if
 
