@@ -68,7 +68,7 @@ ifeq ($(PE_ENV), INTEL)
 
 # INTEL flags:
 
-FFLAGS_OPT   = -c -r8 -i4 -real_size 64 -xSSE4.2 -O3
+FFLAGS_OPT   = -c -r8 -i4 -real_size 64 -xSSE4.2  -align array32byte -O3
 FFLAGS_DEBUG = -c -g -r8 -i4 -real_size 64 -O0 -check bounds -check format \
 -check output_conversion  -warn error -check uninit \
 -traceback -fp-stack-check -fpe0 -check pointers
@@ -130,7 +130,7 @@ FFLAGS_HYPRE = -I${HYPRE_PATH}/include
 
 ifeq ($(PE_ENV), INTEL)
 
-LFLAGS_OPT   = -O3 -xSSE4.2 -o
+LFLAGS_OPT   = -O3 -xSSE4.2 -align array32byte -o
 LFLAGS_DEBUG = -o
 LFLAGS_TEST  = -O3 -o
 
