@@ -75,16 +75,16 @@ PP      = -D
 ifeq ($(PE_ENV), INTEL)
 
 # INTEL flags:
-FFLAGS_OPT   = -c -r8 -i4 -O3 -real_size 64 -xSSE4.2  -align array32byte -diag-disable 10120
+FFLAGS_OPT   = -c -r8 -i4 -O3 -real_size 64 -xSSE4.2 -align array32byte
 FFLAGS_DEBUG = -c -g -r8 -i4 -O0 -check bounds -check format \
 -check output_conversion  -warn error -real_size 64 -check uninit \
--traceback -fp-stack-check -diag-disable 10120 -fpe0 -check pointers
+-traceback -fp-stack-check -fpe0 -check pointers
 FFLAGS_TEST  = ${FFLAGS_OPT} -fp-model precise
 F90FLAGS = -DH5_USE_16_API -D_LARGEFILE64_SOURCE -D_FORTIFY_SOURCE=2 
 
-CFLAGS_OPT   = -c -O3 -diag-disable 10120 -D_LARGEFILE64_SOURCE 
+CFLAGS_OPT   = -c -O3 -D_LARGEFILE64_SOURCE 
 CFLAGS_DEBUG = -c -O0 -g -traceback -debug all -debug extended \
-               -D_LARGEFILE64_SOURCE -diag-disable 10120 -ftrapuv -fp-stack-check
+               -D_LARGEFILE64_SOURCE -ftrapuv -fp-stack-check
 CFLAGS_TEST  = ${CFLAGS_OPT} -fp-model precise
 
 else
@@ -137,9 +137,9 @@ FFLAGS_HYPRE = -I${HYPRE_PATH}/include
 
 ifeq ($(PE_ENV), INTEL)
 
-LFLAGS_OPT   = -xSSE4.2  -align array32byte -diag-disable 10120 -O3 -o
-LFLAGS_DEBUG = -diag-disable 10120 -o
-LFLAGS_TEST  = -diag-disable 10120 -O3 -o
+LFLAGS_OPT   = -xSSE4.2 -align array32byte -O3 -o
+LFLAGS_DEBUG = -o
+LFLAGS_TEST  = -O3 -o
 
 else
 
