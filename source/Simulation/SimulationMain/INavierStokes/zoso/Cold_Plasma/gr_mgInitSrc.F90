@@ -151,6 +151,8 @@ if (mg_bnd_cond == 0) then ! Substract source mean.
 
 else if (mg_bnd_cond == 1) then
 
+  goto 200
+
   do lb = 1, blockCount
 
       blockID = blockList(lb) 
@@ -222,6 +224,8 @@ else if (mg_bnd_cond == 1) then
       call Grid_releaseBlkPtr(blockID,solnData,CENTER)    
 
   enddo
+
+  200 continue
 
 endif
 

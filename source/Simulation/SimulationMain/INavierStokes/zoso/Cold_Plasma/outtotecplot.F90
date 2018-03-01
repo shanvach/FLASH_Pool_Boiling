@@ -149,7 +149,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p temp e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -197,6 +197,7 @@
      tpu = 0.
      tpv = 0.
      tpp = 0.
+     tpcurv = 0.
      tpdens = 0.
      tpdensy = 0.
      tpt = 0.
@@ -269,8 +270,8 @@
      !ye_c(i) = ye_c(i-1)+dy;
      !end do
    
-     facevarxx = facexData(MAGF_FACE_VAR,:,:,1)
-     facevaryy = faceyData(MAGF_FACE_VAR,:,:,1)
+     facevarxx = facexData(VELC_FACE_VAR,:,:,1)
+     facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
  
      facevarr1 = facexData(RH1F_FACE_VAR,:,:,1)
      facevarr2 = faceyData(RH1F_FACE_VAR,:,:,1)
@@ -293,6 +294,12 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DELE_VAR,:,:,1),tpt)
 
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(PRES_VAR,:,:,1),tpp)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(TEMP_VAR,:,:,1),tpcurv)
+   
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DHV0_VAR,:,:,1),tph0)
 
@@ -423,6 +430,17 @@
       enddo
       i = TecDat(ijk,arraylb,0)
 
+      arraylb(:,:,1) = sngl(tpu)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpv)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpp)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpcurv)
+      i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)

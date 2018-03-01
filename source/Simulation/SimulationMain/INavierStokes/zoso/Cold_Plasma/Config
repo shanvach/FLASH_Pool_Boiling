@@ -13,6 +13,12 @@ REQUIRES Driver
 REQUIRES physics/Plasma
 REQUIRES physics/Plasma/PlasmaMain/coldPlasma
 
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/constdens
+
+REQUIRES physics/Heat_AD
+REQUIRES physics/Heat_AD/Heat_ADMain/constdens
+
 USESETUPVARS Grid
 
   REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
@@ -23,3 +29,5 @@ REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
 # Number of guardcells at each boundary
 GUARDCELLS 3
+
+PARAMETER Pr REAL 1.0

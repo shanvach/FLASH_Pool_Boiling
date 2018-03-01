@@ -11,6 +11,12 @@ pt_maxPerProc=3500
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
+# Fluid parameters
+invRe = 0.01
+
+# Heat parameters
+Pr = 1.0
+
 #       Size of computational volume
 xmin = -2.50
 xmax =  2.50
