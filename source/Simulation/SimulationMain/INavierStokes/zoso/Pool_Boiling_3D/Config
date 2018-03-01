@@ -61,6 +61,8 @@ PARAMETER sinkB	         REAL  1.0
 
 PARAMETER tnuc		 REAL  0.0
 
+PARAMETER ncDensPlus	 INTEGER  0
+
 # Number of guardcells at each boundary
 GUARDCELLS 3
 

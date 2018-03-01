@@ -62,6 +62,9 @@ tnuc  =  0.4
 # Nucleation frequency
 twait =  0.4
 
+# Additional nucleation sites
+ncDensPlus = 0
+
 # Level set sink strength
 sinkB = 1.0
 

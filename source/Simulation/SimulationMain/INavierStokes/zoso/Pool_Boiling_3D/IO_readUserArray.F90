@@ -60,18 +60,22 @@ subroutine IO_readUserArray ()
   use Multiphase_data, ONLY: mph_timeStampAll
   use IO_data, ONLY : io_chkptFileID, io_globalMe
   use IO_interface, ONLY :  IO_getScalar
+  use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
   implicit none
 
 #include "constants.h"
   include"Flash_mpi.h"
 
-  integer :: offset, datasetNameLen,ierr
-  
+  integer :: offset, datasetNameLen,ierr,ncDensPlus  
+
   offset = 0
   datasetNameLen = 7 
 
   call IO_getScalar("nucsitedens", sim_nucSiteDens)
+  call RuntimeParameters_get("ncDensPlus",ncDensPlus)
+
+  sim_nucSiteDens = sim_nucSiteDens + ncDensPlus
 
   if(io_globalMe .eq. MASTER_PE) print *,"sim_nucSiteDens: ",sim_nucSiteDens
 
@@ -83,8 +87,8 @@ subroutine IO_readUserArray ()
   call io_h5read_generic_real_arr( &
        io_chkptFileID, &
        mph_timeStampAll, &
-       sim_nucSiteDens, &
-       sim_nucSiteDens, &
+       sim_nucSiteDens-ncDensPlus, &
+       sim_nucSiteDens-ncDensPlus, &
        offset, &
        "nuctime", &
        datasetNameLen)
