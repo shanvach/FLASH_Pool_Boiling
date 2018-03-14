@@ -30,6 +30,8 @@ REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 # Number of guardcells at each boundary
 GUARDCELLS 3
 
+VARIABLE sigp TYPE:GENERIC
+
 PARAMETER Pr REAL 1.0
 
 #LM added

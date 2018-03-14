@@ -77,6 +77,8 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
   
   use tree, only : lrefine
+
+  use Plasma_data, only: pls_pois_flg
   
   implicit none
  
@@ -352,7 +354,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. & 
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+1) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+1) = 0.0
                        !print*,"COEFFICIENT REFERENCE XL:",gr_meshMe,blockID,i,j,k
                     end if
 
@@ -360,9 +362,12 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else  !- kpd - Boundary Node
 
-                 MdensXL = 0.0 ! Neumann
-                 !MdensXL = 4.0
-                 !MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 if(pls_pois_flg) then
+                        MdensXL = 0.0 ! Neumann
+                 else
+                        MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 endif
+
                  temp_BoxVal(iter+1) = 0.0
 
               end if
@@ -394,16 +399,19 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+2) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+2) = 0.0
                        !print*,"COEFFICIENT REFERENCE XR:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
 
               else  !- kpd - Boundary Node
+        
+                 if(pls_pois_flg) then
+                        MdensXR = 0.0 ! Neumann
+                 else
+                        MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
+                 endif
 
-                 MdensXR = 0.0 ! Neumann
-                 !MdensXR = 4.0
-                 !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+2) = 0.0
 
               end if
@@ -444,16 +452,19 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+3) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+3) = 0.0
                        !print*,"COEFFICIENT REFERENCE YL:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
 
               else   !- kpd - Boundary Node
 
-                 MdensYL = 0.0 ! Neumann
-                 !MdensYL = 4.0
-                 !MdensYL = 2*(facevary(RH1F_FACE_VAR,i  ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 if(pls_pois_flg) then
+                        MdensYL = 0.0 ! Neumann
+                 else
+                        MdensYL = 2*(facevary(RH1F_FACE_VAR,i  ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 endif
+
                  temp_BoxVal(iter+3) = 0.0
 
               end if
@@ -485,16 +496,19 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+4) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+4) = 0.0
                        !print*,"COEFFICIENT REFERENCE YR:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
 
               else  !- kpd - Boundary Node
- 
-                 MdensYR = 0.0 !Neumann
-                 !MdensYR = 4.0
-                 !MdensYR = 2*(facevary(RH1F_FACE_VAR,i,j+1,k)+facevary(RH2F_FACE_VAR,i  ,j+1,k))
+
+                 if(pls_pois_flg) then 
+                        MdensYR = 0.0 !Neumann
+                 else
+                        MdensYR = 2*(facevary(RH1F_FACE_VAR,i,j+1,k)+facevary(RH2F_FACE_VAR,i  ,j+1,k))
+                 endif
+
                  temp_BoxVal(iter+4) = 0.0
 
               end if

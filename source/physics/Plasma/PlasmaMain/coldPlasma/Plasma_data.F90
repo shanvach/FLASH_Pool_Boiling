@@ -54,4 +54,6 @@ module Plasma_data
         
         real, save :: pls_dtspec_nd ! nondimensionalized time-step
 
+        logical, save :: pls_pois_flg
+
 end module Plasma_data

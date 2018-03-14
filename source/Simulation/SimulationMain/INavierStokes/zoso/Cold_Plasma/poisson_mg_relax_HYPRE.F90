@@ -103,6 +103,8 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   use tree, only : maxblocks_tr, lrefine, grid_changed, nodetype
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get 
 
+  use Plasma_data, only:pls_pois_flg
+
   implicit none
 
 #include "Flash.h"
@@ -263,7 +265,7 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
                                   j .eq. blkLimits(LOW, JAXIS) .AND. &
                                   k .eq. blkLimits(LOW, KAXIS)) then 
                  !RHSVal(ii) = 0.0
-                 temp_RHSVal(ii) = 0.0
+                 if(pls_pois_flg) temp_RHSVal(ii) = 0.0
                  !print*,"REFERENCE PRESSURE:",gr_meshMe,blockID,i,j,k
               end if
 

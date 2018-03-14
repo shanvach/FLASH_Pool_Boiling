@@ -1,3 +1,6 @@
+VARIABLE nrmx TYPE: GENERIC # cell centered normals
+VARIABLE nrmy TYPE: GENERIC
+
 VARIABLE tpel TYPE: GENERIC # cell center, Temperature
 VARIABLE tphv TYPE: GENERIC 
 

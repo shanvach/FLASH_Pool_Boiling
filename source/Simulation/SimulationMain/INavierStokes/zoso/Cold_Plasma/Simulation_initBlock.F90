@@ -121,8 +121,8 @@ subroutine Simulation_initBlock(blockId)
 
   facexData(RH1F_FACE_VAR,:,:,:) = 1.0
   faceyData(RH1F_FACE_VAR,:,:,:) = 1.0
-  facexData(RH2F_FACE_VAR,:,:,:) = 1.0
-  faceyData(RH2F_FACE_VAR,:,:,:) = 1.0
+  facexData(RH2F_FACE_VAR,:,:,:) = 0.0
+  faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
  
   !initialize values of heavy species and generation rates
   do i=0,9

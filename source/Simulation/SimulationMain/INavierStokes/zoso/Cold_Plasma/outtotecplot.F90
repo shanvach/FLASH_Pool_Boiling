@@ -73,7 +73,7 @@
            tpuint, tpvint,tptes,tprds,&
            tph0, tph1, tph2, tph3, tph4, tph5, tph6, tph7, tph8, tph9,&
            tpdfe, tpdfh0, tpdfh1, tpdfh2, tpdfh3, tpdfh4, tpdfh5,&
-           tpdnat, tpdnit, tpepot, tpdqnt
+           tpdnat, tpdnit, tpepot, tpdqnt,tpnrmx,tpnrmy
 
 
   real, dimension(NXB,NYB) :: tptes_c
@@ -149,7 +149,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p temp e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p nx ny temp e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -241,6 +241,8 @@
      tpdnit = 0.
      tpepot = 0.
      tpdqnt =0.
+     tpnrmx = 0.
+     tpnrmy = 0.
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -296,6 +298,12 @@
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(PRES_VAR,:,:,1),tpp)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NRMX_VAR,:,:,1),tpnrmx)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NRMY_VAR,:,:,1),tpnrmy)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(TEMP_VAR,:,:,1),tpcurv)
@@ -437,6 +445,12 @@
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tpp)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpnrmx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpnrmy)
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tpcurv)

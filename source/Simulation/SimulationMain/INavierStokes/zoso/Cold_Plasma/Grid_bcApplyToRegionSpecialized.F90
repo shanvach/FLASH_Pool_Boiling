@@ -202,6 +202,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
+  use Plasma_data, ONLY: pls_pois_flg
+
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
 #endif
@@ -274,18 +276,34 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
             if(gridDataStruct == CENTER) then
 
 
-               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+               if(ivar == EPOT_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == PRES_VAR) then
+               else if(ivar == MGW3_VAR) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if(ivar == TEMP_VAR) then
@@ -306,10 +324,20 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             else if(gridDataStruct == WORK) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
  
            else
 
@@ -317,17 +345,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.0
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -347,18 +375,34 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
  
             if(gridDataStruct == CENTER) then
 
-               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+               if(ivar == EPOT_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == PRES_VAR) then
+               else if(ivar == MGW3_VAR) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if(ivar == TEMP_VAR) then
@@ -379,10 +423,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             else if(gridDataStruct == WORK) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
 
             else
 
@@ -390,17 +443,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -426,18 +479,34 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
            if(gridDataStruct == CENTER) then
 
-               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+               if(ivar == EPOT_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == PRES_VAR) then
+               else if(ivar == MGW3_VAR) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
               else if(ivar == TEMP_VAR) then
@@ -458,10 +527,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
            else if(gridDataStruct == WORK) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
 
            else
 
@@ -469,17 +547,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)= -regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -507,25 +585,41 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             if(gridDataStruct == CENTER) then
           
-               if(ivar == MGW3_VAR .or. ivar == EPOT_VAR) then
+               if(ivar == EPOT_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
                   regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == PRES_VAR) then
+               else if(ivar == MGW3_VAR) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                   regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
                else if(ivar == TEMP_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2.0 - regionData(guard,1:je,1:ke,ivar)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                else
@@ -539,10 +633,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
            else if(gridDataStruct == WORK) then
 
+               if(pls_pois_flg) then
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
 
            else
 
@@ -550,17 +653,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)= -regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)=2.0-regionData(guard,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 

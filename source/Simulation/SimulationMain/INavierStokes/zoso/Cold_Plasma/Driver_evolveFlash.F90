@@ -165,8 +165,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
      dr_simTime = dr_simTime + dr_dt
 
      !print *,"Time step: ",dr_dt
-     call IncompNS( blockCount, blockList,   &
-              dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
+     !call IncompNS( blockCount, blockList,   &
+     !         dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
 
      call Heat_AD( blockCount, blockList,   &
               dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
