@@ -434,6 +434,7 @@ subroutine Plasma( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 
   poisfact = 1.0
+  pls_pois_flg = .true.
   call Grid_solvePoisson (EPOT_VAR, DQNT_VAR, bc_types, bc_values, poisfact)
 
   gcMask = .FALSE.

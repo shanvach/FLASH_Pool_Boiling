@@ -194,4 +194,25 @@ module Plasma_interface
         end subroutine Plasma_elPotential
         end interface
 
+        interface
+        subroutine Plasma_getNorm(nrmx,nrmy,s,ix1,ix2,jy1,jy2,dx,dy)
+                implicit none
+                real, intent(inout), dimension(:,:,:) :: nrmx,nrmy
+                real, intent(in), dimension(:,:,:) :: s
+                integer, intent(in) :: ix1,ix2,jy1,jy2
+                real, intent(in) :: dx,dy
+        end subroutine
+        end interface
+
+        interface
+        subroutine Plasma_velSource(u,v,nrmx,nrmy,s,sigp,ix1,ix2,jy1,jy2,dx,dy)
+                implicit none
+                real, intent(inout), dimension(:,:,:) :: u,v
+                real, intent(inout), dimension(:,:,:) :: sigp
+                real, intent(in), dimension(:,:,:) :: s,nrmx,nrmy
+                integer, intent(in) :: ix1,ix2,jy1,jy2
+                real, intent(in) :: dx,dy
+        end subroutine Plasma_velSource
+        end interface
+
 end module Plasma_interface

@@ -107,6 +107,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   use mg_common, only: mg_bnd_cond
 
+  use Plasma_data, only: pls_pois_flg
+
+  use Plasma_interface, only: Plasma_getNorm, Plasma_velSource
+
   implicit none
 
 #include "constants.h"
@@ -184,6 +188,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   character(len=6) :: IndNStep
   integer :: NStep
+
+  real :: xcell,ycell,pi=acos(-1.0)
 ! --------------------------------------------------------------------------
 
 
@@ -226,7 +232,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 #ifdef FLASH_GRID_UG
         bc_types(eachBoundary) = OUTFLOW
 #else
-        bc_types(eachBoundary) = GRID_PDE_BND_NEUMANN !MG_BND_NEUMANN
+        bc_types(eachBoundary) = GRID_PDE_BND_DIRICHLET !MG_BND_NEUMANN
 #endif
      case default
      if (ins_meshMe .eq. MASTER_PE) then
@@ -382,7 +388,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   ! Compute forcing pressure gradients if required:
   call ins_pressgradients(ins_tlevel,ins_alfa*dt)
 
-
   call Timers_start("RightHandSide_Predictor")
   ! COMPUTE RIGHT HAND SIDE AND PREDICTOR STEP:
   ! ------- ----- ---- ---- --- --------- ----
@@ -444,7 +449,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      facexData(RHDS_FACE_VAR,:,:,:) = newu(:,:,:)
      faceyData(RHDS_FACE_VAR,:,:,:) = newv(:,:,:)
 
-
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -458,6 +462,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
 
   enddo
+
   call Timers_stop("RightHandSide_Predictor")
 
 !!$   !CALL SYSTEM_CLOCK(TA(2),count_rate)
@@ -508,9 +513,14 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   ! Copy the original ustar and pressure to velo, preo
   do lb=1,blockCount
      blockID = blockList(lb)
+
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
 #if NDIM ==3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
      facezData(VELO_FACE_VAR,:,:,:) = facezData(VELC_FACE_VAR,:,:,:)
@@ -528,9 +538,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 #endif 
   enddo
-
-
-  
+ 
   ! Begin FSI subiterations:
   sm_body_converge=SM_NOTCONVERGED
   do while(sm_body_converge .eq. SM_NOTCONVERGED)
@@ -573,6 +581,70 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
   call Timers_stop("Immersed Boundaries.")
 
+  do lb=1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     call Plasma_getNorm(solnData(NRMX_VAR,:,:,:), &
+                         solnData(NRMY_VAR,:,:,:), &
+                         solnData(DFUN_VAR,:,:,:), &
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                         del(DIR_X),del(DIR_Y))
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(NRMX_VAR) = .TRUE.
+  gcMask(NRMY_VAR) = .TRUE.
+
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+ 
+  do lb=1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     call Plasma_velSource(facexData(VELC_FACE_VAR,:,:,:),&
+                           faceyData(VELC_FACE_VAR,:,:,:),&
+                           solnData(NRMX_VAR,:,:,:), &
+                           solnData(NRMY_VAR,:,:,:), &
+                           solnData(DFUN_VAR,:,:,:), &
+                           solnData(SIGP_VAR,:,:,:), &
+                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                           del(DIR_X),del(DIR_Y))
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
+
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 !  call Timers_start("ImmBoundaries_Forces")
   ! Compute forces on immersed bodies:
@@ -606,6 +678,11 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   do lb = 1,blockCount
      blockID = blockList(lb)
 
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
      ! Get blocks dx, dy ,dz:
      call Grid_getDeltas(blockID,del)
 
@@ -632,7 +709,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                        del(DIR_X),del(DIR_Y),del(DIR_Z),&
                        solnData(DUST_VAR,:,:,:) )
 
-
      ! Poisson RHS source vector
      solnData(DUST_VAR,                                   &
           blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
@@ -641,8 +717,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      solnData(DUST_VAR,                                   &
           blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
           blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
-          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))/(dt*ins_alfa)              
-
+          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))/(dt*ins_alfa)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -659,11 +734,12 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   call Timers_start("Grid_solvePoisson")
   ! SOLUTION OF POISSON EQUATION FOR PRESSURE:
   ! -------- -- ------- -------- --- --------
-  poisfact = 1.0 
+  poisfact = 1.0
+  pls_pois_flg = .false. 
   call Grid_solvePoisson (DELP_VAR, DUST_VAR, bc_types, bc_values, poisfact) 
   call Timers_stop("Grid_solvePoisson")
 
-  if(ins_meshMe .eq. MASTER_PE) print *,"INS mg_bnd_cond: ",mg_bnd_cond
+  !if(ins_meshMe .eq. MASTER_PE) print *,"INS mg_bnd_cond: ",mg_bnd_cond
 
 !  call gr_findMean(PRES_VAR,2,.false.,meanPres)
 !  if (ins_meshMe .eq. MASTER_PE) write(*,*) 'Mean Pressure=',meanPres
@@ -1030,8 +1106,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   CALL SYSTEM_CLOCK(TA(2),count_rate)
   ET=REAL(TA(2)-TA(1),8)/count_rate
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total AB Step Time =',ET
-  
-
+ 
 END SUBROUTINE ins_ab2rk3
 
 

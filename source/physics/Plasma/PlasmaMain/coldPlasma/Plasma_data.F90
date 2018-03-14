@@ -48,4 +48,6 @@ module Plasma_data
         real, save :: pls_epsilon0 !permitivity of free space
         real, save :: pls_l2target !l2 norm of error target for convergence
 
+        logical, save :: pls_pois_flg
+
 end module Plasma_data

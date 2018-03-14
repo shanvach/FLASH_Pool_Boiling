@@ -26,6 +26,9 @@ ymax =  2.50
 # plasma percentage noise parameters
 pct_noise = 0.2
 
+# pressure correction
+pressure_correct = .false.
+
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
 xr_boundary_type = "neumann_ins"
