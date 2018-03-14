@@ -31,3 +31,6 @@ REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 GUARDCELLS 3
 
 PARAMETER Pr REAL 1.0
+
+#LM added
+PARAMETER invRe REAL 0.01
