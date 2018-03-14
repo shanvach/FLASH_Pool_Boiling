@@ -47,5 +47,11 @@ module Plasma_data
 
         real, save :: pls_epsilon0 !permitivity of free space
         real, save :: pls_l2target !l2 norm of error target for convergence
+        
+        real, save :: pls_Uc  !characteristic velocity
+        real, save :: pls_Lc  !characteristic length
+        real, save :: pls_nfc !characteristic feed of particles
+        
+        real, save :: pls_dtspec_nd ! nondimensionalized time-step
 
 end module Plasma_data
