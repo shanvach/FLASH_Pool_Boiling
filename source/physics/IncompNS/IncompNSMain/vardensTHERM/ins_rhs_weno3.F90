@@ -1307,7 +1307,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens*(tzzp - tzzm)*dz1                &
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
-                           + gravX*(1.0  - ht_Ra*tempface)  
+                           + gravX*(1.0  + ht_Ra*tempface)  
  
             enddo
          enddo
@@ -1796,7 +1796,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
-                           + gravY*(1.0  - ht_Ra*tempface)           
+                           + gravY*(1.0  + ht_Ra*tempface)           
 
             enddo
          enddo
@@ -2284,7 +2284,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txzp - txzm)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dy1                &
-                           + gravZ* (1.0  - ht_Ra*tempface)                   
+                           + gravZ* (1.0  + ht_Ra*tempface)                   
             enddo
          enddo
       enddo

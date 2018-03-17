@@ -18,6 +18,6 @@ subroutine Heat_Solve(T_p,T_o,T_rhs,dt,ix1,ix2,jy1,jy2,kz1,kz2,T_res)
 
   T_res = sum(sum(sum((T_o(:,:,:)-T_p(:,:,:))**2,1),1))
 
-  T_res = sqrt(T_res/size(T_o))
+  T_res = (T_res/size(T_o))
 
 end subroutine Heat_Solve

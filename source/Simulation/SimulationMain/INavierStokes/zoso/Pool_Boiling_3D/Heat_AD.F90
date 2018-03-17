@@ -199,7 +199,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    call MPI_Allreduce(T_resBlock, T_res, 1, FLASH_REAL,&
                       MPI_SUM, MPI_COMM_WORLD, ierr)
 
-   T_res = T_res/mph_meshNumProcs
+   T_res = sqrt(T_res/mph_meshNumProcs)
 
    if(mph_meshMe .eq. MASTER_PE) print *,"T_res:",T_res
 
@@ -394,8 +394,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call MPI_Allreduce(Tnv_resBlock, Tnv_res, 1, FLASH_REAL,&
                      MPI_SUM, MPI_COMM_WORLD, ierr)
 
-     Tnl_res = Tnl_res/mph_meshNumProcs
-     Tnv_res = Tnv_res/mph_meshNumProcs
+     Tnl_res = sqrt(Tnl_res/mph_meshNumProcs)
+     Tnv_res = sqrt(Tnv_res/mph_meshNumProcs)
 
      ! Apply BC
      gcMask = .FALSE.

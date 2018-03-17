@@ -186,13 +186,13 @@ subroutine Simulation_initBlock(blockId)
 
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk           
-           do bli=1,10   
-                if(ycell .le. 1.0 .and. & 
-                   xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
-                   zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
-           end do
-           if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           !do bli=1,10   
+           !     if(ycell .le. 1.0 .and. & 
+           !        xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
+           !        zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
+           !end do
+           !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+           !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
 
            !solnData(TEMP_VAR,i,j,k) = sim_Tbulk
@@ -203,7 +203,7 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.1*cos(ht_psi)
+  sim_nuc_site_y(1:sim_nucSiteDens) = 0.15*cos(ht_psi)
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
