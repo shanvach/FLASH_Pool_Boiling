@@ -1,6 +1,6 @@
 subroutine Plasma_velSource(u,v,nrmx,nrmy,s,sigp,ix1,ix2,jy1,jy2,dx,dy)
 
-     use Driver_data, only: dr_nstep
+     use Driver_data, only: dr_nstep, dr_dt
 
      implicit none
 
@@ -24,10 +24,12 @@ subroutine Plasma_velSource(u,v,nrmx,nrmy,s,sigp,ix1,ix2,jy1,jy2,dx,dy)
 
      do j=jy1-1,jy2+1
         do i=ix1-1,ix2+1
-   
-           u(i,j,k) = 0.5*(nrmx(i,j,k)+nrmx(i-1,j,k))*vr
-           v(i,j,k) = 0.5*(nrmy(i,j,k)+nrmy(i,j-1,k))*vr
+  
+           pfx = (s(i,j,k)+s(i-1,j,k))/2.0d0
+           pfy = (s(i,j,k)+s(i,j-1,k))/2.0d0
 
+           u(i,j,k) = u(i,j,k) + dr_dt*0.5*(nrmx(i,j,k)+nrmx(i-1,j,k))*(vr/(phiS-pfx+eps))
+           v(i,j,k) = v(i,j,k) + dr_dt*0.5*(nrmy(i,j,k)+nrmy(i,j-1,k))*(vr/(phiS-pfy+eps))
 
         end do
      end do

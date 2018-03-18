@@ -13,7 +13,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
                              Grid_fillGuardCells
 
    use Plasma_interface, only: Plasma_Feed, Plasma_sumIons,&
-                               Plasma_netCharge, Plasma_elPotential
+                               Plasma_getNorm, Plasma_netCharge, Plasma_elPotential
 
    implicit none
 
@@ -27,7 +27,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
    logical, INTENT(IN)    :: restart
 
    ! Local Variables
-   integer ::  blockID,lb,i
+   integer ::  blockID,lb,i,j
    real ::  del(MDIM)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
@@ -38,7 +38,52 @@ subroutine Plasma_init(blockCount,blockList,restart)
    real :: nrel, nrna, nrni !nrh0, nrh1, nrh2, nrh6, nrh7, nrh8, nrh9 
 
    real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldPhi
+   real :: tempDT, Troom, rrc, rrx, rry, trc, vrx, vry, pu(20), pt(20)
 
+   integer :: fac, pcount
+
+   fac    = 9
+   tempDT = 1.0
+   Troom  = 0.0
+
+   pu(1) = -0.0000
+   pu(2) =  0.0005
+   pu(3) = -0.0035
+   pu(4) =  0.0065
+   pu(5) =  0.0267
+   pu(6) = -0.1211
+   pu(7) =  0.0232
+   pu(8) =  0.4247
+   pu(9) =  0.0003
+
+   pt(1) =  0.0000
+   pt(2) = -0.0002
+   pt(3) =  0.0021
+   pt(4) = -0.0106
+   pt(5) =  0.0281
+   pt(6) = -0.0245
+   pt(7) = -0.0435
+   pt(8) = -0.0030
+   pt(9) =  0.5303
+
+   !pu(1) = -0.0000
+   !pu(2) =  0.0011
+   !pu(3) = -0.0135
+   !pu(4) =  0.0743
+   !pu(5) = -0.1839
+   !pu(6) =  0.0650
+   !pu(7) =  0.4133
+   !pu(8) =  0.0009
+  
+   !pt(1) = -0.0000
+   !pt(2) =  0.0004
+   !pt(3) = -0.0032
+   !pt(4) =  0.0102
+   !pt(5) = -0.0010
+   !pt(6) = -0.0592
+   !pt(7) =  0.0012
+   !pt(8) =  0.5300
+ 
    nrel = 0.99*1e18       ! Electrons
    nrna = 1e26            ! neutral
    nrni = 1e18            ! ions
@@ -69,7 +114,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
    pls_Ckb = 1.38064852e-23
    pls_Cme = 9.10938356e-31
    pls_Ce  = 1.60217662e-19
-   pls_gam = EXP(0.577) 
+      pls_gam = EXP(0.577) 
    pls_Cpi = 3.14159265359
    pls_KtoeV = 1.0/11604.52
    
@@ -213,7 +258,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
                              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) )
 
-     ! Release block pointers
+        ! Release block pointers
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do
@@ -230,4 +275,85 @@ subroutine Plasma_init(blockCount,blockList,restart)
   call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-end subroutine Plasma_init
+  do lb=1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     call Plasma_getNorm(solnData(NRMX_VAR,:,:,:), &
+                         solnData(NRMY_VAR,:,:,:), &
+                         solnData(DFUN_VAR,:,:,:), &
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                         del(DIR_X),del(DIR_Y))
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(NRMX_VAR) = .TRUE.
+  gcMask(NRMY_VAR) = .TRUE.
+
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+  do lb=1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     do j=blkLimits(LOW,JAXIS)-1,blkLimits(HIGH,JAXIS)+1
+        do i=blkLimits(LOW,IAXIS)-1,blkLimits(HIGH,IAXIS)+1
+
+           rrc = 0.5 -  solnData(DFUN_VAR,i,j,1)
+           rrx = 0.5 - (solnData(DFUN_VAR,i,j,1)+solnData(DFUN_VAR,i-1,j,1))/2.0d0
+           rry = 0.5 - (solnData(DFUN_VAR,i,j,1)+solnData(DFUN_VAR,i,j-1,1))/2.0d0
+
+           trc = 0.0
+           vrx = 0.0
+           vry = 0.0
+
+           do pcount=1,fac
+                trc = trc + (pt(pcount)*(rrc**(fac-pcount)));
+                vrx = vrx + (pu(pcount)*(rrx**(fac-pcount)));
+                vry = vry + (pu(pcount)*(rry**(fac-pcount)));
+           end do    
+
+           solnData(TEMP_VAR,i,j,1) = trc*tempDT + Troom
+
+           facexData(VELC_FACE_VAR,i,j,1) = vrx*(solnData(NRMX_VAR,i,j,1)+solnData(NRMX_VAR,i-1,j,1))/2.0d0
+           faceyData(VELC_FACE_VAR,i,j,1) = vry*(solnData(NRMY_VAR,i,j,1)+solnData(NRMY_VAR,i,j-1,1))/2.0d0
+
+        end do
+     end do
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(TEMP_VAR) = .TRUE.
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.
+
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+           
+  end subroutine Plasma_init
