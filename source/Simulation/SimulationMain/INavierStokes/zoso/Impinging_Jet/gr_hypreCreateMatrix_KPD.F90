@@ -130,7 +130,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   character(len=32) :: matfile
   integer :: numGraph, iter
 !  real, allocatable :: BoxVal(:)
-  real, dimension(28672) :: temp_BoxVal
+  real, dimension(1000000) :: temp_BoxVal
   integer, parameter :: nFluxVars = 2**(NDIM-1)
 
   !- kpd - 
@@ -548,14 +548,19 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+5) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+5) = 0.0
                     end if
                  end if
 
               else  !- kpd - Boundary Node
 
+               if(pls_pois_flg) then
                  MdensZL = 0.0
-                 temp_BoxVal(iter+5) = 0.0
+               else
+                 MdensZL = 2*(facevarz(RH1F_FACE_VAR,i,j,k)+facevarz(RH2F_FACE_VAR,i  ,j,k)) 
+               end if
+
+               temp_BoxVal(iter+5) = 0.0
 
               end if
               
@@ -583,14 +588,19 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       temp_BoxVal(iter+6) = 0.0
+                       if(pls_pois_flg) temp_BoxVal(iter+6) = 0.0
                     end if
                  end if
 
               else  !- kpd - Boundary Node
 
+               if(pls_pois_flg) then
                  MdensZR = 0.0
-                 temp_BoxVal(iter+6) = 0.0
+               else
+                 MdensZR = 2*(facevarz(RH1F_FACE_VAR,i,j,k+1)+facevarz(RH2F_FACE_VAR,i  ,j,k+1)) 
+               end if
+
+               temp_BoxVal(iter+6) = 0.0
 
               end if
               
@@ -603,7 +613,6 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 #endif
 
               iter = iter + nentries
-
            end do
         end do
      end do     

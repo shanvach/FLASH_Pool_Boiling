@@ -4,99 +4,71 @@
 !
 ! ---------------------------------------------------------------------------
 
-#include "constants.h"
-#include "Flash.h"
+  subroutine outtotecplot(mype,time,dt,istep,count, &
+                          timer,blockList,blockCount,firstfileflag)
 
 
-  subroutine outtotecplot(mype,time,dt,istep,count,&
-           timer,blockList,blockCount,firstfileflag)
+  use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
+    Grid_releaseBlkPtr, Grid_getBlkIndexLimits, Grid_getBlkBoundBox, &
+    Grid_getBlkCenterCoords
 
-      use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
-        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, &
-        Grid_getBlkBoundBox, Grid_getBlkCenterCoords
-
-  use Driver_data,      ONLY : dr_nstep
-
-#ifdef FLASH_GRID_UG
-#else
-      use physicaldata, ONLY : interp_mask_unk,interp_mask_unk_res
-#endif
+  use ins_interface, only : ins_velgradtensor
 
   implicit none
 
-!#include "constants.h"
-!#include "Flash.h"
+#include "constants.h"
+#include "Flash.h"
   include "Flash_mpi.h"
 
 
-  integer, intent(in) :: mype,istep,count,firstfileflag
+  integer, intent(in) :: mype,istep,count,&
+                         firstfileflag
   integer, intent(in) :: blockCount
   integer, intent(in) :: blockList(MAXBLOCKS)
-  real, intent(in) :: time,dt,timer
-      
- 
-  ! Local Variables
-  integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc,i1,i2
-  !character(25) :: filename
-  character(29) :: filename
+  real, intent(in)    :: time,dt,timer
+  
+
+  ! Local variables    
+  integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc
+  character(27) :: filename
   character(6) :: index_lb,index_mype
 
   real xedge(NXB+1),xcell(NXB+1)
   real yedge(NYB+1),ycell(NYB+1)
-  real intsx(NXB+1), intsy(NYB+1)
+  real zedge(NZB+1),zcell(NZB+1)
+  real intsx(NXB+1), intsy(NYB+1), intsz(NZB+1)
 
-  !real xe_c(NXB+2*NGUARD),ye_c(NYB+2*NGUARD)
-  real xe_c(NXB),ye_c(NYB)
+  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData
+  real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD,NZB+2*NGUARD),&
+       facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD),&
+       facevarzz(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD+1)
 
-  real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1)
-
-  real facevarxx2(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevaryy2(NXB+2*NGUARD,NYB+2*NGUARD+1)
-
-  real facevarr1(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevarr2(NXB+2*NGUARD,NYB+2*NGUARD+1)
-  real facevarr3(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevarr4(NXB+2*NGUARD,NYB+2*NGUARD+1)
-
-  real facevara1(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevara2(NXB+2*NGUARD,NYB+2*NGUARD+1)
-  real facevara3(NXB+2*NGUARD+1,NYB+2*NGUARD), &
-       facevara4(NXB+2*NGUARD,NYB+2*NGUARD+1)
-
-  real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
-           tpdudxcorn, tpdudycorn, &
-           tpdvdxcorn, tpdvdycorn, &
-           vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes,tprds,&
-           tph0, tph1, tph2, tph3, tph4, tph5, tph6, tph7, tph8, tph9,&
-           tpdfe, tpdfh0, tpdfh1, tpdfh2, tpdfh3, tpdfh4, tpdfh5,&
-           tpdnat, tpdnit, tpepot, tpdqnt,tpnrmx,tpnrmy, tpdivv
+  real, dimension(NXB+1,NYB+1,NZB+1) :: tpu,tpv,tpw,tpp,&
+            tpdudxcorn, tpdudycorn, tpdudzcorn,& 
+            tpdvdxcorn, tpdvdycorn, tpdvdzcorn,&
+            tpdwdxcorn, tpdwdycorn, tpdwdzcorn,&
+            vortx,vorty,vortz,omg,             &
+            Sxy,Syz,Sxz,Oxy,Oyz,Oxz,Qcr,divpp,TVtpp,&
+            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp,tprds
 
 
-  real, dimension(NXB,NYB) :: tptes_c
-  real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
-
-  real*4 arraylb(NXB+1,NYB+1,1)
-  real*4 arraylb_c(NXB,NYB,1)
-  real*4 arraylb_d(NXB+2*NGUARD,NYB+2*NGUARD,1)
-
+  real*4 arraylb(NXB+1,NYB+1,NZB+1)
  
-  real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tpdudxc, &
-        tpdudyc,tpdvdxc,tpdvdyc
+  real, dimension(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD) :: tpdudxc,&
+        tpdudyc,tpdudzc,tpdvdxc,tpdvdyc,tpdvdzc,tpdwdxc,&
+        tpdwdyc,tpdwdzc
 
 
   integer blockID
 
-  real del(MDIM),dx,dy
+  real del(3),dx,dy,dz
   real, dimension(MDIM)  :: coord,bsize
   real ::  boundBox(2,MDIM)
 
   integer*4 TecIni,TecDat,TecZne,TecNod,TecFil,TecEnd
   integer*4 VIsdouble
-  integer*4 Debug,ijk,Npts,NElm,klm,pqr
+  integer*4 Debug,ijk,Npts,NElm
   character*1 NULLCHR
 
 !-----------------------------------------------------------------------
@@ -105,14 +77,13 @@
   Debug     = 0
   VIsdouble = 0
   NULLCHR   = CHAR(0)
-  ijk       = (NXB+1)*(NYB+1)
-  klm       = (NXB+2*NGUARD)*(NYB+2*NGUARD)
-  pqr       = (NXB)*(NYB)
+  ijk       = (NXB+1)*(NYB+1)*(NZB+1)
 !-----------------------------------------------------------------------
 
 
 ! -- filetime.XX --
-  write(filename, '("./IOData/data_time.", i2.2)') mype
+
+  write(filename, '("IOData/data_time.", i4.4)') mype
 
   ! create/clear filetime.XX if time = 0
   if(firstfileflag .eq. 0) then
@@ -123,8 +94,7 @@
      write(33,'(3i4.1)') NXB, NYB, NZB    
 #else
      write(33,*) 'NXB, NYB, NZB, interp. order (prolong, restrict)'
-     write(33,'(5i4.1)') NXB, NYB, NZB, interp_mask_unk(1), &
-             interp_mask_unk_res(1)         
+     write(33,'(3i4.1)') NXB, NYB, NZB
 #endif
 
      write(33,'(a23,a43,a49,a12)') 'file number, time, dt, ',&
@@ -135,43 +105,58 @@
     close(33)
  endif
 
-  ! write timestep data to filetime.XX on each processor
+ ! write timestep data to filetime.XX on each processor
+
   open(unit=33, file=filename, status='old', position='append')
   write(33,66) count, time, dt, istep,blockcount,timer
   close(33)
-66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
 
 
   ! -- data.XXXX.XX --
   nxc = NXB + NGUARD + 1
   nyc = NYB + NGUARD + 1
+  nzc = NZB + NGUARD + 1
 
-  ! write solution data to data.XXXX.XX
-  write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
+! write solution data to data.XXXX.XX
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p nx ny divv temp e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
-           filename//NULLCHR,'./IOData/'//NULLCHR, &
-           Debug,VIsdouble)
+!!-kpd - New Output
+!if ( mype .lt. 100) then
+!  write(filename,'("./IOData/data.",i4.4,".00",i2.2,".plt")') &
+!        count, mype
+!elseif ( mype .ge. 100 .AND. mype .lt. 1000) then
+!  write(filename,'("./IOData/data.",i4.4,".0",i3.3,".plt")') &
+!        count, mype
+!else
+!  write(filename,'("./IOData/data.",i4.4,".",i4.4,".plt")') &
+!        count, mype
+!end if
 
-!  i = TecIni('AMR2D'//NULLCHR,'x y ptes_c'//NULLCHR,   &
-!           filename//NULLCHR,'./IOData/'//NULLCHR, &
-!           Debug,VIsdouble)
+  write(filename,'("./IOData/data.",i4.4,".",i4.4,".plt")') &
+        count, mype
+
+!  write(filename,'("./IOData/data.",i4.4,".",i3.3,".plt")') &
+!        count, mype
 
 
-!  i = TecIni('AMR2D'//NULLCHR,'ptes_d'//NULLCHR,   &
-!           filename//NULLCHR,'./IOData/'//NULLCHR, &
-!           Debug,VIsdouble)
+  i = TecIni('AMR3D'//NULLCHR,                            &
+             'x y z u v w p T'//NULLCHR,  &
+             filename//NULLCHR,                           &
+             './IOData/'//NULLCHR,                  &
+             Debug,VIsdouble)
 
-  !open(unit=22,file=filename,status='replace')  
+
+
+  ! open(unit=22,file=filename,status='replace')  
 
   intsx    = (/ (real(i), i=0,NXB) /)
   intsy    = (/ (real(i), i=0,NYB) /)
+  intsz    = (/ (real(i), i=0,NZB) /)
 
-!  call int2char(mype,index_mype)
+  call int2char(mype,index_mype)
+
 
   do lb = 1,blockcount
-
-
+  
      blockID =  blockList(lb)      
 
 
@@ -179,7 +164,7 @@
      call Grid_getDeltas(blockID,del)
      dx = del(IAXIS)
      dy = del(JAXIS)
-  
+     dz = del(KAXIS)
 
      ! Get Coord and Bsize for the block:
      ! Bounding box:
@@ -192,449 +177,456 @@
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      tpu = 0.
      tpv = 0.
+     tpw = 0.
      tpp = 0.
-     tpcurv = 0.
-     tpdens = 0.
-     tpdensy = 0.
-     tpt = 0.
-     tnx = 0.
-     tny = 0.
-     tmdot = 0.
-     txl = 0.
-     tyl = 0.
-     txv = 0.
-     tyv = 0.
-     tpth = 0.
-     tsigp = 0.
-     tpuint = 0.
-     tpvint = 0.
-     tptes = 0.
-     tptes_c = 0.
-     tptes_d = 0.
-     tprds = 0.
-     tph0 = 0.
-     tph1 = 0.
-     tph2 = 0.
-     tph3 = 0.
-     tph4 = 0.
-     tph5 = 0.
-     tph6 = 0.
-     tph7 = 0.
-     tph8 = 0.
-     tph9 = 0.
-     tpdfe = 0.
-     tpdfh0 = 0.
-     tpdfh1 = 0.
-     tpdfh2 = 0.
-     tpdfh3 = 0.
-     tpdfh4 = 0.
-     tpdfh5 = 0.
-     !tpdfh6 = 0.
-     !tpdfh7 = 0.
-     !tpdfh8 = 0.
-     !tpdfh9 = 0.
-     tpdnat = 0.
-     tpdnit = 0.
-     tpepot = 0.
-     tpdqnt =0.
-     tpnrmx = 0.
-     tpnrmy = 0.
-     tpdivv = 0.
+     omg = 0.
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
-     !xe_c = xcell(1:NXB); 
-
-     !xe_c(NGUARD+1:NGUARD+NXB+1) = xcell;
-
-     !do i=NGUARD,1,-1
-     !xe_c(i) = xe_c(i+1)-dx;
-     !end do
-
-     !do i=NGUARD+NXB+2,NXB+2*NGUARD
-     !xe_c(i) = xe_c(i-1)+dx;
-     !end do
-
+    
      yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
      ycell = yedge(:) + dy/2.0;
-     !ye_c = ycell(1:NYB);
+    
+     zedge = coord(KAXIS) - bsize(KAXIS)/2.0 + dz*intsz;
+     zcell = zedge(:) + dz/2.0; 
 
-     !ye_c(NGUARD+1:NGUARD+NYB+1) = ycell;
 
-     !do i=NGUARD,1,-1
-     !ye_c(i) = ye_c(i+1)-dy;
-     !end do
-
-     !do i=NGUARD+NYB+2,NYB+2*NGUARD
-     !ye_c(i) = ye_c(i-1)+dy;
-     !end do
-   
-     facevarxx = facexData(VELC_FACE_VAR,:,:,1)
-     facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
+     facevarxx = facexData(VELC_FACE_VAR,:,:,:)
+     facevaryy = faceyData(VELC_FACE_VAR,:,:,:)
+     facevarzz = facezData(VELC_FACE_VAR,:,:,:)          
  
-     facevarr1 = facexData(RH1F_FACE_VAR,:,:,1)
-     facevarr2 = faceyData(RH1F_FACE_VAR,:,:,1)
-     facevarr3 = facexData(RH2F_FACE_VAR,:,:,1)
-     facevarr4 = faceyData(RH2F_FACE_VAR,:,:,1)
+     ! U velocity: u(NXB+1,NYB+1,NZB+1)
+     ! --------------------------------
+     tpu = 0.25*(facevarxx(NGUARD+1:nxc,NGUARD:nyc-1,NGUARD:nzc-1)+ &
+                 facevarxx(NGUARD+1:nxc,NGUARD:nyc-1,NGUARD+1:nzc)+ &
+                 facevarxx(NGUARD+1:nxc,NGUARD+1:nyc,NGUARD+1:nzc)+ &
+                 facevarxx(NGUARD+1:nxc,NGUARD+1:nyc,NGUARD:nzc-1))
+    
+!!$     ! y = 1, z = 1:    
+!!$     tpu(:,1,1) = .5*(facevarxx(NGUARD+1:nxc,NGUARD,NGUARD+1) + &
+!!$                      facevarxx(NGUARD+1:nxc,NGUARD+1,NGUARD));
+!!$                              
+!!$     ! y = 1, z = end:    
+!!$     tpu(:,1,NZB+1) = .5*(facevarxx(NGUARD+1:nxc,NGUARD+1,nzc)+ &
+!!$                          facevarxx(NGUARD+1:nxc,NGUARD,nzc-1)) 
+!!$                              
+!!$     ! y = end, z = 1:    
+!!$     tpu(:,NYB+1,1) = .5*(facevarxx(NGUARD+1:nxc,nyc,NGUARD+1)+ &
+!!$                          facevarxx(NGUARD+1:nxc,nyc-1,NGUARD))        
+!!$
+!!$                              
+!!$     ! y = end, z = end:    
+!!$     tpu(:,NYB+1,NZB+1)=.5*(facevarxx(NGUARD+1:nxc,nyc,nzc-1)+ &
+!!$                            facevarxx(NGUARD+1:nxc,nyc-1,nzc)) 
 
-     ! U velocity: u(nxb+1,nyb+1)
-     ! --------------------------
-     tpu = 0.5*(facevarxx(NGUARD+1:nxc,NGUARD:nyc-1)+  &
-                facevarxx(NGUARD+1:nxc,NGUARD+1:nyc) )
 
+     ! V velocity: v(NXB+1,NYB+1,NZB+1)
+     ! --------------------------------                           
+     tpv = 0.25*(facevaryy(NGUARD:nxc-1,NGUARD+1:nyc,NGUARD:nzc-1) + &
+                 facevaryy(NGUARD+1:nxc,NGUARD+1:nyc,NGUARD:nzc-1) + &
+                 facevaryy(NGUARD+1:nxc,NGUARD+1:nyc,NGUARD+1:nzc) + &
+                 facevaryy(NGUARD:nxc-1,NGUARD+1:nyc,NGUARD+1:nzc));
+    
+!!$     !x = 1, z = 1:    
+!!$     tpv(1,:,1) = .5*(facevaryy(NGUARD,NGUARD+1:nyc,NGUARD+1) + &
+!!$                      facevaryy(NGUARD+1,NGUARD+1:nyc,NGUARD));
+!!$                              
+!!$     ! x = 1, z = end:    
+!!$     tpv(1,:,NZB+1) = .5*(facevaryy(NGUARD+1,NGUARD+1:nyc,nzc) + &
+!!$                          facevaryy(NGUARD,NGUARD+1:nyc,nzc-1)); 
+!!$                              
+!!$     ! x = end, z = 1:    
+!!$     tpv(NXB+1,:,1) = .5*(facevaryy(nxc,NGUARD+1:nyc,NGUARD+1) + &
+!!$                          facevaryy(nxc-1,NGUARD+1:nyc,NGUARD));        
+!!$                              
+!!$     ! x = end, z = end:    
+!!$     tpv(NXB+1,:,NZB+1) = .5*(facevaryy(nxc,NGUARD+1:nyc,nzc-1) + &
+!!$                              facevaryy(nxc-1,NGUARD+1:nyc,nzc));         
 
-     ! V velocity: v(nxb+1,nyb+1)
-     ! --------------------------                           
-     tpv = 0.5*(facevaryy(NGUARD:nxc-1,NGUARD+1:nyc) + &
-                facevaryy(NGUARD+1:nxc,NGUARD+1:nyc) )                               
+     ! W velocity: w(NXB+1,NYB+1,NZB+1)
+     ! --------------------------------
+     tpw = 0.25*(facevarzz(NGUARD:nxc-1,NGUARD:nyc-1,NGUARD+1:nzc)   + &
+                 facevarzz(NGUARD+1:nxc,NGUARD:nyc-1,NGUARD+1:nzc)   + &
+                 facevarzz(NGUARD+1:nxc,NGUARD+1:nyc,NGUARD+1:nzc)   + &
+                 facevarzz(NGUARD:nxc-1,NGUARD+1:nyc,NGUARD+1:nzc));
+      
+        
+!!$     ! x = 1, y = 1:    
+!!$     tpw(1,1,:) = .5*(facevarzz(NGUARD,NGUARD+1,NGUARD+1:nzc) + &
+!!$                      facevarzz(NGUARD+1,NGUARD,NGUARD+1:nzc));
+!!$                              
+!!$     ! x = 1, y = end:    
+!!$     tpw(1,NYB+1,:) = .5*(facevarzz(NGUARD+1,nyc,NGUARD+1:nzc) + &
+!!$                          facevarzz(NGUARD,nyc-1,NGUARD+1:nzc)); 
+!!$                              
+!!$     ! x = end, y = 1:    
+!!$     tpw(NXB+1,1,:) = .5*(facevarzz(nxc,NGUARD+1,NGUARD+1:nzc) + &
+!!$                          facevarzz(nxc-1,NGUARD,NGUARD+1:nzc));        
+!!$
+!!$                              
+!!$     ! x = end, y = end:    
+!!$     tpw(NXB+1,NYB+1,:) = .5*(facevarzz(nxc,nyc-1,NGUARD+1:nzc) + &
+!!$                              facevarzz(nxc-1,nyc,NGUARD+1:nzc));       
+                              
 
-     ! P pressure: p(nxb+1,nyb+1)
+     ! P pressure: p(NXB+1,NYB+1,NZB+1)
      ! -------------------------------
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DELE_VAR,:,:,1),tpt)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+                             solnData(PRES_VAR,:,:,:),tpp)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(PRES_VAR,:,:,1),tpp)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(NRMX_VAR,:,:,1),tpnrmx)
+     ! Divergence: ! Ojo Intermediate velocities: unk(3, for div(u) unk(5 !!!!!!!
+     ! ----------
+!     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+!                             unk(3,:,:,:,lb),divppstar)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(NRMY_VAR,:,:,1),tpnrmy)
+     ! TV : TV(NXB+1,NYB+1,NZB+1)
+     ! -------------------------------
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        solnData(TVIS_VAR,:,:,:),TVtpp)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(TEMP_VAR,:,:,1),tpcurv)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(TEMP_VAR,:,:,:),tempp)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DUST_VAR,:,:,1),tpdivv)  
+     ! Divergence: 
+     ! ----------
+     solnData(DUST_VAR,:,:,:) = 0.
+     solnData(DUST_VAR,NGUARD:nxc,NGUARD:nyc,NGUARD:nzc) =      &
+             (facevarxx(NGUARD+1:nxc+1,NGUARD:nyc,NGUARD:nzc) - &
+              facevarxx(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dx + &
+             (facevaryy(NGUARD:nxc,NGUARD+1:nyc+1,NGUARD:nzc) - &
+              facevaryy(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dy + &
+             (facevarzz(NGUARD:nxc,NGUARD:nyc,NGUARD+1:nzc+1) - &
+              facevarzz(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dz
+
+     solnData(DUST_VAR,1:NGUARD,:,:)=0.
+     solnData(DUST_VAR,nxc:2*NGUARD+NXB,:,:)=0.
+
  
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV0_VAR,:,:,1),tph0)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(DUST_VAR,:,:,:),divpp)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV1_VAR,:,:,1),tph1)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV2_VAR,:,:,1),tph2)
+     ! Velocity derivatives:
+     ! -------- -----------            
+     !!call ins_velgradtensor(NGUARD,facexData,faceyData,facezData, &
+     !!                          dx,dy,dz,tpdudxc,tpdudyc,tpdudzc,&
+     !!           tpdvdxc,tpdvdyc,tpdvdzc,tpdwdxc,tpdwdyc,tpdwdzc)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV3_VAR,:,:,1),tph3)
+     ! Extrapolation of center derivatives to corners, the values
+     ! of derivatives in guardcells next to edges are obtained 
+     ! from real velocities and linearly extrapolated velocities
+     ! to edge points.
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV4_VAR,:,:,1),tph4)
+     ! U derivatives:
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdudxc,tpdudxcorn)
+            
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdudyc,tpdudycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV5_VAR,:,:,1),tph5)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdudzc,tpdudzcorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV6_VAR,:,:,1),tph6)
+     ! V derivatives:
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdvdxc,tpdvdxcorn)
+            
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdvdyc,tpdvdycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV7_VAR,:,:,1),tph7)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdvdzc,tpdvdzcorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV8_VAR,:,:,1),tph8)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHV9_VAR,:,:,1),tph9)
+     ! W derivatives:
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdwdxc,tpdwdxcorn)
+            
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdwdyc,tpdwdycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFUN_VAR,:,:,1),tpdfun)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             tpdwdzc,tpdwdzcorn)
+        
+     ! VORTICITY:
+     ! ---------
+     ! Corner values of vorticity:
+     vortx = tpdwdycorn - tpdvdzcorn
+     vorty = tpdudzcorn - tpdwdxcorn
+     vortz = tpdvdxcorn - tpdudycorn
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFEL_VAR,:,:,1),tpdfe)
+!!$     do k = 1,NZB+1
+!!$        do j = 1,NYB+1
+!!$           do i = 1,NXB+1
+!!$              omg(i,j,k) = sqrt(vortx(i,j,k)**2 +  &
+!!$                                vorty(i,j,k)**2 +  &
+!!$                                vortz(i,j,k)**2)
+!!$           enddo
+!!$        enddo
+!!$     enddo
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH0_VAR,:,:,1),tpdfh0)
+     ! Q criterion:
+     ! First Sij:
+     !Sxx = tpdudxcorn
+     Sxy = 0.5*(tpdudycorn + tpdvdxcorn)
+     Sxz = 0.5*(tpdudzcorn + tpdwdxcorn)
+     !Syy = tpdvdycorn
+     Syz = 0.5*(tpdvdzcorn + tpdwdycorn)
+     !Szz = tpdwdzcorn
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH1_VAR,:,:,1),tpdfh1)
+     ! Then Oij:
+     Oxy = 0.5*(tpdudycorn - tpdvdxcorn)
+     Oxz = 0.5*(tpdudzcorn - tpdwdxcorn)
+     Oyz = 0.5*(tpdvdzcorn - tpdwdycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH2_VAR,:,:,1),tpdfh2)
+     ! Calculate Q:
+     Qcr = 0.5*(2.*(Oxy*Oxy+Oyz*Oyz+Oxz*Oxz) -                     &
+               (tpdudxcorn*tpdudxcorn + tpdvdycorn*tpdvdycorn +    &
+                tpdwdzcorn*tpdwdzcorn +                            &
+                2.*(Sxy*Sxy+Syz*Syz+Sxz*Sxz)))                      
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH3_VAR,:,:,1),tpdfh3)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH4_VAR,:,:,1),tpdfh4)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH5_VAR,:,:,1),tpdfh5)
-
-     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-     !                       solnData(DFH6_VAR,:,:,1),tpdfh6)
-
-     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-     !                       solnData(DFH7_VAR,:,:,1),tpdfh7)
-
-     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-     !                       solnData(DFH8_VAR,:,:,1),tpdfh8)
-
-     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-     !                       solnData(DFH9_VAR,:,:,1),tpdfh9)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(FVEI_VAR,:,:,1),tnx)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(FVEA_VAR,:,:,1),tny)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DNAT_VAR,:,:,1),tpdnat)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DNIT_VAR,:,:,1),tpdnit)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DQNT_VAR,:,:,1),tpdqnt)
-
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(EPOT_VAR,:,:,1),tpepot)
-
-     ! Density: dens(nxb+1,nyb+1)
-     ! -------------------------------
-
-     if (dr_nstep .eq. 1) then
-        tpdens  = 0.d0
-        tpdensy = 0.d0 
-     else
-        tpdens  = 0.5*(1./( facevarr1(NGUARD+1:nxc,NGUARD:nyc-1) + facevarr3(NGUARD+1:nxc,NGUARD:nyc-1) ) +  &
-                       1./( facevarr1(NGUARD+1:nxc,NGUARD+1:nyc) + facevarr3(NGUARD+1:nxc,NGUARD+1:nyc) ) )
-
-        tpdensy = 0.5*(1./( facevarr2(NGUARD:nxc-1,NGUARD+1:nyc) + facevarr4(NGUARD:nxc-1,NGUARD+1:nyc) ) +  &
-                       1./( facevarr2(NGUARD+1:nxc,NGUARD+1:nyc) + facevarr4(NGUARD+1:nxc,NGUARD+1:nyc) ) )
-
-     end if
 
      ! Write Block Results into data file:
-      call int2char(lb,index_lb)
+     call int2char(lb,index_lb)
 
-      i = TecZne('ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR, &
-          NXB+1,NYB+1,1,'BLOCK'//NULLCHR,CHAR(0))
-
-!      i = TecZne('ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR, &
-!          NXB,NYB,1,'BLOCK'//NULLCHR,CHAR(0))
-
-!      i = TecZne('ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR, &
-!          NXB+2*NGUARD,NYB+2*NGUARD,1,'BLOCK'//NULLCHR,CHAR(0))
+     i = TecZne(                                                       &
+                'ZONE T=BLKPROC'//index_lb//'.'//index_mype//NULLCHR,  &
+                 NXB+1,NYB+1,NZB+1,                                    &
+                 'BLOCK'//NULLCHR,                                     &
+                 CHAR(0))
 
             
-!      goto 100
-      ! Write x:
-      do j=1,NYB+1
-         do i=1,NXB+1
-            arraylb(i,j,1) = sngl(xedge(i))
-         enddo
-      enddo
-      i = TecDat(ijk,arraylb,0)
+     ! Write x:
+     do k=1,NZB+1
+        do j=1,NYB+1
+           do i=1,NXB+1
+              arraylb(i,j,k) = sngl(xedge(i))
+           enddo
+        enddo
+     enddo
+     i = TecDat(ijk,arraylb,0)
 
 
-      ! Write y:
-      do j=1,NYB+1
-         do i=1,NXB+1
-            arraylb(i,j,1) = sngl(yedge(j))
-         enddo
-      enddo
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpu)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpv)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpp)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpnrmx)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpnrmy)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdivv)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpcurv)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpt)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph0)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph1)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph2)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph3)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph4)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph5)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph6)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph7)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph8)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tph9)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfun)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfe)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh0)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh1)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh2)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh3)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh4)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdfh5)
-      i = TecDat(ijk,arraylb,0)
-
-      !arraylb(:,:,1) = sngl(tpdfh6)
-      !i = TecDat(ijk,arraylb,0)
-
-      !arraylb(:,:,1) = sngl(tpdfh7)
-      !i = TecDat(ijk,arraylb,0)
-
-      !arraylb(:,:,1) = sngl(tpdfh8)
-      !i = TecDat(ijk,arraylb,0)
-
-      !arraylb(:,:,1) = sngl(tpdfh9)
-      !i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tnx)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tny)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpdnat)
-      i = TecDat(ijk,arraylb,0)
-      
-      arraylb(:,:,1) = sngl(tpdnit)
-      i = TecDat(ijk,arraylb,0)
-      
-      arraylb(:,:,1) = sngl(tpdqnt)
-      i = TecDat(ijk,arraylb,0)
-
-      arraylb(:,:,1) = sngl(tpepot)
-      i = TecDat(ijk,arraylb,0)
-
-!      ! Write Temp:
-!      arraylb(:,:,1) = sngl(tpt)
-!      i = TecDat(ijk,arraylb,0)
-
-!      ! Write magX:
-!      arraylb(:,:,1) = sngl(tpu)
-!      i = TecDat(ijk,arraylb,0)
-
-!      ! Write magY:
-!      arraylb(:,:,1) = sngl(tpv)
-!      i = TecDat(ijk,arraylb,0)
-
-!      arraylb_c(:,:,1) = sngl(tptes_c)
-!      i1 = TecDat(pqr,arraylb_c,0)
-
-!      100 continue
-
-!      do j=1,NYB
-!         do i=1,NXB
-!            arraylb_c(i,j,1) = sngl(xe_c(i))
-!         enddo
-!      enddo
-!      i = TecDat(pqr,arraylb_c,0)
+     ! Write y:
+     do k=1,NZB+1
+        do j=1,NYB+1
+           do i=1,NXB+1
+              arraylb(i,j,k) = sngl(yedge(j))
+           enddo
+        enddo
+     enddo
+     i = TecDat(ijk,arraylb,0)
 
 
-      ! Write y:
-!      do j=1,NYB
-!         do i=1,NXB
-!            arraylb_c(i,j,1) = sngl(ye_c(j))
-!         enddo
-!      enddo
-!      i = TecDat(pqr,arraylb_c,0)
+     ! Write z:
+     do k=1,NZB+1
+        do j=1,NYB+1
+           do i=1,NXB+1
+              arraylb(i,j,k) = sngl(zedge(k))
+           enddo
+        enddo
+     enddo
+     i = TecDat(ijk,arraylb,0)
 
-!      arraylb_c(:,:,1) = sngl(tptes_c)
-!      i = TecDat(pqr,arraylb_c,0)
 
-   enddo
+     ! Write u:
+     arraylb = sngl(tpu)
+     i = TecDat(ijk,arraylb,0)
 
-   i = TecEnd()
+     ! Write v:
+     arraylb = sngl(tpv)
+     i = TecDat(ijk,arraylb,0)
 
+     ! Write w:
+     arraylb = sngl(tpw)
+     i = TecDat(ijk,arraylb,0)
+
+     ! Write p:
+     arraylb = sngl(tpp)
+     i = TecDat(ijk,arraylb,0)
+
+     arraylb = sngl(tempp)
+     i = TecDat(ijk,arraylb,0)
+
+  enddo
+
+  i = TecEnd()
+
+  if (mype .eq. 0) then
+  write(*,*) ''
+  write(filename,'("./IOData/data.",i4.4,".**.plt")') &
+        count
+  write(*,*) '*** Wrote plotfile to ',filename,' ****'
+  endif
+
+  return
+
+66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
 
   End subroutine outtotecplot
+
+
 
 ! Subroutine centervals2corners:
 ! Subroutine to obtain corver values of a variable given the center 
 ! values of it in a 3D structured block, suppossing guardcells already
 ! filled.
 !
+! Written by Marcos Vanella Decemeber 2006.
 ! ----------------------------------------------------------------------
 
-       subroutine centervals2corners(ng,nxb,nyb,nxc,nyc,unk1,tpp)
+  subroutine centervals2corners(ng,nxb,nyb,nzb,nxc,nyc,nzc, &
+                                unk1,tpp)
 
-       implicit none
+    implicit none
 
-       integer ng,nxb,nyb,nxc,nyc
-       integer nx1,ny1,nx2,ny2
-       real*8, intent(in) :: unk1(nxb+2*ng,nyb+2*ng)
-       real*8, intent(out) :: tpp(nxb+1,nyb+1)
+    integer ng,nxb,nyb,nzb,nxc,nyc,nzc
+    integer nx1,ny1,nz1,nx2,ny2,nz2
+    real*8, intent(in) :: unk1(nxb+2*ng,nyb+2*ng,nzb+2*ng)
+    real*8, intent(out) :: tpp(nxb+1,nyb+1,nzb+1)
+
+      
+    tpp = .5*.25*(unk1(ng:nxc-1,ng:nyc-1,ng:nzc-1) + &
+                  unk1(ng:nxc-1,ng:nyc-1,ng+1:nzc) + &
+                  unk1(ng:nxc-1,ng+1:nyc,ng:nzc-1) + &
+                  unk1(ng+1:nxc,ng:nyc-1,ng:nzc-1) + &
+                  unk1(ng+1:nxc,ng+1:nyc,ng:nzc-1) + &
+                  unk1(ng:nxc-1,ng+1:nyc,ng+1:nzc) + &
+                  unk1(ng+1:nxc,ng:nyc-1,ng+1:nzc) + &
+                  unk1(ng+1:nxc,ng+1:nyc,ng+1:nzc));
+
+    ! Z edges:
+    ! Edge: x = 1, y = 1:
+    tpp(1,1,:) = .25*(unk1(ng,ng+1,ng:nzc-1) + &
+                      unk1(ng,ng+1,ng+1:nzc) + &
+                      unk1(ng+1,ng,ng:nzc-1) + &
+                      unk1(ng+1,ng,ng+1:nzc));           
+            
+    ! Edge: x = 1, y = end:
+    tpp(1,nyb+1,:) = .25*(unk1(ng,nyc-1,ng:nzc-1) + & 
+                          unk1(ng,nyc-1,ng+1:nzc) + &
+                          unk1(ng+1,nyc,ng:nzc-1) + &
+                          unk1(ng+1,nyc,ng+1:nzc));    
+
+    ! Edge: x = end, y = 1:
+    tpp(nxb+1,1,:) = .25*(unk1(nxc-1,ng,ng:nzc-1) + &
+                          unk1(nxc-1,ng,ng+1:nzc) + &
+                          unk1(nxc,ng+1,ng:nzc-1) + &
+                          unk1(nxc,ng+1,ng+1:nzc));
+
+    ! Edge: x = end, y = end:
+    tpp(nxb+1,nyb+1,:) = .25*(unk1(nxc-1,nyc,ng:nzc-1) + &
+                              unk1(nxc-1,nyc,ng+1:nzc) + &
+                              unk1(nxc,nyc-1,ng:nzc-1) + &
+                              unk1(nxc,nyc-1,ng+1:nzc));
+            
+    ! Y edges:
+    ! Edge: x = 1, z = 1:
+    tpp(1,:,1) = .25*(unk1(ng,ng:nyc-1,ng+1) + &
+                      unk1(ng,ng+1:nyc,ng+1) + &
+                      unk1(ng+1,ng:nyc-1,ng) + &
+                      unk1(ng+1,ng+1:nyc,ng));
+
+    ! Edge: x = 1, z = end:
+    tpp(1,:,nzb+1) = .25*(unk1(ng,ng:nyc-1,nzc-1) + &
+                          unk1(ng,ng+1:nyc,nzc-1) + &
+                          unk1(ng+1,ng:nyc-1,nzc) + &
+                          unk1(ng+1,ng+1:nyc,nzc)); 
+
+    ! Edge: x = end, z = 1:
+    tpp(nxb+1,:,1) = .25*(unk1(nxc-1,ng:nyc-1,ng) + &
+                          unk1(nxc-1,ng+1:nyc,ng) + &
+                          unk1(nxc,ng:nyc-1,ng+1) + &
+                          unk1(nxc,ng+1:nyc,ng+1));
+
+    ! Edge: x = end, z = end:
+    tpp(nxb+1,:,nzb+1) = .25*(unk1(nxc-1,ng:nyc-1,nzc) + &
+                              unk1(nxc-1,ng+1:nyc,nzc) + &
+                              unk1(nxc,ng:nyc-1,nzc-1) + &
+                              unk1(nxc,ng+1:nyc,nzc-1));
+
+    ! X edges:
+    ! Edge: y = 1, z = 1:
+    tpp(:,1,1) = .25*(unk1(ng:nxc-1,ng,ng+1) + &
+                      unk1(ng+1:nxc,ng,ng+1) + &
+                      unk1(ng:nxc-1,ng+1,ng) + &
+                      unk1(ng+1:nxc,ng+1,ng));            
+
+    ! Edge: y = 1, z = end:
+    tpp(:,1,nzb+1) = .25*(unk1(ng:nxc-1,ng,nzc-1) + &
+                          unk1(ng+1:nxc,ng,nzc-1) + &
+                          unk1(ng:nxc-1,ng+1,nzc) + &
+                          unk1(ng+1:nxc,ng+1,nzc));   
+
+    ! Edge: y = end, z = 1:
+    tpp(:,nyb+1,1) = .25*(unk1(ng:nxc-1,nyc-1,ng) + & 
+                          unk1(ng+1:nxc,nyc-1,ng) + &
+                          unk1(ng:nxc-1,nyc,ng+1) + &
+                          unk1(ng+1:nxc,nyc,ng+1)); 
+
+    ! Edge: y = end, z = end:
+    tpp(:,nyb+1,nzb+1) = .25*(unk1(ng:nxc-1,nyc-1,nzc) + &
+                              unk1(ng+1:nxc,nyc-1,nzc) + &
+                              unk1(ng:nxc-1,nyc,nzc-1) + &
+                              unk1(ng+1:nxc,nyc,nzc-1)); 
+
+    ! Corners
+    ! Corner x = 1, y = 1, z = 1:
+    tpp(1,1,1) = -0.5*unk1(ng+1,ng+1,ng+1) + &
+                  0.5*unk1(ng,ng+1,ng+1)   + &
+                  0.5*unk1(ng+1,ng,ng+1)   + &
+                  0.5*unk1(ng+1,ng+1,ng)   
 
 
-       tpp = .25*(unk1(ng:nxc-1,ng:nyc-1) + &
-                  unk1(ng:nxc-1,ng+1:nyc) + &
-                  unk1(ng+1:nxc,ng:nyc-1) + &
-                  unk1(ng+1:nxc,ng+1:nyc))
-
-       ! Corners:
-       ! Edge: x = 1, y = 1:
-       tpp(1,1) = .5*(unk1(ng,ng+1) + &
-                      unk1(ng+1,ng))
-
-       ! Edge: x = 1, y = end:
-       tpp(1,nyb+1) = .5*(unk1(ng,nyc-1) + &
-                          unk1(ng+1,nyc))
-
-       ! Edge: x = end, y = 1:
-       tpp(nxb+1,1) = .5*(unk1(nxc-1,ng) + &
-                          unk1(nxc,ng+1))
-
-       ! Edge: x = end, y = end:
-       tpp(nxb+1,nyb+1) = .5*(unk1(nxc-1,nyc) + &
-                              unk1(nxc,nyc-1))
+    ! Corner x = end, y =1, z = 1:
+    tpp(nxb+1,1,1) = -0.5*unk1(nxc-1,ng+1,ng+1) + &
+                      0.5*unk1(nxc,ng+1,ng+1)   + &
+                      0.5*unk1(nxc-1,ng,ng+1)   + &
+                      0.5*unk1(nxc-1,ng+1,ng)   
 
 
-     End subroutine centervals2corners
+    ! Corner x = end, y = end, z = 1:
+    tpp(nxb+1,nyb+1,1) = -0.5*unk1(nxc-1,nyc-1,ng+1) + &
+                          0.5*unk1(nxc,nyc-1,ng+1)   + &
+                          0.5*unk1(nxc-1,nyc,ng+1)   + &
+                          0.5*unk1(nxc-1,nyc-1,ng)
 
+    ! Corner x = 1, y = end, z = 1:
+    tpp(1,nyb+1,1) = -0.5*unk1(ng+1,nyc-1,ng+1) + &
+                      0.5*unk1(ng,nyc-1,ng+1)   + &
+                      0.5*unk1(ng+1,nyc,ng+1)   + &
+                      0.5*unk1(ng+1,nyc-1,ng)   
+
+    ! Corner x = 1, y = 1, z = end:
+    tpp(1,1,nzb+1) = -0.5*unk1(ng+1,ng+1,nzc-1) + &
+                      0.5*unk1(ng,ng+1,nzc-1)   + &
+                      0.5*unk1(ng+1,ng,nzc-1)   + &
+                      0.5*unk1(ng+1,ng+1,nzc)               
+
+    ! Corner x = end, y = 1, z = end:
+    tpp(nxb+1,1,nzb+1) = -0.5*unk1(nxc-1,ng+1,nzc-1) + &
+                          0.5*unk1(nxc,ng+1,nzc-1)   + &
+                          0.5*unk1(nxc-1,ng,nzc-1)   + &
+                          0.5*unk1(nxc-1,ng+1,nzc)    
+
+    ! Corner x = end, y = end, z = end:
+    tpp(nxb+1,nyb+1,nzb+1) = -0.5*unk1(nxc-1,nyc-1,nzc-1) + &
+                              0.5*unk1(nxc,nyc-1,nzc-1)   + &
+                              0.5*unk1(nxc-1,nyc,nzc-1)   + &
+                              0.5*unk1(nxc-1,nyc-1,nzc)
+
+    ! Corner x = 1, y = end, z = end:
+    tpp(1,nyb+1,nzb+1) = -0.5*unk1(ng+1,nyc-1,nzc-1) + &
+                          0.5*unk1(ng,nyc-1,nzc-1)   + &
+                          0.5*unk1(ng+1,nyc,nzc-1)   + &
+                          0.5*unk1(ng+1,nyc-1,nzc)          
+
+  End subroutine centervals2corners
 
 ! Subroutine int2char
 ! Subroutine that converts an integer of at most 6 figures
@@ -712,4 +704,5 @@
       enddo
 
       End subroutine int2char
+
 

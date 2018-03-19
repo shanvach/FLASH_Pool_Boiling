@@ -1,15 +1,16 @@
-subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2, T_res)
+subroutine Heat_Solve(T_p, T_o, u, v, w, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2, kz1, kz2, T_res)
 
   use Heat_AD_data
 
 #include "Heat_AD.h"
+#include "Flash.h"
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_p
   real, dimension(:,:,:), intent(in) :: T_o
-  real, dimension(:,:,:), intent(in) :: u,v
+  real, dimension(:,:,:), intent(in) :: u,v,w
   real, intent(in) :: dt, dx, dy, dz, inRe
-  integer, intent(in) :: ix1, ix2, jy1, jy2
+  integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
 
   real, intent(out) :: T_res
 
@@ -20,13 +21,38 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2, T
 
 #ifdef HEAT_CENTRAL
 
-  ! with Loop Vectorization ! (Second Order Central)
+ ! with Loop Vectorization ! (Second Order Central)
 
-  T_p(ix1:ix2,jy1:jy2,1) = T_o(ix1:ix2,jy1:jy2,1) &
-  +((dt*inRe)/(ht_Pr*dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)+T_o(ix1-1:ix2-1,jy1:jy2,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
-  +((dt*inRe)/(ht_Pr*dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)+T_o(ix1:ix2,jy1-1:jy2-1,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
-  -((dt*(u(ix1+1:ix2+1,jy1:jy2,1) + u(ix1:ix2,jy1:jy2,1))/2)/(2*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)-T_o(ix1-1:ix2-1,jy1:jy2,1))&
-  -((dt*(v(ix1:ix2,jy1+1:jy2+1,1) + v(ix1:ix2,jy1:jy2,1))/2)/(2*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)-T_o(ix1:ix2,jy1-1:jy2-1,1))
+#if NDIM == 3
+ T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_o(ix1:ix2,jy1:jy2,kz1:kz2) &
+
+ +((dt*inRe)/(ht_Pr*dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+T_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2)-2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
+ +((dt*inRe)/(ht_Pr*dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+T_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2)-2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
+ +((dt*inRe)/(ht_Pr*dz*dz))*(T_o(ix1:ix2,jy1:jy2,kz1+1:kz2+1)+T_o(ix1:ix2,jy1:jy2,kz1-1:kz2-1)-2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
+
+ -((dt*(u(ix1+1:ix2+1,jy1:jy2,kz1:kz2) + u(ix1:ix2,jy1:jy2,kz1:kz2))/2)/(2*dx))*&
+   (T_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)-T_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2))&
+
+ -((dt*(v(ix1:ix2,jy1+1:jy2+1,kz1:kz2) + v(ix1:ix2,jy1:jy2,kz1:kz2))/2)/(2*dy))*&
+   (T_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)-T_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2))&
+
+ -((dt*(w(ix1:ix2,jy1:jy2,kz1+1:kz2+1) + w(ix1:ix2,jy1:jy2,kz1:kz2))/2)/(2*dz))*&
+   (T_o(ix1:ix2,jy1:jy2,kz1+1:kz2+1)-T_o(ix1:ix2,jy1:jy2,kz1-1:kz2-1))
+
+#else
+
+ T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_o(ix1:ix2,jy1:jy2,kz1:kz2) &
+
+ +((dt*inRe)/(ht_Pr*dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+T_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2)-2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
+ +((dt*inRe)/(ht_Pr*dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+T_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2)-2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
+
+ -((dt*(u(ix1+1:ix2+1,jy1:jy2,kz1:kz2) + u(ix1:ix2,jy1:jy2,kz1:kz2))/2)/(2*dx))*&
+   (T_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)-T_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2))&
+
+ -((dt*(v(ix1:ix2,jy1+1:jy2+1,kz1:kz2) + v(ix1:ix2,jy1:jy2,kz1:kz2))/2)/(2*dy))*&
+   (T_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)-T_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2))
+
+#endif
 
 #endif
 
@@ -63,7 +89,7 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2, T
 #endif
 
   !do i = ix1,ix2
-     T_res = T_res + sum(sum((T_o(:,:,1)-T_p(:,:,1))**2,1),1)
+     T_res = T_res + sum(sum(sum((T_o(:,:,:)-T_p(:,:,:))**2,1),1),1)
   !end do
 
   T_res = (T_res/size(T_o))

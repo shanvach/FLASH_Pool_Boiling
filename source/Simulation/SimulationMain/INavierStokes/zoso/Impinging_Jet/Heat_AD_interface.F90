@@ -3,13 +3,13 @@ module Heat_AD_interface
     implicit none
         
     interface
-       subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, T_res)
+       subroutine Heat_Solve(T_p, T_o, u, v, w, dt, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, kz1, kz2, T_res)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_p
          real, dimension(:,:,:), intent(in) :: T_o
-         real, dimension(:,:,:), intent(in) :: u,v
+         real, dimension(:,:,:), intent(in) :: u,v,w
          real, intent(in) :: dt, dx, dy, dz, inRe
-         integer, intent(in) :: ix1, ix2, jy1, jy2
+         integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
          real, intent(out) :: T_res
        end subroutine Heat_Solve
     end interface
