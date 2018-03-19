@@ -589,71 +589,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
   call Timers_stop("Immersed Boundaries.")
 
-  do lb=1,blockCount
-
-     blockID = blockList(lb)
-
-     call Grid_getDeltas(blockID,del)
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-     call Plasma_getNorm(solnData(NRMX_VAR,:,:,:), &
-                         solnData(NRMY_VAR,:,:,:), &
-                         solnData(DFUN_VAR,:,:,:), &
-                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                         del(DIR_X),del(DIR_Y))
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-  end do
-
-  gcMask = .FALSE.
-  gcMask(NRMX_VAR) = .TRUE.
-  gcMask(NRMY_VAR) = .TRUE.
-
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
- 
-  do lb=1,blockCount
-
-     blockID = blockList(lb)
-
-     call Grid_getDeltas(blockID,del)
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-     !call Plasma_velSource(facexData(VELC_FACE_VAR,:,:,:),&
-     !                      faceyData(VELC_FACE_VAR,:,:,:),&
-     !                      solnData(NRMX_VAR,:,:,:), &
-     !                      solnData(NRMY_VAR,:,:,:), &
-     !                      solnData(DFUN_VAR,:,:,:), &
-     !                      solnData(SIGP_VAR,:,:,:), &
-     !                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-     !                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-     !                      del(DIR_X),del(DIR_Y))
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-  end do
-
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
-  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
-
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-
 !  call Timers_start("ImmBoundaries_Forces")
   ! Compute forces on immersed bodies:
 !  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
@@ -1042,6 +977,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   maxp = max(maxp,maxval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minp = min(minp,minval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
 
+  ures  = ures + sum(sum(sum((facexData(VELC_FACE_VAR,:,:,:)-facexData(VOLD_FACE_VAR,:,:,:))**2,1),1),1)/size(facexData(VELC_FACE_VAR,:,:,:))
+
+  vres  = ures + sum(sum(sum((faceyData(VELC_FACE_VAR,:,:,:)-faceyData(VOLD_FACE_VAR,:,:,:))**2,1),1),1)/size(faceyData(VELC_FACE_VAR,:,:,:))
+
 
 #elif NDIM == 2
 
@@ -1067,9 +1006,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                    (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,1) - &
                     faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_Y) ))
 
-  ures  = ures + (sum(sum((facexData(VELC_FACE_VAR,:,:,1)-facexData(VOLD_FACE_VAR,:,:,1))**2,1),1)/size(facexData(VELC_FACE_VAR,:,:,1)))
+  ures  = ures + sum(sum(sum((facexData(VELC_FACE_VAR,:,:,:)-facexData(VOLD_FACE_VAR,:,:,:))**2,1),1),1)/size(facexData(VELC_FACE_VAR,:,:,:))
 
-  vres  = ures + (sum(sum((faceyData(VELC_FACE_VAR,:,:,1)-faceyData(VOLD_FACE_VAR,:,:,1))**2,1),1)/size(faceyData(VELC_FACE_VAR,:,:,1)))
+  vres  = ures + sum(sum(sum((faceyData(VELC_FACE_VAR,:,:,:)-faceyData(VOLD_FACE_VAR,:,:,:))**2,1),1),1)/size(faceyData(VELC_FACE_VAR,:,:,:))
 
 #endif
 

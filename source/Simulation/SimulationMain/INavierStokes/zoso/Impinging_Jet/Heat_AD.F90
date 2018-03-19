@@ -46,6 +46,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      oldT = solnData(TEMP_VAR,:,:,:)
 
@@ -53,17 +54,19 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Heat_Solve(solnData(TEMP_VAR,:,:,:), oldT,&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
+                     facezData(VELC_FACE_VAR,:,:,:),&
                      dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
                      ins_invRe,&
                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),T_res1)
+                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                     blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),T_res1)
 
      T_resblock = T_resblock + T_res1
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
    end do
 
