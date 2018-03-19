@@ -25,11 +25,16 @@ module Plasma_data
         integer, save :: pls_prol_method
 
         real, save :: pls_dcoeff
-
+  
+        real, dimension(10), save :: pls_NJET !source from beam     
+   
         real, dimension(10), save :: pls_RSCD ! Collision Diameter, Angstrom
         real, dimension(10), save :: pls_MHSP ! molar mass of each species  g/mol
 
-        real, save :: pls_MMIX ! molar mass of saline solution
+        real, dimension(21), save :: pls_poly_coef !polynomial coeffs ne feed
+
+        real, save :: pls_MMIX    ! molar mass of saline solution
+        real, save :: pls_Cmi_net ! mass of all ions (kg)
         
         real, save :: pls_Ckb ! Boltzmann Constant J/K
         real, save :: pls_Cme ! electron mass kg
@@ -37,5 +42,12 @@ module Plasma_data
         real, save :: pls_Cpi ! pi
         real, save :: pls_gam ! Euler's number
         real, save :: pls_KtoeV ! conversion factor from Kelvin to eV
+
+        real, save :: pls_pct_noise ! percentage noise
+
+        real, save :: pls_epsilon0 !permitivity of free space
+        real, save :: pls_l2target !l2 norm of error target for convergence
+
+        logical, save :: pls_pois_flg
 
 end module Plasma_data

@@ -24,14 +24,14 @@ subroutine Plasma_ColFreq(vei, vea, N_a, N_e, T_e, ix1, ix2, jy1, jy2)
      vea(i,j,1) = (4.0/3.0)*1e-20*(N_a(i,j,1))*                             &
                   ((8.0*pls_Ckb*T_e(i,j,1)) /(pls_Cpi*pls_Cme))**0.5
      !set limit on collision frequencies
-     if (vei(i,j,1).le.1e7) then
-      vei(i,j,1) = 1e7
+     if (vei(i,j,1).le.1e3) then
+      vei(i,j,1) = 1e3
      elseif(vei(i,j,1).ge.1e13) then
       vei(i,j,1) = 1e13
      end if
      !
-     if (vea(i,j,1).le.1e7) then
-      vea(i,j,1) = 1e7
+     if (vea(i,j,1).le.1e3) then
+      vea(i,j,1) = 1e3
      elseif(vea(i,j,1).ge.1e13) then
       vea(i,j,1) = 1e13
      end if

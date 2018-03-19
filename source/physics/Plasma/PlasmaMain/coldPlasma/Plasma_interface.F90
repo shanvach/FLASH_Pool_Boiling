@@ -32,10 +32,10 @@ module Plasma_interface
 
 
         interface
-        subroutine Plasma_Solve(T_p, T_gen, T_o, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
+        subroutine Plasma_Solve(T_p, T_gen, T_o, T_source, dfun, dcoeff, dt, dx, dy, ix1,ix2, jy1, jy2,T_res)
                 implicit none
                 real, dimension(:,:,:), intent(inout) :: T_p
-                real, dimension(:,:,:), intent(in) :: T_o, T_gen, dfun, dcoeff
+                real, dimension(:,:,:), intent(in) :: T_o, T_source, T_gen, dfun, dcoeff
                 real, intent(in) :: dt, dx, dy
                 integer, intent(in) :: ix1, ix2, jy1, jy2
                 real, intent(out) :: T_res
@@ -89,10 +89,11 @@ module Plasma_interface
         end interface
 
         interface
-        subroutine Plasma_elDiffCoeff(DiffCoeffel, T_e, Fvea, Fvei, ix1, ix2,jy1, jy2)
+        subroutine Plasma_elDiffCoeff(Diffcoeffion, DiffCoeffel, T_e, T_h,&
+                                      Fvea, Fvei, ix1, ix2,jy1, jy2)
                 implicit none
-                real, dimension(:,:,:), intent(inout) :: DiffCoeffel
-                real, dimension(:,:,:), intent(in) :: T_e, Fvea, Fvei
+                real, dimension(:,:,:), intent(inout) :: DiffCoeffion,DiffCoeffel
+                real, dimension(:,:,:), intent(in) :: T_e, T_h, Fvea, Fvei
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_elDiffCoeff
         end interface
@@ -117,13 +118,23 @@ module Plasma_interface
         end interface
 
         interface
-        subroutine Plasma_spReactions(RSP0, RSP1, RSP2, RSP3, RSP4, RSP5, RSP6, RSP7,  &
-                                      RSP8, RSP9, RSP10, RSP11, RSP12, RSP13, T_h, T_e,&
-                                      ix1, ix2, jy1, jy2)
+        subroutine Plasma_sumIons(N_is, N_it, ix1, ix2, jy1, jy2 )
+                implicit none
+                real, dimension(:,:,:), intent(in) :: N_is
+                real, dimension(:,:,:), intent(inout) :: N_it
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_sumIons
+        end interface
+
+        interface
+        subroutine Plasma_spReactions(RSP0,RSP1,RSP2,RSP3,RSP4,RSP5,RSP6,RSP7,&
+                                      RSP8,RSP9,RSP10,RSP11,RSP12,RSP13,RSP14,& 
+                                      RSP15,RSP16,T_h,T_e,ix1, ix2, jy1, jy2)
                 implicit none
                 real, dimension(:,:,:), intent(inout) :: RSP0,RSP1,RSP2,RSP3,RSP4,&
                                                          RSP5,RSP6,RSP7,RSP8,RSP9,&
-                                                         RSP10,RSP11,RSP12,RSP13
+                                                         RSP10,RSP11,RSP12,RSP13,&
+                                                         RSP14,RSP15,RSP16
                 real, dimension(:,:,:), intent(in) :: T_h, T_e
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_spReactions
@@ -131,24 +142,77 @@ module Plasma_interface
    
         interface
         subroutine Plasma_spGeneration(N_h0,N_h1,N_h2,N_h3,N_h4,N_h5,N_h6,& 
-                                       N_h7,N_h8,N_h9,N_e,RSP0,RSP1,RSP2, &
+                                       N_h7,N_h8,N_h9,N_el,RSP0,RSP1,RSP2, &
                                        RSP3,RSP4,RSP5,RSP6,RSP7,RSP8,RSP9,&
-                                       RSP10,RSP11,RSP12,RSP13,GNH0,GNH1, &
-                                       GNH2,GNH3,GNH4,GNH5,GNH6,GNH7,GNH8,&
-                                       GNH9,GNE,GNEBZ,GNERT,ix1,ix2,jy1,jy2)
+                                       RSP10,RSP11,RSP12,RSP13,RSP14,RSP15,&
+                                       RSP16,GNH0,GNH1,GNH2,GNH3,GNH4,GNH5,&
+                                       GNH6,GNH7,GNH8,GNH9,GNE,GNEBZ,GNERT,&
+                                       ix1,ix2,jy1,jy2)
                 implicit none
                 real, dimension(:,:,:), intent(in) :: N_h0,N_h1,N_h2,N_h3,N_h4,&
                                                       N_h5,N_h6,N_h7,N_h8,N_h9,&
-                                                      N_e
+                                                      N_el
                 real, dimension(:,:,:), intent(in) :: RSP0,RSP1,RSP2,RSP3,RSP4,&
                                                       RSP5,RSP6,RSP7,RSP8,RSP9,&
-                                                      RSP10,RSP11,RSP12,RSP13
+                                                      RSP10,RSP11,RSP12,RSP13,&
+                                                      RSP14,RSP15,RSP16
                 real, dimension(:,:,:), intent(inout) :: GNH0,GNH1,GNH2,GNH3,&
                                             GNH4,GNH5,GNH6,GNH7,&
                                             GNH8,GNH9,GNE,GNEBZ,&
                                             GNERT
                 integer, intent(in) :: ix1, ix2, jy1, jy2
         end subroutine Plasma_spGeneration
+        end interface
+
+        interface
+        subroutine Plasma_Feed(constant_rate,noise,feed_rate,distfunc,ix1,ix2,jy1,jy2)
+                implicit none
+                real, intent(in) :: constant_rate
+                real, dimension(:), intent(in) :: noise
+                real, dimension(:,:,:), intent(in) :: distfunc
+                real, dimension(:,:,:), intent(inout) :: feed_rate
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_Feed
+        end interface
+        
+        interface
+        subroutine Plasma_netCharge(dqn, dnit_pos, dnit_neg, dele, ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: dnit_pos, dnit_neg, dele
+                real, dimension(:,:,:), intent(inout) :: dqn
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_netCharge        
+        end interface
+
+        interface
+        subroutine Plasma_elPotential(ppold, distfunc, pp, dqn, dx, dy,ix1, ix2, jy1, jy2)
+                implicit none
+                real, dimension(:,:,:), intent(in) :: dqn, distfunc
+                real, dimension(:,:,:), intent(inout) :: pp, ppold
+                real, intent(in) :: dx, dy
+                integer, intent(in) :: ix1, ix2, jy1, jy2
+        end subroutine Plasma_elPotential
+        end interface
+
+        interface
+        subroutine Plasma_getNorm(nrmx,nrmy,s,ix1,ix2,jy1,jy2,dx,dy)
+                implicit none
+                real, intent(inout), dimension(:,:,:) :: nrmx,nrmy
+                real, intent(in), dimension(:,:,:) :: s
+                integer, intent(in) :: ix1,ix2,jy1,jy2
+                real, intent(in) :: dx,dy
+        end subroutine
+        end interface
+
+        interface
+        subroutine Plasma_velSource(u,v,nrmx,nrmy,s,sigp,ix1,ix2,jy1,jy2,dx,dy)
+                implicit none
+                real, intent(inout), dimension(:,:,:) :: u,v
+                real, intent(inout), dimension(:,:,:) :: sigp
+                real, intent(in), dimension(:,:,:) :: s,nrmx,nrmy
+                integer, intent(in) :: ix1,ix2,jy1,jy2
+                real, intent(in) :: dx,dy
+        end subroutine Plasma_velSource
         end interface
 
 end module Plasma_interface

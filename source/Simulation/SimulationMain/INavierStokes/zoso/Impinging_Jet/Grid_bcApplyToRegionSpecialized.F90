@@ -227,7 +227,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   integer,intent(IN),dimension(LOW:HIGH,MDIM) :: endPoints, blkLimitsGC
   integer,intent(IN),OPTIONAL:: idest
 
-  integer :: i,j, k,ivar,je,ke,n,varCount,bcTypeActual
+  integer :: kk,i,j, k,ivar,je,ke,n,varCount,bcTypeActual,ii
   logical :: isFace
   integer    :: sign
   integer :: jd,kd
@@ -238,7 +238,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   real, dimension(MDIM)  :: coord,bsize,del
   real ::  boundBox(2,MDIM)
 
-  real :: xcell,xedge,ycell,yedge,alfadt
+  real :: zcell,xcell,xedge,ycell,yedge,alfadt
 
   real, save :: TLEVEL
 
@@ -393,6 +393,105 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else
                k = 2*guard+1
                do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == TEMP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+
+               k = 2*guard+1
+               do i = 1,guard
+               regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+            else if(gridDataStruct == WORK) then
+
+               if(pls_pois_flg) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+            else
+
+               if(ivar == VELC_FACE_VAR) then
+
+                        if (isFace) then
+
+                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+
+                        k = 2*guard+2
+                        do i = 1,guard
+                        regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+
+                        else
+                        k = 2*guard+1
+                        do i = 1,guard
+                        regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+                        endif
+
+               else
+
+                        k = 2*guard+1
+                        if (isFace) k = k+1
+                        do i = 1,guard
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+
+               end if
+ 
+           end if
+  
+         else if (axis == KAXIS) then ! Level 3a
+           ! KAXIS BCs for face == LOW
+            if(gridDataStruct == CENTER) then
+
+
+               if(ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == MGW3_VAR) then
+
+               if(pls_pois_flg) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
                   regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
                end do
 
@@ -416,7 +515,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-               regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                end if
@@ -437,13 +536,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                end if
 
-            else
+ 
+           else
 
                if(ivar == VELC_FACE_VAR) then
 
                         if (isFace) then
 
-                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.0
 
                         k = 2*guard+2
                         do i = 1,guard
@@ -466,11 +566,9 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         end do
 
                end if
- 
-           end if
-  
-         else if (axis == KAXIS) then ! Level 3a
-           ! KAXIS BCs for face == LOW
+    
+            end if 
+
          end if ! End Level 3a
  
        else ! if face == HIGH ! Level 3
@@ -603,6 +701,161 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else
                k = 2*guard+1
                do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+               else if(ivar == PRES_VAR .or. ivar == DELP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == TEMP_VAR) then
+
+                do ii=1,je
+                   do kk=1,ke
+
+                   xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                           real(ii+NGUARD - NGUARD - 1)*del(IAXIS) +   &
+                           0.5*del(IAXIS)
+
+                   zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +   &
+                           real(kk+NGUARD - NGUARD - 1)*del(KAXIS) +   &
+                           0.5*del(KAXIS)
+
+                       k = 2*guard+1
+                       do i = 1,guard
+
+                       if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then    
+                          regionData(k-i,ii,kk,ivar) = 2.0 -regionData(guard,ii,kk,ivar)
+
+                        else
+                          regionData(k-i,ii,kk,ivar) = regionData(guard,ii,kk,ivar)
+
+                        end if
+
+                     end do   
+                   end do            
+                 end do
+
+              else
+
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+           else if(gridDataStruct == WORK) then
+
+               if(pls_pois_flg) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+           else
+
+              if (ivar == VELC_FACE_VAR) then
+
+                        if (isFace) then
+                       
+                        do ii=1,je
+                           do kk=1,ke
+
+                                xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                                        real(ii+NGUARD - NGUARD - 1)*del(IAXIS) +   &
+                                        0.5*del(IAXIS)
+
+                                zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +   &
+                                        real(kk+NGUARD - NGUARD - 1)*del(KAXIS) +   &
+                                        0.5*del(KAXIS)
+                           
+                                if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then
+
+                                regionData(guard+1,ii,kk,ivar) = -1.0
+
+                                else
+                                regionData(guard+1,ii,kk,ivar) = 0.0
+
+                                endif
+
+                                k = 2*guard+2
+                                do i = 1,guard
+
+                                        if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then
+                                        regionData(k-i,ii,kk,ivar) = -2.0 -regionData(guard+1,ii,kk,ivar)
+
+                                        else
+                                        regionData(k-i,ii,kk,ivar) = -regionData(guard+1,ii,kk,ivar)
+
+                                        end if
+                                end do
+                            end do                                
+                        end do
+
+                        else
+                        k = 2*guard+1
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+                        end do
+                        endif
+
+              else
+
+                        if(isFace) then
+                        k=2*guard+2
+                        do i=1,guard
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                        enddo
+
+                        else
+                        k=2*guard+1
+                        do i=1,guard
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+                        enddo
+                        endif
+
+
+              endif
+
+
+            end if
+  
+         else if (axis == KAXIS) then ! Level 3b
+           ! KAXIS BCs for face == HIGH
+           if(gridDataStruct == CENTER) then
+
+               if(ivar == EPOT_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == MGW3_VAR) then
+
+               if(pls_pois_flg) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
                   regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
@@ -615,7 +868,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                   regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == TEMP_VAR) then
+              else if(ivar == TEMP_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
@@ -685,12 +938,9 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
               endif
 
-
-            end if
+           end if
   
-         else if (axis == KAXIS) then ! Level 3b
-           ! KAXIS BCs for face == HIGH
-         end if ! End Level 3b
+        end if ! End Level 3b
   
        end if ! End Level 3
  

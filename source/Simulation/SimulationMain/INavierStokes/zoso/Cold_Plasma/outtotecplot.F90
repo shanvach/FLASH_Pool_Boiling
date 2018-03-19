@@ -72,8 +72,8 @@
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
            tpuint, tpvint,tptes,tprds,&
            tph0, tph1, tph2, tph3, tph4, tph5, tph6, tph7, tph8, tph9,&
-           tpdfe, tpdfh0, tpdfh1, tpdfh2, tpdfh3, tpdfh4, tpdfh5, tpdfh6, tpdfh7,&
-           tpdfh8, tpdfh9, tpdhvt
+           tpdfe, tpdfh0, tpdfh1, tpdfh2, tpdfh3, tpdfh4, tpdfh5,&
+           tpdnat, tpdnit, tpepot, tpdqnt,tpnrmx,tpnrmy, tpdivv
 
 
   real, dimension(NXB,NYB) :: tptes_c
@@ -149,7 +149,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 dfh6 dfh7 dfh8 dfh9 vei vea neutrals'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p nx ny divv temp e h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 dfun dfE dfh0 dfh1 dfh2 dfh3 dfh4 dfh5 vei vea neutrals ions netcharge potential'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -197,6 +197,7 @@
      tpu = 0.
      tpv = 0.
      tpp = 0.
+     tpcurv = 0.
      tpdens = 0.
      tpdensy = 0.
      tpt = 0.
@@ -232,11 +233,17 @@
      tpdfh3 = 0.
      tpdfh4 = 0.
      tpdfh5 = 0.
-     tpdfh6 = 0.
-     tpdfh7 = 0.
-     tpdfh8 = 0.
-     tpdfh9 = 0.
-     tpdhvt = 0.
+     !tpdfh6 = 0.
+     !tpdfh7 = 0.
+     !tpdfh8 = 0.
+     !tpdfh9 = 0.
+     tpdnat = 0.
+     tpdnit = 0.
+     tpepot = 0.
+     tpdqnt =0.
+     tpnrmx = 0.
+     tpnrmy = 0.
+     tpdivv = 0.
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -266,8 +273,8 @@
      !ye_c(i) = ye_c(i-1)+dy;
      !end do
    
-     facevarxx = facexData(MAGF_FACE_VAR,:,:,1)
-     facevaryy = faceyData(MAGF_FACE_VAR,:,:,1)
+     facevarxx = facexData(VELC_FACE_VAR,:,:,1)
+     facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
  
      facevarr1 = facexData(RH1F_FACE_VAR,:,:,1)
      facevarr2 = faceyData(RH1F_FACE_VAR,:,:,1)
@@ -290,6 +297,21 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DELE_VAR,:,:,1),tpt)
 
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(PRES_VAR,:,:,1),tpp)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NRMX_VAR,:,:,1),tpnrmx)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NRMY_VAR,:,:,1),tpnrmy)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(TEMP_VAR,:,:,1),tpcurv)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DUST_VAR,:,:,1),tpdivv)  
+ 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DHV0_VAR,:,:,1),tph0)
 
@@ -344,17 +366,17 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DFH5_VAR,:,:,1),tpdfh5)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH6_VAR,:,:,1),tpdfh6)
+     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+     !                       solnData(DFH6_VAR,:,:,1),tpdfh6)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH7_VAR,:,:,1),tpdfh7)
+     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+     !                       solnData(DFH7_VAR,:,:,1),tpdfh7)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH8_VAR,:,:,1),tpdfh8)
+     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+     !                       solnData(DFH8_VAR,:,:,1),tpdfh8)
 
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFH9_VAR,:,:,1),tpdfh9)
+     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+     !                       solnData(DFH9_VAR,:,:,1),tpdfh9)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(FVEI_VAR,:,:,1),tnx)
@@ -363,7 +385,16 @@
                             solnData(FVEA_VAR,:,:,1),tny)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DHVT_VAR,:,:,1),tpdhvt)
+                            solnData(DNAT_VAR,:,:,1),tpdnat)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DNIT_VAR,:,:,1),tpdnit)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DQNT_VAR,:,:,1),tpdqnt)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(EPOT_VAR,:,:,1),tpepot)
 
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
@@ -411,6 +442,26 @@
       enddo
       i = TecDat(ijk,arraylb,0)
 
+      arraylb(:,:,1) = sngl(tpu)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpv)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpp)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpnrmx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpnrmy)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpdivv)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpcurv)
+      i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)
@@ -469,17 +520,17 @@
       arraylb(:,:,1) = sngl(tpdfh5)
       i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tpdfh6)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdfh6)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tpdfh7)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdfh7)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tpdfh8)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdfh8)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tpdfh9)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdfh9)
+      !i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tnx)
       i = TecDat(ijk,arraylb,0)
@@ -487,7 +538,16 @@
       arraylb(:,:,1) = sngl(tny)
       i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,1) = sngl(tpdhvt)
+      arraylb(:,:,1) = sngl(tpdnat)
+      i = TecDat(ijk,arraylb,0)
+      
+      arraylb(:,:,1) = sngl(tpdnit)
+      i = TecDat(ijk,arraylb,0)
+      
+      arraylb(:,:,1) = sngl(tpdqnt)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tpepot)
       i = TecDat(ijk,arraylb,0)
 
 !      ! Write Temp:

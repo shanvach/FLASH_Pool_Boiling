@@ -1,1 +1,4 @@
 ./setup INavierStokes/zoso/Cold_Plasma  -2d -auto  -nxb=20 -nyb=20 -opt  -maxblocks=100 -gridinterpolation=native +pm4dev  -objdir=Cold_Plasma -site=splash.seas.gwu.edu Bittree=0
+
+git checkout bin/*
+git checkout lib/*

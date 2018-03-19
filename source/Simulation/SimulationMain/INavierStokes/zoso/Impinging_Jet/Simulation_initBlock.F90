@@ -60,14 +60,14 @@ subroutine Simulation_initBlock(blockId)
 
   real, dimension(MDIM)  :: coord,bsize,del
   real ::  boundBox(2,MDIM)
-  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData
+  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  real :: xcell,xedge,ycell,yedge
+  real :: zcell,xcell,xedge,ycell,yedge
 
   real :: A0
 
   real :: A, B, emp, fs, x0, y0, r0, solnX, x1, y1, x2, y2, d1, d2, d3, r_test
-  real :: x3,x4,x5,x6,y3,y4,y5,y6
+  real :: z0,x3,x4,x5,x6,y3,y4,y5,y6
   real :: d4,d5,d6,d7
   real :: nuc_dfun
   integer :: nuc_index
@@ -102,11 +102,13 @@ subroutine Simulation_initBlock(blockId)
   ! Point to Blocks face variables: 
   call Grid_getBlkPtr(blockID,facexData,FACEX)
   call Grid_getBlkPtr(blockID,faceyData,FACEY)
+  call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
   x0 = 0.0
   y0 = 0.0
+  z0 = 0.0
   r0 = 0.5
 
   solnData(DELE_VAR,:,:,:)  = 4e6          ! particles/m3
@@ -121,9 +123,12 @@ subroutine Simulation_initBlock(blockId)
 
   facexData(RH1F_FACE_VAR,:,:,:) = 1.0
   faceyData(RH1F_FACE_VAR,:,:,:) = 1.0
+  facezData(RH1F_FACE_VAR,:,:,:) = 1.0
+
   facexData(RH2F_FACE_VAR,:,:,:) = 0.0
   faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
- 
+  facezData(RH2F_FACE_VAR,:,:,:) = 0.0 
+
   !initialize values of heavy species and generation rates
   do i=0,9
     solnData(DHV0_VAR+i,:,:,:) = 1e6
@@ -148,9 +153,12 @@ subroutine Simulation_initBlock(blockId)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-           
-           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2)
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
 
+          
+           solnData(DFUN_VAR,i,j,k) = r0 - sqrt((xcell-x0)**2+(ycell-y0)**2+(zcell-z0)**2)
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
 
            !     solnData(DELE_VAR,i,j,k) = solnData(DELE_VAR,i,j,k) + dt*0.99*1e18    ! Electrons
@@ -175,6 +183,7 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_releaseBlkPtr(blockID,facexData,FACEX)
   call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+  call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   return
 
