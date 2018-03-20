@@ -28,8 +28,7 @@ subroutine Plasma_init(blockCount,blockList,restart)
 
    ! Local Variables
    integer ::  blockID,lb,i,j
-   real, dimension(MDIM)  :: coord,bsize,del
-   real ::  boundBox(2,MDIM)
+   real ::  del(MDIM)
    integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
    logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
    real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
@@ -40,27 +39,12 @@ subroutine Plasma_init(blockCount,blockList,restart)
 
    real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: oldPhi
    real :: tempDT, Troom, rrc, rrx, rry, trc, vrx, vry, pu(20), pt(20)
-   real, allocatable, dimension(:) :: xt,xu,xv,yt,yu,yv,tt,uu,vv
 
-   integer :: fac, pcount, fIndex, fSize
-   real :: xcell,ycell,xedge,yedge
+   integer :: fac, pcount
 
    fac    = 9
    tempDT = 1.0
    Troom  = 0.0
-   fSize  = 12100
-
-   allocate(xt(fSize))
-   allocate(xu(fSize))
-   allocate(xv(fSize))
-
-   allocate(yt(fSize))
-   allocate(yu(fSize))
-   allocate(yv(fSize))
-
-   allocate(tt(fSize))
-   allocate(uu(fSize))
-   allocate(vv(fSize))
 
    pu(1) = -0.0000
    pu(2) =  0.0005
@@ -290,75 +274,5 @@ subroutine Plasma_init(blockCount,blockList,restart)
 
   call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-
-  open(unit = 2,file = "temp.txt")
-  open(unit = 3,file = "uvel.txt")
-  open(unit = 4,file = "vvel.txt")
-
-       do fIndex=1,fSize
-          read(2,*)xt(fIndex),yt(fIndex),tt(fIndex)
-          read(3,*)xu(fIndex),yu(fIndex),uu(fIndex)
-          read(4,*)xv(fIndex),yv(fIndex),vv(fIndex)
-       end do
-
-  close(2)
-  close(3)
-  close(4)
-
-  do lb=1,blockCount
-
-     blockID = blockList(lb)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     call Grid_getDeltas(blockID,del)
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-     do j=blkLimits(LOW,JAXIS)-1,blkLimits(HIGH,JAXIS)+1
-        do i=blkLimits(LOW,IAXIS)-1,blkLimits(HIGH,IAXIS)+1
-
-           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                   real(i - NGUARD - 1)*del(IAXIS) +   &
-                   0.5*del(IAXIS)
-
-           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                   real(j - NGUARD - 1)*del(JAXIS)  +  &
-                   0.5*del(JAXIS)
-
-           xedge = xcell - 0.5*del(IAXIS)
- 
-           yedge = ycell - 0.5*del(JAXIS)
-
-           do fIndex = 1,fSize
-                if(abs(xcell - xt(fIndex)) .le. 1e-3 .and. abs(ycell - yt(fIndex)) .le. 1e-3)  solnData(TEMP_VAR,     i,j,1) = tt(fIndex)
-                if(abs(xedge - xu(fIndex)) .le. 1e-3 .and. abs(ycell - yu(fIndex)) .le. 1e-3) facexData(VELC_FACE_VAR,i,j,1) = uu(fIndex)
-                if(abs(xcell - xv(fIndex)) .le. 1e-3 .and. abs(yedge - yv(fIndex)) .le. 1e-3) faceyData(VELC_FACE_VAR,i,j,1) = vv(fIndex)
-           end do
-
-        end do
-     end do
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-  end do
-
-  deallocate(xt,xu,xv,yt,yu,yv,tt,uu,vv)
-
-  gcMask = .FALSE.
-  gcMask(TEMP_VAR) = .TRUE.
-  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.
-
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-           
+        
   end subroutine Plasma_init

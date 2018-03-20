@@ -62,8 +62,8 @@ tmax                = 200.0
 cflflg              = 0
 cfl                 = 1.0d-2
 sigma		    = 1.0d-2
-dtspec              = 1.0d-3
-dtinit              = 1.0d-3
+dtspec              = 1.0d-2
+dtinit              = 1.0d-2
 dtmin 	            = 1.0d-8
 tstep_change_factor = 1.0
 
