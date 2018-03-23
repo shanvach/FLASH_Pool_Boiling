@@ -256,7 +256,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      ! Microlayer contribution - only for nucleate boiling
      !if(dr_nstep .gt. 1) then
 
-     !solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/del(DIR_X))
+     solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/del(DIR_X))
      !   solnData(RTES_VAR,:,:,:) = solnData(TMIC_VAR,:,:,:)*((ht_qmic*mph_baseRadius)/(mph_baseCountAll*del(DIR_X)*del(DIR_Z)))
 
      !end if
@@ -326,33 +326,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call Grid_fillGuardCells(CENTER,ALLDIR,&
         maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS) 
-
-   do lb = 1,blockCount
-
-     blockID = blockList(lb)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-    
-     ! Calculate Heat Flux in known phase
-
-     solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/del(DIR_X))
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-  end do
-
 !_________________________________End of Heat Flux calculation_____________________________!
 
 !__________________________Heat Flux extrapolation sub iterations__________________________!
