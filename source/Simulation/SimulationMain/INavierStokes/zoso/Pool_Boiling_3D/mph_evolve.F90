@@ -548,6 +548,7 @@ else if(mph_flag == 0) then
 
   gcMask(CURV_VAR) = .TRUE.
 
+  gcMask(TMIC_VAR) = .TRUE.
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
   gcMask(NUNK_VARS+2*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2z

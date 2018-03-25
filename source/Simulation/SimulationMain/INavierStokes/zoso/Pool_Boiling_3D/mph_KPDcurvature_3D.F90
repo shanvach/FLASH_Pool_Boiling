@@ -536,6 +536,20 @@
                  icrv(i,j,k) = 1
                  icrv(i,j+1,k) = 1
 
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps .and. &
+                   ((pf(i+1,j,k) .eq. 1) .or. (pf(i,j,k+1) .eq. 1) .or. &
+                    (pf(i-1,j,k) .eq. 1) .or. (pf(i,j,k-1) .eq. 1))) then
+
+                        if(tmic(i,j,k) .eq. 0) then
+                                tmic(i,j,k) = 1.0
+                                mph_baseCount = mph_baseCount+1
+                        end if
+
+                        w(i,j,k)      = w(i,j,k)      - (ht_fmic/dy)/aa/dy**2
+                        w(i,j+1,k)    = w(i,j+1,k)    + (ht_fmic/dy)/aa/dy**2
+                        sigy(i,j+1,k) = sigy(i,j+1,k) - (ht_fmic/dy)/aa/dy
+
+                 end if
               end if
 
               !--------------------------------------------------------------
