@@ -119,7 +119,7 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (45.0/180.0)*acos(-1.0)
+  ht_psi          = (35.0/180.0)*acos(-1.0)
 
 
   open(unit = 3,file = "sim_thermalBL.dat")

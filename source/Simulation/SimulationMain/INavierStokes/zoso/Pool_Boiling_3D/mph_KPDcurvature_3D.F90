@@ -433,9 +433,9 @@
 
                         tmic(i,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/dz)/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/dz)/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/dz)/aa/dx
+                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
+                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
+                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(0.75*dx*dy))/aa/dx
 
                  end if
 
@@ -487,9 +487,9 @@
 
                         tmic(i+1,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/dz)/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/dz)/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/dz)/aa/dx
+                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
+                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
+                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(0.75*dx*dy))/aa/dx
 
                  end if
 
@@ -624,9 +624,9 @@
 
                         tmic(i,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/dx)/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/dx)/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/dx)/aa/dz
+                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
+                        w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
+                        sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/(0.75*dx*dy))/aa/dz
 
                  end if
 
@@ -676,9 +676,9 @@
 
                         tmic(i,j,k+1) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/dx)/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/dx)/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/dx)/aa/dz
+                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
+                        w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
+                        sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/(0.75*dx*dy))/aa/dz
 
                  end if
 
