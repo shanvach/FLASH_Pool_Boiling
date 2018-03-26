@@ -93,17 +93,17 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    if(dr_restart .eqv. .FALSE.) then
 
-        !dxmin    = 1e10
+        dxmin    = 1e10
 
-        !do lb = 1,blockCount
+        do lb = 1,blockCount
 
-        !blockID = blockList(lb)
-        !call Grid_getDeltas(blockID,del)
-        !dxmin = min(dxmin,del(JAXIS))
+        blockID = blockList(lb)
+        call Grid_getDeltas(blockID,del)
+        dxmin = min(dxmin,del(JAXIS))
 
-        !end do
+        end do
 
-        dxmin = 0.0100
+        !dxmin = 0.0100
 
         call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
