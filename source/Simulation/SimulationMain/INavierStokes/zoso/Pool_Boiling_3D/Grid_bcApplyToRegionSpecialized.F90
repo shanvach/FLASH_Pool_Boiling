@@ -284,7 +284,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
                end do
   
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -458,7 +458,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -530,7 +530,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -654,7 +654,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then

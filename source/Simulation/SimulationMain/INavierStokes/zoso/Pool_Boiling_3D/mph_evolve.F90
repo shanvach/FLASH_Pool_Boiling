@@ -514,7 +514,7 @@ else if(mph_flag == 0) then
                            facezData(RH1F_FACE_VAR,:,:,:)   , &
                            facezData(RH2F_FACE_VAR,:,:,:)   , &
                            facezData(SIGM_FACE_VAR,:,:,:) ,&
-                           solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),blockID)
+                           solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),blockID)
 
 #endif
      !-----------------------------------------------

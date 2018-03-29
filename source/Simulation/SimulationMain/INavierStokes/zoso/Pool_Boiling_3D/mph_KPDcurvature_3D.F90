@@ -326,7 +326,7 @@
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz,mdot,tmic,blockID)
+                                       rho2z,sigz,mdot,tmic,temp,blockID)
 
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
@@ -347,7 +347,7 @@
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot
+        real, dimension(:,:,:), intent(in) :: mdot,temp
 
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
@@ -365,6 +365,8 @@
 
         real :: ycell
 
+        real :: yit, cmi, mi
+
         sigx = 0.
         sigy = 0.
         sigz = 0.
@@ -372,6 +374,9 @@
         icrv = 0
         bb = (rho2/rho1) - 1.0
         tmic = 0.0
+
+        cmi = 1.2795
+         mi = 0.7056
 
         call Grid_getDeltas(blockID,del)
         call Grid_getBlkCenterCoords(blockId,coord)
@@ -433,9 +438,9 @@
 
                         tmic(i,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(0.75*dx*dy))/aa/dx
+                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(dx))/aa/dx**2
+                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(dx))/aa/dx**2
+                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(dx))/aa/dx
 
                  end if
 
@@ -487,9 +492,9 @@
 
                         tmic(i+1,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(0.75*dx*dy))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(0.75*dx*dy))/aa/dx
+                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(dx))/aa/dx**2
+                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(dx))/aa/dx**2
+                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(dx))/aa/dx
 
                  end if
 
@@ -624,9 +629,9 @@
 
                         tmic(i,j,k) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/(0.75*dx*dy))/aa/dz
+                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(dx))/aa/dz**2
+                        w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/(dx))/aa/dz**2
+                        sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/(dx))/aa/dz
 
                  end if
 
@@ -676,9 +681,9 @@
 
                         tmic(i,j,k+1) = 1.0
                         mph_baseCount = mph_baseCount+1
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/(0.75*dx*dy))/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/(0.75*dx*dy))/aa/dz
+                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(dx))/aa/dz**2
+                        w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/(dx))/aa/dz**2
+                        sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/(dx))/aa/dz
 
                  end if
 
