@@ -434,10 +434,9 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps .and. tmic(i,j,k) .eq. 0) then
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
 
                         tmic(i,j,k) = 1.0
-                        mph_baseCount = mph_baseCount+1
                         w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
                         w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
                         sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(2.0*dx*dx))/aa/dx
@@ -488,10 +487,9 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps .and. tmic(i+1,j,k) .eq. 0) then
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
 
                         tmic(i+1,j,k) = 1.0
-                        mph_baseCount = mph_baseCount+1
                         w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
                         w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
                         sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(2.0*dx*dx))/aa/dx
@@ -625,10 +623,9 @@
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps .and. tmic(i,j,k) .eq. 0) then 
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then 
 
                         tmic(i,j,k) = 1.0
-                        mph_baseCount = mph_baseCount+1
                         w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
                         w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
                         sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/(2.0*dx*dx))/aa/dz
@@ -677,10 +674,9 @@
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps .and. tmic(i,j,k+1) .eq. 0) then 
+                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then 
 
                         tmic(i,j,k+1) = 1.0
-                        mph_baseCount = mph_baseCount+1
                         w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
                         w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
                         sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/(2.0*dx*dx))/aa/dz
