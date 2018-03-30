@@ -79,7 +79,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
      if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 1"
 
-     ht_psi          = (35.0/180.0)*acos(-1.0)
+     ht_psi          = (50.0/180.0)*acos(-1.0)
 
      open(unit = 2,file = "sim_nucSites.dat")
      do nuc_index=1,sim_nucSiteDens
@@ -113,6 +113,9 @@ subroutine Heat_AD_init(blockCount,blockList)
         call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
     end if
+
+    ht_qmic = -0.165859622773079
+    ht_fmic = -1.126586525308052E-002 
 
     if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
