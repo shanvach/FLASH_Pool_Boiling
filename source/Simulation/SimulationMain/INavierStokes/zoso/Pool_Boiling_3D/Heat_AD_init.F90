@@ -56,6 +56,8 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Ra",ht_Ra)
    call RuntimeParameters_get("twait",ht_tWait)
    call RuntimeParameters_get("tnuc",ht_Tnuc)
+   call RuntimeParameters_get("qmic",ht_qmic)
+   call RuntimeParameters_get("fmic",ht_fmic)
 
    if (ins_meshMe .eq. MASTER_PE) then
      write(*,*) 'ht_Pr     =',ht_Pr
@@ -93,29 +95,26 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    if(dr_restart .eqv. .FALSE.) then
 
-        dxmin    = 1e10
+        !dxmin    = 1e10
 
-        do lb = 1,blockCount
+        !do lb = 1,blockCount
 
-        blockID = blockList(lb)
-        call Grid_getDeltas(blockID,del)
-        dxmin = min(dxmin,del(JAXIS))
+        !blockID = blockList(lb)
+        !call Grid_getDeltas(blockID,del)
+        !dxmin = min(dxmin,del(JAXIS))
 
-        end do
+        !end do
 
-        !dxmin = 0.0100
+        !!dxmin = 0.0100
 
-        call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
+        !call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
 
-        if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
+        !if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
 
-        call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-        call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        !call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+        !call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
     end if
-
-    ht_qmic = -0.165859622773079
-    ht_fmic = -1.126586525308052E-002 
 
     if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 

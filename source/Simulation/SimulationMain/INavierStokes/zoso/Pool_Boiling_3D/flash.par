@@ -54,6 +54,10 @@ Ab = 5.4d-10
 Bb = 5.7d-7
 Cb = 2.4d-7
 
+# Constant microlayer heat flux and curvature
+qmic = 0.0
+fmic = 0.0
+
 # Temperatures
 tbulk =  0.0
 tsat  =  0.4

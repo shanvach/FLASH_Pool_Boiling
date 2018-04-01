@@ -63,6 +63,9 @@ PARAMETER tnuc		 REAL  0.0
 
 PARAMETER ncDensPlus	 INTEGER  0
 
+PARAMETER qmic		 REAL 0.0
+
+PARAMETER fmic		 REAL 0.0
 # Number of guardcells at each boundary
 GUARDCELLS 3
 
