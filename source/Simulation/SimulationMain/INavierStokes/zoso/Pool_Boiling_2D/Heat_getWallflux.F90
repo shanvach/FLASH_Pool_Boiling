@@ -36,12 +36,14 @@ subroutine Heat_getWallflux(pf,T,Hf,Nu_l,Nu_t,hcounter,dy,ycell,jy1,ix1,ix2,kz1,
                   real(i - NGUARD - 1)*del(IAXIS) +   &
                   0.5*del(IAXIS)
 
-          zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-                   real(k - NGUARD - 1)*del(KAXIS)  +  &
-                   0.5*del(KAXIS)
+          !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+          !         real(k - NGUARD - 1)*del(KAXIS)  +  &
+          !         0.5*del(KAXIS)
 
-          if(xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
-             zcell .ge. -4.0 .and. zcell .le. 4.0) then
+          zcell = 0.0
+
+          if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
+             zcell .ge. -5.0 .and. zcell .le. 5.0) then
 
                 Nu_l = Nu_l + (1.0 - pf(i,jy1,k))*(1.0 - T(i,jy1,k))/(0.5*dy)
                 Nu_t = Nu_t + ((1.0 - T(i,jy1,k))/(0.5*dy))*(1.0-pf(i,jy1,k)+(mph_thco1/mph_thco2)*pf(i,jy1,k))
