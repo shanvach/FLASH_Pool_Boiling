@@ -121,13 +121,13 @@
    if(firstfileflag .eq. 0) then
 
         open(unit=44, file="IOData/data_heatFlux",status='replace')
-        write(44,*)time,ht_Nu_l,ht_Nu_t
+        write(44,55)time,ht_Nu_l,ht_Nu_t,mph_radius
         close(44)
 
    else
 
         open(unit=44, file="IOData/data_heatFlux", status='old', position='append')
-        write(44,*)time,ht_Nu_l,ht_Nu_t
+        write(44,55)time,ht_Nu_l,ht_Nu_t,mph_radius
         close(44)
 
    end if
@@ -584,6 +584,7 @@
   return
 
 66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
+55    format(g23.15,g23.15,g23.15,g23.15)
 
   End subroutine outtotecplot
 

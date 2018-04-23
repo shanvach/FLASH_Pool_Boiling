@@ -21,7 +21,7 @@ subroutine Multiphase_init()
                               mph_vis1,mph_vis2,mph_lsit, mph_inls, &
                               mph_meshMe, mph_meshNumProcs, mph_meshComm, &
                               mph_thco1,mph_thco2,mph_cp1,mph_cp2,mph_isAttached,mph_isAttachedAll,mph_isAttachedOld, &
-                              mph_timeStampAll,mph_nucSiteTemp ! Akash
+                              mph_timeStampAll,mph_nucSiteTemp,mph_offset ! Akash
  
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
@@ -71,6 +71,8 @@ subroutine Multiphase_init()
      write(*,*) 'mph_cp2=',mph_cp2
      write(*,*) 'sim_nucSiteDens=',sim_nucSiteDens
   endif
+
+  mph_offset = 0.0
 
   if(dr_restart .eqv. .FALSE.) then
 

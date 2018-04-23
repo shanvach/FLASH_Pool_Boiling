@@ -31,7 +31,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
                              mph_radius, mph_isAttached, mph_timeStamp, &
                              mph_isAttachedAll, mph_timeStampAll,&
-                             mph_isAttachedOld, mph_nucSiteTemp
+                             mph_isAttachedOld, mph_nucSiteTemp, mph_offset
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -316,7 +316,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #if NDIM == 3
 
-    mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
+    mph_radius =  max(0.0,((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0) - mph_offset)
 
 #endif
 
@@ -477,7 +477,12 @@ do nuc_index =1,sim_nucSiteDens
   call MPI_Allreduce(nucSiteTemp, mph_nucSiteTemp(nuc_index), 1, FLASH_REAL,&
                      MPI_MAX, MPI_COMM_WORLD, ierr)
 
-  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) mph_timeStampAll(nuc_index) = dr_simTime
+  if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) then
+
+         mph_timeStampAll(nuc_index) = dr_simTime
+         mph_offset = mph_offset+mph_radius
+
+  end if
 
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
 
