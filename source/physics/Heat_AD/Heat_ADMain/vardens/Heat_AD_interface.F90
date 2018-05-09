@@ -227,9 +227,9 @@ module Heat_AD_interface
   end interface
 
   interface
-        subroutine Heat_getQin(mdot,smrh,dfun,nrmx,nrmy,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,qin)
+        subroutine Heat_getQin(u,v,pf,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,qin)
         implicit none
-        real,intent(in),dimension(:,:,:) :: mdot,smrh,dfun,nrmx,nrmy
+        real,intent(in),dimension(:,:,:) :: u,v,pf
         real,intent(in) :: dx,dy,dz
         real,intent(inout) :: qin
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
