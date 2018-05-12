@@ -204,7 +204,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Heat_AD_data
 
-  use Multiphase_data, only: mph_bcFlag
+  use Multiphase_data, only: mph_bcFlag, mph_psi
 
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
@@ -389,8 +389,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
+
+               do kkk = 1,ke
+               do jjj = 1,je
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
+
+                  regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) - del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
+
+               end do
+               end do
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then

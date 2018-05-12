@@ -31,7 +31,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
                              mph_radius, mph_isAttached, mph_timeStamp, &
                              mph_isAttachedAll, mph_timeStampAll,&
-                             mph_isAttachedOld, mph_nucSiteTemp
+                             mph_isAttachedOld, mph_nucSiteTemp, &
+                             mph_psi, mph_vlim, mph_psi_adv
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -44,7 +45,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
 
-  use Heat_AD_data, ONLY: ht_tWait, ht_Tnuc
+  use Heat_AD_data, ONLY: ht_psi, ht_tWait, ht_Tnuc
 
   use Simulation_data, ONLY: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_radii, sim_nuc_site_z, sim_nucSiteDens
 
@@ -103,6 +104,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   real    :: nuc_dfun, nucSiteTemp
 
   real    :: tol=1E-13
+
+  real    :: veli
 
   do lb = 1,blockCount
 
@@ -175,7 +178,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 #endif
          !---------------------------------------------------------------------
 
-
          ! Release pointers:
          call Grid_releaseBlkPtr(blockID,solnData,CENTER)
          call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -195,6 +197,72 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
+!---- Advancing/Receding Contact Angle -------!
+
+do lb = 1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to blocks center and face vars:
+        call Grid_getBlkPtr(blockID,solnData,CENTER)
+        call Grid_getBlkPtr(blockID,facexData,FACEX)
+        call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+#if NDIM == 3
+        call Grid_getBlkPtr(blockID,facezData,FACEZ)
+#endif
+
+         mph_psi(:,:,blockID)     = ht_psi
+
+         do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+            if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
+               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0) then
+             
+                 veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
+                                   solnData(NRMX_VAR,i,NGUARD+1,k)
+
+                 if(veli .ge. 0.0) then
+                 if(abs(veli) .le. mph_vlim) then
+
+                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                                              (mph_psi_adv + ht_psi)/2.0d0
+
+                 else
+        
+                      mph_psi(i,k,blockID) = mph_psi_adv
+                        
+                 end if
+                 end if
+
+            end if
+
+         end do
+         end do
+
+     ! Release pointers:
+        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+#if NDIM ==3
+        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+#endif
+
+enddo
+
     !------------------------------------------------------------------
     !- kpd - Advect the multiphase distance function using WENO3 scheme
     !------------------------------------------------------------------
@@ -209,6 +277,12 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     do lb = 1,blockCount
 
      blockID = blockList(lb)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Get blocks dx, dy ,dz:
      call Grid_getDeltas(blockID,del)
@@ -370,8 +444,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work = intval;
 #endif
+
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
     !********************************************************************************************************
     !call mph_bcLevelSet(0.0d0,0.0d0)
 
@@ -653,6 +729,7 @@ end do
     !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
 #endif
+
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
     !*********************************************************************************************************
