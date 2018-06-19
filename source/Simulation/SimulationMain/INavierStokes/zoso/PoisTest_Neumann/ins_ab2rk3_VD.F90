@@ -105,7 +105,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                             ins_rhoa, AB2_SCHM, RK3_SCHM, ins_outflowgridChanged, ins_tlevel, &
                             ins_gravX, ins_gravY,ins_gravZ
 
-  use Grid_Data, ONLY : gr_domainBC 
+  use Grid_Data, ONLY : gr_domainBC,gr_meshComm 
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit,mph_inls,mph_thco1, &
@@ -332,12 +332,18 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   ! SOLUTION OF POISSON EQUATION FOR PRESSURE:
   ! -------- -- ------- -------- --- --------
-  call cpu_time(t_startP)
-  poisfact = 1.0 
-  call Grid_solvePoisson (DELP_VAR, RTES_VAR, bc_types, bc_values, poisfact) 
-  call cpu_time(t_stopP)
 
-  if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
+  call mpi_barrier(gr_meshComm,ierr)
+  if (ins_meshMe .eq. 0) CALL SYSTEM_CLOCK(TA(1),count_rate)
+  poisfact = 1.0 
+  call Grid_solvePoisson (DELP_VAR, RTES_VAR, bc_types, bc_values, poisfact)
+  call mpi_barrier(gr_meshComm,ierr)
+  if (ins_meshMe .eq. 0) then
+     CALL SYSTEM_CLOCK(TA(2),count_rate)
+     ET=REAL(TA(2)-TA(1))/count_rate
+     write(*,*) ' '
+     write(*,*) ' Poisson Solver time = ',ET,' sec.'
+  endif 
 
   call ins_fluxfix_p(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
                      DELP_VAR,blockCount,blockList)

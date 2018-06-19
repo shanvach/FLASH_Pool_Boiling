@@ -139,10 +139,10 @@ pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
 #checkpointFileIntervalTime = 10.0
-checkpointFileIntervalStep = 1.0
+checkpointFileIntervalStep = 1
 
 #plotFileIntervalTime = 0.1
-plotFileIntervalStep = 1.0
+plotFileIntervalStep = 1
 
 ##	AMR parameters
 nblockx	= 16
