@@ -18,6 +18,8 @@
 
   use Heat_AD_data, only: ht_Nu_l,ht_Nu_t
 
+  use Simulation_data, only: sim_flux_flg, sim_data_flg
+
   implicit none
 
 #include "constants.h"
@@ -87,6 +89,8 @@
 
 ! -- filetime.XX --
 
+  if(sim_data_flg) then
+
   write(filename, '("IOData/data_time.", i4.4)') mype
 
   ! create/clear filetime.XX if time = 0
@@ -110,11 +114,15 @@
 
  endif
 
- ! write timestep data to filetime.XX on each processor
-
   open(unit=33, file=filename, status='old', position='append')
   write(33,66) count, time, dt, istep,blockcount,timer
   close(33)
+
+ end if
+
+ ! write timestep data to filetime.XX on each processor
+
+  if(sim_flux_flg .or. sim_data_flg) then
 
   if(mype .eq. MASTER_PE) then
 
@@ -131,6 +139,8 @@
         close(44)
 
    end if
+
+  end if
 
   end if
 
@@ -152,6 +162,8 @@
 !  write(filename,'("./IOData/data.",i4.4,".",i4.4,".plt")') &
 !        count, mype
 !end if
+
+  if(sim_data_flg) then
 
   write(filename,'("./IOData/data.",i4.4,".",i4.4,".plt")') &
         count, mype
@@ -580,6 +592,8 @@
         count
   write(*,*) '*** Wrote plotfile to ',filename,' ****'
   endif
+
+  end if
 
   return
 

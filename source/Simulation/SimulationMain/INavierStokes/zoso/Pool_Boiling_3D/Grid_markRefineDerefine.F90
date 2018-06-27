@@ -93,7 +93,7 @@ subroutine Grid_markRefineDerefine()
   !specs(2) = -0.5d0
   !specs(3) =  0.0d0
 
-  specs(2) = -0.05d0
+  specs(2) = -0.001d0
   specs(3) =  0.0d0
 
   !! Bring all qualifying blocks to this level of refinement

@@ -390,7 +390,7 @@ enddo
 
 #if NDIM == 3
 
-    mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0) 
+    mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
 
 #endif
 
@@ -554,7 +554,7 @@ do nuc_index =1,sim_nucSiteDens
   if((mph_isAttachedOld(nuc_index) .eqv. .true.) .and. (mph_isAttachedAll(nuc_index) .eqv. .false.)) then
 
          mph_timeStampAll(nuc_index) = dr_simTime
-         mph_offset = mph_offset+mph_radius
+         !mph_offset = mph_offset+mph_radius
 
   end if
 

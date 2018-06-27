@@ -54,8 +54,8 @@ Bb = 8.9d-7
 Cb = 9.7d-8
 
 # Constant microlayer heat flux and curvature
-qmic = -0.2932 # -0.1358 # -0.0606 # -0.0116 #
-fmic = -0.0101 # -0.0050 # -0.0025 # -0.00063 #
+qmic = -0.2932 # -0.1358 # -0.0606 # -0.0231 #
+fmic = -0.0101 # -0.0050 # -0.0025 # -0.0013 #
 
 # Temperatures
 tbulk =  0.0

@@ -14,7 +14,7 @@ MPI_PATH   = /nasa/sgi/mpt/2.15r20
 
 HDF4_PATH  =
 
-HDF5_PATH  = /home3/adhruv/hdf5-1.8.20/hdf5
+HDF5_PATH  = /home3/adhruv/hdf5-1.8.20_NEW/hdf5
 ZLIB_PATH  = 
 
 PAPI_PATH  =
@@ -25,7 +25,7 @@ MPE_PATH   =
 
 BLAS_PATH    = 
 LAPACK_PATH  = 
-HYPRE_PATH = /home3/adhruv/hypre-2.11.2/src/hypre
+HYPRE_PATH = /home3/adhruv/hypre-2.11.2_NEW/src/hypre
 SUPERLU_PATH = 
 
 # Current directory:
@@ -75,7 +75,7 @@ FFLAGS_DEBUG = -c -g -r8 -i4 -real_size 64 -O0 -check bounds -check format \
 FFLAGS_TEST  = ${FFLAGS_OPT} -fp-model precise
 F90FLAGS = -DH5_USE_16_API -D_LARGEFILE64_SOURCE -D_FORTIFY_SOURCE=2 
 
-CFLAGS_OPT   = -c -O3 -D_LARGEFILE64_SOURCE
+CFLAGS_OPT   = -c -xSSE4.2 -O3 -D_LARGEFILE64_SOURCE
 CFLAGS_DEBUG = -c -O0 -g -traceback -debug all -debug extended \
                -D_LARGEFILE64_SOURCE -ftrapuv -fp-stack-check
 CFLAGS_TEST  = ${CFLAGS_OPT} -fp-model precise

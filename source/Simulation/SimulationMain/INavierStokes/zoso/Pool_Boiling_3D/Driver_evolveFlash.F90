@@ -59,6 +59,8 @@ subroutine Driver_evolveFlash()
   use IncompNS_data, only : ins_cflflg
   use Multiphase_interface, only: Multiphase
   use Heat_AD_interface, only: Heat_AD
+
+  use Simulation_data, only: sim_flux_flg, sim_data_flg
   !use mph_interface, only : mph_advect
 
   implicit none
@@ -120,6 +122,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
   end if
 
   firstfileflag = 0
+  sim_data_flg = .true.
+  sim_flux_flg = .true.
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
   ! Write to Bodies to Tecplot:
@@ -217,18 +221,30 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !--------------------------------------------------------------------
      if (ins_cflflg .eq. 1) then ! Constant cfl       
        if (dr_nstep .gt. 1) then
-       tecplot_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
+       sim_data_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
                       dr_dt/IO_plotFileIntervalTime)
        else
-       tecplot_flg = .false.
+       sim_data_flg = .false.
        endif
      else                        ! Constant timestep
-       tecplot_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
+       sim_data_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
      endif
 
-     if (tecplot_flg) then
+
+     if (ins_cflflg .eq. 1) then ! Constant cfl       
+       if (dr_nstep .gt. 1) then
+       sim_flux_flg = (1/(0.1*IO_plotFileIntervalTime)*MOD(dr_simtime,(0.1*IO_plotFileIntervalTime)) .le. &
+                      dr_dt/(0.1*IO_plotFileIntervalTime))
+       else
+       sim_flux_flg = .false.
+       endif
+     else                        ! Constant timestep
+       sim_flux_flg = (MOD(dr_nstep,int(0.1*IO_plotFileIntervalStep)) .eq. 0)
+     endif
+
+     if (sim_flux_flg .or. sim_data_flg) then
         ! Write to Grid to Tecplot:
-        count = count + 1
+        if(sim_data_flg) count = count + 1
         call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                           0.0,blockList,blockCount,firstfileflag)
 

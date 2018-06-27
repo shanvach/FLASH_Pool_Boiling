@@ -32,12 +32,14 @@ module Simulation_data
 
   real, save :: sim_waveA
 
-  real, save, dimension(120) :: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_site_z, sim_nuc_radii
+  real, save, dimension(800) :: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_site_z, sim_nuc_radii
 
   integer, save :: sim_nucSiteDens
 
   real, save :: sim_Tbulk
 
   real, save :: sim_sinkB
+
+  logical, save :: sim_flux_flg, sim_data_flg
  
 end module Simulation_data

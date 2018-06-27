@@ -214,9 +214,9 @@ if(mph_flag == 1) then
       lsT = lsT + lsDT
 
      if(mod(ii,1000) == 0) then
-       write(*,*) 'Output DFUN:', mph_meshMe, ii, lsT, lsDT
-       call outtotecplot(mph_meshMe,lsT,lsDT,ii,ii, &
-                         0.0,blockList,blockCount,1)
+       !write(*,*) 'Output DFUN:', mph_meshMe, ii, lsT, lsDT
+       !call outtotecplot(mph_meshMe,lsT,lsDT,ii,ii, &
+       !                  0.0,blockList,blockCount,1)
      endif
 
    end do  ! End do: ii=1,inls

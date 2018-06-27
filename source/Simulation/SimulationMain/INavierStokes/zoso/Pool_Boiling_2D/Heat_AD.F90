@@ -23,7 +23,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Multiphase_data, only: mph_thco1,mph_cp1,mph_thco2,mph_cp2,mph_meshMe,mph_meshNumProcs,mph_rho2,mph_baseRadius,mph_baseCountAll,mph_baseCount
 
-   use Heat_AD_data, only: ht_hfit,ht_Tsat
+   use Heat_AD_data, only: ht_hfit,ht_Tsat,ht_microFlg,ht_fmic,ht_qmic
 
    use Driver_data,  only: dr_nstep,dr_simTime
 
@@ -63,8 +63,38 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real :: Nu_l,Nu_t
    integer :: hcounterAll,hcounter
    integer :: iter_count,intval
+   real    :: dxmin
 
    iter_count = 0
+
+!_________________________________Microlayer solution_____________________________________________!
+
+   if(ht_microFlg) then
+
+      print *,"Calculating minimum dx: "
+
+      dxmin    = 1e10
+
+      do lb = 1,blockCount
+
+        blockID = blockList(lb)
+        call Grid_getDeltas(blockID,del)
+        dxmin = min(dxmin,del(JAXIS))
+
+      end do
+
+      call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
+       
+      ht_microFlg = .FALSE. 
+
+   end if
+
+   !if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
+
+   !call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+   !call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+
+   if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
 !______________________________________Energy Equation____________________________________________!
 

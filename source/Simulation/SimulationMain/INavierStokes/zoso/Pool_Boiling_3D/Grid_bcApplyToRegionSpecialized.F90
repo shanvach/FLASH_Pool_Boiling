@@ -284,7 +284,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
                end do
   
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -364,8 +364,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                               real((kkk+NGUARD) - NGUARD - 1)*del(KAXIS)  +  &
                               0.5*del(KAXIS)
 
-                     if(xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
-                        zcell .ge. -4.0 .and. zcell .le. 4.0) then
+                     if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
+                        zcell .ge. -5.0 .and. zcell .le. 5.0) then
 
                         regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(guard+1,jjj,kkk,ivar)
 
@@ -465,7 +465,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -537,7 +537,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
@@ -661,7 +661,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if(ivar == DFUN_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) - del(DIR_Y)*cos(ht_psi)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then

@@ -119,7 +119,7 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (50.0/180.0)*acos(-1.0)
+  ht_psi          = (45.0/180.0)*acos(-1.0)
 
 
   open(unit = 3,file = "sim_thermalBL.dat")
@@ -185,25 +185,27 @@ subroutine Simulation_initBlock(blockId)
            end do
 
 
-           solnData(TEMP_VAR,i,j,k) = sim_Tbulk           
-           do bli=1,10   
-                if(ycell .le. 1.0 .and. & 
-                   xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
-                   zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
-           end do
-           if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           !solnData(TEMP_VAR,i,j,k) = sim_Tbulk           
+           !do bli=1,10   
+           !     if(ycell .le. 1.0 .and. & 
+           !        xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
+           !        zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
+           !end do
+           !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+           !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
 
-           !solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           !if(ycell .le. 0.25 .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0) solnData(TEMP_VAR,i,j,k) = (0.25 - ycell)/0.25  
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 0.0
+           solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+           if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
+              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
         enddo
      enddo
   enddo
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.15*cos(ht_psi)
+  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

@@ -119,7 +119,7 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (50.0/180.0)*acos(-1.0)
+  ht_psi          = (45.0/180.0)*acos(-1.0)
 
 
   open(unit = 3,file = "sim_thermalBL.dat")
@@ -198,11 +198,11 @@ subroutine Simulation_initBlock(blockId)
    
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.2  .and. solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+           if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
               xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
               zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
 
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
         enddo
      enddo

@@ -77,6 +77,8 @@ subroutine Heat_AD_init(blockCount,blockList)
    ht_Twall_high = 0.0
    ht_AMR_specs  = 0.0
 
+   ht_microFlg   = .TRUE.
+
    if(dr_restart .eqv. .TRUE.) then
 
      if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 1"
@@ -92,30 +94,5 @@ subroutine Heat_AD_init(blockCount,blockList)
      sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
    end if
-
-   if(dr_restart .eqv. .FALSE.) then
-
-        !dxmin    = 1e10
-
-        !do lb = 1,blockCount
-
-        !blockID = blockList(lb)
-        !call Grid_getDeltas(blockID,del)
-        !dxmin = min(dxmin,del(JAXIS))
-
-        !end do
-
-        !!dxmin = 0.0100
-
-        !call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
-
-        !if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
-
-        !call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-        !call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-
-    end if
-
-    if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
 
 end subroutine Heat_AD_init

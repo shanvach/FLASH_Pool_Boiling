@@ -54,8 +54,8 @@ Bb = 8.9d-7
 Cb = 9.7d-8
 
 # Constant microlayer heat flux and curvature
-qmic = -0.1313
-fmic = -0.003
+qmic = 0
+fmic = 0
 
 # Temperatures
 tbulk =  0.0
@@ -63,7 +63,7 @@ tsat  =  0.0
 tnuc  =  0.0
 
 # Nucleation frequency
-twait =  0.5
+twait =  200
 
 # Additional nucleation sites
 ncDensPlus = 0
@@ -114,8 +114,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.7
 sigma		= 0.7
-dtspec          = 1.0d-4
-dtinit          = 1.0d-4
+dtspec          = 1.0d-3
+dtinit          = 1.0d-3
 tstep_change_factor=1.00
 
 
@@ -133,13 +133,13 @@ pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
 #checkpointFileIntervalTime = 10.0
-plotFileIntervalStep = 10000
+plotFileIntervalStep = 10000000
 #plotFileIntervalTime = 0.1
-plotFileIntervalStep = 1000
+plotFileIntervalStep = 100
 
 ##	AMR parameters
-nblockx	= 4
-nblocky	= 24
+nblockx	= 2
+nblocky	= 12
 
 lrefine_min	= 1
 lrefine_max     = 1
@@ -186,7 +186,7 @@ gr_hyprePrintSolveInfo  = .FALSE.
 gr_hypreInfoLevel       = 1
 gr_hypreMaxIter         = 1000
 #gr_hypreRelTol          = 5.0e-6
-gr_hypreRelTol          = 1.0e-8
+gr_hypreRelTol          = 1.0e-16
 gr_hypreFloor           = 1.0e-16
 #gr_hyprePCType          = "HYPRE_PARASAILS"
 #gr_hyprePCType          = "HYPRE_ILU"
