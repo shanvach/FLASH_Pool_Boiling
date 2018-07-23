@@ -65,7 +65,7 @@ subroutine IO_readUserArray ()
   implicit none
 
 #include "constants.h"
-  include"Flash_mpi.h"
+  include "Flash_mpi.h"
 
   integer :: offset, datasetNameLen,ierr,ncDensPlus  
 
