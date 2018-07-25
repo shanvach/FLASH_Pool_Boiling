@@ -206,6 +206,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Multiphase_data, only: mph_bcFlag, mph_psi
 
+  use IncompNS_data, only: ins_convvel
+
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
 #endif
@@ -633,18 +635,38 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             else
 
-              if(isFace) then
-              k=2*guard+2
-              do i = 1,guard
-              regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
-              end do
+              if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+              
+                        if (isFace) then
+
+                        k = 2*guard+2
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)=ins_convvel(HIGH,JAXIS)
+                        end do
+
+                        else
+                        k = 2*guard+1
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard,1:je,1:ke,ivar)
+                        end do
+                        endif
 
               else
-              k=2*guard+1
-              do i = 1,guard
-              regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
-              end do
-              endif
+
+                        if(isFace) then
+                        k=2*guard+2
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+
+                        else
+                        k=2*guard+1
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+                        end do
+                        endif
+
+              end if
 
            end if
   
