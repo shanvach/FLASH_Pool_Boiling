@@ -649,7 +649,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = 0.0
+                        regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
