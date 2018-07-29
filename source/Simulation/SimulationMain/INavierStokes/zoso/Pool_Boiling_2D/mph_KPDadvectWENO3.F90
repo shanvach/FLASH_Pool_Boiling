@@ -55,7 +55,7 @@
 
         Cb  = sim_sinkB
         Ly  = sim_yMax-sim_yMin
-        Lb  = sim_yMax-sim_yMin-3.0
+        Lb  = sim_yMax-sim_yMin-2.0
 
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
