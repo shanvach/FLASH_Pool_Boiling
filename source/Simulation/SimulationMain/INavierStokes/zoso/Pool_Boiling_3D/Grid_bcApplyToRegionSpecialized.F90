@@ -647,7 +647,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard,1:je,1:ke,ivar)
+                        regionData(guard+i,1:je,1:ke,ivar) = regionData(guard+i-1,1:je,1:ke,ivar) - &
+                                                            (ins_convvel(HIGH,JAXIS)*dr_dt/del(JAXIS)) * &
+                                                            (regionData(guard+i-1,1:je,1:ke,ivar) - &
+                                                             regionData(guard+i-2,1:je,1:ke,ivar))
+
                         end do
                         endif
 
