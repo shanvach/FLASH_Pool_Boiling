@@ -81,7 +81,7 @@ subroutine ins_convectVelout( blockCount, blockList, convvel)
 #elif NDIM == 3
   nzc = NZB + NGUARD + 1
 #endif
-  convveli = 0.
+  convveli = 1.
   convvel  = 0.
 
   ! Detect if the problem is an outflow problem to proceed with flow computation.
