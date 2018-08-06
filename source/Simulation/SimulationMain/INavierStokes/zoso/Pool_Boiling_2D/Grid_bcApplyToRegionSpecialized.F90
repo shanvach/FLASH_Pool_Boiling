@@ -640,19 +640,16 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
               
                         if (isFace) then
-                        
+
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = ins_convvel(HIGH,JAXIS)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(guard+i,1:je,1:ke,ivar) = regionData(guard+i-1,1:je,1:ke,ivar) - &
-                                                            (ins_convvel(HIGH,JAXIS)*dr_dt/del(JAXIS)) * &
-                                                            (regionData(guard+i-1,1:je,1:ke,ivar) - &
-                                                             regionData(guard+i-2,1:je,1:ke,ivar))
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
