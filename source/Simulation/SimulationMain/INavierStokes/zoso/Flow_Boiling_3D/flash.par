@@ -123,7 +123,7 @@ cfl             = 0.7
 sigma		= 0.7
 dtspec          = 1.0
 dtinit          = 1.0
-tstep_change_factor=1.01
+tstep_change_factor=1.05
 
 
 #Integration Scheme:
@@ -144,9 +144,9 @@ checkpointFileIntervalTime = 0.1
 plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 200
-nblocky	= 20
-nblockz = 20
+nblockx	= 120
+nblocky	= 12
+nblockz = 12
 
 lrefine_min	= 1
 lrefine_max     = 1

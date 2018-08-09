@@ -358,7 +358,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
 
   call Timers_stop("evolution")
   call Logfile_stamp( 'Exiting evolution loop' , '[Driver_evolveFlash]')
-  if(.NOT.endRun) call IO_outputFinal()
+  !if(.NOT.endRun) call IO_outputFinal()
   call Timers_getSummary(dr_nstep)
   call Logfile_stamp( "FLASH run complete.", "LOGFILE_END")
   call Logfile_close()

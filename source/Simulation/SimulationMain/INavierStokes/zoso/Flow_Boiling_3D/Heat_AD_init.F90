@@ -89,7 +89,7 @@ subroutine Heat_AD_init(blockCount,blockList)
      end do
      close(2)
 
-     sim_nuc_site_y(1:sim_nucSiteDens) = 0.0135*cos(ht_psi)
+     sim_nuc_site_y(1:sim_nucSiteDens) = 0.02*cos(ht_psi)
 
    end if
 
