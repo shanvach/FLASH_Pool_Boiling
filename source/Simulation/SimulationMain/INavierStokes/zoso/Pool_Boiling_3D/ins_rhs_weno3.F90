@@ -894,8 +894,8 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                wzplus  = (wni(i,j,k+1) + wni(i-1,j,k+1))*0.5
                wzminus = (wni(i,j,k) + wni(i-1,j,k))*0.5
 
-               uyplus = (uni(i,j+1,kz1) + uni(i,j,kz1))*0.5
-               uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
+               uyplus = (uni(i,j+1,k) + uni(i,j,k))*0.5
+               uyminus = (uni(i,j,k) + uni(i,j-1,k))*0.5
 
                !----------------- WENO3 X-Direction ------------!
                if (uxplus .gt. 0) then     ! u = (+) Downwind
@@ -1887,8 +1887,8 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                wzplus  = (wni(i,j,k+1) + wni(i,j,k))*0.5
                wzminus = (wni(i,j,k-1) + wni(i,j,k))*0.5
 
-               wyplus  = (wni(i,j+1,kz1) + wni(i,j,kz1))*0.5
-               wyminus = (wni(i,j,kz1)   + wni(i,j-1,kz1))*0.5
+               wyplus  = (wni(i,j+1,k) + wni(i,j,k))*0.5
+               wyminus = (wni(i,j,k)   + wni(i,j-1,k))*0.5
 
                !----------------- WENO3 X-Direction ------------!
                if (uxplus .gt. 0) then     ! u = (+) Downwind
