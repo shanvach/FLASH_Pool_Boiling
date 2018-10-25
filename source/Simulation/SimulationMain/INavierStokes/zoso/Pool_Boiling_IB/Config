@@ -1,0 +1,123 @@
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+
+REQUIRES physics/Multiphase
+REQUIRES physics/Multiphase/MultiphaseMain/INStherm
+
+REQUIRES physics/Heat_AD
+REQUIRES physics/Heat_AD/Heat_ADMain/vardens
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardensTHERM
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+
+USESETUPVARS Grid
+
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+VARIABLE tfrc TYPE: GENERIC
+VARIABLE tfro TYPE: GENERIC
+
+PARTICLEPROP temp REAL
+PARTICLEPROP titp REAL
+PARTICLEPROP ftp REAL
+PARTICLEPROP tl REAL
+
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
+
+# Solid Mechanics:
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+
+DATAFILES kinematics.input.h5 sm_body.00001.h5
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+## kpd - This is for the HYPRE implementation
+  VARIABLE aaJunk  #kpd  for IfactorB
+
+  VARIABLE preo  #Shizhao for fsi
+  FACEVAR  velo
+
+PARAMETER quadrant          BOOLEAN  FALSE
+
+PARAMETER waveA          REAL  0.0
+
+PARAMETER tbulk		 REAL  0.0
+
+PARAMETER tsat	 	 REAL  0.0
+
+PARAMETER twait		 REAL  0.3
+
+PARAMETER sinkB	         REAL  1.0
+
+PARAMETER tnuc		 REAL  0.0
+
+PARAMETER ncDensPlus	 INTEGER  0
+
+PARAMETER qmic		 REAL 0.0
+
+PARAMETER fmic		 REAL 0.0
+# Number of guardcells at each boundary
+GUARDCELLS 3
+
+
+# Akash - This is for Poisson test
+
+VARIABLE PTES
+VARIABLE RTES
+
+#/Generic_Direct
+
+#DATAFILES libtecio.a
+
+# ----------------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
+#D   invRe  inverse Reynolds number
+#PARAMETER invRe         REAL     1.
+
+#D   isgs   Subgrid scale model flag
+#PARAMETER isgs          INTEGER  0
+
+
+
+## ----------------------------------------------
+## THIS PART IS FOR PHYSICS CONFIG
+## Variables required by the INS module
+#VARIABLE pres                	# pressure
+#VARIABLE delp            	# pressure correction
+#VARIABLE dust                 	# divergence of ustar, poissons equation source term
+#VARIABLE tvis               	# turbulent viscosity
+
+## Fluxes
+#FLUX velx
+#FLUX vely
+
+
+## Use GRIDVAR for temporary storages
+#GRIDVAR divv
+
+
+
+## Use FACEVAR for cell interface velocity fields
+#FACEVAR velc
+#FACEVAR rhds
+
+
+## Number of guardcells at each boundary
+#GUARDCELLS 2
