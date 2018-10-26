@@ -22,7 +22,7 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   ! given time step on a given particle.  A diffuse interface method is employed.
   use Grid_data, ONLY: gr_meshMe
   
-  use ImBound_data, only : ib_stencil,ib_alphax,ib_alphay,ib_dt,ib_BlockMarker_flag,ib_vel_flg,ib_temp_flg
+  use ImBound_data, only : ib_stencil,ib_alphax,ib_alphay,ib_dt,ib_BlockMarker_flag,ib_vel_flg,ib_temp_flg,ib_dfun_flg
   
   use ib_interface, ONLY : ib_stencils,      &
                            ib_interpLpoints, &
@@ -70,13 +70,13 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
   real, dimension(ib_stencil,NDIM+1,MDIM) :: ib_phile
 
-  integer, dimension(ib_stencil,MDIM) :: ib_ht_ielem
+  integer, dimension(ib_stencil,MDIM) :: ib_ht_ielem, ib_external
 
-  real, dimension(ib_stencil,NDIM+1) :: ib_ht_phile
+  real, dimension(ib_stencil,NDIM+1) :: ib_ht_phile, ib_external_phile
 
-  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp,tl
+  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp,tl,tdl
 
-  real :: part_Nml(MDIM), part_temp
+  real :: part_Nml(MDIM), part_temp, part_dfun
 
   integer :: indx(MDIM),gridfl(MDIM)
 
@@ -85,6 +85,10 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   real, pointer, dimension(:,:,:,:) :: faceData
 
   real :: factor
+
+  real :: externalPt(MDIM), hnorm, external_dfun
+
+  real, parameter :: pi = acos(-1.0)
 
   !character(len=20) :: filename
   !logical, save :: firstcall = .true.
@@ -119,6 +123,8 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   part_Nml(JAXIS) = particleData(NMLY_PART_PROP);
 
   part_temp       = particleData(TEMP_PART_PROP);
+
+  !part_dfun       = particleData(DFUN_PART_PROP);
 
 #if NDIM == 3
   part_Pos(KAXIS) = particleData(POSZ_PART_PROP);
@@ -323,13 +329,58 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
      endif
 
-    endif
+  endif
 
-  return
+  if(ib_dfun_flg) then
 
+     if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
+
+     gridfl(:) = CENTER
+     indx(:)   = CONSTANT_ZERO
+
+     if (force_center) then
+
+        ! External Point  
+        hnorm   = 1.*sqrt((del(IAXIS)*part_Nml(IAXIS))**2. + (del(JAXIS)*part_Nml(JAXIS))**2.)
+      
+        externalPt(IAXIS) = part_Pos(IAXIS) + part_Nml(IAXIS)*hnorm
+        externalPt(JAXIS) = part_Pos(JAXIS) + part_Nml(JAXIS)*hnorm
+        externalPt(KAXIS) = 0.0
+
+        call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
+                         ib_external(:,:),tdl,FORCE_FLOW)
+
+        call ib_interpLpoints(externalPt, gridfl, &
+                              del, coord, bsize, ib_external(:,:), ib_external_phile(:,:), &
+                              external_dfun,FORCE_FLOW,blockID,CENTER_IND)
+
+        part_dfun = external_dfun - hnorm*cos(60*pi/180)
+
+        particleData(DFUN_PART_PROP) = part_dfun
+
+        ! Forcing
+        call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
+                         ib_ht_ielem(:,:),tl,FORCE_FLOW)
+
+        call ib_interpLpoints(part_Pos,gridfl,                     &
+              del,coord,bsize,ib_ht_ielem(:,:),ib_ht_phile(:,:),     &
+              ib_temp,FORCE_FLOW,blockID,CENTER_IND)
+
+        ib_Ftemp  = invdt*(part_dfun - ib_temp)
+        particleData(FTP_PART_PROP)  = particleData(CENTER_IND) + ib_Ftemp
+        particleData(DIFP_PART_PROP) = ib_temp
+
+        particleData(DF_PART_PROP) = tl
+
+        call ib_extrapEpoints(part_Pos,sb,tl,del,ib_ht_ielem(:,:),ib_ht_phile(:,:),   &
+                              ib_Ftemp,blockID,CENTER_IND)
+
+     endif
+
+     endif
+
+  endif
+
+ return
 
 end subroutine ib_forcing
-
-
-
-

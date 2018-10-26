@@ -8,6 +8,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "constants.h"
 #include "Heat_AD.h"
 #include "Flash.h"
+#include "ImBound.h"
 
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
@@ -28,6 +29,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    use Driver_data,  only: dr_nstep,dr_simTime
 
    use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu_l, ht_Nu_t
+
+   use ImBound_data, only: ib_vel_flg, ib_dfun_flg, ib_temp_flg
+
+   use ImBound_interface, only: ImBound
+
+   use InCompNS_data, only: ins_alfa
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -214,6 +221,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
     end do
+
+    ib_temp_flg = .true.
+    ib_vel_flg  = .false.
+    ib_dfun_flg = .false.
+
+    call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.

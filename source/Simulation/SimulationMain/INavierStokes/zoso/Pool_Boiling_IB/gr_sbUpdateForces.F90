@@ -35,7 +35,7 @@ subroutine gr_sbUpdateForces
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
-  use ImBound_data, only : ib_dt, ib_maxIterForcing, ib_vel_flg, ib_temp_flg
+  use ImBound_data, only : ib_dt, ib_maxIterForcing, ib_vel_flg, ib_temp_flg, ib_dfun_flg
 
   use gr_ptInterface, ONLY : gr_ptMove, gr_ptSetIndices, gr_ptResetIndices
 
@@ -1492,6 +1492,21 @@ subroutine gr_sbUpdateForces
                        blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &
      ib_dt*                                                                &
      solnData(TFRC_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
+
+     end if
+
+     if(ib_dfun_flg) then
+
+     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &
+     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &
+     ib_dt*                                                                &
+     solnData(DFRC_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
                        blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
                        blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 

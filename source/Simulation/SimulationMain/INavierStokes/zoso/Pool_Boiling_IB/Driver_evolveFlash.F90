@@ -159,30 +159,16 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !--------------------------------------------------------------------
      !--------------------------------------------------------------------
      !----
-
-     call Timers_start("Multiphase")
-     call Multiphase( blockCount, blockList,   &
-              dr_simTime, dr_dt, dr_dtOld,  sweepDummy,1)
-     call Timers_stop("Multiphase")
-
-
-     call Timers_start("Heat_AD")
-     call Heat_AD( blockCount, blockList,   &
-              dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
-     call Timers_stop("Heat_AD")
-
+     dr_simTime = dr_simTime + dr_dt
 
      call Timers_start("Multiphase")
      call Multiphase( blockCount, blockList,   &
               dr_simTime, dr_dt, dr_dtOld,  sweepDummy,0)
      call Timers_stop("Multiphase")
 
-
 #ifdef DEBUG_DRIVER
      print*, 'going into IncompNS'
 #endif
-     dr_simTime = dr_simTime + dr_dt
-
      !print *,"Time step: ",dr_dt
 
      call Timers_start("IncompNS")
@@ -193,6 +179,16 @@ if (dr_nstep .eq. 1) grid_changed = 1
 #ifdef DEBUG_DRIVER
   print*, 'return from IncompNS timestep'
 #endif
+
+     call Timers_start("Heat_AD")
+     call Heat_AD( blockCount, blockList,   &
+              dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
+     call Timers_stop("Heat_AD")
+
+     call Timers_start("Multiphase")
+     call Multiphase( blockCount, blockList,   &
+              dr_simTime, dr_dt, dr_dtOld,  sweepDummy,1)
+     call Timers_stop("Multiphase")
 
      if (dr_globalMe .eq. MASTER_PE) then
         write(*,*) ' '        

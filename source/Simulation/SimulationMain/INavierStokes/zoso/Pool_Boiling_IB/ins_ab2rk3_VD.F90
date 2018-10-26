@@ -122,6 +122,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
+  use ImBound_data, ONLY: ib_temp_flg, ib_vel_flg, ib_dfun_flg
  
   implicit none
 
@@ -591,6 +592,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   ! Rescale Velocities at outflows for overall conservation: 
   !call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout) !- ML: commented out due to error with neumann_ins bc?
+
+  ib_temp_flg = .false.
+  ib_vel_flg  = .true.
+  ib_dfun_flg = .false.
 
   CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
   ! Force Immersed Boundaries:

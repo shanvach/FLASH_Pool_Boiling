@@ -22,7 +22,7 @@ subroutine ib_interpLpoints(xp,gridfl,          &
                del,coord,bsize,ielem,phile,     &
                zL,forcflag,blockID,faceind)
 
-  use ImBound_data , only :ib_stencil,ib_interp,ib_npol,ib_vel_flg,ib_temp_flg
+  use ImBound_data , only: ib_stencil,ib_interp,ib_npol,ib_vel_flg,ib_temp_flg,ib_dfun_flg
 
   use ib_interface , only : ib_getInterpFunc
 
@@ -100,6 +100,17 @@ subroutine ib_interpLpoints(xp,gridfl,          &
   do i = 1 , ib_stencil
      zp = zp + phile(i,CONSTANT_ONE) * &
                faceData(TEMP_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));
+  enddo
+  zL = zp;
+
+  end if
+
+  if(ib_dfun_flg) then
+
+  zp = 0.;
+  do i = 1 , ib_stencil
+     zp = zp + phile(i,CONSTANT_ONE) * &
+               faceData(DFUN_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));
   enddo
   zL = zp;
 

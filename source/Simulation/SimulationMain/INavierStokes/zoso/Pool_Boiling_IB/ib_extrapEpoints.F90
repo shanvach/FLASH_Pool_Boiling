@@ -20,7 +20,7 @@
 
 subroutine ib_extrapEpoints(xp,sb,hl,del,ielem,phile,zL,blockID,faceind)
 
-  use ImBound_data , only : ib_stencil,ib_vel_flg,ib_temp_flg
+  use ImBound_data , only : ib_stencil,ib_vel_flg,ib_temp_flg,ib_dfun_flg
 
   use Grid_interface, ONLY : Grid_getBlkPtr,          &
                              Grid_releaseBlkPtr
@@ -84,6 +84,14 @@ subroutine ib_extrapEpoints(xp,sb,hl,del,ielem,phile,zL,blockID,faceind)
   enddo
   endif
 
+  if(ib_dfun_flg) then
+  do i = 1,ib_stencil
+
+     faceData(DFRC_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) = &
+     faceData(DFRC_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) + factor*phile(i,CONSTANT_ONE)*zL;
+
+  enddo
+  endif
 
   ! Release face data:
   call Grid_releaseBlkPtr(blockID,faceData,faceind)  
