@@ -58,6 +58,7 @@ sm_c2fortran_dgssv_(int *iopt, int *n, int *nnz, int *nrhs,
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
+    GlobalLU_t Glu;
     factors_t *LUfactors;
 
     trans = NOTRANS;
@@ -100,7 +101,7 @@ sm_c2fortran_dgssv_(int *iopt, int *n, int *nnz, int *nrhs,
 	relax = sp_ienv(2);
 
 	dgstrf(&options, &AC, relax, panel_size, etree,
-                NULL, 0, perm_c, perm_r, L, U, &stat, info);
+                NULL, 0, perm_c, perm_r, L, U, &Glu, &stat, info);
 
 	if ( *info == 0 ) {
 	    Lstore = (SCformat *) L->Store;
