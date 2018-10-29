@@ -222,7 +222,7 @@ subroutine ib_forceInsideBody()
      lb_box(IAXIS,HIGH) = coord(IAXIS) + bsize(IAXIS)/2.0 + real(NGUARD)*del(IAXIS)
      lb_box(JAXIS,LOW)  = coord(JAXIS) - bsize(JAXIS)/2.0 - real(NGUARD)*del(JAXIS)
      lb_box(JAXIS,HIGH) = coord(JAXIS) + bsize(JAXIS)/2.0 + real(NGUARD)*del(JAXIS)        
-#if NDIM = MDIM
+#if NDIM == MDIM
      lb_box(KAXIS,LOW)  = coord(KAXIS) - bsize(KAXIS)/2.0 - real(NGUARD)*del(KAXIS)
      lb_box(KAXIS,HIGH) = coord(KAXIS) + bsize(KAXIS)/2.0 + real(NGUARD)*del(KAXIS)
 #else
