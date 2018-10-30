@@ -70,11 +70,11 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
   real, dimension(ib_stencil,NDIM+1,MDIM) :: ib_phile
 
-  integer, dimension(ib_stencil,MDIM) :: ib_ht_ielem, ib_external
+  integer, dimension(ib_stencil,MDIM) :: ib_ht_ielem, ib_external, ib_dfun_ielem
 
-  real, dimension(ib_stencil,NDIM+1) :: ib_ht_phile, ib_external_phile
+  real, dimension(ib_stencil,NDIM+1) :: ib_ht_phile, ib_external_phile, ib_dfun_phile
 
-  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp,tl,tdl
+  real :: part_Pos(MDIM),part_Vel(MDIM),sb,hl,ib_uL(MDIM),ib_FuL(MDIM),ib_temp,ib_Ftemp,tl,dfe,dfl, ib_Fdfun, ib_dfun
 
   real :: part_Nml(MDIM), part_temp, part_dfun
 
@@ -348,32 +348,32 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
         externalPt(KAXIS) = 0.0
 
         call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
-                         ib_external(:,:),tdl,FORCE_FLOW)
+                         ib_external(:,:),dfe,FORCE_FLOW)
 
         call ib_interpLpoints(externalPt, gridfl, &
                               del, coord, bsize, ib_external(:,:), ib_external_phile(:,:), &
                               external_dfun,FORCE_FLOW,blockID,CENTER_IND)
-
+        
         part_dfun = external_dfun - hnorm*cos(60*pi/180)
 
         particleData(DFUN_PART_PROP) = part_dfun
 
         ! Forcing
         call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
-                         ib_ht_ielem(:,:),tl,FORCE_FLOW)
+                         ib_dfun_ielem(:,:),dfl,FORCE_FLOW)
 
         call ib_interpLpoints(part_Pos,gridfl,                     &
-              del,coord,bsize,ib_ht_ielem(:,:),ib_ht_phile(:,:),     &
-              ib_temp,FORCE_FLOW,blockID,CENTER_IND)
+              del,coord,bsize,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),     &
+              ib_dfun,FORCE_FLOW,blockID,CENTER_IND)
 
-        ib_Ftemp  = invdt*(part_dfun - ib_temp)
-        particleData(FTP_PART_PROP)  = particleData(CENTER_IND) + ib_Ftemp
-        particleData(DIFP_PART_PROP) = ib_temp
+        ib_Fdfun  = invdt*(part_dfun - ib_dfun)
+        particleData(FTP_PART_PROP)  = particleData(CENTER_IND) + ib_Fdfun
+        particleData(DIFP_PART_PROP) = ib_dfun
 
-        particleData(DF_PART_PROP) = tl
+        particleData(DF_PART_PROP) = dfl
 
-        call ib_extrapEpoints(part_Pos,sb,tl,del,ib_ht_ielem(:,:),ib_ht_phile(:,:),   &
-                              ib_Ftemp,blockID,CENTER_IND)
+        call ib_extrapEpoints(part_Pos,sb,dfl,del,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),   &
+                              ib_Fdfun,blockID,CENTER_IND)
 
      endif
 

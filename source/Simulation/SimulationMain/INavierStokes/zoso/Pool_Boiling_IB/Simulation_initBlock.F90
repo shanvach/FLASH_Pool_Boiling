@@ -84,6 +84,7 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(17) :: Nuc_radii,Nuc_sites_x,Nuc_sites_z,Nuc_sites_y
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
+  real :: th_radii
 
   !----------------------------------------------------------------------
   
@@ -122,33 +123,39 @@ subroutine Simulation_initBlock(blockId)
   ht_psi          = (45.0/180.0)*acos(-1.0)
 
 
-  open(unit = 3,file = "sim_thermalBL.dat")
+  !open(unit = 3,file = "sim_thermalBL.dat")
 
-  do bli=1,10
+  !do bli=1,10
 
-     read(3,*)fn(bli)
+  !   read(3,*)fn(bli)
 
-  end do
+  !end do
 
-  close(3)
+  !close(3)
 
-  open(unit = 2,file = "sim_nucSites.dat")
+  !open(unit = 2,file = "sim_nucSites.dat")
 
-  do
+  !do
  
-     nuc_index = sim_nucSiteDens + 1
+  !   nuc_index = sim_nucSiteDens + 1
 
-     read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+  !   read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
 
-     sim_nucSiteDens = nuc_index
+  !   sim_nucSiteDens = nuc_index
 
-  end do
+  !end do
 
-  10 continue
+  !10 continue
 
-  close(2)
+  !close(2)
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
+  !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
+
+  sim_nucSiteDens = 1
+  sim_nuc_radii   = 0.2
+  sim_nuc_site_x  = 0.0
+  sim_nuc_site_y  = 0.6
+  sim_nuc_site_z  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -169,6 +176,8 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
+
+
            do nuc_index=1,sim_nucSiteDens
 
             nuc_dfun  = sim_nuc_radii(nuc_index) -  sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2);
@@ -186,24 +195,13 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-
-           !solnData(TEMP_VAR,i,j,k) = sim_Tbulk           
-           !do bli=1,10   
-           !     if(ycell .le. 1.0 .and. & 
-           !        xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-           !        zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = solnData(TEMP_VAR,i,j,k) + fn(bli)*(ycell**(10-bli)) 
-           !end do
-           !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
-   
-
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
 
-           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
+           th_radii = sqrt(xcell**2+ycell**2+zcell**2)
 
+           if(th_radii .le. 0.5) solnData(TEMP_VAR,i,j,k) = 1.0
+           if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = 1.0 - ((th_radii - 0.5)/(0.7 - 0.5))
+ 
         enddo
      enddo
   enddo

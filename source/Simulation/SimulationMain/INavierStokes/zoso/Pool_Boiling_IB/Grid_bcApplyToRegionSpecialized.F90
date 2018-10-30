@@ -371,7 +371,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                      if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
                         zcell .ge. -5.0 .and. zcell .le. 5.0) then
 
-                        regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(guard+1,jjj,kkk,ivar)
+                        regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar)
 
                      else
 
@@ -391,18 +391,18 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                !   regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(guard+1,1:je,1:ke,ivar)
                !end do
 
-               else if(ivar == DFUN_VAR) then
-               k = 2*guard+1
+               !else if(ivar == DFUN_VAR) then
+               !k = 2*guard+1
 
-               do kkk = 1,ke
-               do jjj = 1,je
-               do i = 1,guard
+               !do kkk = 1,ke
+               !do jjj = 1,je
+               !do i = 1,guard
 
-                  regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) - del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
+               !   regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) - del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
                   
-               end do
-               end do
-               end do
+               !end do
+               !end do
+               !end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
@@ -611,7 +611,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(guard,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
