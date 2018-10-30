@@ -199,6 +199,9 @@ subroutine Simulation_initBlock(blockId)
 
            th_radii = sqrt(xcell**2+ycell**2+zcell**2)
 
+           if(th_radii .le. 0.5) solnData(TEMP_VAR,i,j,k) = 1.0
+           if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = 1.0 - ((th_radii - 0.5)/(0.7 - 0.5))
+ 
         enddo
      enddo
   enddo
