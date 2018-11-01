@@ -39,7 +39,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
                             mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
                             mph_KPDadvectWENO3_3D, mph_KPDlsRedistance_3D,&
-                            mph_getInterfaceVelocity,mph_getInterfaceVelocity_3D 
+                            mph_getInterfaceVelocity,mph_getInterfaceVelocity_3D, mph_imbound 
 
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
@@ -439,11 +439,11 @@ enddo
  end do   !End ii RK loop
 
 
-    ib_temp_flg = .false.
-    ib_vel_flg  = .false.
-    ib_dfun_flg = .true.
+    !ib_temp_flg = .false.
+    !ib_vel_flg  = .false.
+    !ib_dfun_flg = .true.
 
-    call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+    !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
     !********************************************************************************************************
     !-kpd - Fill distance function guard cells before re-initialization to
@@ -754,6 +754,8 @@ end do
       lsT = lsT + lsDT
 
    end do  ! End do: ii=1,lsit
+
+   call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call cpu_time(t_stopMP2)
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a

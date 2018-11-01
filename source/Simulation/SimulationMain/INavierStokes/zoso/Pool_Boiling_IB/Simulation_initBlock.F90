@@ -195,6 +195,8 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
+           solnData(LMDA_VAR,i,j,k) = 0.5 - sqrt(xcell**2+ycell**2+zcell**2)
+
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
            th_radii = sqrt(xcell**2+ycell**2+zcell**2)
@@ -206,6 +208,22 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
+  k = 1
+     do j=2,blkLimitsGC(HIGH,JAXIS)-1
+        do i=2,blkLimitsGC(HIGH,IAXIS)-1
+
+           solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+
+        end do
+     end do
+ 
   sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 

@@ -75,7 +75,7 @@
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes,tprds
+           tpuint, tpvint,tptes,tprds, tlamda, tnmlx, tnmly
 
   real, dimension(NXB,NYB) :: tptes_c
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
@@ -168,7 +168,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam lamda nmlx nmly'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -345,6 +345,14 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(TMIC_VAR,:,:,1),tptes)
 
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(LMDA_VAR,:,:,1),tlamda)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NMLX_VAR,:,:,1),tnmlx)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NMLY_VAR,:,:,1),tnmly)
 
      tptes_c = solnData(PTES_VAR,NGUARD+1:NXB+NGUARD,NGUARD+1:NYB+NGUARD,1)
      tptes_d = solnData(PTES_VAR,:,:,1)
@@ -528,6 +536,15 @@
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,1) = sngl(tprds)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tlamda)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tnmlx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tnmly)
       i = TecDat(ijk,arraylb,0)
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)

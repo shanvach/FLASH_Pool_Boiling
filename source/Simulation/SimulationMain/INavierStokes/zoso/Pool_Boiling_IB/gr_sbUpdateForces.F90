@@ -1510,6 +1510,43 @@ subroutine gr_sbUpdateForces
                        blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
                        blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
+
+     !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+     !   do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+     !      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+     !   
+     !         if(solnData(PFUN_VAR,i,j,k) .eq. 0 .and. solnData(PFUN_VAR,i+1,j,k) .eq. 1) then
+     !         
+     !            solnData(DFUN_VAR,i,j,k)   = solnData(DFUN_VAR,i,j,k)   + ib_dt*solnData(DFRC_VAR,i,j,k)
+     !            solnData(DFUN_VAR,i+1,j,k) = solnData(DFUN_VAR,i+1,j,k) + ib_dt*solnData(DFRC_VAR,i+1,j,k)
+     !
+     !         end if          
+     !
+     !         if(solnData(PFUN_VAR,i,j,k) .eq. 1 .and. solnData(PFUN_VAR,i+1,j,k) .eq. 0) then
+     !         
+     !            solnData(DFUN_VAR,i,j,k)   = solnData(DFUN_VAR,i,j,k)   + ib_dt*solnData(DFRC_VAR,i,j,k)
+     !            solnData(DFUN_VAR,i+1,j,k) = solnData(DFUN_VAR,i+1,j,k) + ib_dt*solnData(DFRC_VAR,i+1,j,k)
+     !
+     !         end if          
+     !
+     !         if(solnData(PFUN_VAR,i,j,k) .eq. 0 .and. solnData(PFUN_VAR,i,j+1,k) .eq. 1) then
+     !         
+     !            solnData(DFUN_VAR,i,j,k)   = solnData(DFUN_VAR,i,j,k)   + ib_dt*solnData(DFRC_VAR,i,j,k)
+     !            solnData(DFUN_VAR,i,j+1,k) = solnData(DFUN_VAR,i,j+1,k) + ib_dt*solnData(DFRC_VAR,i,j+1,k)
+     !
+     !         end if          
+
+     !         if(solnData(PFUN_VAR,i,j,k) .eq. 1 .and. solnData(PFUN_VAR,i,j+1,k) .eq. 0) then
+     !         
+     !            solnData(DFUN_VAR,i,j,k)   = solnData(DFUN_VAR,i,j,k)   + ib_dt*solnData(DFRC_VAR,i,j,k)
+     !            solnData(DFUN_VAR,i,j+1,k) = solnData(DFUN_VAR,i,j+1,k) + ib_dt*solnData(DFRC_VAR,i,j+1,k)
+
+     !         end if          
+
+     !      end do
+     !   end do
+     !end do
+
      end if
 
 #ifdef ITER_FORCING
