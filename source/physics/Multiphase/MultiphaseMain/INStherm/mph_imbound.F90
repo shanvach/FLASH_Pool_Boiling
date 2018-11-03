@@ -28,7 +28,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
-                             mph_radius, mph_isAttached, mph_timeStamp
+                             mph_radius, mph_isAttached, mph_timeStamp, mph_vlim, mph_psi_adv
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -67,9 +67,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,blockID,ii,jj,kk,ierr,i,j,k
+  integer :: lb,blockID,ii,jj,kk,ierr,i,j,k,dir
 
-  real bsize(MDIM),coord(MDIM)
+  real bsize(MDIM),coord(MDIM), vel_probe(MDIM)
   
   real del(MDIM),xcell,ycell,zcell,rc
 
@@ -100,6 +100,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real    :: externalPt(MDIM), part_Nml(MDIM), dfe
   integer, dimension(ib_stencil,MDIM) :: ib_external
   real, dimension(ib_stencil,NDIM+1) :: ib_external_phile
+  integer,parameter,dimension(MDIM):: FACE_IND =(/FACEX,FACEY,FACEZ/)
 
   integer :: idim
   real    :: xyz_stencil(ib_stencil,MDIM)
@@ -109,7 +110,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer, parameter :: derivflag = 0
   integer :: ib_ind
 
-  real    :: hratio
+  real    :: hratio, veli, this_psi
 
   do lb = 1,blockCount
 
@@ -165,11 +166,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            part_Nml(JAXIS) = solnData(NMLY_VAR,i,j,k)
            part_Nml(KAXIS) = 0.0
 
+! Cell centered stencil for DFUN interpolation at probe
            gridfl(:) = CENTER
-
            call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
                             ib_external(:,:),dfe,FORCE_FLOW)
-
 
            delaux = 0.5*del
 
@@ -180,19 +180,71 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                     real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim)
            enddo
 
+!           Get shape function ib_external_phile  for points on stencil
            call ib_getInterpFunc(externalPt,xyz_stencil,del,derivflag,ib_external_phile)
 
-           zp = 0.
+           zp = 0.      ! zp = DFUN at probe point
 
            do ib_ind = 1 , ib_stencil
                 zp = zp + ib_external_phile(ib_ind,CONSTANT_ONE) * &
                 solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
 
+!!!!!!!!! Interpolate velocity to probe point !!!!!!!!!!!!
+!   Face centered stencil for velocity interpolation at probe
+           gridfl(:) = CENTER
+           veli=0
+            do dir=1,NDIM
+                gridfl(:) = CENTER
+!                 indx(:)   = CONSTANT_ZERO
+!                 if (force_fl(dir)) then
+
+                    gridfl(dir) = FACES
+
+                    ! Define Interpolation Stencil For Particle:
+                    call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
+                                    ib_external(:,:),dfe,FORCE_FLOW)
+
+                    ! Interpolation of the values of velocity to Lagrangian points:
+                    call ib_interpLpoints(externalPt,gridfl,                     &
+                        del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
+                        vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
+
+                        veli = veli + vel_probe(dir) * part_Nml(dir)
+! !                     ! The particle forcing field:
+! !                     ib_FuL(dir)  = invdt*(part_Vel(dir) - vel_probe(dir))
+! !                     particleData(FORCE_IND(dir))  = particleData(FORCE_IND(dir)) + ib_FuL(dir)
+! ! 
+! !                     particleData(HL_PART_PROP) = dfe
+! ! 
+! !                     ! Extrapolation of Forces to the Eulerian Points (Check what 
+! !                     ! happens to the positions accelerations and velocities) and 
+! !                     ! sum to ustar, vstar and wstar:
+! !                     call ib_extrapEpoints(part_Pos,sb,dfe,del,ib_external(:,:,i),ib_external_phile(:,:,i),   &
+! !                                         ib_FuL(dir),blockID,FACE_IND(dir))
+
+!                 endif
+            end do
+!!!!!!!!! Interpolate velocity to probe point !!!!!!!!!!!!
+
+!           Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
+                 if(veli .ge. 0.0) then
+                 if(abs(veli) .le. mph_vlim) then
+
+                      this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                                              (mph_psi_adv + ht_psi)/2.0d0
+
+                 else
+        
+                      this_psi = mph_psi_adv
+                        
+                 end if
+                 end if
+!           dynamic contact angle done      !
 
            hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
 
-           solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(ht_psi)
+           solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(ht_psi)     !!!!Use this_psi instead of ht_psi
 
 
            end if 
