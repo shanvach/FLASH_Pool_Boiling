@@ -240,11 +240,12 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         
                  end if
                  end if
+                 print*,"$$$$$$$$$ phi old vs new: ", ht_psi, this_psi, "$$$$$$$$$$$$$"
 !           dynamic contact angle done      !
 
            hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
 
-           solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(ht_psi)     !!!!Use this_psi instead of ht_psi
+           solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(this_psi)     !!!!Use this_psi instead of ht_psi
 
 
            end if 
