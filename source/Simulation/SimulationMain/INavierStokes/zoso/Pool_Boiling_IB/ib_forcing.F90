@@ -317,7 +317,7 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
               ib_temp,FORCE_FLOW,blockID,CENTER_IND)
 
         ib_Ftemp  = invdt*(part_temp - ib_temp)
-        particleData(FTEMP_IND)  = particleData(CENTER_IND) + ib_Ftemp
+        particleData(FTEMP_IND)  = particleData(FTEMP_IND) + ib_Ftemp
         particleData(TEMPITP_IND)  = ib_temp
 
         particleData(TL_PART_PROP) = tl
@@ -367,7 +367,7 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
               ib_dfun,FORCE_FLOW,blockID,CENTER_IND)
 
         ib_Fdfun  = invdt*(part_dfun - ib_dfun)
-        particleData(FTP_PART_PROP)  = particleData(CENTER_IND) + ib_Fdfun
+        particleData(FTP_PART_PROP)  = particleData(FTP_PART_PROP) + ib_Fdfun
         particleData(DIFP_PART_PROP) = ib_dfun
 
         particleData(DF_PART_PROP) = dfl
