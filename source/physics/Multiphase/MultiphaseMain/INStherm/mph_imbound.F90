@@ -196,11 +196,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            veli=0
             do dir=1,NDIM
                 gridfl(:) = CENTER
-!                 indx(:)   = CONSTANT_ZERO
 !                 if (force_fl(dir)) then
-
                     gridfl(dir) = FACES
-
                     ! Define Interpolation Stencil For Particle:
                     call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
                                     ib_external(:,:),dfe,FORCE_FLOW)
@@ -211,24 +208,12 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
 
                         veli = veli + vel_probe(dir) * part_Nml(dir)
-! !                     ! The particle forcing field:
-! !                     ib_FuL(dir)  = invdt*(part_Vel(dir) - vel_probe(dir))
-! !                     particleData(FORCE_IND(dir))  = particleData(FORCE_IND(dir)) + ib_FuL(dir)
-! ! 
-! !                     particleData(HL_PART_PROP) = dfe
-! ! 
-! !                     ! Extrapolation of Forces to the Eulerian Points (Check what 
-! !                     ! happens to the positions accelerations and velocities) and 
-! !                     ! sum to ustar, vstar and wstar:
-! !                     call ib_extrapEpoints(part_Pos,sb,dfe,del,ib_external(:,:,i),ib_external_phile(:,:,i),   &
-! !                                         ib_FuL(dir),blockID,FACE_IND(dir))
-
 !                 endif
             end do
 !!!!!!!!! Interpolate velocity to probe point !!!!!!!!!!!!
 
 !           Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
-                 if(veli .ge. 0.0) then
+            if(veli .ge. 0.0) then
                  if(abs(veli) .le. mph_vlim) then
 
                       this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
@@ -236,11 +221,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
                  else
         
-                      this_psi = mph_psi_adv
+                this_psi = mph_psi_adv
                         
                  end if
-                 end if
-                 print*,"$$$$$$$$$ phi old vs new: ", ht_psi, this_psi, "$$$$$$$$$$$$$"
+            end if
 !           dynamic contact angle done      !
 
            hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
