@@ -194,28 +194,31 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            ! Face centered stencil for velocity interpolation at probe
 
-           gridfl(:) = CENTER
            veli=0
 
             do dir=1,NDIM
 
-                    gridfl(dir) = FACES
+                gridfl(:) = CENTER
+                gridfl(dir) = FACES
 
-                    ! Define Interpolation Stencil For Particle:
-                    call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
-                                    ib_external(:,:),dfe,FORCE_FLOW)
+                ! Define Interpolation Stencil For Particle:
+                call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
+                                 ib_external(:,:),dfe,FORCE_FLOW)
 
-                    ! Interpolation of the values of velocity to Lagrangian points:
-                    call ib_interpLpoints(externalPt,gridfl,                     &
-                        del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
-                        vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
+                ! Interpolation of the values of velocity to Lagrangian points:
+                call ib_interpLpoints(externalPt,gridfl,                     &
+                                      del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
+                                      vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
 
-                        veli = veli + vel_probe(dir) * part_Nml(dir)
+                veli = veli + vel_probe(dir) * part_Nml(dir)
+
             end do
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
         
             this_psi = ht_psi
+
+            ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
 
             if(veli .ge. 0.0) then
                  if(abs(veli) .le. mph_vlim) then
@@ -225,7 +228,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
                  else
         
-                      this_psi = mph_psi_adv
+                this_psi = mph_psi_adv
                         
                  end if
              end if
