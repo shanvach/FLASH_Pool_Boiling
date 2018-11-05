@@ -444,6 +444,8 @@ enddo
     !ib_dfun_flg = .true.
 
     !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+    call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
 
     !********************************************************************************************************
     !-kpd - Fill distance function guard cells before re-initialization to
@@ -754,8 +756,6 @@ end do
       lsT = lsT + lsDT
 
    end do  ! End do: ii=1,lsit
-
-   call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call cpu_time(t_stopMP2)
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a
