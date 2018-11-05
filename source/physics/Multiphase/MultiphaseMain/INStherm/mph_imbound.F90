@@ -134,8 +134,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
         k = 1
-        do j=2,blkLimitsGC(HIGH,JAXIS)-1
-         do i=2,blkLimitsGC(HIGH,IAXIS)-1
+        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
            if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .lt. 3.5*del(IAXIS)) then
                           
