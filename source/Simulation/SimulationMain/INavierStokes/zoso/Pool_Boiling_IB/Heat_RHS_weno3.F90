@@ -1,5 +1,5 @@
 subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv)
+                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv,lambda)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -14,7 +14,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2
   real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
-  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv
+  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv,lambda
 
   real :: T_res
 
@@ -75,19 +75,19 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
      ! End of Case 1 !
 
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
      ! End of Case 2 !
 
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
      ! End of Case 3 !
 
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
      ! End of Case 4 ! 
 
      !______________________Advection Terms_______________________!
@@ -339,9 +339,17 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
     Txx = alph(i,j,k)*(coeff*(Tx_plus-Tij)/dx - coeff*(Tij-Tx_mins)/dx)/dx
     Tyy = alph(i,j,k)*(coeff*(Ty_plus-Tij)/dy - coeff*(Tij-Ty_mins)/dy)/dy
 
+    if(lambda(i,j,k) .lt. 0.0) then
+
     T_rhs(i,j,k) = - (frx*ur - flx*ul)/dx &
                    - (fry*vr - fly*vl)/dy &
                    + Txx + Tyy
+
+    else
+
+    T_rhs(i,j,k) = Txx + Tyy
+
+    end if
 
     end do
   end do 

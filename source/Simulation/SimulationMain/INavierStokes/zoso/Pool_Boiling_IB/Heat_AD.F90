@@ -154,7 +154,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
-                     solnData(CURV_VAR,:,:,:))
+                     solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -282,7 +282,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
