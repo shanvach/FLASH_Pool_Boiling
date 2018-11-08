@@ -85,6 +85,12 @@ subroutine Simulation_initBlock(blockId)
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
   real :: th_radii
+  real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
+
+  xl =  0.0;
+  xr =  2.0;
+  yl =  0.0;
+  yr =  yl+2.0;
 
   !----------------------------------------------------------------------
   
@@ -154,7 +160,7 @@ subroutine Simulation_initBlock(blockId)
   sim_nucSiteDens = 1
   sim_nuc_radii   = 0.2
   sim_nuc_site_x  = 0.0
-  sim_nuc_site_y  = 0.6
+  sim_nuc_site_y  = 0.57 !yr + sim_nuc_radii*cos(ht_psi)
   sim_nuc_site_z  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -176,7 +182,10 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-
+           dxl = xcell - xl;
+           dxr = xr - xcell;
+           dyl = ycell - yl;
+           dyr = yr - ycell;      
 
            do nuc_index=1,sim_nucSiteDens
 
@@ -196,6 +205,7 @@ subroutine Simulation_initBlock(blockId)
            end do
 
            solnData(LMDA_VAR,i,j,k) = 0.5 - sqrt(xcell**2+ycell**2+zcell**2)
+           !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr);
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
@@ -203,6 +213,9 @@ subroutine Simulation_initBlock(blockId)
 
            if(th_radii .le. 0.5) solnData(TEMP_VAR,i,j,k) = 1.0
            if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = 1.0 - ((th_radii - 0.5)/(0.7 - 0.5))
+
+           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           !if(ycell .le. 0.15 + yr .and. ycell .gt. yr .and. xcell .ge. xl .and. xcell .le. xr) solnData(TEMP_VAR,i,j,k) = (0.15 + yr - ycell)/0.15
  
         enddo
      enddo
