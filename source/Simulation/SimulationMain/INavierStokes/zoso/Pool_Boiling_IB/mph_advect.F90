@@ -1,6 +1,6 @@
 subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
-!#define NUCLEATE_BOILING
+#define NUCLEATE_BOILING
 #include "Flash.h"
 #include "ImBound.h"
 
@@ -85,7 +85,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   real bsize(MDIM),coord(MDIM)
   
-  real del(MDIM),xcell,ycell,zcell,rc,xcellp,zcellp
+  real del(MDIM),xcell,ycell, ycellp,zcell,rc,xcellp,zcellp
 
   real    :: r_avg
   integer :: n_avg
@@ -509,9 +509,9 @@ do nuc_index =1,sim_nucSiteDens
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
-              0.5*del(JAXIS)
+!      ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+!               real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
+!               0.5*del(JAXIS)
 
 !      if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
 
@@ -555,12 +555,12 @@ do nuc_index =1,sim_nucSiteDens
 #endif
               (ycell .le. sim_nuc_site_y(nuc_index)) .and. (ycellp .ge. sim_nuc_site_y(nuc_index)) ) then
 
-             if ((solnData(DFUN_VAR,i,j,k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k)   .ge. 0.0) then ! .or. &
+             if ( (solnData(DFUN_VAR,i,j,k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k)   .ge. 0.0) .or. &
 #if NDIM == MDIM
                  (solnData(DFUN_VAR,i,j,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k+1) .ge. 0.0) .or. &
                  (solnData(DFUN_VAR,i,j+1,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k+1) .ge. 0.0) .or. &
 #endif
-                 (solnData(DFUN_VAR,i,j+1,k) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k) .ge. 0.0) )
+                 (solnData(DFUN_VAR,i,j+1,k) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k) .ge. 0.0) ) then
                         
                         isAttached = isAttached .or. .true.
              else
@@ -577,6 +577,7 @@ do nuc_index =1,sim_nucSiteDens
 
         end do
        end do
+      end do
 
 !      end if
   
@@ -598,7 +599,8 @@ do nuc_index =1,sim_nucSiteDens
       (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime) .and. &
       (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
 
-  do lb = 1,blockCount
+  if(ins_meshMe .eq. MASTER_PE) print*, "Bubble reneucleation at site ",nuc_index
+      do lb = 1,blockCount
 
      blockID = blockList(lb)
      call Grid_getBlkBoundBox(blockId,boundBox)
@@ -654,6 +656,8 @@ do nuc_index =1,sim_nucSiteDens
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
+  else
+  if(ins_meshMe .eq. MASTER_PE) print*, "No reneucleation at site ", nuc_index
   end if
 
 end do
