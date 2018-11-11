@@ -141,26 +141,26 @@ subroutine sm_surf_MapParticles(ibd)
       y1 = ypos(1)
      end if
 
-     if(e .eq. 3) then
+     if(e .eq. 15) then
       x2 = xpos(1)
       y2 = ypos(1)
      end if
 
-     if(e .eq. 5) then
+     if(e .eq. 30) then
       x3 = xpos(1)
       y3 = ypos(1)
      end if
 
   enddo
 
-  !sim_ibm_x = ((x2**2+y2**2)*(y3-y1) - (x1**2+y1**2)*(y3+y2-2*y1) + (x3**2+y3**2)*(y2-y1)) &
-  !          / (2*((x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)))
+  sim_ibm_x = ((x2**2+y2**2)*(y3-y1) + (x1**2+y1**2)*(y2-y3) + (x3**2+y3**2)*(y1-y2)) &
+            / (2*((x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)))
  
-  !sim_ibm_y = ((x2**2+y2**2)*(x3-x1) - (x1**2+y1**2)*(x3+x2-2*x1) + (x3**2+y3**2)*(x2-x1)) &
-  !          / (2*((y2-y1)*(x3-x1)-(y3-y1)*(x2-x1)))
+  sim_ibm_y = ((x2**2+y2**2)*(x3-x1) + (x1**2+y1**2)*(x2-x3) + (x3**2+y3**2)*(x1-x2)) &
+            / (2*((y2-y1)*(x3-x1)-(y3-y1)*(x2-x1)))
 
-  sim_ibm_x = xpos(1) - 0.5
-  sim_ibm_y = ypos(1)
+  !sim_ibm_x = xpos(1) - 0.5
+  !sim_ibm_y = ypos(1)
  
   print *,"P1: ", x1, y1
   print *,"P2: ", x2, y2
