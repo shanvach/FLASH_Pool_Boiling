@@ -627,13 +627,15 @@ do nuc_index =1,sim_nucSiteDens
                   real(j - NGUARD - 1)*del(JAXIS)  +  &
                   0.5*del(JAXIS)
 
-         !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 + &
-         !         real(k - NGUARD - 1)*del(KAXIS)  + &
-         !         0.5*del(KAXIS)
-
+#if NDIM == MDIM
+         zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 + &
+                 real(k - NGUARD - 1)*del(KAXIS)  + &
+                 0.5*del(KAXIS)
+#else
          zcell = 0.0
+#endif
 
-         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
+         nuc_dfun  = sim_nuc_radii(nuc_index) - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
 
          solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
 
