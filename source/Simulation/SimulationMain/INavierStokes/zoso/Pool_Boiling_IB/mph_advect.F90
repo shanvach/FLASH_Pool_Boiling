@@ -567,7 +567,15 @@ do nuc_index =1,sim_nucSiteDens
                         isAttached = isAttached .or. .false.
              end if 
 
-             !TODO :: Change this
+             !TODO :: Change this to remove points with for IBs??
+             nucSiteTemp = ( solnData(TEMP_VAR,i,j,k) + solnData(TEMP_VAR,i+1,j,k) + &
+#if NDIM == MDIM
+                                        solnData(TEMP_VAR,i,j,k+1) + solnData(TEMP_VAR,i+1,j,k+1) + &
+                                        solnData(TEMP_VAR,i,j+1,k+1) + solnData(TEMP_VAR,i+1,j+1,k+1) + &
+                                        solnData(TEMP_VAR,i,j+1,k) + solnData(TEMP_VAR,i+1,j+1,k) )/8.0
+#else
+                                        solnData(TEMP_VAR,i,j+1,k) + solnData(TEMP_VAR,i+1,j+1,k) )/4.0
+#endif
              nucSiteTemp = (solnData(TEMP_VAR,i,j,k) + &
                             solnData(TEMP_VAR,i+1,j,k))/2.0 ! + &
                             !solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k+1) + & 
