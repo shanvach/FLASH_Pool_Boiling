@@ -513,10 +513,16 @@ do nuc_index =1,sim_nucSiteDens
               real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
               0.5*del(JAXIS)
 
-     if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
+!      if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
 
+
+#if NDIM == MDIM
+       do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)-1
+#else
        do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)
-        do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
+#endif
+        do j=blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)-1
+         do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
 
            xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
                     real(i - NGUARD - 1)*del(IAXIS)  +  &
@@ -526,27 +532,44 @@ do nuc_index =1,sim_nucSiteDens
                     real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
                     0.5*del(IAXIS)
 
-           !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !         real(k - NGUARD - 1)*del(KAXIS)  +  &
-           !         0.5*del(KAXIS)
+           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                    real(j - NGUARD - 1)*del(JAXIS)  +  &
+                    0.5*del(JAXIS)
 
-           !zcellp = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !         real(k+1 - NGUARD - 1)*del(KAXIS)  +  &
-           !         0.5*del(KAXIS)
+           ycellp = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                    real(j+1 - NGUARD - 1)*del(JAXIS)  +  &
+                    0.5*del(JAXIS)
 
-           if((xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index))) then ! .and. &
-              !(zcell .le. sim_nuc_site_z(nuc_index)) .and. (zcellp .ge. sim_nuc_site_z(nuc_index))) then
+#if NDIM == MDIM
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
 
-             if ((solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k)   .ge. 0.0)) then ! .or. &
-                 !(solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k+1) .ge. 0.0)) then
+           zcellp = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k+1 - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
+#endif
+           if( (xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index)) .and. &
+#if NDIM == MDIM
+              (zcell .le. sim_nuc_site_z(nuc_index)) .and. (zcellp .ge. sim_nuc_site_z(nuc_index)).and. &
+#endif
+              (ycell .le. sim_nuc_site_y(nuc_index)) .and. (ycellp .ge. sim_nuc_site_y(nuc_index)) ) then
+
+             if ((solnData(DFUN_VAR,i,j,k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k)   .ge. 0.0) then ! .or. &
+#if NDIM == MDIM
+                 (solnData(DFUN_VAR,i,j,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k+1) .ge. 0.0) .or. &
+                 (solnData(DFUN_VAR,i,j+1,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k+1) .ge. 0.0) .or. &
+#endif
+                 (solnData(DFUN_VAR,i,j+1,k) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k) .ge. 0.0) )
                         
                         isAttached = isAttached .or. .true.
              else
                         isAttached = isAttached .or. .false.
              end if 
 
-             nucSiteTemp = (solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k) + &
-                            solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k))/2.0 ! + &
+             !TODO :: Change this
+             nucSiteTemp = (solnData(TEMP_VAR,i,j,k) + &
+                            solnData(TEMP_VAR,i+1,j,k))/2.0 ! + &
                             !solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k+1) + & 
                             !solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k+1))/4.0
 
@@ -555,7 +578,7 @@ do nuc_index =1,sim_nucSiteDens
         end do
        end do
 
-     end if
+!      end if
   
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
