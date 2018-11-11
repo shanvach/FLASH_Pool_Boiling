@@ -200,15 +200,40 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
                 gridfl(:) = CENTER
                 gridfl(dir) = FACES
+                delaux(1:NDIM)   = 0.5*del(1:NDIM)
+                delaux(dir) = 0.
 
                 ! Define Interpolation Stencil For Particle:
                 call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
                                  ib_external(:,:),dfe,FORCE_FLOW)
 
                 ! Interpolation of the values of velocity to Lagrangian points:
-                call ib_interpLpoints(externalPt,gridfl,                     &
-                                      del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
-                                      vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
+                xyz_stencil(:,:) = 0. 
+                do idim = 1,NDIM
+                    xyz_stencil(:,idim) = coord(idim) - 0.5*bsize(idim) + &
+                        real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim) 
+                enddo
+                call ib_getInterpFunc(externalPt,xyz_stencil,del,0,ib_external_phile)
+                vel_probe(dir) = 0.
+                do ii = 1 , ib_stencil      
+                    select case(dir)
+                    case(FACEX) 
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
+                            facexData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                    case(FACEY) 
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
+                            faceyData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+#if NDIM == MDIM
+                    case(FACEZ)
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
+                            facezData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+#endif
+                    end select
+                enddo
+! 
+!                 call ib_interpLpoints(externalPt,gridfl,                     &
+!                                       del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
+!                                       vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
 
                 veli = veli + vel_probe(dir) * part_Nml(dir)
 
