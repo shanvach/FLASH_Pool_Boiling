@@ -12,6 +12,7 @@ REQUIRES Driver
 
 REQUIRES physics/Multiphase
 REQUIRES physics/Multiphase/MultiphaseMain/INStherm
+REQUIRES physics/Multiphase/MultiphaseMain/INStherm/ImBound
 
 REQUIRES physics/Heat_AD
 REQUIRES physics/Heat_AD/Heat_ADMain/vardens

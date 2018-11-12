@@ -124,7 +124,7 @@ interface
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz,mdot,tmic,temp,blockID)
+                                       rho2z,sigz,mdot,tmic,blockID)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2,blockID
         real, intent(in) :: dx, dy, dz, rho1, rho2, xit
@@ -133,7 +133,7 @@ interface
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,temp
+        real, dimension(:,:,:), intent(in) :: mdot
 
         end subroutine mph_KPDcurvature3DC
 end interface
@@ -267,6 +267,17 @@ interface
        real, intent(in) :: dx,dy,dz
        integer, intent(in) :: ix1,ix2,jy1,jy2
        end subroutine
+end interface
+
+interface
+      subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
+      integer, INTENT(IN) :: sweepOrder
+      integer, INTENT(INOUT) :: blockCount
+      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+
+      end subroutine
 end interface
 
 ! End
