@@ -233,17 +233,21 @@ do lb = 1,blockCount
                solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0) then
              
                  veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
-                                   solnData(NRMX_VAR,i,NGUARD+1,k)
+                                   solnData(NRMX_VAR,i,NGUARD+1,k) + &
+                        (faceyData(VELI_FACE_VAR,i,NGUARD+1,k)+faceyData(VELI_FACE_VAR,i,NGUARD+2,k))*0.5*&
+                                   solnData(NRMY_VAR,i,NGUARD+1,k) 
+
+
 
                  if(veli .ge. 0.0) then
                  if(abs(veli) .le. mph_vlim) then
 
-                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                                              (mph_psi_adv + ht_psi)/2.0d0
+                      !mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                      !                        (mph_psi_adv + ht_psi)/2.0d0
 
                  else
         
-                      mph_psi(i,k,blockID) = mph_psi_adv
+                      !mph_psi(i,k,blockID) = mph_psi_adv
                         
                  end if
                  end if

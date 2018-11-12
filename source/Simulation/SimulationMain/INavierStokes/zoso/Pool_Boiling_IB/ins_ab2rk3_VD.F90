@@ -614,27 +614,28 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
 !_______________________________________________________________!
 
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
+  do lb = 1,blockCount
+     blockID = blockList(lb)
 
-!     call Grid_getBlkBoundBox(blockId,boundBox)
-!     bsize(:) = boundBox(2,:) - boundBox(1,:)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-!     call Grid_getBlkCenterCoords(blockId,coord)
+     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
+     call Grid_getDeltas(blockID,del)
 
      ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
      ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
 
-
-!     do k=1,blkLimits(HIGH,KAXIS)
-!       do j=1,blkLimits(HIGH,JAXIS)
-!         do i=1,blkLimits(HIGH,IAXIS)
+     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+       do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
 !           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
 !                   real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -646,20 +647,27 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
 !           solnData(RTES_VAR,i,j,k) = -8*pi*pi*cos(2*pi*xcell)*cos(2*pi*ycell)
 
-!        end do
-!       end do
-!     end do
+            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
 
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+        end do
+       end do
+     end do
 
-!  end do
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
 
 !  poisfact = 1.0
 !  call Grid_solvePoisson (PTES_VAR, RTES_VAR, bc_types, bc_values, poisfact)
 
-!  gcMask = .FALSE.
+  gcMask = .FALSE.
 !  gcMask(PTES_VAR) = .TRUE.
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 !____________________________________________________________!
 
