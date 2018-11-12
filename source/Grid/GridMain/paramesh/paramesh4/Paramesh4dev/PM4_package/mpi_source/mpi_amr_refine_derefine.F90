@@ -105,7 +105,7 @@
       Use Paramesh_comm_data, ONLY : amr_mpi_meshComm
 #ifdef BITTREE
       use bittree
-      use iso_c_binding, only: c_int
+      use, intrinsic :: iso_c_binding, only: c_int
 #endif
       Implicit None
 

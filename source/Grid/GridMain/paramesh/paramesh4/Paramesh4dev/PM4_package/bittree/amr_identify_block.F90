@@ -30,7 +30,7 @@
 subroutine amr_identify_block(procs, lev, ijk, proc, locblk)
   use bittree, only: bittree_block_count, bittree_morton
   use paramesh_dimensions, only: ndim
-  use iso_c_binding, only: c_int
+  use, intrinsic :: iso_c_binding, only: c_int
   implicit none
   
   integer, intent(in) :: procs

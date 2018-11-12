@@ -58,6 +58,7 @@ sm_c2fortran_dgssv_(int *iopt, int *n, int *nnz, int *nrhs,
     mem_usage_t   mem_usage;
     superlu_options_t options;
     SuperLUStat_t stat;
+    GlobalLU_t Glu;
     factors_t *LUfactors;
 
     trans = NOTRANS;
