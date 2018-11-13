@@ -99,11 +99,11 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalStep = 100000
 
 #plotFileIntervalTime = 0.01
-plotFileIntervalStep = 1
+plotFileIntervalStep = 200
 
 ##	AMR parameters
-nblockx	= 8
-nblocky	= 26
+nblockx	= 4
+nblocky	= 13
 
 lrefine_min	= 1
 lrefine_max     = 1
