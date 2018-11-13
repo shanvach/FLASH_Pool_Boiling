@@ -85,7 +85,7 @@ subroutine IncompNS_init(restart)
   endif
 
   ! Call multiphase variables initialization routine:
-  !call Multiphase_init()	
+  call Multiphase_init()
 
   if(ins_meshMe==MASTER_PE)print*,'Incmp_Navier_Stokes initialized'
 

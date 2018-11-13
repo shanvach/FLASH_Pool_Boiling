@@ -199,7 +199,7 @@
                           rConvU                                    &
                           + Mdens*(txxp - txxm)*dx1                 & ! diffusion - normal terms 
                           + Mdens*(tyyp - tyym)*dy1                 &
-                          - gravX     
+                          + gravX     
              !!ru(i,j,kz1) = 0.0 
           enddo
        enddo
@@ -342,7 +342,7 @@
                           rConvU                                     &
                           + Mdens* (txxp - txxm)*dx1                 &! diffusion - normal terms
                           + Mdens* (tyyp - tyym)*dy1                 &
-                          - gravY                                      ! kpd - gravity term 
+                          + gravY                                      ! kpd - gravity term 
              !rv(i,j,kz1) = -grav
           enddo
        enddo
@@ -666,7 +666,7 @@
                            + Mdens*(tzzp - tzzm)*dz1                &
                            + Mdens*(txyp - txym)*dy1                &! TURBULENT cross terms
                            + Mdens*(txzp - txzm)*dz1                &
-                           - gravX   
+                           + gravX   
 
             enddo
          enddo
@@ -879,7 +879,7 @@
                            + Mdens* (tzzp - tzzm)*dz1                &
                            + Mdens* (txyp - txym)*dx1                &! diffusion - cross terms
                            + Mdens* (tyzp - tyzm)*dz1                &
-                           - gravY
+                           + gravY
             enddo
          enddo
       enddo
@@ -1091,7 +1091,7 @@
                           + Mdens* (tzzp - tzzm)*dz1                &
                           + Mdens* (txzp - txzm)*dx1                &! diffusion - cross terms
                           + Mdens* (tyzp - tyzm)*dy1                &
-                          - gravZ                   
+                          + gravZ                   
             enddo
          enddo
       enddo
