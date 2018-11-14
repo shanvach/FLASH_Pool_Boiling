@@ -713,8 +713,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
 !           solnData(RTES_VAR,i,j,k) = -8*pi*pi*cos(2*pi*xcell)*cos(2*pi*ycell)
 
-            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
-            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
+            !if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+            !if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
 
         end do
        end do
