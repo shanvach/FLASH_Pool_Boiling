@@ -61,7 +61,7 @@ end interface
 
 interface
         subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,lambda)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx, dy, rho1, rho2, xit
@@ -69,6 +69,7 @@ interface
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy
+        real, dimension(:,:,:), intent(in) :: lambda
         end subroutine mph_KPDcurvature2DC
 end interface
 
