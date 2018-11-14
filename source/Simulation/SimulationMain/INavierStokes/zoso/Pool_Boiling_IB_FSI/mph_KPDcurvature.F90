@@ -260,7 +260,7 @@
 !=========================================================================
 
         subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,blockID)   
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,lambda,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
@@ -283,7 +283,7 @@
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot
+        real, dimension(:,:,:), intent(in) :: mdot,lambda
 
         integer, intent(in) :: blockID
 
@@ -353,7 +353,8 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
+              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. &
+             .and.lambda(i,j,k).lt.0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
 
                  !          = (+)            = (+)           = (-)
                  th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i,j,k)))
@@ -411,7 +412,8 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0. &
+              .and.lambda(i,j,k).lt.0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
 
@@ -467,7 +469,8 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
+              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1. &
+              .and.lambda(i,j,k).lt.0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
 
@@ -514,7 +517,8 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0. &
+              .and.lambda(i,j,k).lt.0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) 
  

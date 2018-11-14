@@ -204,6 +204,10 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
+           nuc_dfun = 0.3 - sqrt(xcell**2+(ycell-0.6)**2)
+
+           solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
+
            solnData(LMDA_VAR,i,j,k) = 0.5 - sqrt(xcell**2+ycell**2+zcell**2)
            !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr);
 
