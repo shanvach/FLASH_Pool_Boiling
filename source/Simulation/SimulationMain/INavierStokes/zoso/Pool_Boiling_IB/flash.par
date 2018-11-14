@@ -15,7 +15,7 @@ invRe = 0.0042
 Pr = 8.4
 
 # Stefan Number
-St = 0.65
+St = 0.4
 
 iConvU = 0
 
@@ -86,10 +86,10 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =   -2.50
-xmax =    2.50
-ymin =   -2.50
-ymax =    7.50
+xmin =    0.00
+xmax =    2.00
+ymin =    0.00
+ymax =    6.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -140,8 +140,8 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 5
-nblocky	= 10
+nblockx	= 4
+nblocky	= 12
 
 lrefine_min	= 1
 lrefine_max     = 1
