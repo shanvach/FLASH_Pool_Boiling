@@ -149,7 +149,7 @@ subroutine Simulation_initBlock(blockId)
   !close(2)
 
   sim_nucSiteDens   = 1
-  sim_nuc_radii(1)  = 0.5
+  sim_nuc_radii(1)  = 0.2
   sim_nuc_site_x(1) = 0.0
   sim_nuc_site_z(1) = 0.0
 
@@ -203,9 +203,9 @@ subroutine Simulation_initBlock(blockId)
    
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.5  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+           if(ycell .le. 0.15  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
               xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
-              zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = (0.5 - ycell)/0.5
+              zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = (0.15 - ycell)/0.15
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
