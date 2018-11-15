@@ -182,7 +182,7 @@ subroutine Simulation_initBlock(blockId)
   !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
   sim_nucSiteDens = 1
-  sim_nuc_radii   = 0.5
+  sim_nuc_radii   = 0.2
   sim_nuc_site_x  = - (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
   sim_nuc_site_y  =   (yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0
@@ -258,7 +258,7 @@ subroutine Simulation_initBlock(blockId)
 
            if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
-           if(dxl .ge. 0.0 .and. dxr .ge. 0.0 .and. dyl .ge. 0.0 .and. dyr .lt. 0.0 .and. dyr .ge. -0.5) solnData(TEMP_VAR,i,j,k) = 1.0 - abs(dyr)/0.5
+           if(dxl .ge. 0.0 .and. dxr .ge. 0.0 .and. dyl .ge. 0.0 .and. dyr .lt. 0.0 .and. dyr .ge. -0.15) solnData(TEMP_VAR,i,j,k) = 1.0 - abs(dyr)/0.15
  
         enddo
      enddo
