@@ -206,6 +206,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   call MPI_BCAST(sim_ibm_x, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
   call MPI_BCAST(sim_ibm_y, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
+  sim_nuc_site_y(2) = 0.6 + sim_ibm_y
+
 !----- Reconstruct IBM level set function lambda ---!
 do lb = 1,blockCount
 
@@ -616,7 +618,27 @@ do nuc_index =1,sim_nucSiteDens
        end do
 
      end if
-  
+ 
+     if(nuc_index == 2) then
+
+       do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+              if(solnData(LMDA_VAR,i,j,1) .lt. 0.0 .and. solnData(LMDA_VAR,i,j-1,1) .ge. 0.0) then
+
+                   if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) then
+                        isAttached = isAttached .or. .true.
+                   else
+                        isAttached = isAttached .or. .false.
+
+                   end if
+              end if    
+
+        end do
+       end do
+
+     end if
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do

@@ -401,9 +401,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else  !- kpd - Boundary Node
 
-                 MdensXR = 0.0 ! Neumann
+                 !MdensXR = 0.0 ! Neumann
                  !MdensXR = 4.0
-                 !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
+                 MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+2) = 0.0
 
               end if

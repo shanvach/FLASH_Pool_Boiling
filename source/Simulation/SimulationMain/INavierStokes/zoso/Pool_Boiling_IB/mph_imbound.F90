@@ -137,7 +137,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .lt. 3.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .lt. 2.0*del(IAXIS)) then
                           
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -152,7 +152,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !        0.5*del(KAXIS)
           
            ! Get probe in fluid
-           hnorm   = 1.*sqrt((1.5*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.5*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
+           hnorm   = 1.*sqrt((1.2*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.2*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
 
            xprobe = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)

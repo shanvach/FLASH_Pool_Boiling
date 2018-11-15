@@ -368,8 +368,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                      zcell = 0.0
 
-                     if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-                        zcell .ge. -5.0 .and. zcell .le. 5.0) then
+                     if(xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
+                        zcell .ge. -4.0 .and. zcell .le. 4.0) then
 
                         regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(guard+1,jjj,kkk,ivar)
 

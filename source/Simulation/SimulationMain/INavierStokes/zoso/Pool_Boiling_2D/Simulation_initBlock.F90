@@ -122,31 +122,36 @@ subroutine Simulation_initBlock(blockId)
   ht_psi          = (45.0/180.0)*acos(-1.0)
 
 
-  open(unit = 3,file = "sim_thermalBL.dat")
+  !open(unit = 3,file = "sim_thermalBL.dat")
 
-  do bli=1,10
+  !do bli=1,10
 
-     read(3,*)fn(bli)
+  !   read(3,*)fn(bli)
 
-  end do
+  !end do
 
-  close(3)
+  !close(3)
 
-  open(unit = 2,file = "sim_nucSites.dat")
+  !open(unit = 2,file = "sim_nucSites.dat")
 
-  do
+  !do
  
-     nuc_index = sim_nucSiteDens + 1
+  !   nuc_index = sim_nucSiteDens + 1
 
-     read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+  !   read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
 
-     sim_nucSiteDens = nuc_index
+  !   sim_nucSiteDens = nuc_index
 
-  end do
+  !end do
 
-  10 continue
+  !10 continue
 
-  close(2)
+  !close(2)
+
+  sim_nucSiteDens   = 1
+  sim_nuc_radii(1)  = 0.5
+  sim_nuc_site_x(1) = 0.0
+  sim_nuc_site_z(1) = 0.0
 
   sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
@@ -198,9 +203,9 @@ subroutine Simulation_initBlock(blockId)
    
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.15  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.15 - ycell)/0.15  
+           if(ycell .le. 0.5  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+              xcell .ge. -4.0 .and. xcell .le. 4.0 .and. &
+              zcell .ge. -4.0 .and. zcell .le. 4.0) solnData(TEMP_VAR,i,j,k) = (0.5 - ycell)/0.5
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
