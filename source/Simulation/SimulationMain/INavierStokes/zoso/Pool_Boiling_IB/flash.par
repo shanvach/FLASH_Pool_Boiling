@@ -38,9 +38,9 @@ cp1   = 1.0
 cp2   = 144.0
 
 # Gravity in the +y direction
-gravX =  0.0
-gravY = -1.0
-gravZ =  0.0
+gravX =  -0.7071
+gravY =  -0.7071
+gravZ =   0.0
 
 # sten is the inverse of the Weber number
 sten = 1.0
@@ -86,10 +86,10 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =    0.00
-xmax =    2.00
+xmin =   -5.00
+xmax =    25.00
 ymin =    0.00
-ymax =    6.00
+ymax =    30.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -140,8 +140,8 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 4
-nblocky	= 12
+nblockx	= 15
+nblocky	= 15
 
 lrefine_min	= 1
 lrefine_max     = 1

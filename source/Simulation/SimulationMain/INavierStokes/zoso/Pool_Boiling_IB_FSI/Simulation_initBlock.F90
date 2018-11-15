@@ -157,11 +157,16 @@ subroutine Simulation_initBlock(blockId)
 
   !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
-  sim_nucSiteDens =  1
-  sim_nuc_radii   =  0.8
-  sim_nuc_site_x  =  0.0
-  sim_nuc_site_y  = -25.0 + sim_nuc_radii*cos((20.0/180.0)*acos(-1.0))
-  sim_nuc_site_z  =  0.0
+  sim_nucSiteDens    =  2
+  sim_nuc_radii(1)   =  0.8
+  sim_nuc_site_x(1)  =  0.0
+  sim_nuc_site_y(1)  = -25.0 + sim_nuc_radii(1)*cos((20.0/180.0)*acos(-1.0))
+  sim_nuc_site_z(1)  =  0.0
+
+  sim_nuc_radii(2)   = 0.3
+  sim_nuc_site_x(2)  = 0.0
+  sim_nuc_site_y(2)  = 0.6
+  sim_nuc_site_z(2)  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -204,22 +209,15 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-           nuc_dfun = 0.3 - sqrt(xcell**2+(ycell-0.6)**2)
-
-           solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
-
            solnData(LMDA_VAR,i,j,k) = 0.5 - sqrt(xcell**2+ycell**2+zcell**2)
-           !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr);
-
+                 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+
            th_radii = sqrt(xcell**2+ycell**2+zcell**2)
-
-           if(th_radii .le. 0.5) solnData(TEMP_VAR,i,j,k) = 1.0 !-0.15
            if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = 1.0 - ((th_radii - 0.5)/(0.7 - 0.5))
-           !if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = -0.15 + 0.15*((th_radii - 0.5)/(0.7 - 0.5))
 
-           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
            if(ycell .le. 0.15 - 25.0) solnData(TEMP_VAR,i,j,k) = (0.15 -25.0 - ycell)/0.15
  
         enddo
@@ -242,7 +240,7 @@ subroutine Simulation_initBlock(blockId)
         end do
      end do
  
-  sim_nuc_site_y(1:sim_nucSiteDens) = -25.0 + 0.2*cos(ht_psi)
+  sim_nuc_site_y(1) = -25.0 + 0.2*cos(ht_psi)
 
 
 #if(0)

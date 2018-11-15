@@ -15,7 +15,7 @@ invRe = 0.0042
 Pr = 8.4
 
 # Stefan Number
-St = 0.65
+St = 0.4
 
 iConvU = 0
 
@@ -59,7 +59,7 @@ fmic = -7.2d-6
 
 # Temperatures
 tbulk =  0.0
-tsat  =  0.4
+tsat  =  0.0
 tnuc  =  0.0
 
 # Nucleation frequency
@@ -81,12 +81,11 @@ lsit = 2
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
-
 #       Size of computational volume
-xmin =   -8.00
-xmax =    8.00
+xmin =   -15.00
+xmax =    15.00
 ymin =    0.00
-ymax =    8.00
+ymax =    30.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -112,11 +111,11 @@ restart         = .false.
 nend = 1000000000
 tmax            = 2500.0
 cflflg          = 1
-cfl             = 0.7
-sigma		= 0.7
+cfl             = 0.4
+sigma		= 0.4
 dtspec          = 1.0
 dtinit          = 1.0
-tstep_change_factor=1.05
+tstep_change_factor=1.01
 
 
 #Integration Scheme:
@@ -134,11 +133,11 @@ convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 10.0
 
-plotFileIntervalTime = 0.1
+plotFileIntervalTime = 0.01
 
 ##	AMR parameters
-nblockx	= 64
-nblocky	= 32
+nblockx	= 15
+nblocky	= 15
 
 lrefine_min	= 1
 lrefine_max     = 1
