@@ -242,12 +242,12 @@ do lb = 1,blockCount
                  if(veli .ge. 0.0) then
                  if(abs(veli) .le. mph_vlim) then
 
-                      !mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                      !                        (mph_psi_adv + ht_psi)/2.0d0
+                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                                              (mph_psi_adv + ht_psi)/2.0d0
 
                  else
         
-                      !mph_psi(i,k,blockID) = mph_psi_adv
+                      mph_psi(i,k,blockID) = mph_psi_adv
                         
                  end if
                  end if
