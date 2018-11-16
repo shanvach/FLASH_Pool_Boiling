@@ -272,8 +272,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. &
-            .and. lambda(i,j,k) .lt. 0. .and. lambda(i+1,j,k) .lt. 0.) then
+              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. ) then
 
                  !          = (+)            = (+)           = (-)
                  th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i,j,k)))
@@ -317,8 +316,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0. &
-              .and. lambda(i,j,k) .lt. 0. .and. lambda(i+1,j,k) .lt. 0.) then
+              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0. ) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
 
@@ -363,8 +361,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1. &
-              .and. lambda(i,j,k) .lt. 0. .and. lambda(i,j+1,k) .lt. 0.) then
+              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1. ) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
 
@@ -409,8 +406,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0. &
-              .and. lambda(i,j,k) .lt. 0. .and. lambda(i,j+1,k) .lt. 0.) then
+              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0. )then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) 
  
