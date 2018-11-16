@@ -603,7 +603,39 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
   ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
- 
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     k = 1
+
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS) 
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+          if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+          if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
+
+        end do
+     end do
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
