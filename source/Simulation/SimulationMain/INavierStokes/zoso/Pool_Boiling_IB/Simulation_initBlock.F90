@@ -280,7 +280,7 @@ subroutine Simulation_initBlock(blockId)
         end do
      end do
  
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+  !sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 
 #if(0)
