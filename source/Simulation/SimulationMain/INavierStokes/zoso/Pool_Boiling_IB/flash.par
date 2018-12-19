@@ -63,7 +63,7 @@ tsat  =  0.0
 tnuc  =  0.0
 
 # Nucleation frequency
-twait =  0.2
+twait =  0.3
 
 # Additional nucleation sites
 ncDensPlus = 0
@@ -87,9 +87,9 @@ gr_sbNumBodies =  1
 
 #       Size of computational volume
 xmin =   -4.00
-xmax =    26.00
+xmax =   12.00
 ymin =    0.00
-ymax =    30.00
+ymax =   16.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -137,11 +137,11 @@ convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 10.0
 
-plotFileIntervalTime = 0.01
+plotFileIntervalTime = 0.05
 
 ##	AMR parameters
-nblockx	= 15
-nblocky	= 15
+nblockx	= 20
+nblocky	= 20
 
 lrefine_min	= 1
 lrefine_max     = 1
