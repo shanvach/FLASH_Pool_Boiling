@@ -280,6 +280,18 @@ interface
       end subroutine
 end interface
 
+interface
+      subroutine mph_imboundJumps(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
+      integer, INTENT(IN) :: sweepOrder
+      integer, INTENT(INOUT) :: blockCount
+      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+
+      end subroutine
+end interface
+
+
 ! End
 
 End module mph_interface
