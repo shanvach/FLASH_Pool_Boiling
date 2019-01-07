@@ -1,4 +1,4 @@
-subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine mph_imboundJumps(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 #include "Flash.h"
 
@@ -105,7 +105,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: idim
   real    :: xyz_stencil(ib_stencil,MDIM)
   real :: delaux(MDIM)
-  real :: zp
+  real :: zp, lambdaX, lambdaY
 
   integer, parameter :: derivflag = 0
   integer :: ib_ind
@@ -137,7 +137,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .lt. 3.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .lt. 2.0*del(IAXIS)) then
                           
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -152,7 +152,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !        0.5*del(KAXIS)
           
            ! Get probe in fluid
-           hnorm   = 1.*sqrt((1.5*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.5*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
+           hnorm   = 1.*sqrt((1.2*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.2*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
 
            xprobe = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
@@ -187,16 +187,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            do ib_ind = 1 , ib_stencil
                 zp = zp + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
+                solnData(SIGP_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
 
-           !! Interpolate velocity to probe point
-
-           ! Face centered stencil for velocity interpolation at probe
-
-           veli=0
-
-            do dir=1,NDIM
+           do dir=1,NDIM
 
                 gridfl(:) = CENTER
                 gridfl(dir) = FACES
@@ -219,52 +213,26 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                     select case(dir)
                     case(FACEX) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facexData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            facexData(SIGM_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
                     case(FACEY) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            faceyData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            faceyData(SIGM_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
 #if NDIM == MDIM
                     case(FACEZ)
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facezData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            facezData(SIGM_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
 #endif
                     end select
                 enddo
-! 
-!                 call ib_interpLpoints(externalPt,gridfl,                     &
-!                                       del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
-!                                       vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
-
-                veli = veli + vel_probe(dir) * part_Nml(dir)
-
             end do
 
-            ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
-        
-            this_psi = ht_psi
+             solnData(SIGP_VAR,i,j,k) = zp
 
-            ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
+             lambdaX = 0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k))
+             lambdaY = 0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k))
 
-            if(veli .ge. 0.0) then
-                 if(abs(veli) .le. mph_vlim) then
-
-                      this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                                              (mph_psi_adv + ht_psi)/2.0d0
-
-                 else
-        
-                this_psi = mph_psi_adv
-                        
-                 end if
-             end if
-
-             !! Dynamic contact angle done 
-
-             !hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
-             hratio = solnData(LMDA_VAR,i,j,k)
-
-             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(this_psi)
-
+             facexData(SIGM_FACE_VAR,i,j,k) = vel_probe(1)
+             faceyData(SIGM_FACE_VAR,i,j,k) = vel_probe(2)
 
            end if 
 
@@ -284,4 +252,4 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
   !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-end subroutine mph_imbound
+end subroutine mph_imboundJumps

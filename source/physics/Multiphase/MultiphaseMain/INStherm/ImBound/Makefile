@@ -1,2 +1,2 @@
-Multiphase += mph_imbound.o
+Multiphase += mph_imbound.o mph_imboundJumps.o
 
