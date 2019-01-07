@@ -509,86 +509,23 @@ do nuc_index =1,sim_nucSiteDens
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-!      ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-!               real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
-!               0.5*del(JAXIS)
+     do j=blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)
+         do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
 
-!      if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
+           if(solnData(LMDA_VAR,i,j,1) .le. 0.0 .and. solnData(LMDA_VAR,i,j,1) .ge. -0.15) then
 
-
-#if NDIM == MDIM
-       do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)-1
-#else
-       do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)
-#endif
-        do j=blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)-1
-         do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
-
-           xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           xcellp = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                    real(j - NGUARD - 1)*del(JAXIS)  +  &
-                    0.5*del(JAXIS)
-
-           ycellp = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                    real(j+1 - NGUARD - 1)*del(JAXIS)  +  &
-                    0.5*del(JAXIS)
-
-#if NDIM == MDIM
-           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-                   real(k - NGUARD - 1)*del(KAXIS)  +  &
-                   0.5*del(KAXIS)
-
-           zcellp = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-                   real(k+1 - NGUARD - 1)*del(KAXIS)  +  &
-                   0.5*del(KAXIS)
-#endif
-           if( (xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index)) .and. &
-#if NDIM == MDIM
-              (zcell .le. sim_nuc_site_z(nuc_index)) .and. (zcellp .ge. sim_nuc_site_z(nuc_index)).and. &
-#endif
-              (ycell .le. sim_nuc_site_y(nuc_index)) .and. (ycellp .ge. sim_nuc_site_y(nuc_index)) ) then
-
-             if ( (solnData(DFUN_VAR,i,j,k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k)   .ge. 0.0) .or. &
-#if NDIM == MDIM
-                 (solnData(DFUN_VAR,i,j,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j,k+1) .ge. 0.0) .or. &
-                 (solnData(DFUN_VAR,i,j+1,k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k+1) .ge. 0.0) .or. &
-#endif
-                 (solnData(DFUN_VAR,i,j+1,k) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,j+1,k) .ge. 0.0) ) then
-                        
+                   if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) then
                         isAttached = isAttached .or. .true.
-             else
+                   else
                         isAttached = isAttached .or. .false.
-             end if 
 
-             !TODO :: Change this to remove points with for IBs??
-             nucSiteTemp = ( solnData(TEMP_VAR,i,j,k) + solnData(TEMP_VAR,i+1,j,k) + &
-#if NDIM == MDIM
-                                        solnData(TEMP_VAR,i,j,k+1) + solnData(TEMP_VAR,i+1,j,k+1) + &
-                                        solnData(TEMP_VAR,i,j+1,k+1) + solnData(TEMP_VAR,i+1,j+1,k+1) + &
-                                        solnData(TEMP_VAR,i,j+1,k) + solnData(TEMP_VAR,i+1,j+1,k) )/8.0
-#else
-                                        solnData(TEMP_VAR,i,j+1,k) + solnData(TEMP_VAR,i+1,j+1,k) )/4.0
-#endif
-             nucSiteTemp = (solnData(TEMP_VAR,i,j,k) + &
-                            solnData(TEMP_VAR,i+1,j,k))/2.0 ! + &
-                            !solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k+1) + & 
-                            !solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k+1))/4.0
+                   end if
 
            end if
 
-        end do
-       end do
+         end do
       end do
-
-!      end if
-  
+ 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do
@@ -604,8 +541,8 @@ do nuc_index =1,sim_nucSiteDens
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
 
   if( (mph_isAttachedAll(nuc_index) .eqv. .false.) .and. &
-      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime) .and. &
-      (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
+      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime)) then !.and. &
+      !(mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
 
   if(ins_meshMe .eq. MASTER_PE) print*, "Bubble reneucleation at site ",nuc_index
       do lb = 1,blockCount
