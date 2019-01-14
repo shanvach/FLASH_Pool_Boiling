@@ -54,7 +54,9 @@ subroutine Driver_evolveFlash()
 
   use IO_data , ONLY : IO_checkpointFileIntervalStep, io_plotFileNumber, IO_plotFileIntervalTime, IO_plotFileIntervalStep
 
+#ifdef FLASH_GRID_PARAMESH
   use tree, only : grid_changed
+#endif
 
   use IncompNS_data, only : ins_cflflg
 
@@ -85,8 +87,9 @@ subroutine Driver_evolveFlash()
 !-----------------------------------------------------------------------------------------
 
 !KPD
-if (dr_nstep .eq. 1) grid_changed = 1
-
+#ifdef FLASH_GRID_PARAMESH
+  if (dr_nstep .eq. 1) grid_changed = 1
+#endif
 !-----------------------------------------------------------------------------------------
   endRun = .false.
 
@@ -295,7 +298,9 @@ if (dr_nstep .eq. 1) grid_changed = 1
 !     call Grid_updateRefinement(dr_nstep, dr_simTime, .TRUE. )
 !     end if
 
+#ifdef FLASH_GRID_PARAMESH
      call Grid_updateRefinement(dr_nstep, dr_simTime, gridChanged )
+#endif
 
 !!$     call Timers_stop("Grid_updateRefinement")
 
