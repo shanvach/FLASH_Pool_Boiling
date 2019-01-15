@@ -33,6 +33,9 @@ xr_mg_boundary_type = "outflow"
 yl_mg_boundary_type = "outflow"
 yr_mg_boundary_type = "outflow"
 
+#     Temperature Wall Boundary Conditions
+Twall_high = 1.0
+Twall_low  = 0.0
 
 #       Simulation (grid, time, I/O) parameters
 run_comment	= "2D Lid Driven Cavity problem"
@@ -56,6 +59,7 @@ intschm            = 2
 
 plot_var_1	= "pres"
 plot_var_2      = "delp"
+plot_var_3      = "temp"
   
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
@@ -109,8 +113,8 @@ gr_mgDiffOpDiscretize   = 2
 #iGridSize	= 8	#defined as nxb * iprocs
 #jGridSize	= 8	#defined as nyb * jprocs
 #kGridSize	= 1	#defined as nzb * kprocs
-#iProcs		= 1	#number of procs in the i direction
-#jProcs		= 1	#number of procs in the j direction
+#iProcs		= 4	#number of procs in the i direction
+#jProcs		= 4	#number of procs in the j direction
 #kProcs		= 1	#number of procs in the k direction
 
 # When using UG, iProcs, jProcs and kProcs must be specified.

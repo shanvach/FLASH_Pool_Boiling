@@ -16,8 +16,8 @@ LIBRARY STDCXX
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
 IF Grid == 'UG'
-#   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
-   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct
+#   REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
 ELSE
    REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
 #   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
