@@ -15,6 +15,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    integer ::  blockID,lb
    real, pointer, dimension(:,:,:,:) :: solnData
+   real :: rnd
 
    call RuntimeParameters_get('Twall_high', ht_Twall_high)
    call RuntimeParameters_get('Twall_low', ht_Twall_low)
@@ -24,8 +25,10 @@ subroutine Heat_AD_init(blockCount,blockList)
    do lb = 1,blockCount
      blockID = blockList(lb)
 
+     call random_number(rnd)
+
      call Grid_getBlkPtr(blockID,solnData,CENTER)
-     solnData(TEMP_VAR,:,:,:) = 0.0
+     solnData(TEMP_VAR,:,:,:) = rnd
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
    end do
