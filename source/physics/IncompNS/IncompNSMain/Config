@@ -2,5 +2,5 @@ DEFAULT constdens
 
 REQUIRES Driver/DriverMain/INSfracstep
 
-CHILDORDER vardens constdens extras
+CHILDORDER vardens constdens boussinesq extras
 

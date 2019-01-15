@@ -1,0 +1,21 @@
+#     Config file for the Heat Advective Diffusive solver
+PPDEFINE HT_CONSTDENS
+
+
+# Runtime parameters
+
+D Pr			Prandtl Number
+D Nu			Nusselt Number
+D Bi			Biot Number
+# --------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
+D Twall_high	The upper wall temperature
+PARAMETER Twall_high	REAL	1.
+
+D Twall_low	The lower wall temperature 
+PARAMETER Twall_low	REAL	0.
+
+
+# THIS PART IS FOR PHYSICS CONFIG
+# Variables required by the ht module
+VARIABLE temp 			# Temperature 
