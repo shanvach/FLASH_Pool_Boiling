@@ -2,7 +2,7 @@
 #define DIR_Y 2
 #define DIR_Z 3
 
-#define SCHEME 2
+#define SCHEME 1 
 
 #if SCHEME == 1
 #define HEAT_CENTRAL
