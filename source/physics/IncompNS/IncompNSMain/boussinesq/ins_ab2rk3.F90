@@ -88,10 +88,11 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                       ins_UstarStats,&
                   ins_pressgradients
 
-  use IncompNS_data, ONLY : ins_isgs, ins_invRe, ins_intschm, ins_prescoeff, ins_meshMe,&
+  use IncompNS_data, ONLY : ins_isgs, ins_invsqrtRa_Pr,                                 &
+                            ins_intschm, ins_prescoeff, ins_meshMe,                     &
                             ins_restart, ins_nstep, ins_Qin, ins_Qout, ins_predcorrflg, &
                             ins_convvel, ins_alf, ins_gam, ins_rho, ins_gama, ins_alfa, &
-                            ins_rhoa, ins_outflowgridChanged, ins_tlevel, &
+                            ins_rhoa, ins_outflowgridChanged, ins_tlevel,               &
                             ins_vardt, rkstep, ins_intschm_type
 
   use Grid_Data, ONLY : gr_domainBC 
@@ -358,7 +359,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
         ! calculate turbulent viscosity
         call ins_vt(ins_isgs,NGUARD,nxc,nyc,nzc,                   &
-                    ins_invRe,del(DIR_X),del(DIR_Y),del(DIR_Z),    &
+                    ins_invsqrtRa_Pr,                              &
+                    del(DIR_X),del(DIR_Y),del(DIR_Z),              &
                     coord,bsize,                                   &
                     facexData,&
                     faceyData,&
@@ -412,7 +414,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                        faceyData(VELC_FACE_VAR,:,:,:),            & 
                        facezData(VELC_FACE_VAR,:,:,:),            &
                        solnData(TVIS_VAR,:,:,:),                  &
-                       ins_invRe,                                 &
+                       ins_invsqrtRa_Pr,                          &
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -422,7 +424,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      ! compute RHS of momentum equation
      call ins_rhs2d(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
-                      ins_invRe,                                 &
+                      solnData(TEMP_VAR,:,:,:),                  &
+                      ins_invsqrtRa_Pr,                          &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                       del(DIR_X),del(DIR_Y),newu,newv)

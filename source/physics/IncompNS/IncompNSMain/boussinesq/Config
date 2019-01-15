@@ -1,15 +1,19 @@
 #       Config file for the Incompressible Navier Stoke solver.
-PPDEFINE INS_CONSTDENS
+PPDEFINE INS_BOUSSINESQ
 
 
 # Runtime parameters
 
 D cfl                   Courant Number
 D sigma			Viscous Condition Parameter
+D invsqrtRa_Pr          1/sqrt(Ra/Pr)
 # ----------------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
-D   invRe  inverse Reynolds number
-PARAMETER invRe         REAL     1.
+D   Ra  Rayleigh number
+PARAMETER Ra         REAL     1.
+
+D   Pr  Prandtl number
+PARAMETER Pr         REAL     1.
 
 D   isgs   Subgrid scale model flag
 PARAMETER isgs          INTEGER  0

@@ -2,7 +2,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use Heat_AD_data
    use Grid_interface, only: Grid_getBlkPtr, Grid_releaseBlkPtr
-   use IncompNS_data, only: ins_invRe
+   use IncompNS_data, only: ins_Ra, ins_Pr
    use RuntimeParameters_interface, only: RuntimeParameters_get
 
    implicit none
@@ -16,12 +16,10 @@ subroutine Heat_AD_init(blockCount,blockList)
    integer ::  blockID,lb
    real, pointer, dimension(:,:,:,:) :: solnData
 
-   ht_Pr = 0.7
-   ht_Nu = 0.332*(ht_Pr**0.33)/(ins_invRe**0.5)
-   ht_Bi = 1.0
-
    call RuntimeParameters_get('Twall_high', ht_Twall_high)
    call RuntimeParameters_get('Twall_low', ht_Twall_low)
+
+   ht_invsqrtRaPr = 1. / (Ra * Pr)**0.5
 
    do lb = 1,blockCount
      blockID = blockList(lb)

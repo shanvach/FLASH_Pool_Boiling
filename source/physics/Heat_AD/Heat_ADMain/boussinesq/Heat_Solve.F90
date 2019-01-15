@@ -1,4 +1,4 @@
-subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2)
+subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, ix1,ix2, jy1, jy2)
 
   use Heat_AD_data
 
@@ -8,7 +8,7 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2)
   real, dimension(:,:,:), intent(inout) :: T_p
   real, dimension(:,:,:), intent(in) :: T_o
   real, dimension(:,:,:), intent(in) :: u,v
-  real, intent(in) :: dt, dx, dy, dz, inRe
+  real, intent(in) :: dt, dx, dy, dz, 
   integer, intent(in) :: ix1, ix2, jy1, jy2
 
   real :: T_res
@@ -23,8 +23,8 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2)
   ! with Loop Vectorization ! (Second Order Central)
 
   T_p(ix1:ix2,jy1:jy2,1) = T_o(ix1:ix2,jy1:jy2,1) &
-  +((dt*inRe)/(ht_Pr*dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)+T_o(ix1-1:ix2-1,jy1:jy2,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
-  +((dt*inRe)/(ht_Pr*dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)+T_o(ix1:ix2,jy1-1:jy2-1,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
+  +((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)+T_o(ix1-1:ix2-1,jy1:jy2,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
+  +((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)+T_o(ix1:ix2,jy1-1:jy2-1,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
   -((dt*(u(ix1+1:ix2+1,jy1:jy2,1) + u(ix1:ix2,jy1:jy2,1))/2)/(2*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)-T_o(ix1-1:ix2-1,jy1:jy2,1))&
   -((dt*(v(ix1:ix2,jy1+1:jy2+1,1) + v(ix1:ix2,jy1:jy2,1))/2)/(2*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)-T_o(ix1:ix2,jy1-1:jy2-1,1))
 
@@ -52,8 +52,8 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2)
      Ty_plus = T_o(i,j+1,1)-T_o(i,j,1)
      Ty_mins = T_o(i,j,1)-T_o(i,j-1,1)
 
-     T_p(i,j,1) = T_o(i,j,1) + ((dt*inRe)/(ht_Pr*dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
-                             + ((dt*inRe)/(ht_Pr*dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))&
+     T_p(i,j,1) = T_o(i,j,1) + ((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
+                             + ((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))&
                              - ((dt)/dx) * (u_plus*Tx_mins + u_mins*Tx_plus)&
                              - ((dt)/dy) * (v_plus*Ty_mins + v_mins*Ty_plus)
 

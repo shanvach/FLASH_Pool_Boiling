@@ -1,12 +1,10 @@
 #     Config file for the Heat Advective Diffusive solver
-PPDEFINE HT_CONSTDENS
+PPDEFINE HT_BOUSSINESQ
 
 
 # Runtime parameters
 
-D Pr			Prandtl Number
-D Nu			Nusselt Number
-D Bi			Biot Number
+D ht_invsqrtRaPr        1/SQRT(RaPr)
 # --------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
 D Twall_high	The upper wall temperature

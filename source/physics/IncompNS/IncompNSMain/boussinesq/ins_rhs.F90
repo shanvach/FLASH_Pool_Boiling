@@ -1,11 +1,12 @@
 
-      SUBROUTINE ins_rhs2d(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv)
+      SUBROUTINE ins_rhs2d(uni,vni,tni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv)
 
   !***************************************************************
   ! This subroutine computes the discretization of the RHS of the 
   ! Helmholtz equation on a staggered uniform grid.
   !
   ! Input:  uni,vni     = velocity at timestep n
+  !         tni         = temperature at timestep n
   !         ru1         = molecular viscosity
   !         ix1,ix2     = starting and ending x indices
   !         jy1,jy2     = starting and ending y indices
@@ -17,7 +18,7 @@
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, tni
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
 
       INTEGER:: i, j
@@ -29,6 +30,7 @@
       REAL:: tvjp, tvjm
       REAL:: txxp, txxm, tyyp, tyym
       REAL:: txyp, txym
+      REAL:: ty
       ! new y-component variables
       REAL:: vyplus, vyminus
       REAL:: dvdyp, dvdym
@@ -89,6 +91,9 @@
              uyplus = (uni(i+1,j,kz1) + uni(i+1,j-1,kz1))*0.5
              uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
 
+             ! get temperature at v locations
+             ty = (tni(i,j+1,kz1) + tni(i,j,kz1) / 2.
+             
              ! get derivatives at 1/2 locations
              dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1))*dx1
              dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))*dx1
@@ -109,6 +114,7 @@
                           - (vyplus*vyplus - vyminus*vyminus)*dy1       &
                           + (txxp - txxm)*dx1                           &! diffusion - normal terms
                           + (tyyp - tyym)*dy1
+                          - ty
           enddo
        enddo
 

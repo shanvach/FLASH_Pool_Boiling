@@ -1,12 +1,12 @@
-#       Configuration file for Lid Driven Cavity Problem
+#       Configuration file for Rayleigh Benard 2D Cavity Problem
 
 #	Config file for the INS module.
 #       Note: This is a staggered finite difference mesh algorithm.
 REQUIRES physics/IncompNS
-REQUIRES physics/IncompNS/IncompNSMain/constdens
+REQUIRES physics/IncompNS/IncompNSMain/boussinesq
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 REQUIRES physics/Heat_AD
-REQUIRES physics/Heat_AD/Heat_ADMain/constdens
+REQUIRES physics/Heat_AD/Heat_ADMain/boussinesq
 
 USESETUPVARS Grid
 

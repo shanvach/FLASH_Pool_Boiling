@@ -5,8 +5,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells
 
-   use IncompNS_data, only: ins_invRe   
-
    implicit none
 #include "constants.h"
 #include "Heat_AD.h"
@@ -48,7 +46,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
-                     ins_invRe,&
                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
 

@@ -132,11 +132,11 @@ Module ins_interface
       end SUBROUTINE ins_rhs3d
 
 
-      SUBROUTINE ins_rhs2d(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv)
+      SUBROUTINE ins_rhs2d(uni,vni,tni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv)
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, tni
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
       end SUBROUTINE ins_rhs2d
 

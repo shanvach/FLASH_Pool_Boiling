@@ -42,7 +42,8 @@ subroutine IncompNS_init(restart)
   call RuntimeParameters_get("cflflg", ins_cflflg)
   call RuntimeParameters_get("cfl", ins_cfl)
   call RuntimeParameters_get("isgs",ins_isgs)
-  call RuntimeParameters_get("invRe",ins_invRe)
+  call RuntimeParameters_get("Ra",ins_Ra)
+  call RuntimeParameters_get("Pr",ins_Pr)
   call RuntimeParameters_get("sigma",ins_sigma)
   call RuntimeParameters_get("dtspec",ins_dtspec)
   call RuntimeParameters_get("intschm",ins_intschm)
@@ -59,6 +60,9 @@ subroutine IncompNS_init(restart)
   end select
   ins_vardt(:) = ins_dtspec
 
+  ! calulate momentum eq controling parameter
+  ins_invsqrtRa_Pr = 1.0 / SQRT(ins_Ra / ins_Pr)
+
   call Driver_getNstep(ins_nstep)
   ins_restart=restart
 
@@ -71,7 +75,9 @@ subroutine IncompNS_init(restart)
   if (ins_meshMe .eq. MASTER_PE) then
      write(*,*) 'ins_cfl   =',ins_cfl
      write(*,*) 'ins_isgs  =',ins_isgs
-     write(*,*) 'ins_invRe =',ins_invRe
+     write(*,*) 'ins_Ra =',ins_Ra
+     write(*,*) 'ins_Pr =',ins_Pr
+     write(*,*) '1/sqrt(Ra/Pr) = ',ins_invsqrtRa_Pr
      write(*,*) 'ins_sigma =',ins_sigma
      write(*,*) 'ins_dtspec=',ins_dtspec
      write(*,*) 'ins_intschm=',ins_intschm

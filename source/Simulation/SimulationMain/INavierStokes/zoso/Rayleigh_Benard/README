@@ -1,4 +1,4 @@
-# Lid driven cavity problem on a 2D, 2 level AMR grid.
+# Rayleigh Benard cavity problem on a 2D, Uniform grid.
 # The problem is integrated for 3000 time steps.
 
 # Setup line:
