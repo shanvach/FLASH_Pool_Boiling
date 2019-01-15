@@ -8,7 +8,7 @@ module Heat_AD_interface
          real, dimension(:,:,:), intent(inout) :: T_p
          real, dimension(:,:,:), intent(in) :: T_o
          real, dimension(:,:,:), intent(in) :: u,v
-         real, intent(in) :: dt, dx, dy, dz, 
+         real, intent(in) :: dt, dx, dy, dz 
          integer, intent(in) :: ix1, ix2, jy1, jy2
        end subroutine Heat_Solve
     end interface

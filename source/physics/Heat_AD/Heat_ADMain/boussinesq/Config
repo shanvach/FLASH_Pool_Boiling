@@ -1,5 +1,5 @@
 #     Config file for the Heat Advective Diffusive solver
-PPDEFINE HT_BOUSSINESQ
+PPDEFINE HT_BOUSSINESQ 1
 
 
 # Runtime parameters

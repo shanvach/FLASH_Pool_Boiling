@@ -19,7 +19,7 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get('Twall_high', ht_Twall_high)
    call RuntimeParameters_get('Twall_low', ht_Twall_low)
 
-   ht_invsqrtRaPr = 1. / (Ra * Pr)**0.5
+   ht_invsqrtRaPr = 1. / (ins_Ra * ins_Pr)**0.5
 
    do lb = 1,blockCount
      blockID = blockList(lb)

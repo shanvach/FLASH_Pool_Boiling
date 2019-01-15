@@ -25,13 +25,13 @@ subroutine ins_computeDtLocal(blockID,   &
                               facezData,            &
                               dtLocal, lminloc )
 
-  use IncompNS_data, ONLY : ins_cflflg, ins_cfl, ins_sigma, ins_invRe, ins_dtspec
+  use IncompNS_data, ONLY : ins_cflflg, ins_cfl, ins_sigma, ins_invsqrtRa_Pr, ins_dtspec
 
   use Grid_interface, ONLY : Grid_getBlkCenterCoords
   
   use Grid_data, ONLY : gr_meshMe
 
-  use Heat_AD_data, only: ht_Pr ! Akash
+  use Heat_AD_data, only: ht_invsqrtRaPr ! Akash
 
   implicit none
 
@@ -67,7 +67,7 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = ins_sigma / (ins_invRe*MAX( 2./(dx*dx), 2./(dy*dy),2./(dz*dz) ))
+  dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 2./(dx*dx), 2./(dy*dy),2./(dz*dz) ))
          
 # elif NDIM == 2
 
@@ -80,9 +80,9 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps  
   endif
   
-  dtv = ins_sigma / (ins_invRe*MAX( 1.0/(dx*dx), 1.0/(dy*dy)))
+  dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 1.0/(dx*dx), 1.0/(dy*dy)))
 
-  dtv_h = (ins_sigma)*(ht_Pr) / (ins_invRe*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
+  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
 
 # endif
 

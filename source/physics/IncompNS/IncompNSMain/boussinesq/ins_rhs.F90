@@ -92,7 +92,7 @@
              uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
 
              ! get temperature at v locations
-             ty = (tni(i,j+1,kz1) + tni(i,j,kz1) / 2.
+             ty = (tni(i,j+1,kz1) + tni(i,j,kz1)) / 2.
              
              ! get derivatives at 1/2 locations
              dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1))*dx1
@@ -113,8 +113,8 @@
                           - (uyplus*vxplus - uyminus*vxminus)*dx1       &! advection term
                           - (vyplus*vyplus - vyminus*vyminus)*dy1       &
                           + (txxp - txxm)*dx1                           &! diffusion - normal terms
-                          + (tyyp - tyym)*dy1
-                          - ty
+                          + (tyyp - tyym)*dy1                           &!
+                          - ty                                           ! energy momentum coupling
           enddo
        enddo
 
