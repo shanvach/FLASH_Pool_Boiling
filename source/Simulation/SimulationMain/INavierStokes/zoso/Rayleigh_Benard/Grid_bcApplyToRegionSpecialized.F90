@@ -295,7 +295,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
+#if NDIM == 3
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-1,1:je,1:ke,ivar)
+#elif NDIM == 2
                   regionData(i,1:je,1:ke,ivar) = 2* ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
+#endif
                end do
 
                applied = .true.
@@ -304,7 +308,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
  
          else if (axis == KAXIS) then ! Level 3a
-           ! KAXIS BCs for face == LOW
+#if NDIM == 3              
+               if (ivar == TEMP_VAR) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = 2 * ht_Twall_low - regionData(k-1,1:je,1:ke,ivar)       
+               end do
+
+               applied = .true.
+
+               end if
+#endif
+
          end if ! End Level 3a
  
        else ! if face == HIGH ! Level 3
@@ -329,7 +345,12 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
+#if NDIM == 3
+                 regionData(k-1,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+
+#elif NDIM == 2
                  regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
+#endif
                end do
 
                applied = .true.
@@ -337,7 +358,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                end if
  
          else if (axis == KAXIS) then ! Level 3b
-           ! KAXIS BCs for face == HIGH
+#if NDIM == 3              
+               if (ivar == TEMP_VAR) then
+
+               k = 2*gaurd+1
+               do i = 1,guard
+                  regionData(k-1,1:je,1:ke,ivar) = 2 * ht_Twall_high - regionData(i,1:je,1:ke,ivar)       
+               end do
+
+               applied = .true.
+
+               end if
+#endif
+
          end if ! End Level 3b
   
        end if ! End Level 3

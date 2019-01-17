@@ -30,7 +30,7 @@
 #define DEBUG_DRIVER
 #endif
 
-#define WRITE_TO_TECPLOT 1
+#define WRITE_TO_TECPLOT 0 
 
 subroutine Driver_evolveFlash()
 
@@ -120,8 +120,8 @@ subroutine Driver_evolveFlash()
   end if
 
   firstfileflag = 0
-  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                    0.0,blockList,blockCount,firstfileflag)
+  !call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
+  !                  0.0,blockList,blockCount,firstfileflag)
   ! Write to Bodies to Tecplot:
   !call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
   !call sm_outputBeam('beam_', count)
@@ -217,23 +217,23 @@ subroutine Driver_evolveFlash()
 !     if (count .gt. 0) firstfileflag = 1
 !     endif
      !--------------------------------------------------------------------
-     if (ins_cflflg .eq. 1) then ! Constant cfl       
-       if (dr_nstep .gt. 1) then
-       tecplot_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
-                      dr_dt/IO_plotFileIntervalTime)
-       else
-       tecplot_flg = .false.
-       endif
-     else                        ! Constant timestep
-       tecplot_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
-     endif
-
-     if (tecplot_flg) then
-        ! Write to Grid to Tecplot:
-        count = count + 1
-        call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                          0.0,blockList,blockCount,firstfileflag)
-
+!     if (ins_cflflg .eq. 1) then ! Constant cfl       
+!       if (dr_nstep .gt. 1) then
+!       tecplot_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
+!                      dr_dt/IO_plotFileIntervalTime)
+!       else
+!       tecplot_flg = .false.
+!       endif
+!     else                        ! Constant timestep
+!       tecplot_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
+!     endif
+!
+!     if (tecplot_flg) then
+!        ! Write to Grid to Tecplot:
+!        count = count + 1
+!        call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
+!                          0.0,blockList,blockCount,firstfileflag)
+!
 !        call outtotecplot_uv(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
 !                          0.0,blockList,blockCount,firstfileflag)
 
@@ -253,10 +253,10 @@ subroutine Driver_evolveFlash()
 !              call sm_ioWriteParticles(ibd,count)
 !           endif
 !        end do
-
-     if (count .gt. 0) firstfileflag = 1
-     endif
-     !--------------------------------------------------------------------
+!
+!     if (count .gt. 0) firstfileflag = 1
+!     endif
+!     !--------------------------------------------------------------------
 
      
 

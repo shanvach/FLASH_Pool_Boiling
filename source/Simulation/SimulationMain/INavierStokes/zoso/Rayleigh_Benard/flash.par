@@ -6,46 +6,51 @@ gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
 # Inverse of Reynolds Number
-Ra              = 100.
-Pr              = 0.70
+Ra              = 1000.
+Pr              = 7.00
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
 
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
-
 #       Size of computational volume
 xmin		=  0.000000000000000
 xmax		=  1.000000000000000
 ymin		=  0.000000000000000
 ymax		=  1.000000000000000
+#zmin            =  0.000000000000000
+#zmax            =  1.000000000000000
 
 #       Boundary conditions
 xl_boundary_type = "noslip_ins"
 xr_boundary_type = "noslip_ins"
 yl_boundary_type = "noslip_ins"
-yr_boundary_type = "movlid_ins"
+yr_boundary_type = "noslip_ins"
+#zl_boundary_type = "noslip_ins"
+#zr_boundary_type = "noslip_ins"
 
 #      Poisson Solver Boundary Conditions
 xl_mg_boundary_type = "outflow"
 xr_mg_boundary_type = "outflow"
 yl_mg_boundary_type = "outflow"
 yr_mg_boundary_type = "outflow"
+#zl_mg_boundary_type = "outflow"
+#zr_mg_boundary_type = "outflow"
 
 #     Temperature Wall Boundary Conditions
-Twall_high = 1.0
-Twall_low  = 0.0
+Twall_high = 0.0
+Twall_low  = 1.0
 
 #       Simulation (grid, time, I/O) parameters
-run_comment	= "2D Rayleigh Benard problem"
+run_comment	= "Rayleigh Benard problem"
 log_file	= "INS_Rayleigh_Benard.log"
 basenm		= "INS_Rayleigh_Benard_"
 restart         = .false.
 #checkPointFileNumber=1
 #plotFileNumber  = 1
 nend            = 30000
-tmax            = 300. 
+tmax            = 60. 
 cflflg          = 1
 cfl             = 0.3
 sigma		= 0.2
@@ -69,8 +74,6 @@ checkpointFileIntervalStep =20000
 
 plotFileIntervalTime = 0.1
 plotFileIntervalStep = 2000
-
-
 
 ##	AMR parameters
 nblockx	= 1
@@ -113,8 +116,8 @@ gr_mgDiffOpDiscretize   = 2
 #iGridSize	= 8	#defined as nxb * iprocs
 #jGridSize	= 8	#defined as nyb * jprocs
 #kGridSize	= 1	#defined as nzb * kprocs
-iProcs		= 4	#number of procs in the i direction
-jProcs		= 4	#number of procs in the j direction
+iProcs		= 6	#number of procs in the i direction
+jProcs		= 6	#number of procs in the j direction
 kProcs		= 1	#number of procs in the k direction
 
 # When using UG, iProcs, jProcs and kProcs must be specified.

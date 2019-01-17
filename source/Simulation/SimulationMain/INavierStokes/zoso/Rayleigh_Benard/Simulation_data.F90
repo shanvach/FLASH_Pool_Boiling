@@ -21,7 +21,7 @@ module Simulation_data
 #include "constants.h"
 
   !! *** Runtime Parameters *** !!
-  real, save    :: sim_xMin, sim_xMax, sim_yMin, sim_yMax
+  real, save    :: sim_xMin, sim_xMax, sim_yMin, sim_yMax, sim_zMin, sim_zMax
   logical, save :: sim_gCell
 
 integer, save :: sim_meshMe

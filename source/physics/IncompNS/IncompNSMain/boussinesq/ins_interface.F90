@@ -122,12 +122,12 @@ Module ins_interface
 
   interface
 
-      SUBROUTINE ins_rhs3d(uni,vni,wni,tv,ru1,ix1,ix2,jy1,jy2,kz1,kz2,&
+      SUBROUTINE ins_rhs3d(uni,vni,wni,tni,tv,ru1,ix1,ix2,jy1,jy2,kz1,kz2,&
                          dx,dy,dz,ru,rv,rw) 
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tni, tv
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
       end SUBROUTINE ins_rhs3d
 

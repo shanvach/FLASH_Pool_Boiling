@@ -13,7 +13,7 @@ USESETUPVARS Grid
 LIBRARY STDCXX
 
 # Tecplot routines:
-REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+#REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
 IF Grid == 'UG'
    REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct

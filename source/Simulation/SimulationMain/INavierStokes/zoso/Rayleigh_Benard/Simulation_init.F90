@@ -23,8 +23,9 @@
 
 subroutine Simulation_init()
 
-  use Simulation_data, ONLY : sim_xMin, sim_yMin, &
-                              sim_xMax, sim_yMax, sim_gCell
+  use Simulation_data, ONLY : sim_xMin, sim_yMin, sim_zMin, &
+                              sim_xMax, sim_yMax, sim_zMax, &
+                              sim_gCell
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -39,6 +40,11 @@ subroutine Simulation_init()
   call RuntimeParameters_get('ymin',    sim_yMin)
   call RuntimeParameters_get('xmax',    sim_xMax)
   call RuntimeParameters_get('ymax',    sim_yMax)
+
+#if NDIM == 3
+  call RuntimeParameters_get('zmin',    sim_zMin)
+  call RuntimeParameters_get('zmax',    sim_zMax)
+#endif
 
   sim_gCell = .true.
 

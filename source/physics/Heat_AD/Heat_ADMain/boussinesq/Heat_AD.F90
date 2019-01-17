@@ -1,6 +1,6 @@
 subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-   use Heat_AD_interface, only: Heat_Solve
+   use Heat_AD_interface, only: Heat_Solve2d, Heat_Solve3d
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
                              Grid_fillGuardCells
@@ -39,20 +39,37 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
 
+#if NDIM == 3
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+#endif
+
      oldT = solnData(TEMP_VAR,:,:,:)
 
-
-     call Heat_Solve(solnData(TEMP_VAR,:,:,:), oldT,&
-                     facexData(VELC_FACE_VAR,:,:,:),&
-                     faceyData(VELC_FACE_VAR,:,:,:),&
-                     dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
-                     blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+#if NDIM == 3
+     call Heat_Solve3d(solnData(TEMP_VAR,:,:,:), oldT,&
+                       facexData(VELC_FACE_VAR,:,:,:),&
+                       faceyData(VELC_FACE_VAR,:,:,:),&
+                       favezData(VELC_FACE_VAR,:,:,:),&
+                       dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
+#elif NDIM == 2
+     call Heat_Solve2d(solnData(TEMP_VAR,:,:,:), oldT,&
+                       facexData(VELC_FACE_VAR,:,:,:),&
+                       faceyData(VELC_FACE_VAR,:,:,:),&
+                       dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
 
+#if NDIM == 3
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+#endif
 
    end do
 

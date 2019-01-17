@@ -30,11 +30,11 @@
       REAL:: tvjp, tvjm
       REAL:: txxp, txxm, tyyp, tyym
       REAL:: txyp, txym
-      REAL:: ty
+      
       ! new y-component variables
       REAL:: vyplus, vyminus
       REAL:: dvdyp, dvdym
-      REAL:: tvip, tvim
+      REAL:: tvip, tvim, ty
       INTEGER, parameter :: kz1 = 1
 
       ! grid spacings
@@ -114,7 +114,7 @@
                           - (vyplus*vyplus - vyminus*vyminus)*dy1       &
                           + (txxp - txxm)*dx1                           &! diffusion - normal terms
                           + (tyyp - tyym)*dy1                           &!
-                          - ty                                           ! energy momentum coupling
+                          + ty                                           ! energy momentum coupling
           enddo
        enddo
 
@@ -123,7 +123,7 @@
 
 
 
-      SUBROUTINE ins_rhs3d(uni,vni,wni,tv,ru1,      &
+      SUBROUTINE ins_rhs3d(uni,vni,wni,tni,tv,ru1,  &
                            ix1,ix2,jy1,jy2,kz1,kz2, &
                            dx,dy,dz,ru,rv,rw)
 
@@ -149,7 +149,7 @@
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tni, tv
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
 
 !!$      REAL, DIMENSION(nx+1,ny,nz), INTENT(IN):: uni
@@ -179,6 +179,7 @@
       ! additional z-component variables
       REAL:: wzplus, wzminus
       REAL:: dwdzp, dwdzm
+      REAL:: tz
 
       ! grid spacings
       dx1 = 1.0/dx
@@ -357,6 +358,9 @@
                vzplus  = (vni(i  ,j+1,k  ) + vni(i  ,j+1,k-1))*0.5
                vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
 
+               ! get temperature at z locations
+               tz = (tni(i,j,k+1) + tni(i,j,k)) / 2.
+               
                ! get derivatives at 1/2 locations
                dwdxp = (wni(i+1,j  ,k  ) - wni(i  ,j  ,k  ))*dx1
                dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  ))*dx1
@@ -405,7 +409,8 @@
                           + (tyyp - tyym)*dy1                       &
                           + (tzzp - tzzm)*dz1                       &
                           + (txzp - txzm)*dx1                       &! diffusion - cross terms
-                          + (tyzp - tyzm)*dy1                       
+                          + (tyzp - tyzm)*dy1                       & 
+                          + tz                                       ! energy momentum coupling
             enddo
          enddo
       enddo

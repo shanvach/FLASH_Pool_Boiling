@@ -1,7 +1,8 @@
 subroutine Heat_AD_init(blockCount,blockList)
 
    use Heat_AD_data
-   use Grid_interface, only: Grid_getBlkPtr, Grid_releaseBlkPtr
+   use Grid_interface, only: Grid_getBlkPtr, Grid_releaseBlkPtr, &
+                             Grid_getBlkCenterCoords
    use IncompNS_data, only: ins_Ra, ins_Pr
    use RuntimeParameters_interface, only: RuntimeParameters_get
 
@@ -15,7 +16,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    integer ::  blockID,lb
    real, pointer, dimension(:,:,:,:) :: solnData
-   real :: rnd
+   real, dimension(MDIM) :: coord
 
    call RuntimeParameters_get('Twall_high', ht_Twall_high)
    call RuntimeParameters_get('Twall_low', ht_Twall_low)
@@ -25,10 +26,23 @@ subroutine Heat_AD_init(blockCount,blockList)
    do lb = 1,blockCount
      blockID = blockList(lb)
 
-     call random_number(rnd)
-
+     call Grid_getBlkCenterCoords(blockID,coord)     
      call Grid_getBlkPtr(blockID,solnData,CENTER)
-     solnData(TEMP_VAR,:,:,:) = rnd
+
+#if NDIM == 3
+     IF (coord(KAXIS) >= 0.5) THEN
+         solnData(TEMP_VAR,:,:,:) = 0.0
+     ELSE
+        solnData(TEMP_VAR,:,:,:) = 1.0
+     END IF
+#elif NDIM == 2
+     IF (coord(JAXIS) >= 0.5) THEN
+         solnData(TEMP_VAR,:,:,:) = 0.0
+     ELSE
+        solnData(TEMP_VAR,:,:,:) = 1.0
+     END IF
+#endif
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
    end do

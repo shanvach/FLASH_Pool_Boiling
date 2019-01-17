@@ -413,6 +413,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      call ins_rhs3d (  facexData(VELC_FACE_VAR,:,:,:),            &
                        faceyData(VELC_FACE_VAR,:,:,:),            & 
                        facezData(VELC_FACE_VAR,:,:,:),            &
+                       solnData(TEMP_VAR,:,:,:),                  &
                        solnData(TVIS_VAR,:,:,:),                  &
                        ins_invsqrtRa_Pr,                          &
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
