@@ -49,7 +49,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Heat_Solve3d(solnData(TEMP_VAR,:,:,:), oldT,&
                        facexData(VELC_FACE_VAR,:,:,:),&
                        faceyData(VELC_FACE_VAR,:,:,:),&
-                       favezData(VELC_FACE_VAR,:,:,:),&
+                       facezData(VELC_FACE_VAR,:,:,:),&
                        dt,del(DIR_X),del(DIR_Y),del(DIR_Z),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&

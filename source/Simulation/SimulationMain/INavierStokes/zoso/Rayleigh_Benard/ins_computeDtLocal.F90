@@ -68,6 +68,9 @@ subroutine ins_computeDtLocal(blockID,   &
   endif
   
   dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 2./(dx*dx), 2./(dy*dy),2./(dz*dz) ))
+
+
+  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy), 1.0/(dz*dz))) ! Akash
          
 # elif NDIM == 2
 
