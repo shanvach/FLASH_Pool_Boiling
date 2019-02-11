@@ -661,47 +661,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
 
-  do lb = 1,blockCount
-     blockID = blockList(lb)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-       do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
-            if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-
-        end do
-       end do
-     end do
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-  end do
-
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
-  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
- 
 !*************************************************************************************************
 !*************************************************************************************************
 !*************************************************************************************************
