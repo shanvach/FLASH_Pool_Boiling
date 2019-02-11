@@ -25,7 +25,7 @@ subroutine IncompNS_init(restart)
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, &
                                Driver_getComm, Driver_getNstep
-
+  use Simulation_data, ONLY : sim_psiAdv, sim_psiRcd
   use Multiphase_interface, ONLY : Multiphase_init 
 
   implicit none
@@ -82,6 +82,8 @@ subroutine IncompNS_init(restart)
      write(*,*) 'ins_gravZ =',ins_gravZ
      write(*,*) 'ins_dampC =',ins_dampC
      write(*,*) 'ins_iConvU =',ins_iConvU
+     write(*,*) 'sim_psiAdv =',sim_psiAdv
+     write(*,*) 'sim_psiRcd =',sim_psiRcd
   endif
 
   ! Call multiphase variables initialization routine:
