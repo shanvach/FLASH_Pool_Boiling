@@ -40,7 +40,7 @@ module Simulation_data
 
   real, save :: sim_sinkB
 
-  real, save :: sim_vlim, sim_psi_adv, sim_psi_rcd
+  real, save :: sim_vlim, sim_psiAdv, sim_psiRcd
 
   real, save :: sim_ibm_x, sim_ibm_y
  

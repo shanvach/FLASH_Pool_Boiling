@@ -37,7 +37,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   use ImBound_data, only : ib_stencil
 
-  use Simulation_data, only: sim_vlim, sim_psi_adv, sim_psi_rcd
+  use Simulation_data, only: sim_vlim, sim_psiAdv, sim_psiRcd
+
+  use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -110,6 +112,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: ib_ind
 
   real    :: hratio, veli, this_psi
+
+  call RuntimeParameters_get('psiAdv', sim_psiAdv)
+  call RuntimeParameters_get('psiRcd', sim_psiRcd)
 
   do lb = 1,blockCount
 
@@ -240,29 +245,29 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
         
-            this_psi = sim_psi_rcd
+            this_psi = sim_psiRcd
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
 
-            if(veli .ge. 0.0) then
-                 if(abs(veli) .le. sim_vlim) then
+            !if(veli .ge. 0.0) then
+            !     if(abs(veli) .le. sim_vlim) then
 
-                      this_psi = ((sim_psi_adv - sim_psi_rcd)/(2*sim_vlim))*abs(veli) + &
-                                              (sim_psi_adv + sim_psi_rcd)/2.0d0
+            !          this_psi = ((sim_psiAdv - sim_psiRcd)/(2*sim_vlim))*abs(veli) + &
+            !                                  (sim_psiAdv + sim_psiRcd)/2.0d0
 
-                 else
+            !     else
         
-                this_psi = sim_psi_adv
-                        
-                 end if
-             end if
+            !    this_psi = sim_psiAdv
+            !            
+            !     end if
+            ! end if
 
              !! Dynamic contact angle done 
 
              !hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
              hratio = solnData(LMDA_VAR,i,j,k)
 
-             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psi_rcd)
+             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psiRcd)
 
 
            end if 

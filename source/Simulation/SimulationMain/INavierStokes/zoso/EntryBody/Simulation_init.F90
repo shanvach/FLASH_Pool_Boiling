@@ -31,7 +31,7 @@ subroutine Simulation_init()
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
-                              sim_sinkB, sim_vlim, sim_psi_adv, sim_psi_rcd
+                              sim_sinkB, sim_vlim, sim_psiAdv, sim_psiRcd
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
@@ -56,11 +56,14 @@ subroutine Simulation_init()
   call RuntimeParameters_get('ymin',    sim_yMin)
   call RuntimeParameters_get('xmax',    sim_xMax)
   call RuntimeParameters_get('ymax',    sim_yMax)
+
+  call RuntimeParameters_get('psiAdv', sim_psiAdv)
+  call RuntimeParameters_get('psiRcd', sim_psiRcd)
   
   call RuntimeParameters_get('waveA',    sim_waveA)
 
-  sim_psi_adv = 90*acos(-1.0)/180.0
-  sim_psi_rcd = 45*acos(-1.0)/180.0
+  sim_psiAdv = sim_psiAdv*acos(-1.0)/180.0
+  sim_psiRcd = sim_psiRcd*acos(-1.0)/180.0
   sim_vlim    = 0.2
 
 end subroutine Simulation_init

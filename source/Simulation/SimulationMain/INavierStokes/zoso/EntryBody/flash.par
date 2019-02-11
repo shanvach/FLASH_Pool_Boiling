@@ -13,6 +13,10 @@ invRe = 0.005
 
 iConvU = 0
 
+# Contact Angles (measured in degrees)
+psiAdv = 90
+psiRcd = 45
+
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
 
@@ -48,9 +52,9 @@ pcepsilon= 1.e-7
 geometry	= "cartesian"
 
 #       Size of computational volume
-xmin =   -4.0
-xmax =    4.0
-ymin =  -25.0
+xmin =   -2.5
+xmax =    2.5
+ymin =  -49.0
 ymax =    1.0
 
 #       Boundary conditions
@@ -102,8 +106,8 @@ checkpointFileIntervalStep = 100000
 plotFileIntervalStep = 200
 
 ##	AMR parameters
-nblockx	= 4
-nblocky	= 13
+nblockx	= 5
+nblocky	= 50
 
 lrefine_min	= 1
 lrefine_max     = 1
