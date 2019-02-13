@@ -84,7 +84,7 @@ enddo
 ! For periodic or Neumann boundary conditions, we must subtract off the
 ! average value of the source.
 
-goto 100
+!goto 100
 
 if (mg_bnd_cond == 0) then ! Substract source mean.
 
@@ -150,6 +150,8 @@ if (mg_bnd_cond == 0) then ! Substract source mean.
 ! one quadrant suppressed, z=0 is also a Neumann boundary.
 
 else if (mg_bnd_cond == 1) then
+
+  goto 200
 
   do lb = 1, blockCount
 
@@ -223,9 +225,11 @@ else if (mg_bnd_cond == 1) then
 
   enddo
 
+  200 continue
+
 endif
 
-100 continue
+!100 continue
 
 !===============================================================================
 
