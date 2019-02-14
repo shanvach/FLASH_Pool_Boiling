@@ -91,7 +91,8 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
                                Grid_getBlkBoundBox,                       &
                                GRID_PDE_BND_PERIODIC,  &
                                GRID_PDE_BND_NEUMANN,   &
-                               GRID_PDE_BND_DIRICHLET, Grid_getBlkBC
+                               GRID_PDE_BND_DIRICHLET, Grid_getBlkBC,&
+                               Grid_getBlkCenterCoords
 
   use Driver_data,    ONLY : dr_nstep
 
@@ -103,6 +104,7 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   use tree, only : maxblocks_tr, lrefine, grid_changed, nodetype
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get 
 
+  use IncompNS_data, only: ins_gravY
   implicit none
 
 #include "Flash.h"
@@ -149,7 +151,11 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
   !- kpd - Fix for INTEL compiler
   integer, dimension(NDIM) :: temp_gr_hypreLower,temp_gr_hypreUpper 
   real, dimension(NXB*NYB*NZB) :: temp_RHSVal
-  
+
+  real, dimension(MDIM)     :: del, coord, bsize 
+
+  real :: ycell
+ 
   call Timers_start("Grid_solvePoisson")    
 
   call RuntimeParameters_get('xmin', rXmin)
@@ -225,6 +231,13 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
      call Grid_getBlkRefineLevel(blockID,mylevel)
 
      call Grid_getBlkBoundBox(blockId,boundBox)
+
+     call Grid_getBlkBC (blockID, faces)
+     call Grid_getDeltas(blockID, del)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
      
      !print*,"BOUND BOX",gr_meshMe,blockID,boundBox(1,1),boundBox(1,2),boundBox(1,3)
      !print*,"SIMULATIO",gr_meshMe,rXmin, rYmin, rZmin
@@ -242,6 +255,10 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
      do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)      
         do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
            do i = blkLimits(LOW, IAXIS), blkLimits(HIGH, IAXIS)
+
+              ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
               
               ii = (k - blkLimits(LOW,KAXIS)  + 1)                             +  &
                    (j - blkLimits(LOW,JAXIS))*dataSize(KAXIS)                  +  &
@@ -252,6 +269,26 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
               !RHSVal(ii) = -unk(iSrc,i,j,k)
               temp_RHSVal(ii) = -unk(iSrc,i,j,k)
 
+              !if ((i == blkLimits(LOW, IAXIS)) .and. &
+              !    (faces(1,IAXIS) /= NOT_BOUNDARY) .and. &
+              !     ycell .lt. -20) then
+
+              !temp_RHSVal(ii) = temp_RHSVal(ii) - &
+              !                2*ins_gravY*(-20-ycell)/&
+              !                (del(IAXIS)*del(IAXIS))
+               
+              !end if 
+
+              !if ((i == blkLimits(HIGH, IAXIS)) .and. &
+              !    (faces(2,IAXIS) /= NOT_BOUNDARY) .and. &
+              !     ycell .lt. -20) then
+               
+              !temp_RHSVal(ii) = temp_RHSVal(ii) - &
+              !                2*ins_gravY*(-20-ycell)/&
+              !                (del(IAXIS)*del(IAXIS))
+               
+              !end if 
+              
               !*********************************
               !- kpd - For FLASH4 implementation
               !*********************************

@@ -40,9 +40,9 @@ lsit = 2
 geometry	= "cartesian"
 
 #       Size of computational volume
-xmin =   -15.0
-xmax =    15.0
-ymin =   -60.0
+xmin =   -10.0
+xmax =    10.0
+ymin =   -40.0
 ymax =    0.0
 
 #       Boundary conditions
@@ -94,11 +94,11 @@ checkpointFileIntervalStep = 100000
 plotFileIntervalStep = 500
 
 ##	AMR parameters
-nblockx	= 5
-nblocky	= 10
+nblockx	= 10
+nblocky	= 20
 
 lrefine_min	= 1
-lrefine_max     = 3
+lrefine_max     = 1
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 

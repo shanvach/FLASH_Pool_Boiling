@@ -202,6 +202,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
+  use IncompNS_data, only: ins_gravY
+
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
 #endif
@@ -240,11 +242,12 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   real, save :: TLEVEL
 
-  real :: dfun_bnd
+  real :: dfun_bnd, dfun_bnd_y
 
 
   integer :: countj,counter
 
+  real :: P_boundary
   ! Following implementations are written by Akash
 
   je=regionSize(SECOND_DIR)
@@ -276,12 +279,37 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
  
             if(gridDataStruct == CENTER) then
 
-
                if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
 
                k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  P_boundary = 0.0
+                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
+                  regionData(i,ii,kk,ivar) = 2*P_boundary - regionData(guard+1,ii,kk,ivar)
+               end do
+               end do
+               end do
+
+               else if(ivar == DFUN_VAR) then
+
+               k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
+               do i = 1,guard
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  dfun_bnd_y = ycell+20.0
+                  regionData(i,ii,kk,ivar) = 2*dfun_bnd_y - regionData(guard+1,ii,kk,ivar)
+               end do
+               end do
                end do
 
                else
@@ -296,10 +324,20 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(guard+1,1:je,1:ke,ivar)
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  P_boundary = 0.0
+                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
+                  regionData(i,ii,kk,ivar) = 2*P_boundary - regionData(guard+1,ii,kk,ivar)
                end do
- 
+               end do
+               end do
+
            else
 
                if(ivar == VELC_FACE_VAR) then
@@ -463,8 +501,34 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
 
                k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  P_boundary = 0.0
+                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
+                  regionData(k-i,ii,kk,ivar) = 2*P_boundary - regionData(guard,ii,kk,ivar)
+               end do
+               end do
+               end do
+
+               else if(ivar == DFUN_VAR) then
+
+               k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
+               do i = 1,guard
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  dfun_bnd_y = ycell+20.0
+                  regionData(k-i,ii,kk,ivar) = 2*dfun_bnd_y - regionData(guard,ii,kk,ivar)
+               end do
+               end do
                end do
 
                else
@@ -479,8 +543,18 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
+               do ii=1,je
+               do kk=1,ke
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
+                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
+                          0.5*del(JAXIS)
+
+                  P_boundary = 0.0
+                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
+                  regionData(k-i,ii,kk,ivar) = 2*P_boundary - regionData(guard,ii,kk,ivar)
+               end do
+               end do
                end do
 
            else

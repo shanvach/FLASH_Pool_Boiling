@@ -68,7 +68,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                Grid_getBlkIndexLimits, Grid_fillGuardCells, &
                                Grid_getBlkBC, Grid_getBlkCornerID,  &
                                Grid_getCellCoords, Grid_getFluxData, Grid_getBlkData, &
-                               Grid_getLocalNumBlks, Grid_getBlkBoundBox
+                               Grid_getLocalNumBlks, Grid_getBlkBoundBox,&
+                               Grid_getBlkCenterCoords
+
   use Timers_interface, ONLY : Timers_start, Timers_stop 
   use Grid_interface,   ONLY : GRID_PDE_BND_PERIODIC,  &
                                GRID_PDE_BND_NEUMANN,   &
@@ -101,7 +103,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   !!         LOCAL VARIABLES.
   !!-----------------------------------------------------------------------  
   integer :: ierr, pos(NDIM)
-  real, dimension(MDIM)     :: del , delph, delmh
+  real, dimension(MDIM)     :: del , delph, delmh, coord, bsize
   real, dimension(2*MDIM, MDIM) :: negh_del
   real :: CDiv 
   real, POINTER, DIMENSION(:,:,:,:) :: solnVec
@@ -137,6 +139,8 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   real, pointer, dimension(:,:,:,:) :: facevarx,facevary,facevarz,solnData 
   integer :: iBoxCount
   real, dimension(2,MDIM) :: boundBox
+
+  real :: ycell
 
   call Timers_start("gr_hypreCreateMatrix")  
   
@@ -200,6 +204,11 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facevarx ,FACEX)
      call Grid_getBlkPtr(blockID,facevary ,FACEY)
+
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facevarz ,FACEZ)
 #endif     
@@ -286,6 +295,11 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
         do j = blkLimits(LOW, JAXIS), blkLimits(HIGH, JAXIS)
            do k = blkLimits(LOW, KAXIS), blkLimits(HIGH, KAXIS)                    
               
+
+              ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
+
 
               !!-------------------------------------------
               !!- kpd - For variable density implementation
