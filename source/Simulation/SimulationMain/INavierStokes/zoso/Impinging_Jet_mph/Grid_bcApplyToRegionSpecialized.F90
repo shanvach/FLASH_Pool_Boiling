@@ -307,7 +307,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                           0.5*del(JAXIS)
 
                   dfun_bnd_y = ycell+20.0
-                  regionData(i,ii,kk,ivar) = 2*dfun_bnd_y - regionData(guard+1,ii,kk,ivar)
+                  regionData(i,ii,kk,ivar) = regionData(guard+1,ii,kk,ivar)
                end do
                end do
                end do
@@ -526,7 +526,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                           0.5*del(JAXIS)
 
                   dfun_bnd_y = ycell+20.0
-                  regionData(k-i,ii,kk,ivar) = 2*dfun_bnd_y - regionData(guard,ii,kk,ivar)
+                  regionData(k-i,ii,kk,ivar) = regionData(guard,ii,kk,ivar)
                end do
                end do
                end do

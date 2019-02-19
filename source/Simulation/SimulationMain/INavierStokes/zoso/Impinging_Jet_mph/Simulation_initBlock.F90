@@ -115,6 +115,8 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
+  faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
      do j=1,blkLimitsGC(HIGH,JAXIS)
@@ -130,9 +132,12 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           !solnData(DFUN_VAR,i,j,k) = min(sqrt(xcell**2+ycell**2+zcell**2)-0.5,ycell+10.0)
+           !solnData(DFUN_VAR,i,j,k) = min(sqrt(xcell**2+ycell**2+zcell**2)-0.5,ycell+20.0)
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-0.5,ycell+20.0)
 
+           if(ycell .gt. -20 .and. &
+           0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .le. 0.0) &
+           faceyData(VELC_FACE_VAR,i,j+1,k) = -1.0
 
         enddo
      enddo
@@ -171,7 +176,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(PFUN_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
-  faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+  !faceyData(VELC_FACE_VAR,:,:,:) = 0.0
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
 
