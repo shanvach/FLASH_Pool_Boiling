@@ -204,6 +204,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use IncompNS_data, only: ins_gravY
 
+  use Multiphase_data, only: mph_jet_vel, mph_jet_src, mph_prs_src, mph_srf_src
+
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
 #endif
@@ -247,7 +249,6 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   integer :: countj,counter
 
-  real :: P_boundary
   ! Following implementations are written by Akash
 
   je=regionSize(SECOND_DIR)
@@ -282,34 +283,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  P_boundary = 0.0
-                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
-                  regionData(i,ii,kk,ivar) = 2*P_boundary - regionData(guard+1,ii,kk,ivar)
-               end do
-               end do
+                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(:,:,blockHandle) - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  dfun_bnd_y = ycell+20.0
-                  regionData(i,ii,kk,ivar) = regionData(guard+1,ii,kk,ivar)
-               end do
-               end do
+                  regionData(i,1:je,1:ke,ivar) = 2*mph_srf_src(:,:,blockHandle) - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else
@@ -324,21 +306,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  P_boundary = 0.0
-                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
-                  regionData(i,ii,kk,ivar) = 2*P_boundary - regionData(guard+1,ii,kk,ivar)
-               end do
-               end do
+                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(:,:,blockHandle) - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
-           else
+            else
 
                if(ivar == VELC_FACE_VAR) then
 
@@ -501,34 +473,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  P_boundary = 0.0
-                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
-                  regionData(k-i,ii,kk,ivar) = 2*P_boundary - regionData(guard,ii,kk,ivar)
-               end do
-               end do
+                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(:,:,blockHandle) - regionData(guard,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  dfun_bnd_y = ycell+20.0
-                  regionData(k-i,ii,kk,ivar) = regionData(guard,ii,kk,ivar)
-               end do
-               end do
+                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_srf_src(:,:,blockHandle) - regionData(guard,1:je,1:ke,ivar)
                end do
 
                else
@@ -543,18 +496,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
-               do ii=1,je
-               do kk=1,ke
                do i = 1,guard
-                  ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                          real(ii+NGUARD - NGUARD - 1)*del(JAXIS) +   &
-                          0.5*del(JAXIS)
-
-                  P_boundary = 0.0
-                  if(ycell .lt. -20) P_boundary = -ins_gravY*(-20-ycell)
-                  regionData(k-i,ii,kk,ivar) = 2*P_boundary - regionData(guard,ii,kk,ivar)
-               end do
-               end do
+                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(:,:,blockHandle) - regionData(guard,1:je,1:ke,ivar)
                end do
 
            else
@@ -610,29 +553,10 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                elseif (ivar == DFUN_VAR) then
 
-                k = 2*guard+1
-                do ii = 1,je
-                        do kk=1,ke
-
-                                xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                                        real(ii+NGUARD - NGUARD - 1)*del(IAXIS) +   &
-                                        0.5*del(IAXIS)
-
-                                !zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +   &
-                                !        real(kk+NGUARD - NGUARD - 1)*del(KAXIS) +   &
-                                !        0.5*del(KAXIS)
-
-                                zcell = 0.0
-
-                                dfun_bnd  = sqrt((xcell-0.0)**2+(zcell-0.0)**2) - 0.5
-
-                                do i=1,guard
-                                regionData(k-i,ii,kk,ivar) = 2*dfun_bnd - regionData(guard,ii,kk,ivar)
-                                end do
-
-
-                        end do
-                end do 
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_src(:,:,blockHandle) - regionData(guard,1:je,1:ke,ivar)
+               end do
 
                else
 
@@ -653,50 +577,18 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
            else
 
               if (ivar == VELC_FACE_VAR) then
-
-                        if (isFace) then
-                       
-                        do ii=1,je
-                           do kk=1,ke
-
-                                xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                                        real(ii+NGUARD - NGUARD - 1)*del(IAXIS) +   &
-                                        0.5*del(IAXIS)
-
-                                !zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +   &
-                                !        real(kk+NGUARD - NGUARD - 1)*del(KAXIS) +   &
-                                !        0.5*del(KAXIS)
-
-                                zcell = 0.0
-                           
-                                if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then
-
-                                regionData(guard+1,ii,kk,ivar) = -1.0
-
-                                else
-                                regionData(guard+1,ii,kk,ivar) = 0.0
-
-                                endif
-
-                                k = 2*guard+2
-                                do i = 1,guard
-
-                                        if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then
-                                        regionData(k-i,ii,kk,ivar) = -2.0 -regionData(guard+1,ii,kk,ivar)
-
-                                        else
-                                        regionData(k-i,ii,kk,ivar) = -regionData(guard+1,ii,kk,ivar)
-
-                                        end if
-                                end do
-                            end do                                
-                        end do
+         
+                        if(isFace) then
+                        k=2*guard+2
+                        do i=1,guard
+                        regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_vel(:,:,blockHandle) - regionData(guard+1,1:je,1:ke,ivar)
+                        enddo
 
                         else
-                        k = 2*guard+1
-                        do i = 1,guard
+                        k=2*guard+1
+                        do i=1,guard
                         regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
-                        end do
+                        enddo
                         endif
 
               else

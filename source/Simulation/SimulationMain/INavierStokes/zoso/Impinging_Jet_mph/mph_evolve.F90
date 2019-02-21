@@ -28,7 +28,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                              Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls,mph_meshMe
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls,mph_meshMe, &
+                             mph_jet_vel,mph_jet_src,mph_srf_src,mph_prs_src
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -40,6 +41,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   use Driver_data, ONLY : dr_nstep
 
   use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
+
+  use IncompNS_data, only: ins_gravY
 
   implicit none
 
@@ -80,6 +83,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   integer :: listofBlocks(MAXBLOCKS)
   integer :: count
   integer :: intval,nxc,nyc,nzc
+
+  real :: xcell,ycell,zcell
 
 if(mph_flag == 1) then
 
@@ -491,7 +496,64 @@ else if(mph_flag == 0) then
   call ins_fluxfixRho2(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
                    blockCount,blockList)
 #endif
+  do lb = 1,blockCount
 
+     blockID = blockList(lb)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     call Grid_getDeltas(blockID,del)
+
+     k = 1
+    
+     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+       xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+               real(i - NGUARD - 1)*del(IAXIS) +   &
+               0.5*del(IAXIS)
+        
+       zcell = 0.0
+
+       if(sqrt((xcell-0.0)**2+(zcell-0.0)**2) .le. 0.5) then
+          mph_jet_vel(i-NGUARD,k,blockID) = -1.0
+       else
+          mph_jet_vel(i-NGUARD,k,blockID) =  0.0
+       end if
+
+       mph_jet_src(i-NGUARD,k,blockID)  = sqrt((xcell-0.0)**2+(zcell-0.0)**2) - 0.5
+
+     end do
+
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+
+       ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+               real(j - NGUARD - 1)*del(JAXIS)  +  &
+               0.5*del(JAXIS)
+
+       if(ycell .lt. -20) then
+          mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-20-ycell)
+       else
+          mph_prs_src(j-NGUARD,k,blockID) = 0.0
+       end if
+
+       mph_srf_src(j-NGUARD,k,blockID) = ycell+20.0
+
+     end do
+
+ 
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
 end if
 
 end subroutine

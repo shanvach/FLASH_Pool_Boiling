@@ -11,7 +11,7 @@
 !!  module that defines its public interfaces.
 !!
 !!***
-#define TWO_PHASE_SEP
+!#define TWO_PHASE_SEP
 
 Module ins_interface
 
@@ -307,6 +307,15 @@ Module ins_interface
    end interface
 
    interface
+#ifdef TWO_PHASE_SEP
+      subroutine ins_computeQinout( blockCount, blockList, inou_flg,  Qinout1, Qinout2)
+        implicit none
+        integer, INTENT(IN) :: blockCount
+        integer, INTENT(IN), dimension(MAXBLOCKS) :: blockList
+        logical, INTENT(IN) :: inou_flg
+        real,    INTENT(OUT) :: Qinout1, Qinout2
+      end subroutine
+#else
       subroutine ins_computeQinout( blockCount, blockList, inou_flg,  Qinout)
         implicit none
         integer, INTENT(IN) :: blockCount
@@ -314,27 +323,47 @@ Module ins_interface
         logical, INTENT(IN) :: inou_flg
         real,    INTENT(OUT) :: Qinout
       end subroutine
+#endif
    end interface
 
    interface
+#ifdef TWO_PHASE_SEP
+      subroutine ins_rescaleVelout( blockCount, blockList, Qin1, Qin2, Qout1, Qout2)
+        implicit none
+        integer, INTENT(IN) :: blockCount
+        integer, INTENT(IN), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(IN) :: Qin1, Qin2, Qout1, Qout2
+      end subroutine
+#else
       subroutine ins_rescaleVelout( blockCount, blockList, Qin,  Qout)
         implicit none
         integer, INTENT(IN) :: blockCount
         integer, INTENT(IN), dimension(MAXBLOCKS) :: blockList
         real,    INTENT(IN) :: Qin, Qout
       end subroutine
-  end interface
+#endif
+   end interface
 
    interface
-     subroutine ins_convectVelout( blockCount, blockList, convvel)
+#ifdef TWO_PHASE_SEP
+      subroutine ins_convectVelout( blockCount, blockList, convvel1, convvel2)
+        implicit none
+        integer, INTENT(IN) :: blockCount
+        integer, INTENT(IN), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(OUT) :: convvel1(LOW:HIGH,MDIM)
+        real,    INTENT(OUT) :: convvel2(LOW:HIGH,MDIM)
+      end subroutine
+#else
+      subroutine ins_convectVelout( blockCount, blockList, convvel)
         implicit none
         integer, INTENT(IN) :: blockCount
         integer, INTENT(IN), dimension(MAXBLOCKS) :: blockList
         real,    INTENT(OUT) :: convvel(LOW:HIGH,MDIM)
       end subroutine
-  end interface
+#endif
+   end interface 
 
- interface
+  interface
      subroutine ins_velomg2center( blockList, blockCount)
        implicit none
        !! ---- Argument List ----------------------------------
@@ -380,16 +409,13 @@ Module ins_interface
 
  interface
     SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
-                           visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
-                           mdot,smrh,xnorm,ynorm,crv,s,pf,temp,blockID)
+                           visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY)
 
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y,rho2y
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,crv,s,pf,temp
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
-      INTEGER, INTENT(IN) :: blockID
 
     END SUBROUTINE
  end interface
@@ -399,17 +425,13 @@ Module ins_interface
                            ix1,ix2,jy1,jy2,kz1,kz2, &
                            dx,dy,dz,ru,rv,rw,visc,  &
                            rho1x,rho2x,rho1y,rho2y, &
-                           rho1z,rho2z,gravX, gravY, gravZ,&
-                           mdot,smrh,xnorm,ynorm,znorm,crv,temp,blockID)
-
+                           rho1z,rho2z,gravX, gravY, gravZ)
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
       REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
       REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tv, visc, rho1x,rho2x, rho1y, rho2y
       REAL, DIMENSION(:,:,:), INTENT(IN):: rho1z,rho2z
-      REAL, DIMENSION(:,:,:), INTENT(IN):: mdot,smrh,xnorm,ynorm,znorm,crv,temp
       REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
-      INTEGER, INTENT(IN) :: blockID
 
       END SUBROUTINE
  end interface

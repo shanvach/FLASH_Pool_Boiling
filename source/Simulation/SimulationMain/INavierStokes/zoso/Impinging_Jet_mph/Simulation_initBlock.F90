@@ -85,6 +85,7 @@ subroutine Simulation_initBlock(blockId)
   real :: th_radii
   real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
 
+  real :: R_init
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -132,11 +133,15 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
+           R_init = 0.1 + 0.4*(ycell+20)/20
+           !R_init = 0.5
+
            !solnData(DFUN_VAR,i,j,k) = min(sqrt(xcell**2+ycell**2+zcell**2)-0.5,ycell+20.0)
-           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-0.5,ycell+20.0)
+           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,ycell+20.0)
 
            if(ycell .gt. -20 .and. &
-           0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .le. 0.0) &
+           0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .lt. 0.0) &
+           !faceyData(VELC_FACE_VAR,i,j+1,k) = -1.0 + 1.0*(abs(ycell))/20
            faceyData(VELC_FACE_VAR,i,j+1,k) = -1.0
 
         enddo

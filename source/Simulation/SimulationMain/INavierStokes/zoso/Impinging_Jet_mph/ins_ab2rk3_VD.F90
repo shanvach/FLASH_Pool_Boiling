@@ -103,7 +103,9 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                             ins_restart, ins_nstep, ins_Qin, ins_Qout, ins_predcorrflg, &
                             ins_convvel, ins_alf, ins_gam, ins_rho, ins_gama, ins_alfa, &
                             ins_rhoa, AB2_SCHM, RK3_SCHM, ins_outflowgridChanged, ins_tlevel, &
-                            ins_gravX, ins_gravY,ins_gravZ
+                            ins_gravX, ins_gravY,ins_gravZ!,&
+                            !ins_Qin1, ins_Qin2, ins_Qout1, ins_Qout2,&
+                            !ins_convvel1, ins_convvel2
 
   use Grid_Data, ONLY : gr_domainBC 
 
@@ -366,7 +368,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   !call ins_computeQinout( blockCount, blockList, .true., ins_Qin)
   
   ! For OUTFLOW_INS condition compute convective velocity
-  call ins_convectVelout( blockCount, blockList, ins_convvel)
+  !call ins_convectVelout( blockCount, blockList, ins_convvel)
   if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)  
 
 !***********************************************************************************************
