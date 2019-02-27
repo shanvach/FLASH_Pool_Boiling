@@ -202,10 +202,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
-  use IncompNS_data, only: ins_gravY
+  use Heat_AD_data
 
-  use Multiphase_data, only: mph_jet_vel, mph_jet_src, mph_prs_src, mph_srf_src,&
-                             mph_prs_fac, mph_vly_flg, mph_vly_fac, mph_vlx_fac
+  use Multiphase_data, only: mph_bcFlag, mph_psi
+
+  use IncompNS_data, only: ins_convvel
 
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
@@ -230,25 +231,20 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   integer,intent(IN),dimension(LOW:HIGH,MDIM) :: endPoints, blkLimitsGC
   integer,intent(IN),OPTIONAL:: idest
 
-  integer :: kk,i,j, k,ivar,je,ke,n,varCount,bcTypeActual,ii
+  integer :: i,j, k,ivar,je,ke,n,varCount,bcTypeActual
   logical :: isFace
   integer    :: sign
-  integer :: jd,kd
-  real :: rc
 
-  integer :: ia,ib,ja,jb,ka,kb
+  integer :: ia,ib,ja,jb,ka,kb,jd,kd
 
   real, dimension(MDIM)  :: coord,bsize,del
   real ::  boundBox(2,MDIM)
 
-  real :: zcell,xcell,xedge,ycell,yedge,alfadt
+  real :: xcell,xedge,ycell,yedge,alfadt,zcell
 
   real, save :: TLEVEL
 
-  real :: dfun_bnd, dfun_bnd_y
-
-
-  integer :: countj,counter
+  integer :: countj,counter,jjj,kkk
 
   ! Following implementations are written by Akash
 
@@ -279,397 +275,425 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   
          if(axis == IAXIS) then ! Level 3a
  
-            if(gridDataStruct == CENTER) then
-
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
+             if(gridDataStruct == CENTER) then
+  
+               if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                 - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
-
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
-
                k = 2*guard+1
                do i = 1,guard
-                   regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+               end do
+  
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else
-
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
-
+    
                end if
 
-            else if(gridDataStruct == WORK) then
+             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                  -mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
-
-                  !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
+  
+             else
 
-            else
+               if(ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
 
-               if(ivar == VELC_FACE_VAR) then
+               call Grid_getBlkCenterCoords(blockHandle,coord)
+               call Grid_getDeltas(blockHandle,del)
+               call Grid_getBlkBoundBox(blockHandle,boundBox)
 
-                        if (isFace) then
+               bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-                        regionData(guard+1,1:je,1:ke,ivar)= mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
-                        !regionData(guard+1,1:je,1:ke,ivar) = 0.0
+               k = 2*guard+1
+
+               do kkk=1,ke
+                  do jjj=1,je
+                    
+                        ycell  = coord(JAXIS) - bsize(JAXIS)/2.0   + &
+                              real((jjj+NGUARD) - NGUARD - 1)*del(JAXIS)  +  &
+                              0.5*del(JAXIS)
+
+                        if(ycell .gt. 2.0 + del(JAXIS)) then
+
+                        if (isFace) then 
+
+                        regionData(guard+1,jjj,kkk,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
-                        !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,jjj,kkk,ivar)=-regionData(guard+1,jjj,kkk,ivar)
                         end do
-
-                        else
+              
+                        else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,jjj,kkk,ivar)=regionData(guard+1,jjj,kkk,ivar)
                         end do
                         endif
+
+                        end if
+
+                  end do
+               end do
 
                else
 
                         k = 2*guard+1
-                        if (isFace) k = k+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                end if
-    
-            end if
+
+           end if
  
          else if (axis == JAXIS) then ! Level 3a
  
-            if(gridDataStruct == CENTER) then
+             if(gridDataStruct == CENTER) then
 
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               if (ivar == TEMP_VAR) then
+
+               call Grid_getBlkCenterCoords(blockHandle,coord)
+               call Grid_getDeltas(blockHandle,del)
+               call Grid_getBlkBoundBox(blockHandle,boundBox)
+
+               bsize(:) = boundBox(2,:) - boundBox(1,:)
 
                k = 2*guard+1
+
+               do kkk=1,ke
+                  do jjj=1,je
+                     do i=1,guard
+                     xcell  = coord(IAXIS) - bsize(IAXIS)/2.0   +  &
+                              real((jjj+NGUARD) - NGUARD - 1)*del(IAXIS)  +  &
+                              0.5*del(IAXIS)
+                
+                     !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0   +  &
+                     !         real((kkk+NGUARD) - NGUARD - 1)*del(KAXIS)  +  &
+                     !         0.5*del(KAXIS)
+
+                     zcell = 0.0
+
+                     if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
+                        zcell .ge. -5.0 .and. zcell .le. 5.0) then
+
+                        regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar)
+
+                     else
+
+                        regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar)
+
+                     end if
+
+                     end do
+                  end do
+               end do
+
+               !k = 2*guard+1
+               !do i = 1,guard
+               !   !regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low*(1-mph_bcFlag(:,:,blockHandle)) &
+               !   !                             + 2*ht_Tsat*(mph_bcFlag(:,:,blockHandle)) & 
+               !   !                             - regionData(guard+1,1:je,1:ke,ivar)
+               !   regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(guard+1,1:je,1:ke,ivar)
+               !end do
+
+               !else if(ivar == DFUN_VAR) then
+               !k = 2*guard+1
+
+               !do kkk = 1,ke
+               !do jjj = 1,je
+               !do i = 1,guard
+
+               !   regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) - del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
+                  
+               !end do
+               !end do
+               !end do
+
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else
-
                k = 2*guard+1
                do i = 1,guard
-               regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                end if
 
-            else if(gridDataStruct == WORK) then
+             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
-            else
+             else
 
-               if(ivar == VELC_FACE_VAR) then
+               if(ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+               
+                        !if (isFace) then
 
-                        if (isFace) then
-
-                        regionData(guard+1,1:je,1:ke,ivar)= 0.
-
-                        k = 2*guard+2
-                        do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
-                        end do
-
-                        else
-                        k = 2*guard+1
-                        do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
-                        end do
-                        endif
-
-               else
-
-                        k = 2*guard+1
-                        if (isFace) k = k+1
-                        do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                        end do
-
-               end if
+                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
  
+                        !k = 2*guard+2
+                        !do i = 1,guard
+                        !regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        !end do
+              
+                        !else          
+                        !k = 2*guard+1
+                        !do i = 1,guard
+                        !regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        !end do
+                        !endif
+
+               else
+
+                        k = 2*guard+1
+                        do i = 1,guard
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+
+               end if
+
            end if
   
          else if (axis == KAXIS) then ! Level 3a
-           ! KAXIS BCs for face == LOW
-            if(gridDataStruct == CENTER) then
-
-
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
+ 
+             if(gridDataStruct == CENTER) then
+  
+               if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == DFUN_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+               end do
+
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else
-
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
-
+    
                end if
 
-            else if(gridDataStruct == WORK) then
+             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                end do
+  
+             else
 
-
-           else
-
-               if(ivar == VELC_FACE_VAR) then
-
+               if(ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+               
                         if (isFace) then
 
-                        !regionData(guard+1,1:je,1:ke,ivar)= 0.0
-
+                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+ 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
                         end do
-
-                        else
+              
+                        else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=regionData(guard+1,1:je,1:ke,ivar)
                         end do
                         endif
 
                else
 
                         k = 2*guard+1
-                        if (isFace) k = k+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                end if
-    
-            end if 
 
+           end if
+           ! KAXIS BCs for face == LOW
          end if ! End Level 3a
  
        else ! if face == HIGH ! Level 3
 
          if(axis == IAXIS) then ! Level 3b
 
-           if(gridDataStruct == CENTER) then
+             if(gridDataStruct == CENTER) then 
 
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
+               if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                   - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
-
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+               end do
+
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                else
-
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                end if
 
-           else if(gridDataStruct == WORK) then
+             else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                   - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
-           else
+             else
 
-              if (ivar == VELC_FACE_VAR) then
+              if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+              
+               call Grid_getBlkCenterCoords(blockHandle,coord)
+               call Grid_getDeltas(blockHandle,del)
+               call Grid_getBlkBoundBox(blockHandle,boundBox)
 
-                        if (isFace) then
-                                
-                        regionData(guard+1,1:je,1:ke,ivar)=mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
+               bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+               k = 2*guard+1
+
+               do kkk=1,ke
+                  do jjj=1,je
+                    
+                        ycell  = coord(JAXIS) - bsize(JAXIS)/2.0   + &
+                              real((jjj+NGUARD) - NGUARD - 1)*del(JAXIS)  +  &
+                              0.5*del(JAXIS)
+
+                        if(ycell .gt. 2.0 + del(JAXIS)) then
+
+                        if (isFace) then 
+
+                        regionData(guard+1,jjj,kkk,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,jjj,kkk,ivar)=-regionData(guard+1,jjj,kkk,ivar)
                         end do
-
-                        else
+              
+                        else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,jjj,kkk,ivar)=regionData(guard,jjj,kkk,ivar)
                         end do
                         endif
+
+                        end if
+
+                  end do
+               end do
 
               else
 
                         if(isFace) then
                         k=2*guard+2
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        end do
 
                         else
                         k=2*guard+1
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+                        end do
                         endif
 
-
-              endif
+              end if
 
            end if
   
          else if (axis == JAXIS) then ! Level 3b
 
-            if(gridDataStruct == CENTER) then
-          
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+             if(gridDataStruct == CENTER) then
 
+               if (ivar == TEMP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
-               elseif (ivar == DFUN_VAR) then
-
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_src(1:je,1:ke,blockHandle) - regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
                else
-
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                end do
 
                end if
 
-           else if(gridDataStruct == WORK) then
+            else if(gridDataStruct == WORK) then
 
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = -regionData(guard,1:je,1:ke,ivar)
                end do
 
-           else
+            else
 
-              if (ivar == VELC_FACE_VAR) then
-         
-                        if(isFace) then
-
-                        regionData(guard+1,1:je,1:ke,ivar) = mph_jet_vel(1:je,1:ke,blockHandle)
-
-                        k=2*guard+2
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_vel(1:je,1:ke,blockHandle) - regionData(i,1:je,1:ke,ivar)
-                        enddo
-
-                        else
-                        k=2*guard+1
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
-                        enddo
-                        endif
-
-              else
-
-                        if(isFace) then
-                        k=2*guard+2
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
-
-                        else
-                        k=2*guard+1
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
-                        endif
-
-
-              endif
-
-
-            end if
-  
-         else if (axis == KAXIS) then ! Level 3b
-           ! KAXIS BCs for face == HIGH
-           if(gridDataStruct == CENTER) then
-
-               if(ivar == MGW3_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
-               end do
-
-               else
-
-               k = 2*guard+1
-               do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-               end do
-
-               end if
-
-           else if(gridDataStruct == WORK) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
-               end do
-
-           else
-
-              if (ivar == VELC_FACE_VAR) then
-
+              if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+              
                         if (isFace) then
-
-                        !regionData(guard+1,1:je,1:ke,ivar)= 0.
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -677,23 +701,99 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if(isFace) then
                         k=2*guard+2
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        end do
 
                         else
                         k=2*guard+1
-                        do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-                        enddo
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+                        end do
                         endif
 
-
-              endif
+              end if
 
            end if
   
-        end if ! End Level 3b
+         else if (axis == KAXIS) then ! Level 3b
+ 
+             if(gridDataStruct == CENTER) then
+
+               if (ivar == TEMP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else if(ivar == DFUN_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar) !- del(DIR_Y)*cos(ht_psi)
+               end do
+
+               else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               else
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+               end if
+
+             else if(gridDataStruct == WORK) then
+
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+               end do
+
+             else
+
+              if (ivar == VELC_FACE_VAR .or. ivar == VELI_FACE_VAR) then
+              
+                        if (isFace) then
+
+                        regionData(guard+1,1:je,1:ke,ivar)= 0.
+
+                        k = 2*guard+2
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)=-regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+             
+                        else
+                        k = 2*guard+1
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)=regionData(guard,1:je,1:ke,ivar)
+                        end do
+                        endif
+
+              else
+
+                        if(isFace) then
+                        k=2*guard+2
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                        end do
+
+                        else
+                        k=2*guard+1
+                        do i = 1,guard
+                        regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+                        end do
+                        endif
+
+
+              end if
+
+           end if
+           ! KAXIS BCs for face == HIGH
+         end if ! End Level 3b
   
        end if ! End Level 3
  

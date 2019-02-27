@@ -139,7 +139,8 @@ subroutine Simulation_initBlock(blockId)
            R_init = 0.1 + 0.4*(ycell+sim_jet_depth)/sim_jet_depth
            !R_init = 0.5
 
-           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,ycell+sim_jet_depth)
+           dfun_rect = -min(ycell+40, -sim_jet_depth-ycell, xcell+20.0, 20.0-xcell)
+           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,dfun_rect)
 
            !dfun_rect = -min(R_init-sqrt((xcell-0.0)**2+(zcell-0.0)**2),ycell+0.5)
            !solnData(DFUN_VAR,i,j,k)  = min(dfun_rect,ycell+sim_jet_depth)

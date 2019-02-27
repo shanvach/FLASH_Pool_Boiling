@@ -46,9 +46,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   use IncompNS_data, only: ins_gravY
 
-  use Simulation_data, only: sim_jet_depth, sim_jet_x, &
-                             sim_jet_z, sim_free_surface, sim_yMin,&
-                             sim_xMax
+  use Simulation_data, only: sim_jet_depth, sim_jet_x, sim_jet_z
 
   implicit none
 
@@ -90,11 +88,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   integer :: count
   integer :: intval,nxc,nyc,nzc
 
-  real :: xcell,ycell,zcell,theta,interface_loc
-
-  real :: ycell_plus, dfun_y, dfun_y_plus
-
-  real :: free_surface_local
+  real :: xcell,ycell,zcell
 
 if(mph_flag == 1) then
 
@@ -506,11 +500,6 @@ else if(mph_flag == 0) then
   call ins_fluxfixRho2(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
                    blockCount,blockList)
 #endif
-
-  free_surface_local = sim_jet_depth
-  if(dr_nstep > 1) free_surface_local = abs(sim_yMin)
-
-
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -522,64 +511,6 @@ else if(mph_flag == 0) then
      call Grid_getBlkCenterCoords(blockId,coord)
 
      call Grid_getDeltas(blockID,del)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-     k = 1
- 
-     if (dr_nstep > 1) then
-
-        xcell       = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                      real(blkLimits(HIGH,IAXIS) - NGUARD - 1)*del(IAXIS)  +  &
-                      0.5*del(IAXIS)
-
-             
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-
-        ycell       = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                      real(j - NGUARD - 1)*del(JAXIS)  +  &
-                      0.5*del(JAXIS)
-        ycell_plus  = ycell + del(JAXIS) 
-
-        dfun_y      = 0.5*(solnData(DFUN_VAR,blkLimits(LOW,IAXIS),j,k) + &
-                           solnData(DFUN_VAR,blkLimits(LOW,IAXIS)-1,j,k))
-
-        dfun_y_plus = 0.5*(solnData(DFUN_VAR,blkLimits(LOW,IAXIS),j+1,k) + &
-                           solnData(DFUN_VAR,blkLimits(LOW,IAXIS)-1,j+1,k))
-
-        
-        if(dfun_y*dfun_y_plus .le. 0.0 .and. abs(sim_xMax-xcell-0.5*del(IAXIS)) .le. 1E-12) then
-
-           theta         = abs(dfun_y)/(abs(dfun_y)+abs(dfun_y_plus)) 
-           interface_loc = abs(ycell_plus*theta + (1-theta)*ycell)
-
-           free_surface_local = min(free_surface_local, interface_loc)
-
-        end if
-
-     end do
-     end if
-  end do
-
-  ! Collect residuals from other processes
-  call MPI_Allreduce(free_surface_local, sim_free_surface, 1, FLASH_REAL,&
-                      MPI_MIN, MPI_COMM_WORLD, ierr)
-
-  if(mph_meshMe .eq. MASTER_PE) print *,"Free_surface_location:", sim_free_surface
-
-  do lb = 1,blockCount
-
-     blockID = blockList(lb)
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     call Grid_getDeltas(blockID,del)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
 
      k = 1
    
@@ -613,9 +544,8 @@ else if(mph_flag == 0) then
                0.5*del(JAXIS)
 
        if(ycell .lt. -sim_jet_depth) then
-          mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_jet_depth-ycell)
-       !if(ycell .lt. -sim_free_surface) then
-       !   mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_free_surface-ycell)
+          !mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_jet_depth-ycell)
+          mph_prs_src(j-NGUARD,k,blockID) = 0.0
           mph_prs_fac(j-NGUARD,k,blockID) = 1.0
           mph_vly_fac(j-NGUARD,k,blockID) = 1.0
           mph_vly_flg(j-NGUARD,k,blockID) = 1.0
@@ -642,17 +572,22 @@ else if(mph_flag == 0) then
                0.5*del(JAXIS)
 
        if(ycell .lt. -sim_jet_depth+del(JAXIS)) then
-         !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
+         !mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
 
        else
-         !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
        end if
 
      end do
  
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
 
   end do
 end if
