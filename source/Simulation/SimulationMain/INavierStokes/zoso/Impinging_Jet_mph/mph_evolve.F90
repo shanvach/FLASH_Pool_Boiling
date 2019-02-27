@@ -643,11 +643,11 @@ else if(mph_flag == 0) then
 
        if(ycell .lt. -sim_jet_depth+del(JAXIS)) then
          !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) = 1.0
 
        else
          !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) = 1.0
        end if
 
      end do
