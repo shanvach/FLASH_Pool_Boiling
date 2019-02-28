@@ -59,7 +59,7 @@ subroutine Simulation_init()
   
   call RuntimeParameters_get('waveA',    sim_waveA)
 
-  sim_psiRcd = 90.0*acos(-1.0)/180
+  sim_psiRcd = 45.0*acos(-1.0)/180
   sim_psiAdv = 90.0*acos(-1.0)/180
 
 end subroutine Simulation_init

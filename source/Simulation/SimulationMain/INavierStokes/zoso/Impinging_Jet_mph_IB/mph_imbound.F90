@@ -264,7 +264,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
              !hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
              hratio = solnData(LMDA_VAR,i,j,k)
 
-             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psiAdv)
+             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psiRcd)
 
 
            end if 
