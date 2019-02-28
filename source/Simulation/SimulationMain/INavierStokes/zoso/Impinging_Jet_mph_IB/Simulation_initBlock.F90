@@ -121,9 +121,9 @@ subroutine Simulation_initBlock(blockId)
 
   sim_jet_depth = 20
 
-  xl =  20.0
-  xr =  22.5
-  yl = -80.0
+  xl =  10.0
+  xr =  12.5
+  yl = -40.0
   yr = -20.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -150,7 +150,7 @@ subroutine Simulation_initBlock(blockId)
            R_init = 0.1 + 0.4*(ycell+sim_jet_depth)/sim_jet_depth
            !R_init = 0.5
 
-           dfun_rect = -min(ycell+40, -sim_jet_depth-ycell, xcell+21.25, 21.25-xcell)
+           dfun_rect = -min(-sim_jet_depth-0.5-ycell, xcell+(xl+xr)*0.5, (xl+xr)*0.5-xcell)
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,dfun_rect)
 
            solnData(LMDA_VAR,i,j,k)  = min(dxl,dxr,dyl,dyr)

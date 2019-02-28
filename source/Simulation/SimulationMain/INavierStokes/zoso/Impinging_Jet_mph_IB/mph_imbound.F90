@@ -113,9 +113,6 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real    :: hratio, veli, this_psi
 
-  call RuntimeParameters_get('psiAdv', sim_psiAdv)
-  call RuntimeParameters_get('psiRcd', sim_psiRcd)
-
   do lb = 1,blockCount
 
         blockID = blockList(lb)
