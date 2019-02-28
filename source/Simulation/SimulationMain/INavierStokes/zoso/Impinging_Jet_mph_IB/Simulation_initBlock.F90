@@ -147,7 +147,7 @@ subroutine Simulation_initBlock(blockId)
            dyl = ycell - yl
            dyr = yr - ycell
 
-           R_init = 0.1 + 0.4*(ycell+sim_jet_depth)/sim_jet_depth
+           R_init = 0.1 + 0.4*(ycell+sim_jet_depth+0.5)/sim_jet_depth
            !R_init = 0.5
 
            dfun_rect = -min(-sim_jet_depth-0.5-ycell, xcell+(xl+xr)*0.5, (xl+xr)*0.5-xcell)
