@@ -54,8 +54,8 @@ Bb = 5.7d-7
 Cb = 2.4d-7
 
 # Constant microlayer heat flux and curvature
-qmic = -0.0026
-fmic = -7.2d-6
+qmic =  0.0
+fmic =  0.0
 
 # Temperatures
 tbulk =  0.0
@@ -87,9 +87,9 @@ gr_sbNumBodies =  1
 
 #       Size of computational volume
 xmin =   -4.00
-xmax =   12.00
+xmax =    8.00
 ymin =    0.00
-ymax =   16.00
+ymax =    12.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -114,11 +114,11 @@ restart         = .false.
 
 nend = 1000000000
 tmax            = 2500.0
-cflflg          = 1
+cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 1.0
-dtinit          = 1.0
+dtspec          = 1.0d-4
+dtinit          = 1.0d-4
 tstep_change_factor=1.01
 
 
@@ -137,11 +137,12 @@ convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 10.0
 
-plotFileIntervalTime = 0.05
+#plotFileIntervalTime = 0.01
+plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 20
-nblocky	= 20
+nblockx	= 30
+nblocky	= 30
 
 lrefine_min	= 1
 lrefine_max     = 1
