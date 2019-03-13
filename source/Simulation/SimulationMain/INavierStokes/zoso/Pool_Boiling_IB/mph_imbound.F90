@@ -152,7 +152,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !        0.5*del(KAXIS)
           
            ! Get probe in fluid
-           hnorm   = 1.*sqrt((1.2*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.2*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
+           hnorm   = 1.*sqrt((2.0*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (2.0*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
 
            xprobe = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
@@ -245,18 +245,18 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
 
-            if(veli .ge. 0.0) then
-                 if(abs(veli) .le. mph_vlim) then
+            !if(veli .ge. 0.0) then
+            !     if(abs(veli) .le. mph_vlim) then
 
-                      this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                                              (mph_psi_adv + ht_psi)/2.0d0
+            !          this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+            !                                  (mph_psi_adv + ht_psi)/2.0d0
 
-                 else
+            !     else
         
-                this_psi = mph_psi_adv
+            !    this_psi = mph_psi_adv
                         
-                 end if
-             end if
+            !     end if
+            !end if
 
              !! Dynamic contact angle done 
 
