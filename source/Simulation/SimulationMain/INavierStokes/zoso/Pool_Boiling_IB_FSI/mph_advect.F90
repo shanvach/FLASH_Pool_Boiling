@@ -430,7 +430,7 @@ enddo
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
+              if (solnData(DFUN_VAR,i,j,1) .gt. 0 .and. solnData(LMDA_VAR,i,j,1) .le. 0.0) then
                 volSum = volSum + (del(DIR_X) * del(DIR_Y))
               end if
            end do
