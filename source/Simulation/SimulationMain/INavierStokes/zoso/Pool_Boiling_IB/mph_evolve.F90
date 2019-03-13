@@ -254,7 +254,8 @@ if(mph_flag == 1) then
                           solnData(NRMX_VAR,:,:,:),&
                           solnData(NRMY_VAR,:,:,:),&
                           solnData(SMHV_VAR,:,:,:),&
-                          solnData(SMRH_VAR,:,:,:))
+                          solnData(SMRH_VAR,:,:,:),&
+                          solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3

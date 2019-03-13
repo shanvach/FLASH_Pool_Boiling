@@ -96,7 +96,8 @@ subroutine Simulation_initBlock(blockId)
   xr =   4.0;
   yl =   3.0;
   yr =   5.0;
-  rot_rect = 3*acos(-1.0)/4;
+  !rot_rect = 3*acos(-1.0)/4;
+  rot_rect = 0.0*cos(-1.0)/4;
 
   rect_x(1) = xl;
   rect_x(2) = xl;
@@ -110,11 +111,11 @@ subroutine Simulation_initBlock(blockId)
   rect_y(4) = yl;
   rect_y(5) = yl;
 
-  x_temp = rect_x;
-  y_temp = rect_y - 4;
+  !x_temp = rect_x;
+  !y_temp = rect_y - 4;
 
-  rect_x = x_temp*cos(rot_rect) - y_temp*sin(rot_rect);
-  rect_y = y_temp*cos(rot_rect) + x_temp*sin(rot_rect) + 4;
+  !rect_x = x_temp*cos(rot_rect) - y_temp*sin(rot_rect);
+  !rect_y = y_temp*cos(rot_rect) + x_temp*sin(rot_rect) + 4;
 
   !----------------------------------------------------------------------
   
@@ -183,8 +184,8 @@ subroutine Simulation_initBlock(blockId)
 
   sim_nucSiteDens = 1
   sim_nuc_radii   = 0.2
-  sim_nuc_site_x  = - (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
-  sim_nuc_site_y  =   (yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
+  sim_nuc_site_x  = 0.0 !- (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
+  sim_nuc_site_y  = yr+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -206,26 +207,26 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           !dxl = xcell - xl;
-           !dxr = xr - xcell;
-           !dyl = ycell - yl;
-           !dyr = yr - ycell;      
+           dxl = xcell - xl;
+           dxr = xr - xcell;
+           dyl = ycell - yl;
+           dyr = yr - ycell;      
 
-           mxl  = (rect_y(4) - rect_y(3))/(rect_x(4)-rect_x(3));
-           cxl  = rect_y(3) - mxl*rect_x(3);
-           dxl  = -(ycell - mxl*xcell - cxl)/sqrt(1+mxl**2);
+           !mxl  = (rect_y(4) - rect_y(3))/(rect_x(4)-rect_x(3));
+           !cxl  = rect_y(3) - mxl*rect_x(3);
+           !dxl  = -(ycell - mxl*xcell - cxl)/sqrt(1+mxl**2);
         
-           mxr  = (rect_y(2) - rect_y(1))/(rect_x(2)-rect_x(1));
-           cxr  = rect_y(1) - mxr*rect_x(1);
-           dxr  = (ycell - mxr*xcell - cxr)/sqrt(1+mxr**2);
+           !mxr  = (rect_y(2) - rect_y(1))/(rect_x(2)-rect_x(1));
+           !cxr  = rect_y(1) - mxr*rect_x(1);
+           !dxr  = (ycell - mxr*xcell - cxr)/sqrt(1+mxr**2);
         
-           myl  = (rect_y(3) - rect_y(2))/(rect_x(3)-rect_x(2));
-           cyl  = rect_y(2) - myl*rect_x(2);
-           dyl  = (ycell - myl*xcell - cyl)/sqrt(1+myl**2);
+           !myl  = (rect_y(3) - rect_y(2))/(rect_x(3)-rect_x(2));
+           !cyl  = rect_y(2) - myl*rect_x(2);
+           !dyl  = (ycell - myl*xcell - cyl)/sqrt(1+myl**2);
 
-           myr  = (rect_y(5) - rect_y(4))/(rect_x(5)-rect_x(4));
-           cyr  = rect_y(4) - myl*rect_x(4);
-           dyr  = -(ycell - myr*xcell - cyr)/sqrt(1+myr**2);
+           !myr  = (rect_y(5) - rect_y(4))/(rect_x(5)-rect_x(4));
+           !cyr  = rect_y(4) - myl*rect_x(4);
+           !dyr  = -(ycell - myr*xcell - cyr)/sqrt(1+myr**2);
 
            do nuc_index=1,sim_nucSiteDens
 

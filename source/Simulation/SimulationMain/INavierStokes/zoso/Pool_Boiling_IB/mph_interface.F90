@@ -208,11 +208,11 @@ interface
 end interface
 
 interface
-        subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm,ynorm,smhv,smrh)
+        subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm,ynorm,smhv,smrh,lambda)
 
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx,dy,rho1,rho2
-        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,pf
+        real, dimension(:,:,:), intent(in) :: xnorm,ynorm,s,pf,lambda
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
 
         end subroutine
