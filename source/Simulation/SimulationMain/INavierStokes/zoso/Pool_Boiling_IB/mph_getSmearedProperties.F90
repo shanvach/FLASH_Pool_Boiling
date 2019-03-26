@@ -53,6 +53,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
               if(lambda(i,j,kz1) .gt. 0.0) then
                 smrh(i,j,kz1) = (rho2/rho2)
+                smhv(i,j,kz1) = 0.0
               else
                 smrh(i,j,kz1) = (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(i,j,kz1)
               end if
