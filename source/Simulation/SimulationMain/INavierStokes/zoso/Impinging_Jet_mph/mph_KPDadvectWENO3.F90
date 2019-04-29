@@ -2,7 +2,7 @@
    
      subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
 
-        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin
+        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin, sim_jet_depth
 
         use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -55,7 +55,8 @@
 
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
-        xd  = ins_xDampL
+        !xd  = ins_xDampR
+        xd = 5.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -94,9 +95,9 @@
                  !- kpd - LS non-reflective damping term for boundaries 
                  AA = ((xcell-xd)/(sim_xMax-xd))**2.0
               end if
-              if (xcell .lt. ins_xDampR) then
-                 AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
-              end if
+              !if (xcell .lt. ins_xDampR) then
+              !   AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
+              !end if
   
 
               !***************** KPD **********************
@@ -361,8 +362,10 @@
               !---------------------------------------------------------
               !---------------------------------------------------------
 
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy
+              s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+                                   - dt*(fry*vr - fly*vl)/dy &
+                                   - 0.1*AA*(so(i,j,k)-ycell-sim_jet_depth)
+
            end do
         end do
 
