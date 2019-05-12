@@ -31,7 +31,7 @@ subroutine Simulation_init()
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
-                              sim_sinkB, sim_psiRcd, sim_psiAdv
+                              sim_sinkB, sim_psiRcd, sim_psiAdv, sim_ib_flg
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
@@ -61,5 +61,7 @@ subroutine Simulation_init()
 
   sim_psiRcd = 45.0*acos(-1.0)/180
   sim_psiAdv = 90.0*acos(-1.0)/180
+
+  sim_ib_flg = .true.
 
 end subroutine Simulation_init

@@ -56,7 +56,7 @@
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         !xd  = ins_xDampR
-        xd = 0.0
+        xd = 10.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -363,8 +363,8 @@
               !---------------------------------------------------------
 
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                   - dt*(fry*vr - fly*vl)/dy &
-                                   - 0.05*AA*(so(i,j,k)-ycell-sim_jet_depth)
+                                   - dt*(fry*vr - fly*vl)/dy !&
+                                   !- 0.1*AA*(so(i,j,k)-ycell-sim_jet_depth)
 
            end do
         end do

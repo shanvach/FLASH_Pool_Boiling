@@ -83,12 +83,27 @@ subroutine ib_interpLpoints(xp,gridfl,          &
          
   ! Value of the function in xp,yp,zp:
 
+  if(ib_vel_flg) then
+
   zp = 0.;
   do i = 1 , ib_stencil      
      zp = zp + phile(i,CONSTANT_ONE) * &
                faceData(VELC_FACE_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));   
   enddo
   zL = zp;
+
+  endif
+
+  if(ib_dfun_flg) then
+
+  zp = 0.;
+  do i = 1 , ib_stencil
+     zp = zp + phile(i,CONSTANT_ONE) * &
+               faceData(DFUN_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));
+  enddo
+  zL = zp;
+
+  end if
 
   ! Release face data (velocities):
   call Grid_releaseBlkPtr(blockID,faceData,faceind)  

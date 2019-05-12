@@ -43,6 +43,10 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use IncompNS_data,     ONLY: ins_alfa
 
+  use ImBound_interface, ONLY : ImBound
+
+  use ImBound_data, ONLY: ib_vel_flg, ib_dfun_flg
+
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
@@ -270,6 +274,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
  
  end do   !End ii RK loop
 
+    ib_vel_flg  = .false.
+    ib_dfun_flg = .true.
+    call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
     call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 

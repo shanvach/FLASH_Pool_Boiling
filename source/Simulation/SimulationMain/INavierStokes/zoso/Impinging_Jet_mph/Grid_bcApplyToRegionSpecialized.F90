@@ -291,7 +291,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                   regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == DFUN_VAR) then
+               else if(ivar == DFUN_VAR .and. ivar==DBUF_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
@@ -335,7 +335,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        !regionData(i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -487,7 +488,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                                                    - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
                end do
 
-               else if(ivar == DFUN_VAR) then
+               else if(ivar == DFUN_VAR .and. ivar==DBUF_VAR) then
 
                k = 2*guard+1
                do i = 1,guard
@@ -562,7 +563,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                   regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
                end do
 
-               elseif (ivar == DFUN_VAR) then
+               elseif (ivar == DFUN_VAR .and. ivar==DBUF_VAR) then
 
                k = 2*guard+1
                do i = 1,guard

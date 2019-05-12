@@ -425,14 +425,14 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
                  !MdensXR = 0.0 ! Neumann
                  !MdensXR = 4.0
-                 MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
+                 !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+2) = 0.0
 
-                 !if(ycell .lt. -sim_jet_depth) then
-                 !MdensXR = 0.0 
-                 !else
-                 !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1  ,j ,k)+facevarx(RH2F_FACE_VAR,i+1  ,j  ,k))
-                 !end if 
+                 if(ycell .lt. -sim_jet_depth) then
+                 MdensXR = 0.0 
+                 else
+                 MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1  ,j ,k)+facevarx(RH2F_FACE_VAR,i+1  ,j  ,k))
+                 end if 
 
               end if
               

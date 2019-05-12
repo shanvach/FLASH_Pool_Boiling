@@ -283,12 +283,14 @@ if(mph_flag == 1) then
      ! Akash - Modified call to compute specific heat and thermal conductivity
 
      call mph_KPDcurvature2DAB(solnData(DFUN_VAR,:,:,:),               &
+                           solnData(DBUF_VAR,:,:,:),                   &
                            solnData(CURV_VAR,:,:,:),                   &
                            facexData(RH1F_FACE_VAR,:,:,:),             &
                            facexData(RH2F_FACE_VAR,:,:,:),             &
                            faceyData(RH1F_FACE_VAR,:,:,:),             &
                            faceyData(RH2F_FACE_VAR,:,:,:),             &
                            solnData(PFUN_VAR,:,:,:),                   &
+                           solnData(PBUF_VAR,:,:,:),                   &
                            solnData(SIGP_VAR,:,:,:),                   &
                            facexData(SIGM_FACE_VAR,:,:,:),             &
                            faceyData(SIGM_FACE_VAR,:,:,:),             &
@@ -343,6 +345,7 @@ if(mph_flag == 1) then
   !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.
   ! -------------------------------------------------------------------------
   gcMask = .FALSE.
+  gcMask(PBUF_VAR) = .TRUE.
   gcMask(PFUN_VAR) = .TRUE.                                ! Phase Function
   gcMask(CURV_VAR) = .TRUE.                                ! Curvature
   gcMask(VISC_VAR) = .TRUE.                                ! Viscosity
@@ -613,17 +616,15 @@ else if(mph_flag == 0) then
                0.5*del(JAXIS)
 
        if(ycell .lt. -sim_jet_depth) then
-          mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_jet_depth-ycell)
-       !if(ycell .lt. -sim_free_surface) then
-       !   mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_free_surface-ycell)
-          mph_prs_fac(j-NGUARD,k,blockID) = 1.0
-          mph_vly_fac(j-NGUARD,k,blockID) = 1.0
-          mph_vly_flg(j-NGUARD,k,blockID) = 1.0
+          !mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_jet_depth-ycell)
+          !mph_prs_fac(j-NGUARD,k,blockID) = 1.0
+          !mph_vly_fac(j-NGUARD,k,blockID) = 1.0
+          !mph_vly_flg(j-NGUARD,k,blockID) = 1.0
 
-          !mph_prs_src(j-NGUARD,k,blockID) =  0.0
-          !mph_prs_fac(j-NGUARD,k,blockID) = -1.0
-          !mph_vly_fac(j-NGUARD,k,blockID) = -1.0
-          !mph_vly_flg(j-NGUARD,k,blockID) =  0.0 
+          mph_prs_src(j-NGUARD,k,blockID) =  0.0
+          mph_prs_fac(j-NGUARD,k,blockID) = -1.0
+          mph_vly_fac(j-NGUARD,k,blockID) = -1.0
+          mph_vly_flg(j-NGUARD,k,blockID) =  0.0 
        else
           mph_prs_src(j-NGUARD,k,blockID) =  0.0
           mph_prs_fac(j-NGUARD,k,blockID) =  1.0
@@ -643,7 +644,7 @@ else if(mph_flag == 0) then
 
        if(ycell .lt. -sim_jet_depth+del(JAXIS)) then
          !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = 1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
 
        else
          !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0

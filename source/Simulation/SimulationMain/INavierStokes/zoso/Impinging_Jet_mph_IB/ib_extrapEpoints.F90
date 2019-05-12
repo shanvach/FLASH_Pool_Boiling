@@ -66,13 +66,24 @@ subroutine ib_extrapEpoints(xp,sb,hl,del,ielem,phile,zL,blockID,faceind)
     
   ! Do Extrapolation:
 
+  if(ib_vel_flg) then
   do i = 1,ib_stencil
         
      faceData(FORC_FACE_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) = &
      faceData(FORC_FACE_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) + factor*phile(i,CONSTANT_ONE)*zL;
    
   enddo
-  
+  endif
+
+  if(ib_dfun_flg) then
+  do i = 1,ib_stencil
+
+     faceData(DFRC_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) = &
+     faceData(DFRC_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS)) + factor*phile(i,CONSTANT_ONE)*zL;
+
+  enddo
+  endif
+
   ! Release face data:
   call Grid_releaseBlkPtr(blockID,faceData,faceind)  
   

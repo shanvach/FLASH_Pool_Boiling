@@ -70,7 +70,7 @@
   real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
-           vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
+           vortz,divpp,tpdens,tpdensy,tpdfun,tpdbuf,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
            tpuint, tpvint,tptes,tprds, tlamda, tnmlx, tnmly
 
   real, dimension(NXB,NYB) :: tptes_c
@@ -146,7 +146,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p denX denY dfun pfun visc curv vort div'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p denX denY dfun dbuf pfun visc curv vort div'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -268,6 +268,9 @@
 
     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DFUN_VAR,:,:,1),tpdfun)
+
+    call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DBUF_VAR,:,:,1),tpdbuf)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(PFUN_VAR,:,:,1),tppfun)
@@ -392,6 +395,11 @@
       ! Write dfun:
       arraylb(:,:,1) = sngl(tpdfun)
       i = TecDat(ijk,arraylb,0)
+
+      ! Write dfun:
+      arraylb(:,:,1) = sngl(tpdbuf)
+      i = TecDat(ijk,arraylb,0)
+
 
       arraylb(:,:,1) = sngl(tppfun)
       i = TecDat(ijk,arraylb,0)

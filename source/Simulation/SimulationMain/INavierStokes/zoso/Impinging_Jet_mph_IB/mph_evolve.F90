@@ -396,6 +396,7 @@ else if(mph_flag == 0) then
      !- kpd - Call 2-D curvature Routine:
      !----------------------------------------------------------
      call mph_KPDcurvature2DC(solnData(DFUN_VAR,:,:,:), &
+                          solnData(LMDA_VAR,:,:,:), &
                           solnData(CURV_VAR,:,:,:), &
                           facexData(RH1F_FACE_VAR,:,:,:), &
                           facexData(RH2F_FACE_VAR,:,:,:), &

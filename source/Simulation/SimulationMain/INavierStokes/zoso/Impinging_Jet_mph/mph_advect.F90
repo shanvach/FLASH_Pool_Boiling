@@ -42,6 +42,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use IncompNS_data,     ONLY: ins_alfa
 
+  use Simulation_data,  only: sim_jet_depth, sim_xMax
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
@@ -99,6 +100,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   real    :: tol=1E-13
 
   real    :: veli
+
+  real    :: dfun_AA, dfun_temp
 
     !------------------------------------------------------------------
     !- kpd - Advect the multiphase distance function using WENO3 scheme
@@ -402,6 +405,66 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
       lsT = lsT + lsDT
 
    end do  ! End do: ii=1,lsit
+
+    do lb = 1,blockCount
+        blockID = blockList(lb)
+
+         call Grid_getBlkBoundBox(blockId,boundBox)
+         bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+        call Grid_getBlkCenterCoords(blockId,coord)
+
+        ! Get blocks dx, dy ,dz:
+        call Grid_getDeltas(blockID,del)
+
+        ! Get Blocks internal limits indexes:
+        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+        ! Point to blocks center and face vars:
+        call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+        k = 1
+
+        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+           do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+              xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                      real(i - NGUARD - 1)*del(IAXIS) +   &
+                       0.5*del(IAXIS)
+
+              ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
+           
+
+              if(xcell .gt. 10) then
+
+                dfun_temp = ycell+sim_jet_depth
+                dfun_AA   = ((xcell-10)/(sim_xMax-10))**2.0 
+                
+                solnData(DBUF_VAR,i,j,k) = solnData(DFUN_VAR,i,j,k) - &
+                                           1.0*dfun_AA*(solnData(DFUN_VAR,i,j,k)-dfun_temp) 
+
+                !solnData(DBUF_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfun_temp)
+
+              else
+
+                solnData(DBUF_VAR,i,j,k) = solnData(DFUN_VAR,i,j,k)              
+
+              end if
+
+           end do
+        end do
+
+        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+   end do
+ 
+    gcMask = .FALSE.
+    gcMask(DBUF_VAR) = .TRUE.
+
+    call Grid_fillGuardCells(CENTER,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
    call cpu_time(t_stopMP2)
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a

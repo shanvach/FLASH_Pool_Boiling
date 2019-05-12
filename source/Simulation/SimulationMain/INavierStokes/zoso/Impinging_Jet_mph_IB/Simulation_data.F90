@@ -43,5 +43,7 @@ module Simulation_data
   real, save :: sim_jet_depth, sim_jet_x, sim_jet_z
 
   real, save :: sim_vlim, sim_psiRcd, sim_psiAdv
+
+  logical, save :: sim_ib_flg
  
 end module Simulation_data

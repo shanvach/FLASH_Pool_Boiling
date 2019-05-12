@@ -47,14 +47,14 @@ Module mph_interface
 !end interface
 
 interface
-        subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
+        subroutine mph_KPDcurvature2DAB(s,s2,crv,rho1x,rho2x,rho1y,rho2y,pf,pf2,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx, dy, rho1, rho2, xit, vis1, vis2
         real, intent(out) :: crmx, crmn
 
-        real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
+        real, dimension(:,:,:), intent(inout):: s,s2,pf2,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy,visc
         end subroutine mph_KPDcurvature2DAB
 end interface

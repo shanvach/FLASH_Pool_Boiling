@@ -376,9 +376,9 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else  !- kpd - Boundary Node
 
-                 MdensXL = 0.0 ! Neumann
+                 !MdensXL = 0.0 ! Neumann
                  !MdensXL = 4.0
-                 !MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
+                 MdensXL = 2*(facevarx(RH1F_FACE_VAR,i  ,j  ,k)+facevarx(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+1) = 0.0
 
                  !if(ycell .lt. -sim_jet_depth) then
