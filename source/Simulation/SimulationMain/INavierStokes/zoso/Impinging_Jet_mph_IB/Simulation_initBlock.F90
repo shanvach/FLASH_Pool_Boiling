@@ -125,18 +125,22 @@ subroutine Simulation_initBlock(blockId)
 
   xl =  20.0
   xr =  22.0
-  yl = -80.0
+  yl = -82.0
   yr = -20.0
 
   xl_1 =  -22.0
   xr_1 =  -20.0
-  yl_1 =  -80.0
+  yl_1 =  -82.0
   yr_1 =  -20.0
 
   xl_2 =  -20.0
   xr_2 =   20.0
-  yl_2 =  -80.0
-  yr_2 =  -78.0
+  yl_2 =  -82.0
+  yr_2 =  -80.0
+
+  xl = -20.0
+  xr =  20.0
+  yl = -80.0
 
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -160,32 +164,34 @@ subroutine Simulation_initBlock(blockId)
            dyl = ycell - yl
            dyr = yr - ycell
 
-           !R_init = 0.2 + 0.4*(ycell+sim_jet_depth+0.25)/(sim_jet_depth+0.25)
+           R_init = 0.2 + 0.4*(ycell+sim_jet_depth+0.25)/(sim_jet_depth+0.25)
            !R_init = 0.5
-           R_init = 0.0 + 0.5*(ycell+sim_jet_depth)/sim_jet_depth
+           !R_init = 0.0 + 0.5*(ycell+sim_jet_depth)/sim_jet_depth
 
            dfun_rect = -min(-sim_jet_depth-ycell, 20-xcell, xcell+20, ycell+80)
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,dfun_rect)
            
            !solnData(DFUN_VAR,i,j,k)  = dfun_rect
-           solnData(LMDA_VAR,i,j,k)  = min(dxl,dxr,dyl,dyr)
 
-           dxl = xcell - xl_1
-           dxr = xr_1 - xcell
-           dyl = ycell - yl_1
-           dyr = yr_1 - ycell
+           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl)
+           !solnData(LMDA_VAR,i,j,k)  = min(dxl,dxr,dyl,dyr)
 
-           solnData(LMDA_VAR,i,j,k)  = max(solnData(LMDA_VAR,i,j,k),min(dxl,dxr,dyl,dyr))
+           !dxl = xcell - xl_1
+           !dxr = xr_1 - xcell
+           !dyl = ycell - yl_1
+           !dyr = yr_1 - ycell
 
-           dxl = xcell - xl_2
-           dxr = xr_2 - xcell
-           dyl = ycell - yl_2
-           dyr = yr_2 - ycell
+           !solnData(LMDA_VAR,i,j,k)  = max(solnData(LMDA_VAR,i,j,k),min(dxl,dxr,dyl,dyr))
 
-           solnData(LMDA_VAR,i,j,k)  = max(solnData(LMDA_VAR,i,j,k),min(dxl,dxr,dyl,dyr))
+           !dxl = xcell - xl_2
+           !dxr = xr_2 - xcell
+           !dyl = ycell - yl_2
+           !dyr = yr_2 - ycell
+
+           !solnData(LMDA_VAR,i,j,k)  = max(solnData(LMDA_VAR,i,j,k),min(dxl,dxr,dyl,dyr))
 
 
-           solnData(DFUN_VAR,i,j,k)  = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
+           !solnData(DFUN_VAR,i,j,k)  = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
 
            !dfun_rect = -min(R_init-sqrt((xcell-0.0)**2+(zcell-0.0)**2),ycell+0.5)
            !solnData(DFUN_VAR,i,j,k)  = min(dfun_rect,ycell+sim_jet_depth)

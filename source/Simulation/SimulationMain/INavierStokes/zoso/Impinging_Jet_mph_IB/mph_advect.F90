@@ -274,26 +274,11 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
  
  end do   !End ii RK loop
 
-    ib_vel_flg  = .false.
-    ib_dfun_flg = .true.
-    call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+   !call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-    call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
-
-    !********************************************************************************************************
-    !-kpd - Fill distance function guard cells before re-initialization to
-    !communicate updates
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    intval = 1
-    !intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-    interp_mask_work = intval;
-#endif
-
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+   ib_vel_flg  = .false.
+   ib_dfun_flg = .true.
+   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
    call cpu_time(t_startMP2a)
 

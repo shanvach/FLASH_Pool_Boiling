@@ -138,7 +138,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .gt. -1.0*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .gt. -1.5*del(IAXIS)) then
                           
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -192,80 +192,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                 solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
 
-           !! Interpolate velocity to probe point
-
-           ! Face centered stencil for velocity interpolation at probe
-
-           veli=0
-
-            do dir=1,NDIM
-
-                gridfl(:) = CENTER
-                gridfl(dir) = FACES
-                delaux(1:NDIM)   = 0.5*del(1:NDIM)
-                delaux(dir) = 0.
-
-                ! Define Interpolation Stencil For Particle:
-                call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
-                                 ib_external(:,:),dfe,FORCE_FLOW)
-
-                ! Interpolation of the values of velocity to Lagrangian points:
-                xyz_stencil(:,:) = 0. 
-                do idim = 1,NDIM
-                    xyz_stencil(:,idim) = coord(idim) - 0.5*bsize(idim) + &
-                        real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim) 
-                enddo
-                call ib_getInterpFunc(externalPt,xyz_stencil,del,0,ib_external_phile)
-                vel_probe(dir) = 0.
-                do ii = 1 , ib_stencil      
-                    select case(dir)
-                    case(FACEX) 
-                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facexData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
-                    case(FACEY) 
-                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            faceyData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
-#if NDIM == MDIM
-                    case(FACEZ)
-                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facezData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
-#endif
-                    end select
-                enddo
-! 
-!                 call ib_interpLpoints(externalPt,gridfl,                     &
-!                                       del,coord,bsize,ib_external(:,:),ib_external_phile(:,:),     &
-!                                       vel_probe(dir),FORCE_FLOW,blockID,FACE_IND(dir))
-
-                veli = veli + vel_probe(dir) * part_Nml(dir)
-
-            end do
-
-            ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
-        
-            this_psi = sim_psiRcd
-
-            ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
-
-            !if(veli .ge. 0.0) then
-            !     if(abs(veli) .le. sim_vlim) then
-
-            !          this_psi = ((sim_psiAdv - sim_psiRcd)/(2*sim_vlim))*abs(veli) + &
-            !                                  (sim_psiAdv + sim_psiRcd)/2.0d0
-
-            !     else
-        
-            !    this_psi = sim_psiAdv
-            !            
-            !     end if
-            ! end if
-
-             !! Dynamic contact angle done 
-
-             !hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
-             hratio = solnData(LMDA_VAR,i,j,k)
-
-             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psiRcd)
+           solnData(DFUN_VAR,i,j,k) = zp - (solnData(LMDA_VAR,i,j,k) + hnorm)*cos(sim_psiRcd)
 
 
            end if 
@@ -287,48 +214,48 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
   
-  do lb = 1,blockCount
+  !do lb = 1,blockCount
 
-        blockID = blockList(lb)
+  !      blockID = blockList(lb)
 
-        call Grid_getBlkBoundBox(blockId,boundBox)
+  !      call Grid_getBlkBoundBox(blockId,boundBox)
 
-        bsize(:) = boundBox(2,:) - boundBox(1,:)
+  !      bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-        call Grid_getBlkCenterCoords(blockId,coord)
+  !      call Grid_getBlkCenterCoords(blockId,coord)
  
-        call Grid_getDeltas(blockID,del)
+  !      call Grid_getDeltas(blockID,del)
 
         ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+  !      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
         ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
+  !      call Grid_getBlkPtr(blockID,solnData,CENTER)
+  !      call Grid_getBlkPtr(blockID,facexData,FACEX)
+  !      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+  !      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-        k = 1
-        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+  !      k = 1
+  !      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+  !       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
+  !         solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
 
-         end do
-        end do
+  !       end do
+  !      end do
 
          ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+  !      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+  !      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+  !      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+  !      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
-  end do
+  !end do
  
-  gcMask = .FALSE.
-  gcMask(DFUN_VAR) = .TRUE.
+  !gcMask = .FALSE.
+  !gcMask(DFUN_VAR) = .TRUE.
 
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 end subroutine mph_imbound

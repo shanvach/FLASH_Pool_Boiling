@@ -146,7 +146,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p denX denY dfun pfun visc curv vort div'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p denX denY dfun pfun visc curv vort div nmlx nmly'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -274,7 +274,13 @@
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(SIGP_VAR,:,:,1),tsigp)
-                                                                                                                                                                                                               
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                             solnData(NMLX_VAR,:,:,1),tnx)
+  
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                             solnData(NMLY_VAR,:,:,1),tny)
+                                                                                                                                                                                                              
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
 
@@ -412,6 +418,13 @@
       ! Write Div:
       arraylb(:,:,1) = sngl(divpp)
       i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tnx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tny)
+      i = TecDat(ijk,arraylb,0)
+
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)
 !      i1 = TecDat(pqr,arraylb_c,0)

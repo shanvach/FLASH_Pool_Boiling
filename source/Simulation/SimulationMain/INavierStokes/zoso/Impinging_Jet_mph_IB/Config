@@ -34,7 +34,7 @@ REQUIRES physics/SolidMechanics/SolidMechanicsMain/
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
 
-DATAFILES kinematics.input.h5 sm_body.00001.h5
+DATAFILES kinematics.input.h5 sm_body.00001.h5 sm_body.00002.h5 sm_body.00003.h5
 
 VARIABLE aaJunk  # kpd  for IfactorB
 
