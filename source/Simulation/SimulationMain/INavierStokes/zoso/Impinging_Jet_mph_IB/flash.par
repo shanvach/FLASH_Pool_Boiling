@@ -37,8 +37,8 @@ inls = 2
 lsit = 2
 
 # Bodies
-sm_NumBodies   =  3
-gr_sbNumBodies =  3
+sm_NumBodies   =  1
+gr_sbNumBodies =  1
 
 # # SolidMechanics
 sm_solidinteg = 2

@@ -274,7 +274,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
  
  end do   !End ii RK loop
 
-   !call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+   call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    ib_vel_flg  = .false.
    ib_dfun_flg = .true.

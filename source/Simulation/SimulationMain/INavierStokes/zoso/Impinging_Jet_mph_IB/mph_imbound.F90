@@ -138,7 +138,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .gt. -1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .lt. 0.0 .and. solnData(LMDA_VAR,i,j,k) .gt. -1.5*del(IAXIS)) then
                           
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -214,48 +214,48 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
   
-  !do lb = 1,blockCount
+  do lb = 1,blockCount
 
-  !      blockID = blockList(lb)
+        blockID = blockList(lb)
 
-  !      call Grid_getBlkBoundBox(blockId,boundBox)
+        call Grid_getBlkBoundBox(blockId,boundBox)
 
-  !      bsize(:) = boundBox(2,:) - boundBox(1,:)
+        bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-  !      call Grid_getBlkCenterCoords(blockId,coord)
+        call Grid_getBlkCenterCoords(blockId,coord)
  
-  !      call Grid_getDeltas(blockID,del)
+        call Grid_getDeltas(blockID,del)
 
         ! Get Blocks internal limits indexes:
-  !      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
         ! Point to blocks center and face vars:
-  !      call Grid_getBlkPtr(blockID,solnData,CENTER)
-  !      call Grid_getBlkPtr(blockID,facexData,FACEX)
-  !      call Grid_getBlkPtr(blockID,faceyData,FACEY)
-  !      call Grid_getBlkPtr(blockID,facezData,FACEZ)
+        call Grid_getBlkPtr(blockID,solnData,CENTER)
+        call Grid_getBlkPtr(blockID,facexData,FACEX)
+        call Grid_getBlkPtr(blockID,faceyData,FACEY)
+        call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-  !      k = 1
-  !      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-  !       do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+        k = 1
+        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-  !         solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
+           solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
 
-  !       end do
-  !      end do
+         end do
+        end do
 
          ! Release pointers:
-  !      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-  !      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-  !      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-  !      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
-  !end do
+  end do
  
-  !gcMask = .FALSE.
-  !gcMask(DFUN_VAR) = .TRUE.
+  gcMask = .FALSE.
+  gcMask(DFUN_VAR) = .TRUE.
 
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 end subroutine mph_imbound
