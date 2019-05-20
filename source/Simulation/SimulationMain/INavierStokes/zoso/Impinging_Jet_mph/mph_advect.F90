@@ -437,21 +437,21 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       0.5*del(JAXIS)
            
 
-              if(xcell .gt. 10) then
+              !if(xcell .gt. 10) then
 
-                dfun_temp = ycell+sim_jet_depth
-                dfun_AA   = ((xcell-10)/(sim_xMax-10))**2.0 
+              !  dfun_temp = ycell+sim_jet_depth
+              !  dfun_AA   = ((xcell-10)/(sim_xMax-10))**2.0 
                 
-                solnData(DBUF_VAR,i,j,k) = solnData(DFUN_VAR,i,j,k) - &
-                                           1.0*dfun_AA*(solnData(DFUN_VAR,i,j,k)-dfun_temp) 
+              !  solnData(DBUF_VAR,i,j,k) = solnData(DFUN_VAR,i,j,k) - &
+              !                             1.0*dfun_AA*(solnData(DFUN_VAR,i,j,k)-dfun_temp) 
 
-                !solnData(DBUF_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfun_temp)
+              !  !solnData(DBUF_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfun_temp)
 
-              else
+              !else
 
                 solnData(DBUF_VAR,i,j,k) = solnData(DFUN_VAR,i,j,k)              
 
-              end if
+              !end if
 
            end do
         end do

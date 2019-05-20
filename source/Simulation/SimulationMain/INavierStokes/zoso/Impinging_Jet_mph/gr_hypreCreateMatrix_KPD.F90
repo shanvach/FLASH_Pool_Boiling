@@ -368,7 +368,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. & 
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+1) = 0.0
+                       temp_BoxVal(iter+1) = 0.0
                        !print*,"COEFFICIENT REFERENCE XL:",gr_meshMe,blockID,i,j,k
                     end if
 
@@ -416,23 +416,23 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+2) = 0.0
+                       temp_BoxVal(iter+2) = 0.0
                        !print*,"COEFFICIENT REFERENCE XR:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
 
               else  !- kpd - Boundary Node
 
-                 !MdensXR = 0.0 ! Neumann
+                 MdensXR = 0.0 ! Neumann
                  !MdensXR = 4.0
                  !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1,j  ,k) + facevarx(RH2F_FACE_VAR,i+1,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+2) = 0.0
 
-                 if(ycell .lt. -sim_jet_depth) then
-                 MdensXR = 0.0 
-                 else
-                 MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1  ,j ,k)+facevarx(RH2F_FACE_VAR,i+1  ,j  ,k))
-                 end if 
+                 !if(ycell .lt. -sim_jet_depth) then
+                 !MdensXR = 0.0 
+                 !else
+                 !MdensXR = 2*(facevarx(RH1F_FACE_VAR,i+1  ,j ,k)+facevarx(RH2F_FACE_VAR,i+1  ,j  ,k))
+                 !end if 
 
               end if
               
@@ -472,7 +472,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+3) = 0.0
+                       temp_BoxVal(iter+3) = 0.0
                        !print*,"COEFFICIENT REFERENCE YL:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
@@ -513,7 +513,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+4) = 0.0
+                       temp_BoxVal(iter+4) = 0.0
                        !print*,"COEFFICIENT REFERENCE YR:",gr_meshMe,blockID,i,j,k
                     end if
                  end if
@@ -562,7 +562,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+5) = 0.0
+                       temp_BoxVal(iter+5) = 0.0
                     end if
                  end if
 
@@ -597,7 +597,7 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                                         i .eq. blkLimits(LOW, IAXIS) .AND. &
                                         j .eq. blkLimits(LOW, JAXIS) .AND. &
                                         k .eq. blkLimits(LOW, KAXIS)) then
-                       !temp_BoxVal(iter+6) = 0.0
+                       temp_BoxVal(iter+6) = 0.0
                     end if
                  end if
 

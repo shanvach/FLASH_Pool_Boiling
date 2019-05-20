@@ -280,7 +280,7 @@ subroutine poisson_mg_relax_HYPRE (level,iSrc, iSoln, levelmax)
                                   j .eq. blkLimits(LOW, JAXIS) .AND. &
                                   k .eq. blkLimits(LOW, KAXIS)) then 
                  !RHSVal(ii) = 0.0
-                 !temp_RHSVal(ii) = 0.0
+                 temp_RHSVal(ii) = 0.0
                  !print*,"REFERENCE PRESSURE:",gr_meshMe,blockID,i,j,k
               end if
 

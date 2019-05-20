@@ -570,6 +570,8 @@ else if(mph_flag == 0) then
 
   if(mph_meshMe .eq. MASTER_PE) print *,"Free_surface_location:", sim_free_surface
 
+  mph_jet_vel(:,:,:) = 0.0
+
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -615,24 +617,13 @@ else if(mph_flag == 0) then
                real(j - NGUARD - 1)*del(JAXIS)  +  &
                0.5*del(JAXIS)
 
-       if(ycell .lt. -sim_jet_depth) then
-          !mph_prs_src(j-NGUARD,k,blockID) = -ins_gravY*(-sim_jet_depth-ycell)
-          !mph_prs_fac(j-NGUARD,k,blockID) = 1.0
-          !mph_vly_fac(j-NGUARD,k,blockID) = 1.0
-          !mph_vly_flg(j-NGUARD,k,blockID) = 1.0
-
-          mph_prs_src(j-NGUARD,k,blockID) =  0.0
-          mph_prs_fac(j-NGUARD,k,blockID) = -1.0
-          mph_vly_fac(j-NGUARD,k,blockID) = -1.0
-          mph_vly_flg(j-NGUARD,k,blockID) =  0.0 
-       else
-          mph_prs_src(j-NGUARD,k,blockID) =  0.0
-          mph_prs_fac(j-NGUARD,k,blockID) =  1.0
+       if(ycell .le. (sim_yMin + 0.5)) then
           mph_vly_fac(j-NGUARD,k,blockID) =  1.0
-          mph_vly_flg(j-NGUARD,k,blockID) =  1.0
+          mph_vly_flg(j-NGUARD,k,blockID) =  1.0 
+       else
+          mph_vly_fac(j-NGUARD,k,blockID) =  0.0
+          mph_vly_flg(j-NGUARD,k,blockID) = -1.0
        end if
-
-       mph_srf_src(j-NGUARD,k,blockID) = ycell+sim_jet_depth
 
      end do
 
@@ -642,13 +633,11 @@ else if(mph_flag == 0) then
                real(j - NGUARD - 1)*del(JAXIS)  +  &
                0.5*del(JAXIS)
 
-       if(ycell .lt. -sim_jet_depth+del(JAXIS)) then
-         !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
+       if(ycell .le. (sim_yMin + 0.5 + del(JAXIS))) then
+         mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
 
        else
-         !mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-         mph_vlx_fac(j-NGUARD,k,blockID) = 1.0
+         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
        end if
 
      end do
