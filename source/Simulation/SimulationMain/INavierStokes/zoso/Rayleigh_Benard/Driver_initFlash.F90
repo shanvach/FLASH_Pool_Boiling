@@ -220,7 +220,9 @@ subroutine Driver_initFlash()
   end if
 
   ! Following Procedure Written by Akash. Initial Temp
+  if(dr_globalMe==MASTER_PE)print*,'Ready to call Heat_AD_init'
   call Heat_AD_init(blockCount,blockList)
+  if(dr_globalMe==MASTER_PE)print*,'Heat_AD initialized'
   ! End of Procedure
 
   call IO_outputInitial(  dr_nbegin, dr_initialSimTime)
