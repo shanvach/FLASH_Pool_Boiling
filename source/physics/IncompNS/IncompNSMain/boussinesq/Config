@@ -1,19 +1,25 @@
 #       Config file for the Incompressible Navier Stoke solver.
 PPDEFINE INS_BOUSSINESQ
 
-
 # Runtime parameters
 
 D cfl                   Courant Number
 D sigma			Viscous Condition Parameter
 D invsqrtRa_Pr          1/sqrt(Ra/Pr)
+D ins_invRe             1/Re or 1/sqrt(Ra/Pr)
 # ----------------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
 D   Ra  Rayleigh number
-PARAMETER Ra         REAL     1.
+PARAMETER Ra        REAL     1.
 
 D   Pr  Prandtl number
-PARAMETER Pr         REAL     1.
+PARAMETER Pr        REAL     1.
+
+D   Re  Reynolds number
+PARAMETER Re        REAL     1.
+
+D  Momentum and Heat equations are coupled
+PARAMETER coupled_transport  BOOLEAN  true
 
 D   isgs   Subgrid scale model flag
 PARAMETER isgs          INTEGER  0
@@ -30,7 +36,6 @@ PARAMETER pressure_correct BOOLEAN  true      # if true does pressure correction
 
 PARAMETER vel_prolong_method INTEGER   1 [0,1,101,102]  # if 0 injection for prolongation in update refinement, if 1 divergence 
                                                 #preserving prolongation.
-
 # Gravitational acceleration in the xi direction
 PARAMETER gravX          REAL     0.
 PARAMETER gravY          REAL     0.
@@ -58,16 +63,13 @@ VARIABLE omgm                   # Vorticity module
 # Fluxes
 FLUX velc
 
-
 # Use GRIDVAR for temporary storages
 SCRATCHVAR divv
-
 
 # Use FACEVAR for cell interface velocity fields
 FACEVAR velc     
 FACEVAR rhds
 FACEVAR velo
-
 
 # Number of guardcells at each boundary
 GUARDCELLS 2

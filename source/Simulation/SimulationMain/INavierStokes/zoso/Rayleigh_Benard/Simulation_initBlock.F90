@@ -60,7 +60,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(DUST_VAR,:,:,:) = 0.0
   solnData(TVIS_VAR,:,:,:) = 0.0
 
-  facexData(VELC_FACE_VAR,:,:,:) = 0.0
+  facexData(VELC_FACE_VAR,:,:,:) = 1.0
   faceyData(VELC_FACE_VAR,:,:,:) = 0.0
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0

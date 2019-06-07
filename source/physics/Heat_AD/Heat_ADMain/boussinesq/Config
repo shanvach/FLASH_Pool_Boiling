@@ -1,18 +1,16 @@
 #     Config file for the Heat Advective Diffusive solver
 PPDEFINE HT_BOUSSINESQ 1
 
-
 # Runtime parameters
+D ht_invsqrtRaPr        1/SQRT(RaPr) 
 
-D ht_invsqrtRaPr        1/SQRT(RaPr)
 # --------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
 D Twall_high	The upper wall temperature
-PARAMETER Twall_high	REAL	1.
+PARAMETER Twall_high	REAL	0.
 
 D Twall_low	The lower wall temperature 
-PARAMETER Twall_low	REAL	0.
-
+PARAMETER Twall_low	REAL	1.
 
 # THIS PART IS FOR PHYSICS CONFIG
 # Variables required by the ht module

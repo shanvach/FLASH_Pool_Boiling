@@ -7,7 +7,7 @@ subroutine Heat_AD_init(blockCount,blockList)
                              Grid_getBlkCenterCoords,&
                              Grid_getBlkIndexLimits
 
-   use IncompNS_data, only: ins_Ra, ins_Pr
+   use IncompNS_data, only: ins_Ra, ins_Pr, ins_isCoupled
 
    use RuntimeParameters_interface, only: RuntimeParameters_get
 

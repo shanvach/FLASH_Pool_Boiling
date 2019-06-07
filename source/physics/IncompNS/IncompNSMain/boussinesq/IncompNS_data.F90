@@ -40,7 +40,10 @@ module IncompNS_data
   real, save :: ins_sigma
   real, save :: ins_Ra
   real, save :: ins_Pr
+  real, save :: ins_Re
+  logical, save :: ins_isCoupled
   real, save :: ins_invsqrtRa_Pr
+  real, save :: ins_invRe
   real, save :: ins_dtspec
 
   integer, parameter :: rkstep = 3

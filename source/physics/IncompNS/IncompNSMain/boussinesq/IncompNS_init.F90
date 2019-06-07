@@ -44,6 +44,8 @@ subroutine IncompNS_init(restart)
   call RuntimeParameters_get("isgs",ins_isgs)
   call RuntimeParameters_get("Ra",ins_Ra)
   call RuntimeParameters_get("Pr",ins_Pr)
+  call RuntimeParameters_get("Re",ins_Re)
+  call RuntimeParameters_get("coupled_transport",ins_isCoupled)
   call RuntimeParameters_get("sigma",ins_sigma)
   call RuntimeParameters_get("dtspec",ins_dtspec)
   call RuntimeParameters_get("intschm",ins_intschm)
@@ -61,7 +63,12 @@ subroutine IncompNS_init(restart)
   ins_vardt(:) = ins_dtspec
 
   ! calulate momentum eq controling parameter
-  ins_invsqrtRa_Pr = 1.0 / SQRT(ins_Ra / ins_Pr)
+  if (ins_isCoupled) then
+    ins_invsqrtRa_Pr = 1.0 / SQRT(ins_Ra / ins_Pr)
+  else
+    ins_invsqrtRa_Pr = 1.0 / ins_Re
+  endif
+  ins_invRe = ins_invsqrtRa_Pr
 
   call Driver_getNstep(ins_nstep)
   ins_restart=restart
@@ -77,6 +84,8 @@ subroutine IncompNS_init(restart)
      write(*,*) 'ins_isgs  =',ins_isgs
      write(*,*) 'ins_Ra =',ins_Ra
      write(*,*) 'ins_Pr =',ins_Pr
+     write(*,*) 'ins_Re =',ins_Re
+     write(*,*) 'ins_isCoupled =',ins_isCoupled
      write(*,*) '1/sqrt(Ra/Pr) = ',ins_invsqrtRa_Pr
      write(*,*) 'ins_sigma =',ins_sigma
      write(*,*) 'ins_dtspec=',ins_dtspec

@@ -15,6 +15,8 @@
   ! Output: ru,rv    = u and v momentum for Helmholtz RHS
   !**************************************************************
 
+      use IncompNS_data, ONLY : ins_isCoupled
+
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
       REAL, INTENT(IN):: ru1, dx, dy
@@ -34,12 +36,19 @@
       ! new y-component variables
       REAL:: vyplus, vyminus
       REAL:: dvdyp, dvdym
-      REAL:: tvip, tvim, ty
+      REAL:: tvip, tvim, ty, ty_m
       INTEGER, parameter :: kz1 = 1
 
       ! grid spacings
       dx1 = 1.0/dx
       dy1 = 1.0/dy
+
+      ! coupled term multiplier
+      if (ins_isCoupled) then
+        ty_m = 1.
+      else
+        ty_m = 0.
+      endif
 
       !++++++++++  U-COMPONENT  ++++++++++
        do j = jy1,jy2
@@ -114,7 +123,7 @@
                           - (vyplus*vyplus - vyminus*vyminus)*dy1       &
                           + (txxp - txxm)*dx1                           &! diffusion - normal terms
                           + (tyyp - tyym)*dy1                           &!
-                          + ty                                           ! energy momentum coupling
+                          + ty * ty_m                                    ! energy momentum coupling
           enddo
        enddo
 
@@ -145,6 +154,8 @@
   ! E. Balaras   July 1999
   ! P. Rabenold  August 2006
   !**************************************************************
+    
+      use IncompNS_data, ONLY : ins_isCoupled
 
       implicit none
       INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
@@ -179,13 +190,19 @@
       ! additional z-component variables
       REAL:: wzplus, wzminus
       REAL:: dwdzp, dwdzm
-      REAL:: tz
+      REAL:: tz, tz_m
 
       ! grid spacings
       dx1 = 1.0/dx
       dy1 = 1.0/dy
       dz1 = 1.0/dz
 
+      ! coupled term multiplier
+      if (ins_isCoupled) then
+        tz_m = 1.
+      else
+        tz_m = 0.
+      endif
 
       !++++++++++  U-COMPONENT  ++++++++++
       do k = kz1,kz2
@@ -410,7 +427,7 @@
                           + (tzzp - tzzm)*dz1                       &
                           + (txzp - txzm)*dx1                       &! diffusion - cross terms
                           + (tyzp - tyzm)*dy1                       & 
-                          + tz                                       ! energy momentum coupling
+                          + tz * tz_m                                ! energy momentum coupling
             enddo
          enddo
       enddo

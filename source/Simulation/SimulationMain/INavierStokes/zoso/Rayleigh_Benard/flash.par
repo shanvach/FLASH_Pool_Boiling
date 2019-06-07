@@ -1,20 +1,23 @@
-# 	Runtime parameters for the Rayleigh Benard Cavity problem.
+# Runtime parameters for the Rayleigh Benard Cavity problem.
 
 gr_pmRpDivergenceFree = 1
 gr_pmRpNfieldDivf = 2
 gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
-# Inverse of Reynolds Number
-Ra              = 1000.
-Pr              = 7.00
+# Simulation Controlling Parameters
+Ra              = 1000.0
+Pr              =    1.0
+Re              =  100.0
+coupled_transport = .false.
+
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
 
-#       Grid dimensionality and geometry
+# Grid dimensionality and geometry
 geometry	= "cartesian"
 
-#       Size of computational volume
+# Size of computational volume
 xmin		=  0.000000000000000
 xmax		=  1.000000000000000
 ymin		=  0.000000000000000
@@ -22,34 +25,26 @@ ymax		=  1.000000000000000
 #zmin            =  0.000000000000000
 #zmax            =  1.000000000000000
 
-#       Boundary conditions
+# Momentum Boundary conditions
 xl_boundary_type = "noslip_ins"
 xr_boundary_type = "noslip_ins"
 yl_boundary_type = "noslip_ins"
-yr_boundary_type = "noslip_ins"
+yr_boundary_type = "movlid_ins"
 #zl_boundary_type = "noslip_ins"
 #zr_boundary_type = "noslip_ins"
 
-#      Poisson Solver Boundary Conditions
-xl_mg_boundary_type = "outflow"
-xr_mg_boundary_type = "outflow"
-yl_mg_boundary_type = "outflow"
-yr_mg_boundary_type = "outflow"
-#zl_mg_boundary_type = "outflow"
-#zr_mg_boundary_type = "outflow"
-
-#     Temperature Wall Boundary Conditions
+# Temperature Wall Boundary Conditions
 Twall_high = 0.0
 Twall_low  = 1.0
 
-#       Simulation (grid, time, I/O) parameters
+# Simulation (grid, time, I/O) parameters
 run_comment	= "Rayleigh Benard problem"
 log_file	= "INS_Rayleigh_Benard.log"
 basenm		= "INS_Rayleigh_Benard_"
 restart         = .false.
 #checkPointFileNumber=1
 #plotFileNumber  = 1
-nend            = 30000
+nend            = 10000
 tmax            = 60. 
 cflflg          = 1
 cfl             = 0.3
@@ -59,7 +54,7 @@ dtinit          = 1.0
 tstep_change_factor = 1.
 pressure_correct= .true.
 
-#Integration Scheme:
+# Integration Scheme:
 intschm            = 2
 
 plot_var_1	= "pres"
@@ -69,55 +64,24 @@ plot_var_3      = "temp"
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 5.
-checkpointFileIntervalStep =20000 
+checkpointFileIntervalTime = 20.
+checkpointFileIntervalStep = 5000 
 
-plotFileIntervalTime = 0.1
-plotFileIntervalStep = 2000
-
-##	AMR parameters
-nblockx	= 1
-nblocky	= 1
-lrefine_min	= 2
-lrefine_max     = 3
-nrefs           = 0
-refine_var_1    = "pres"
-##	Flux Conservation for AMR
-flux_correct    = .true.
-
-# Multigrid Convergence tolerance
-# Rickers Multigrid HG:
-mg_maxResidualNorm = 1.e-10
-
-## Multigrid Convergence tolerance
-mgrid_npresmooth = 1
-mgrid_npossmooth = 8
-mgrid_print_norm = .true.
-mgrid_max_residual_norm = 1.e-10
-mgrid_max_vcycles = 20
-
-# BiPCGStab Parameters:
-bipcgs_max_residual_norm = 1.e-10
-bipcgs_max_cycles = 1000
-bipcgs_print_norm = .true.
-
-## Force Direct solve in this level:
-#maxDirectSolveLevel=2
+plotFileIntervalTime = 5.0
+plotFileIntervalStep = 1000
 
 ## Pfft Parameters:
 ## Use Central Finite Difference discretization operator:
 gr_pfftDiffOpDiscretize = 2
 gr_mgDiffOpDiscretize   = 2
 
- 
-
 #-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
 #	The parameters below are only necessary for the Uniform Grid
 #iGridSize	= 8	#defined as nxb * iprocs
 #jGridSize	= 8	#defined as nyb * jprocs
 #kGridSize	= 1	#defined as nzb * kprocs
-iProcs		= 6	#number of procs in the i direction
-jProcs		= 6	#number of procs in the j direction
+iProcs		= 4	#number of procs in the i direction
+jProcs		= 4	#number of procs in the j direction
 kProcs		= 1	#number of procs in the k direction
 
 # When using UG, iProcs, jProcs and kProcs must be specified.

@@ -1,9 +1,9 @@
 subroutine ImBound_setData()
 
 !#ifdef INS_BOUSSINESQ
-  use IncompNS_data, only : ins_invsqrtRa_Pr
+!  use IncompNS_data, only : ins_invsqrtRa_Pr
 !#else
-!  use IncompNS_data, only : ins_invRe
+  use IncompNS_data, only : ins_invRe
 !#endif
 
   use ImBound_data,  only : ib_nu 
@@ -11,9 +11,9 @@ subroutine ImBound_setData()
   implicit none
 
 !#ifdef INS_BOUSSINESQ
-  ib_nu = ins_invsqrtRa_Pr
+!  ib_nu = ins_invsqrtRa_Pr
 !#else
-!  ib_nu = ins_invRe
+  ib_nu = ins_invRe
 !#endif
 
   return
