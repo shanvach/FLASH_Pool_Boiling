@@ -31,6 +31,8 @@ REQUIRES physics/SolidMechanics/SolidMechanicsMain/
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
 
+DATAFILES kinematics.input.h5 sm_body.00001.h5
+
 # Tecplot routines:
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 

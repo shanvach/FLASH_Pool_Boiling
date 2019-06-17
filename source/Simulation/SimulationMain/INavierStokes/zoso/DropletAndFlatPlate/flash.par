@@ -36,6 +36,10 @@ sten = 1.0
 inls = 2
 lsit = 2
 
+# Bodies
+sm_NumBodies   =  1
+gr_sbNumBodies =  1
+
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
