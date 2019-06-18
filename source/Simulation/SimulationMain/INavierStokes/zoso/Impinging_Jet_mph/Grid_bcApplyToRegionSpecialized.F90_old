@@ -202,7 +202,9 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
-  use IncompNS_data, only: ins_gravY,ins_predcorrflg,uvel_x,ins_convvel,ins_alfa
+  use IncompNS_data, only: ins_gravY,ins_predcorrflg,ins_convvel,ins_alfa
+
+  use IncompNS_data, only : uvel_x,vvel_x,wvel_x,uvel_y,vvel_y,wvel_y
 
   use Multiphase_data, only: mph_jet_vel, mph_jet_src, mph_prs_src, mph_srf_src,&
                              mph_prs_fac, mph_vly_flg, mph_vly_fac, mph_vlx_fac
@@ -371,22 +373,56 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
             else
 
-               if(ivar == VELC_FACE_VAR) then
 
-                        if (isFace) then
+              if(ivar == VELC_FACE_VAR) then
 
-                        k = 2*guard+2
-                        do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
-                        end do
+                        ia = endPoints(LOW,IAXIS)
+                        ib = endPoints(HIGH,IAXIS)
+                        ka = endPoints(LOW,KAXIS)
+                        kb = endPoints(HIGH,KAXIS)
+
+                        if (ins_predcorrflg) then
+
+                          if (isFace) then            
+                          k = 2*guard+2
+                          do i = 1,guard+1 
+                            regionData(i,1:je,1:ke,ivar) = vvel_y(guard,ia:ib,ka:kb,LOW,blockHandle) -&
+                            (-0.0125*dr_dt/del(axis))* &
+                            (vvel_y(guard+1,ia:ib,ka:kb,LOW,blockHandle) - &
+                             vvel_y(guard,ia:ib,ka:kb,LOW,blockHandle))
+                          end do
+
+                          else
+                          k = 2*guard+1
+                          do i = 1,guard
+                           regionData(1,1:je,1:ke,ivar) = uvel_y(guard-1,ia:ib,ka:kb,LOW,blockHandle) - & 
+                           (-0.0125*dr_dt/del(axis))* &
+                           (uvel_y(guard,ia:ib,ka:kb,LOW,blockHandle) - &
+                            uvel_y(guard-1,ia:ib,ka:kb,LOW,blockHandle))
+
+                          end do
+
+                          endif
+
 
                         else
-                        k = 2*guard+1
-                        do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-                        end do
-                        endif
 
+                          if (isFace) then
+
+                          k = 2*guard+2
+                          do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                          end do
+
+                          else
+                          k = 2*guard+1
+                          do i = 1,guard
+                          regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                          end do
+                          endif
+                       
+                       end if
+ 
                else
 
                         k = 2*guard+1

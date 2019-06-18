@@ -33,6 +33,7 @@ subroutine Simulation_initBlock(blockId)
 
   use Simulation_data, ONLY : sim_xMin, sim_xMax, &
                               sim_yMin, sim_yMax, &
+                              sim_zMin, sim_zMax, &
                               sim_gCell, sim_waveA, &
                               sim_nuc_site_x, sim_nuc_site_y,&
                               sim_nuc_site_z, sim_nuc_radii,&
@@ -63,7 +64,7 @@ subroutine Simulation_initBlock(blockId)
 
   real, dimension(MDIM)  :: coord,bsize,del
   real ::  boundBox(2,MDIM)
-  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData
+  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
   real :: xcell,xedge,ycell,yedge,zcell
 
@@ -115,9 +116,17 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getBlkPtr(blockID,facexData,FACEX)
   call Grid_getBlkPtr(blockID,faceyData,FACEY)
 
+#if NDIM == 3
+  call Grid_getBlkPtr(blockID,facezData,FACEZ)
+#endif
+
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
-  faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+#if NDIM == 2
+  faceyData(VELC_FACE_VAR,:,:,:) = 0.025
+#else
+  faceyData(VELC_FACE_VAR,:,:,:) = 0.0005
+#endif
 
   sim_jet_depth = 20
 
@@ -136,18 +145,24 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           R_init = 0.2 + 0.3*(ycell+sim_jet_depth)/sim_jet_depth
-           !R_init = 0.5
+#if NDIM == 3
+           zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
+#endif        
 
-           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,ycell+sim_jet_depth)
+           !R_init = 0.2 + 0.3*(-ycell+sim_jet_depth)/sim_jet_depth
+           R_init = 0.5
+
+           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,-ycell+sim_jet_depth)
            !solnData(DFUN_VAR,i,j,k) = ycell+sim_jet_depth
 
            !dfun_rect = -min(R_init-sqrt((xcell-0.0)**2+(zcell-0.0)**2),ycell+0.0)
            !solnData(DFUN_VAR,i,j,k)  = min(dfun_rect,ycell+sim_jet_depth)
 
-           if(ycell .gt. -sim_jet_depth .and. &
+           if(ycell .lt. sim_jet_depth .and. &
            0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .lt. 0.0) &
-           faceyData(VELC_FACE_VAR,i,j+1,k) = -1.0
+           faceyData(VELC_FACE_VAR,i,j+1,k) = 1.0
 
         enddo
      enddo
@@ -186,7 +201,6 @@ subroutine Simulation_initBlock(blockId)
   solnData(PFUN_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
-  !faceyData(VELC_FACE_VAR,:,:,:) = 0.0
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
 
@@ -197,11 +211,23 @@ subroutine Simulation_initBlock(blockId)
   facexData(RH2F_FACE_VAR,:,:,:) = 0.0
   faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
 
+#if NDIM == 3
+  facezData(VELC_FACE_VAR,:,:,:) = 0.0
+  facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+  facezData(SIGM_FACE_VAR,:,:,:) = 0.0
+  facezData(RH1F_FACE_VAR,:,:,:) = 0.0
+  facezData(RH2F_FACE_VAR,:,:,:) = 0.0
+#endif
+
   ! Release pointer
   call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   call Grid_releaseBlkPtr(blockID,facexData,FACEX)
   call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+#if NDIM == 3
+  call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+#endif
 
   return
 

@@ -126,6 +126,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
+  use Simulation_data, only: sim_xMax, sim_xMin, sim_zMax, sim_zMin
   !use ImBound_data, ONLY: ib_temp_flg, ib_vel_flg, ib_dfun_flg
  
   implicit none
@@ -369,8 +370,17 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   ! For OUTFLOW_INS condition compute convective velocity
   call ins_convectVelout( blockCount, blockList, ins_convvel)
-  if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)  
 
+!#if NDIM == 2
+!  ins_convvel(HIGH,JAXIS) = 0.5/(sim_xMax-sim_xMin)
+!#endif
+!
+!#if NDIM == 3
+!  ins_convvel(HIGH,JAXIS) = 0.00012265625
+!#endif
+
+  if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)
+ 
 !***********************************************************************************************
 !***********************************************************************************************
 !***********************************************************************************************

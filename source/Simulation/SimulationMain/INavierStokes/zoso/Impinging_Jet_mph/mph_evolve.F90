@@ -4,7 +4,6 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
 
-!#define NUCLEATE_BOILING
 #include "Flash.h"
 
   ! Modules Use:
@@ -29,9 +28,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls,mph_meshMe, &
-                             mph_jet_vel,mph_jet_src,mph_srf_src,mph_prs_src, &
-                             mph_prs_fac,mph_vly_fac,mph_vly_flg,&
-                             mph_vlx_fac
+                             mph_jet_vel,mph_jet_src
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -510,66 +507,6 @@ else if(mph_flag == 0) then
                    blockCount,blockList)
 #endif
 
-  free_surface_local = sim_jet_depth
-  if(dr_nstep > 1) free_surface_local = abs(sim_yMin)
-
-
-  do lb = 1,blockCount
-
-     blockID = blockList(lb)
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     call Grid_getDeltas(blockID,del)
-
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-     k = 1
- 
-     if (dr_nstep > 1) then
-
-        xcell       = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                      real(blkLimits(HIGH,IAXIS) - NGUARD - 1)*del(IAXIS)  +  &
-                      0.5*del(IAXIS)
-
-             
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-
-        ycell       = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                      real(j - NGUARD - 1)*del(JAXIS)  +  &
-                      0.5*del(JAXIS)
-        ycell_plus  = ycell + del(JAXIS) 
-
-        dfun_y      = 0.5*(solnData(DFUN_VAR,blkLimits(LOW,IAXIS),j,k) + &
-                           solnData(DFUN_VAR,blkLimits(LOW,IAXIS)-1,j,k))
-
-        dfun_y_plus = 0.5*(solnData(DFUN_VAR,blkLimits(LOW,IAXIS),j+1,k) + &
-                           solnData(DFUN_VAR,blkLimits(LOW,IAXIS)-1,j+1,k))
-
-        
-        if(dfun_y*dfun_y_plus .le. 0.0 .and. abs(sim_xMax-xcell-0.5*del(IAXIS)) .le. 1E-12) then
-
-           theta         = abs(dfun_y)/(abs(dfun_y)+abs(dfun_y_plus)) 
-           interface_loc = abs(ycell_plus*theta + (1-theta)*ycell)
-
-           free_surface_local = min(free_surface_local, interface_loc)
-
-        end if
-
-     end do
-     end if
-  end do
-
-  ! Collect residuals from other processes
-  call MPI_Allreduce(free_surface_local, sim_free_surface, 1, FLASH_REAL,&
-                      MPI_MIN, MPI_COMM_WORLD, ierr)
-
-  if(mph_meshMe .eq. MASTER_PE) print *,"Free_surface_location:", sim_free_surface
-
   mph_jet_vel(:,:,:) = 0.0
 
   do lb = 1,blockCount
@@ -594,6 +531,9 @@ else if(mph_flag == 0) then
      sim_jet_z = 0.0
  
      do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+#if NDIM == 3
+     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+#endif
 
        xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -601,47 +541,24 @@ else if(mph_flag == 0) then
         
        zcell = 0.0
 
+#if NDIM == 3
+       zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +   &
+               real(k - NGUARD - 1)*del(KAXIS) +   &
+               0.5*del(KAXIS)
+#endif
+   
        if(sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) .le. 0.5) then
-          mph_jet_vel(i-NGUARD,k,blockID) = -1.0
+          mph_jet_vel(i,k,blockID) =  1.0
        else
-          mph_jet_vel(i-NGUARD,k,blockID) =  0.0
+          mph_jet_vel(i,k,blockID) =  0.0
        end if
+       mph_jet_src(i,k,blockID)  = sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) - 0.5
 
-       mph_jet_src(i-NGUARD,k,blockID)  = sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) - 0.5
+#if NDIM == 3
+     end do
+#endif
 
      end do
-
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-
-       ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-               real(j - NGUARD - 1)*del(JAXIS)  +  &
-               0.5*del(JAXIS)
-
-       if(ycell .le. (sim_yMin + 0.5)) then
-          mph_vly_fac(j-NGUARD,k,blockID) =  1.0
-          mph_vly_flg(j-NGUARD,k,blockID) =  1.0 
-       else
-          mph_vly_fac(j-NGUARD,k,blockID) =  0.0
-          mph_vly_flg(j-NGUARD,k,blockID) = -1.0
-       end if
-
-     end do
-
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
-
-       ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-               real(j - NGUARD - 1)*del(JAXIS)  +  &
-               0.5*del(JAXIS)
-
-       if(ycell .le. (sim_yMin + 0.5 + del(JAXIS))) then
-         mph_vlx_fac(j-NGUARD,k,blockID) =  1.0
-
-       else
-         mph_vlx_fac(j-NGUARD,k,blockID) = -1.0
-       end if
-
-     end do
- 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do
