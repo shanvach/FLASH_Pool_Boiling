@@ -364,7 +364,7 @@
 
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                    - dt*(fry*vr - fly*vl)/dy !&
-                                   !- 0.1*AA*(so(i,j,k)-ycell-sim_jet_depth)
+                                   - 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
 
            end do
         end do
