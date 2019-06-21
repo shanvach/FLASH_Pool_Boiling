@@ -73,6 +73,8 @@
         ydM = -1.0*ins_yDampL
         zdP = ins_zDampL
         zdM = -1.0*ins_zDampL
+        xd = 15.0
+
 
         !if (gr_meshMe .eq. 0 .AND. dr_nstep .eq. 1) then
         !   print*,"Xdamp",xdM,xdP
@@ -142,7 +144,13 @@
                  AAz = ((zcell-zdM)/(sim_zMin-zdM))**2.0
               end if
 
-              AA = MAX(AAx,AAy,AAz)
+              !AA = MAX(AAx,AAy,AAz)
+
+              AA = 0.0
+
+              if(sqrt(xcell**2+zcell**2) .gt. xd) then
+                 AA = ((sqrt(xcell**2+zcell**2)-xd)/(sim_xMax-xd))**2.0
+              end if
 
               !***************************************************************
               !***************************************************************
@@ -600,7 +608,7 @@
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
                                       - dt*(frz*wr - flz*wl)/dz &
-                                      !- 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
+                                      - 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
               !end if
               !---------------------------------------------------------------
               !---------------------------------------------------------------

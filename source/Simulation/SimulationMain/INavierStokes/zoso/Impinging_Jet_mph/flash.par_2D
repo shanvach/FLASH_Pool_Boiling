@@ -71,6 +71,7 @@ log_file	= "INS_INOUT.log"
 basenm		= "INS_INOUT_"
 
 restart         = .false.
+#checkPointFileNumber=1
 
 nend = 100000000
 #nend = 3

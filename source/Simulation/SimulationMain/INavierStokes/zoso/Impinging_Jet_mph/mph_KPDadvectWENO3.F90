@@ -56,7 +56,7 @@
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         !xd  = ins_xDampR
-        xd = 10.0
+        xd = 15.0
 
 
         call Grid_getDeltas(blockID,del)
@@ -91,9 +91,9 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-              if (xcell .gt. xd) then
+              if (abs(xcell) .gt. xd) then
                  !- kpd - LS non-reflective damping term for boundaries 
-                 AA = ((xcell-xd)/(sim_xMax-xd))**2.0
+                 AA = ((abs(xcell)-xd)/(sim_xMax-xd))**2.0
               end if
               !if (xcell .lt. ins_xDampR) then
               !   AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
@@ -363,7 +363,7 @@
               !---------------------------------------------------------
 
               s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                   - dt*(fry*vr - fly*vl)/dy !&
+                                   - dt*(fry*vr - fly*vl)/dy &
                                    - 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
 
            end do
