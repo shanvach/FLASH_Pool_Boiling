@@ -945,7 +945,8 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               else ! BOUNDARY CONDITIONS ON VELOCITIES - ONLY for 2nd ORDER STAGGERED GRIDS !
 
               alfadt = ins_alfa*dr_dt        
-       
+              k = 2*guard+1      
+ 
               ! Get blocks dx, dy ,dz:
               call Grid_getDeltas(blockHandle,del)              
 
@@ -971,7 +972,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
 
                  else
                  k = k+1
-                 do i = 1,guard
+                 do i = 1,guard+1
                     regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
                  end do
 
@@ -1063,11 +1064,21 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               if (ins_predcorrflg) then
               if (isFace) then 
                  if(ivar == VELC_FACE_VAR) then ! V velocities on Y face grid
-             
-                   regionData(guard+1,1:je,1:ke,ivar) = vvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) -&
+            
+                 k = k+1
+                 do i = 1,guard+1
+                   regionData(k-i,1:je,1:ke,ivar) = vvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) -&
                     (ins_convvel(HIGH,axis)*alfadt/del(axis))* &
                     (vvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle) - &
                      vvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle))
+
+                 end do
+
+                 else
+                 k = k+1
+                 do i = 1,guard+1
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
 
                  endif
 
@@ -1079,7 +1090,14 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                         (uvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
                          uvel_y(guard-1,ia:ib,ka:kb,HIGH,blockHandle))
 
-                   regionData(guard+1,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                 do i = 1,guard
+                   regionData(k-i,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                 end do
+
+                 else
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
 
                  endif
 
@@ -1092,8 +1110,14 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                         (wvel_y(guard,ia:ib,ka:kb,HIGH,blockHandle) - &
                          wvel_y(guard-1,ia:ib,ka:kb,HIGH,blockHandle))
 
-                   regionData(guard+1,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                   do i = 1,guard
+                   regionData(k-i,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                   end do
 
+                 else
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
 
                  endif
 #endif
@@ -1103,25 +1127,50 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               else !ins_predcorrflg
 
               if (isFace) then 
-!!$                 if(ivar == VELC_FACE_VAR) then ! V velocities on Y face grid
-!!$                 endif
+                 if(ivar == VELC_FACE_VAR) then ! V velocities on Y face grid
+                 k = k+1
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+                 end do
+                 else
+                 k = k+1
+                 do i = 1,guard+1
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+                 endif
               elseif(ins_outflowgridChanged) then ! Estrapolate linearly U or W from the interior when grid changes.
-                 regionData(guard+1,1:je,1:ke,ivar) = 2.*regionData(guard,1:je,1:ke,ivar) - &
-                                                         regionData(guard-1,1:je,1:ke,ivar)
+                 do i=1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = 2.*regionData(guard,1:je,1:ke,ivar) - &
+                                                     regionData(guard-1,1:je,1:ke,ivar)
+                 end do
 
               elseif(gridDataStruct .eq. FACEX) then ! U velocities on Y direction             
                  if(ivar == VELC_FACE_VAR) then                               
+                  
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                 end do
 
-                    regionData(guard+1,1:je,1:ke,ivar) =  uvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
-
+                 else
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+ 
                  endif 
 
 #if NDIM == 3
               elseif(gridDataStruct .eq. FACEZ) then ! W velocities on Y direction 
                  if(ivar == VELC_FACE_VAR) then
 
-                    regionData(guard+1,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar) =  wvel_y(guard+1,ia:ib,ka:kb,HIGH,blockHandle)
+                 end do
 
+                 else
+                 do i = 1,guard
+                    regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+                 end do
+ 
                  endif
 #endif
               endif

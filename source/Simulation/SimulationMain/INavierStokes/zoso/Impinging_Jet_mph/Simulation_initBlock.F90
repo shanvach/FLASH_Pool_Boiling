@@ -145,14 +145,15 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
+           R_init = 0.2 + 0.3*(-ycell+sim_jet_depth)/sim_jet_depth
+
 #if NDIM == 3
            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
-#endif        
 
-           !R_init = 0.2 + 0.3*(-ycell+sim_jet_depth)/sim_jet_depth
            R_init = 0.5
+#endif        
 
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,-ycell+sim_jet_depth)
            !solnData(DFUN_VAR,i,j,k) = ycell+sim_jet_depth

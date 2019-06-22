@@ -27,9 +27,9 @@
 !!
 !!
 !!***
-!#define  SPECIAL_REFINEMENT_1
-!#define SPECIAL_REFINEMENT_2
-#define SPECIAL_THRESHOLD_KPD
+!#define SPECIAL_REFINEMENT_1
+#define SPECIAL_REFINEMENT_2
+!#define SPECIAL_THRESHOLD_KPD
 
 subroutine Grid_markRefineDerefine()
 
@@ -93,8 +93,8 @@ subroutine Grid_markRefineDerefine()
   !specs(2) = -0.5d0
   !specs(3) =  0.0d0
 
-  specs(2) = -0.1d0
-  specs(3) =  0.1d0
+  specs(2) = -0.01d0
+  specs(3) =  0.01d0
 
   !! Bring all qualifying blocks to this level of refinement
   !lref = lrefine_max - 1
@@ -143,18 +143,18 @@ subroutine Grid_markRefineDerefine()
   !! define a range of coordinates of the rectangle in x-directioni
 !  specs(1) =  -1.5  ! sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
 !  specs(2) =   1.5  !sim_xMax -.005
-  specs(1) =   0.0  ! sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
-  specs(2) =   0.5  !sim_xMax -.005
+  specs(1) =   sim_xMin !0.0  ! sim_xMin + 0./4.*(sim_xMax - sim_xMin) +.005
+  specs(2) =   sim_xMax !0.5  !sim_xMax -.005
 
   !! define a range of coordinates of the rectangle in y-direction
 !  specs(3) =  -2.5  !sim_yMin + 2./4.*(sim_yMax - sim_yMin) +.005
 !  specs(4) =  0.0  !sim_yMin + 4./4.*(sim_yMax - sim_yMin) -.005
-  specs(3) =  -0.1  !sim_yMin + 2./4.*(sim_yMax - sim_yMin) +.005
-  specs(4) =  0.1  !sim_yMin + 4./4.*(sim_yMax - sim_yMin) -.005
+  specs(3) =  sim_yMin !-0.1  !sim_yMin + 2./4.*(sim_yMax - sim_yMin) +.005
+  specs(4) =  sim_yMax ! 0.1  !sim_yMin + 4./4.*(sim_yMax - sim_yMin) -.005
 
   !! define a range of coordinates of the rectangle in z-direction
-  specs(5) =  0. !sim_zMin + 1./4.*(sim_zMax - sim_zMin) +.05
-  specs(6) =  0. !sim_zMin + 3./4.*(sim_zMax - sim_zMin) -.05
+  specs(5) =  sim_zMin !0. !sim_zMin + 1./4.*(sim_zMax - sim_zMin) +.05
+  specs(6) =  sim_zMax !0. !sim_zMin + 3./4.*(sim_zMax - sim_zMin) -.05
   !! End of coordinate information -------------------------------
 
   !! Decide wheather or not we refine only blocks completely 
