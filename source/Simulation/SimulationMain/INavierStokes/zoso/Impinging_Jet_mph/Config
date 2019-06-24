@@ -25,6 +25,8 @@ USESETUPVARS Grid
 # Tecplot routines:
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
+DATAFILES flash.par_2D flash.par_3D outtotecplot.F90_2D outtotecplot.F90_3D
+
 VARIABLE aaJunk  # kpd  for IfactorB
 
 VARIABLE preo    # Shizhao for fsi

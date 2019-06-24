@@ -37,24 +37,24 @@ inls = 2
 lsit = 2
 
 # Bodies
-sm_NumBodies   =  1
-gr_sbNumBodies =  1
+#sm_NumBodies   =  1
+#gr_sbNumBodies =  1
 
 # # SolidMechanics
-sm_solidinteg = 2
-pcepsilon= 1.e-7
+#sm_solidinteg = 2
+#pcepsilon= 1.e-7
 
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
 #       Size of computational volume
-xmin =     0.0
-xmax =    20.0
+xmin =   -30.0
+xmax =    30.0
 ymin =     0.0
-ymax =    80.0
+ymax =    60.0
 
 #       Boundary conditions
-xl_boundary_type = "slip_ins"
+xl_boundary_type = "noslip_ins"
 xr_boundary_type = "noslip_ins"
 yl_boundary_type = "inflow_ins"
 yr_boundary_type = "outflow_ins"
@@ -97,15 +97,15 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 30.0
+checkpointFileIntervalTime = 2.5
 #checkpointFileIntervalStep = 100000
 
 plotFileIntervalTime = 2.5
 #plotFileIntervalStep = 1
 
 ##	AMR parameters
-nblockx	= 5
-nblocky	= 20
+nblockx	= 10
+nblocky	= 10
 
 lrefine_min	= 1
 lrefine_max     = 1

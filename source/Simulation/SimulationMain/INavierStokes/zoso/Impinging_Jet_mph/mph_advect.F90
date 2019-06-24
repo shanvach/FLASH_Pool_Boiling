@@ -78,7 +78,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: n_avg
   !kpd
   real :: lsDT,lsT,minCellDiag
-  real :: volSum,volSumAll
+  real :: volSum,volSumAll,volSum_liq,volSumAll_liq
 
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
@@ -110,6 +110,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     volSum = 0.0
     volSumAll = 0.0
+
+    volSum_liq = 0.0
+    volSumAll_liq = 0.0
 
   do ii=1,1
 
@@ -167,6 +170,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
               do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
                  if (solnData(DFUN_VAR,i,j,k) .gt. 0) then
                    volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
+                 else
+                   volSum_liq = volSum_liq + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
                  end if
               end do
            end do
@@ -203,6 +208,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
               if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
                 volSum = volSum + (del(DIR_X) * del(DIR_Y))
+              else
+                volSum_liq = volSum_liq + (del(DIR_X) * del(DIR_Y))
               end if
            end do
         end do
@@ -222,9 +229,17 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if(ii == 1) then
     call MPI_Allreduce(volSum, volSumAll, 1, FLASH_REAL,&
                        MPI_SUM, MPI_COMM_WORLD, ierr)
+    call MPI_Allreduce(volSum_liq, volSumAll_liq, 1, FLASH_REAL,&
+                       MPI_SUM, MPI_COMM_WORLD, ierr)
+
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
-    if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
+    if (mph_meshMe .eq. 0) print*,"Total Air Volume: ",volSumAll
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
+
+    if (mph_meshMe .eq. 0) print*,"----------------------------------------"
+    if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll_liq
+    if (mph_meshMe .eq. 0) print*,"----------------------------------------"
+
     endif
 
 #if NDIM == 3

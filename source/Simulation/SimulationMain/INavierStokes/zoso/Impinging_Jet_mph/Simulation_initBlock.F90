@@ -146,6 +146,7 @@ subroutine Simulation_initBlock(blockId)
            zcell = 0.0
 
            R_init = 0.2 + 0.3*(-ycell+sim_jet_depth)/sim_jet_depth
+           !R_init = 0.5
 
 #if NDIM == 3
            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &

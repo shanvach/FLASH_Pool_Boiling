@@ -56,7 +56,7 @@
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
         !xd  = ins_xDampR
-        xd = 10.0
+        xd = 20.0
 
 
         call Grid_getDeltas(blockID,del)
