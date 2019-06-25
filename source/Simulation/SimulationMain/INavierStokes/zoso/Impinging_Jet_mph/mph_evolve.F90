@@ -530,9 +530,9 @@ else if(mph_flag == 0) then
 
      sim_jet_z = 0.0
  
-     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+     do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
 #if NDIM == 3
-     do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+     do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)
 #endif
 
        xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
