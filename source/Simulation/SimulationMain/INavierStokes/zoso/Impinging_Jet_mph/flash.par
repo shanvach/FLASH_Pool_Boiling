@@ -54,8 +54,8 @@ ymin =     0.0
 ymax =    60.0
 
 #       Boundary conditions
-xl_boundary_type = "noslip_ins"
-xr_boundary_type = "noslip_ins"
+xl_boundary_type = "slip_ins"
+xr_boundary_type = "slip_ins"
 yl_boundary_type = "inflow_ins"
 yr_boundary_type = "outflow_ins"
 
