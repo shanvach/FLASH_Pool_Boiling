@@ -552,7 +552,7 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  k = 2*guard+1   
                  if(ivar == VELC_FACE_VAR) then                               
                  do i = 1,guard
-                 regionData(i,1:je,1:ke,ivar)= -regionData(k-i,1:je,1:ke,ivar)
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
                  end do
                  else
                  k = 2*guard+2
@@ -690,7 +690,12 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               k = 2*guard+1 
               do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
-              end do                          
+              end do
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+              end do      
               end select
 
 
@@ -699,8 +704,9 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               k = 2*guard+1
               if(isFace) then
               ! First order down-wind for collocated var in the face:
+              k = k+1
               do i =1,guard
-                 regionData(guard+1+i,1:je,1:ke,ivar)= regionData(guard+i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
               enddo
               else
               do i = 1,guard
