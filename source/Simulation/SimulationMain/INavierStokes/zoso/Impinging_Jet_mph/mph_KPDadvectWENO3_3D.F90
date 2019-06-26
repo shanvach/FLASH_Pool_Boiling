@@ -607,8 +607,8 @@
               !else
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz !&
-                                      !- 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
+                                      - dt*(frz*wr - flz*wl)/dz &
+                                      - 0.1*AA*(so(i,j,k)+ycell-sim_jet_depth)
               !end if
               !---------------------------------------------------------------
               !---------------------------------------------------------------
