@@ -28,7 +28,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls,mph_meshMe, &
-                             mph_jet_vel,mph_jet_src
+                             mph_jet_vel,mph_jet_src,mph_jet_tstamp,mph_jet_twait, &
+                             mph_jet_period,mph_dist_flag,mph_vel_scalar
 
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
@@ -37,7 +38,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
-  use Driver_data, ONLY : dr_nstep
+  use Driver_data, ONLY : dr_nstep, dr_simTime
 
   use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
 
@@ -507,6 +508,27 @@ else if(mph_flag == 0) then
                    blockCount,blockList)
 #endif
 
+
+  if(mph_dist_flag .and. dr_simTime .lt. (mph_jet_tstamp + mph_jet_period)) then
+ 
+    mph_vel_scalar = 1.0 !+ 2.5*abs(sin((dr_simTime - mph_jet_tstamp)*3.14/mph_jet_period))
+
+  else
+   
+    if(mph_dist_flag) mph_jet_tstamp = dr_simTime
+
+    mph_dist_flag = .false.
+    mph_vel_scalar = 1.0
+
+    if(dr_simTime .gt. (mph_jet_tstamp + mph_jet_twait)) then
+        mph_dist_flag = .true.
+        mph_jet_tstamp = dr_simTime
+    end if
+    
+  end if
+
+  if(mph_meshMe .eq. MASTER_PE) print *,"Jet Velocity:", dr_simTime,  mph_vel_scalar
+
   mph_jet_vel(:,:,:) = 0.0
 
   do lb = 1,blockCount
@@ -548,7 +570,7 @@ else if(mph_flag == 0) then
 #endif
    
        if(sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) .le. 0.5) then
-          mph_jet_vel(i,k,blockID) =  1.0
+          mph_jet_vel(i,k,blockID) =  mph_vel_scalar
        else
           mph_jet_vel(i,k,blockID) =  0.0
        end if

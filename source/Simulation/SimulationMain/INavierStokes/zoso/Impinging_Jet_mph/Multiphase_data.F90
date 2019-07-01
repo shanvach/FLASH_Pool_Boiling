@@ -45,4 +45,7 @@ module Multiphase_data
   real, save :: mph_jet_vel(NXB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
   real, save :: mph_jet_src(NXB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
 
+  real, save :: mph_jet_tstamp, mph_jet_twait, mph_jet_period, mph_vel_scalar
+  logical, save :: mph_dist_flag
+
 end module Multiphase_data
