@@ -6,7 +6,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
 !#define NUCLEATE_BOILING
 #include "Flash.h"
-
+#include "ImBound.h"
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
   use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -40,6 +40,12 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   use Driver_data, ONLY : dr_nstep
 
   use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
+
+  use ImBound_interface, ONLY : ImBound
+
+  use ImBound_data, ONLY: ib_vel_flg, ib_dfun_flg
+
+  use IncompNS_data, ONLY : ins_alfa
 
   implicit none
 
@@ -323,6 +329,12 @@ if(mph_flag == 1) then
      !-----------------------------------------------
 
     enddo
+
+  if(dr_nstep > 1) then
+  ib_vel_flg  = .false.
+  ib_dfun_flg = .true.
+  call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+  end if
 
   !--------------------------------------------------------------------------
   !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.

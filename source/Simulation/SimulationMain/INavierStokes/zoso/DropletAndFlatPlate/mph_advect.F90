@@ -2,7 +2,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #define NUCLEATE_BOILING
 #include "Flash.h"
-#include "ImBound.h"
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -39,12 +38,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
-
-  use IncompNS_data,     ONLY: ins_alfa
-
-  use ImBound_interface, ONLY : ImBound
-
-  use ImBound_data, ONLY: ib_vel_flg, ib_dfun_flg
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -290,10 +283,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
    call cpu_time(t_startMP2a)
-
-   ib_vel_flg  = .false.
-   ib_dfun_flg = .true.
-   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
    do ii = 1,mph_lsit
 

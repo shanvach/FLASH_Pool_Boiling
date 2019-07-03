@@ -328,11 +328,11 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
               del,coord,bsize,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),     &
               ib_dfun,FORCE_FLOW,blockID,CENTER_IND)
 
-        if(abs(ib_dfun) .le. 0.5*del(IAXIS)) then
-           ib_Fdfun  = invdt*(part_dfun - ib_dfun)
-        else
-           ib_Fdfun = 0.0
-        end if
+        !if(abs(ib_dfun) .le. 0.5*del(IAXIS)) then
+           ib_Fdfun  = invdt*(0.0 - ib_dfun)
+        !else
+        !   ib_Fdfun = 0.0
+        !end if
 
         particleData(FTP_PART_PROP)  = particleData(FTP_PART_PROP) + ib_Fdfun
         particleData(DIFP_PART_PROP) = ib_dfun
