@@ -270,7 +270,7 @@
                             solnData(DFUN_VAR,:,:,1),tpdfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(PFUN_VAR,:,:,1),tppfun)
+                            solnData(NMRX_VAR,:,:,1),tppfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(SIGP_VAR,:,:,1),tsigp)
@@ -293,7 +293,7 @@
      ! Viscosity: visc(nxb+1,nyb+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(VISC_VAR,:,:,1),tpvisc)
+                            solnData(NMRY_VAR,:,:,1),tpvisc)
 
      ! Viscosity: visc(nxb+1,nyb+1)
      ! -------------------------------
@@ -308,7 +308,7 @@
              (facevaryy(NGUARD:nxc,NGUARD+1:nyc+1) - &
               facevaryy(NGUARD:nxc,NGUARD:nyc))/dy
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                             solnData(DUST_VAR,:,:,1),divpp)
+                             solnData(LMDA_VAR,:,:,1),divpp)
 
 
             ! Velocity derivatives:

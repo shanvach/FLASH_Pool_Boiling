@@ -2,7 +2,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #define NUCLEATE_BOILING
 #include "Flash.h"
-
+#include "ImBound.h"
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
   use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -38,6 +38,14 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
+
+  use mph_interface, only: mph_imbound
+
+  use ImBound_interface, ONLY : ImBound
+
+  use ImBound_data, ONLY: ib_vel_flg, ib_dfun_flg
+
+  use IncompNS_data, ONLY : ins_alfa
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -196,7 +204,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              if (solnData(DFUN_VAR,i,j,1) .lt. 0) then
+              if (solnData(DFUN_VAR,i,j,1) .lt. 0 .and. solnData(LMDA_VAR,i,j,1) .lt. 0.) then
                 volSum = volSum + (del(DIR_X) * del(DIR_Y))
               end if
            end do
@@ -281,6 +289,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+   call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call cpu_time(t_startMP2a)
 
@@ -401,6 +411,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
    end do  ! End do: ii=1,lsit
 
    call cpu_time(t_stopMP2)
+
    if (mph_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a
 
    !print*,"Multiphase 2 Solver Time  ",t_stopMP2-t_startMP2

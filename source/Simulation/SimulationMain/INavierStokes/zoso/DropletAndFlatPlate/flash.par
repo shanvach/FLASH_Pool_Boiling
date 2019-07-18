@@ -30,7 +30,7 @@ gravY = -1.0
 gravZ =  0.0
 
 # sten is the inverse of the Weber number
-sten = 1.0
+sten = 0.2
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -73,8 +73,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 1.0d-4
-dtinit          = 1.0d-4
+dtspec          = 0.4d-4
+dtinit          = 0.4d-4
 tstep_change_factor=1.00
 
 
@@ -95,11 +95,11 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalStep = 100000
 
 #plotFileIntervalTime = 0.01
-plotFileIntervalStep = 200
+plotFileIntervalStep = 500
 
 ##	AMR parameters
-nblockx	= 8
-nblocky	= 6
+nblockx	= 8 #12 #16
+nblocky	= 6 #9  #12
 
 lrefine_min	= 1
 lrefine_max     = 1

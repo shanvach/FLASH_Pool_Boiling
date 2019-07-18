@@ -11,7 +11,7 @@ pt_maxPerProc=3500
 # Inverse of Reynolds Number
 invRe = 0.005
 
-iConvU = 0
+iConvU = 1
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
@@ -30,7 +30,7 @@ gravY = -1.0
 gravZ =  0.0
 
 # sten is the inverse of the Weber number
-sten = 1.0
+sten = 0.2
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -42,8 +42,8 @@ geometry	= "cartesian"
 #       Size of computational volume
 xmin =   -4.0
 xmax =    4.0
-ymin =  -25.0
-ymax =    1.0
+ymin =   -3.0
+ymax =    2.0
 
 #       Boundary conditions
 xl_boundary_type = "noslip_ins"
@@ -69,8 +69,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 1.0d-4
-dtinit          = 1.0d-4
+dtspec          = 0.4d-4
+dtinit          = 0.4d-4
 tstep_change_factor=1.00
 
 
@@ -91,11 +91,11 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalStep = 100000
 
 #plotFileIntervalTime = 0.01
-plotFileIntervalStep = 200
+plotFileIntervalStep = 500
 
 ##	AMR parameters
-nblockx	= 4
-nblocky	= 13
+nblockx	= 8 #16
+nblocky	= 5 #10
 
 lrefine_min	= 1
 lrefine_max     = 1

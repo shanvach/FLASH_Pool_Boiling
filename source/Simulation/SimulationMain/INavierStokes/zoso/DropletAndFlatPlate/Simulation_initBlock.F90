@@ -115,6 +115,12 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
+
+  xl = -3.0
+  xr =  3.0
+  yl = -3.25
+  yr = -3.0
+
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
      do j=1,blkLimitsGC(HIGH,JAXIS)
@@ -130,12 +136,34 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           !solnData(DFUN_VAR,i,j,k) = min(sqrt(xcell**2+ycell**2+zcell**2)-0.5,ycell+23.0)
+           dxl = xcell - xl
+           dxr = xr - xcell
+           dyl = ycell - yl
+           dyr = yr - ycell
+
            solnData(DFUN_VAR,i,j,k) = sqrt(xcell**2+ycell**2+zcell**2)-0.5
+
+           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr)
 
         enddo
      enddo
   enddo
+
+  k = 1
+  do j=2,blkLimitsGC(HIGH,JAXIS)-1
+   do i=2,blkLimitsGC(HIGH,IAXIS)-1
+
+           solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+
+     end do
+   end do
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

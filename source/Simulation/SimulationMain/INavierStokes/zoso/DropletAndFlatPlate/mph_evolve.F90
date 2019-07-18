@@ -6,7 +6,6 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
 !#define NUCLEATE_BOILING
 #include "Flash.h"
-#include "ImBound.h"
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
   use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -40,12 +39,6 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   use Driver_data, ONLY : dr_nstep
 
   use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
-
-  use ImBound_interface, ONLY : ImBound
-
-  use ImBound_data, ONLY: ib_vel_flg, ib_dfun_flg
-
-  use IncompNS_data, ONLY : ins_alfa
 
   implicit none
 
@@ -330,12 +323,6 @@ if(mph_flag == 1) then
 
     enddo
 
-  if(dr_nstep > 1) then
-  ib_vel_flg  = .false.
-  ib_dfun_flg = .true.
-  call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-  end if
-
   !--------------------------------------------------------------------------
   !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.
   ! -------------------------------------------------------------------------
@@ -366,6 +353,44 @@ if(mph_flag == 1) then
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
        !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+    
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+     ! Get block's dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get block's internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+
+     ! Point to block's center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+     k = 1
+     do j=2,blkLimitsGC(HIGH,JAXIS)-1
+     do i=2,blkLimitsGC(HIGH,IAXIS)-1
+
+           solnData(NMRX_VAR,i,j,k) = ((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+           solnData(NMRY_VAR,i,j,k) = ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+
+     end do
+     end do
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+  end do
 
 !***********************************************************************************************
 !***********************************************************************************************
@@ -399,6 +424,7 @@ else if(mph_flag == 0) then
      !- kpd - Call 2-D curvature Routine:
      !----------------------------------------------------------
      call mph_KPDcurvature2DC(solnData(DFUN_VAR,:,:,:), &
+                          solnData(LMDA_VAR,:,:,:),&
                           solnData(CURV_VAR,:,:,:), &
                           facexData(RH1F_FACE_VAR,:,:,:), &
                           facexData(RH2F_FACE_VAR,:,:,:), &

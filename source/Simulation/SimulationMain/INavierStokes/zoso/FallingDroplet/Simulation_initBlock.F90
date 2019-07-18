@@ -130,7 +130,7 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           solnData(DFUN_VAR,i,j,k) = min(sqrt(xcell**2+ycell**2+zcell**2)-0.5,ycell+23.0)
+           solnData(DFUN_VAR,i,j,k) = (sqrt(xcell**2+ycell**2+zcell**2)-0.5)!,ycell+23.0)
 
         enddo
      enddo
