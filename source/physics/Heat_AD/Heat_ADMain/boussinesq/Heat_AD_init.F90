@@ -2,59 +2,45 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use Heat_AD_data
 
-   use Grid_interface, only: Grid_getBlkPtr,         &
-                             Grid_releaseBlkPtr,     &
-                             Grid_getBlkCenterCoords,&
-                             Grid_getBlkIndexLimits
-
    use IncompNS_data, only: ins_Ra, ins_Pr, ins_isCoupled
 
-   use RuntimeParameters_interface, only: RuntimeParameters_get
-
+   use RuntimeParameters_interface, only: RuntimeParameters_get, &
+                                          RuntimeParameters_mapStrToInt
    implicit none
 
 #include "constants.h"
 #include "Flash.h"
 
-   integer, INTENT(INOUT) :: blockCount
-   integer, INTENT(INOUT) :: blockList(MAXBLOCKS)
+   character(len=MAX_STRING_LENGTH) :: Txl_bcString, Txr_bcString
+   character(len=MAX_STRING_LENGTH) :: Tyl_bcString, Tyr_bcString
+   character(len=MAX_STRING_LENGTH) :: Tzl_bcString, Tzr_bcString
 
-   integer ::  blockID,lb
-   integer, dimension(2,MDIM) :: blkLimits,blkLimitsGC 
-   real, pointer, dimension(:,:,:,:) :: solnData
-   real, dimension(MDIM) :: coord
+   ! Get the boundary conditions stored as strings 
+   ! in the flash.par file
+   call RuntimeParameters_get('Txl_boundary_type', Txl_bcString)
+   call RuntimeParameters_get('Txr_boundary_type', Txr_bcString)
+   call RuntimeParameters_get('Tyl_boundary_type', Tyl_bcString)
+   call RuntimeParameters_get('Tyr_boundary_type', Tyr_bcString)
+   call RuntimeParameters_get('Tzl_boundary_type', Tzl_bcString)
+   call RuntimeParameters_get('Tzr_boundary_type', Tzr_bcString)
 
-   call RuntimeParameters_get('Twall_high', ht_Twall_high)
-   call RuntimeParameters_get('Twall_low', ht_Twall_low)
+   ! Map the string boundary conditions to integer constants defined
+   ! in the constants.h
+   call RuntimeParameters_mapStrToInt(Txl_bcString, ht_Txl_type)
+   call RuntimeParameters_mapStrToInt(Txr_bcString, ht_Txr_type)
+   call RuntimeParameters_mapStrToInt(Tyl_bcString, ht_Tyl_type)
+   call RuntimeParameters_mapStrToInt(Tyr_bcString, ht_Tyr_type)
+   call RuntimeParameters_mapStrToInt(Tzl_bcString, ht_Tzl_type)
+   call RuntimeParameters_mapStrToInt(Tzr_bcString, ht_Tzr_type)
+
+   ! Get the boundary condition values stored in the flash.par file
+   call RuntimeParameters_get('Txl_boundary_value', ht_Txl_value)
+   call RuntimeParameters_get('Txr_boundary_value', ht_Txr_value)
+   call RuntimeParameters_get('Tyl_boundary_value', ht_Tyl_value)
+   call RuntimeParameters_get('Tyr_boundary_value', ht_Tyr_value)
+   call RuntimeParameters_get('Tzl_boundary_value', ht_Tzl_value)
+   call RuntimeParameters_get('Tzr_boundary_value', ht_Tzr_value)
 
    ht_invsqrtRaPr = 1. / (ins_Ra * ins_Pr)**0.5
-
-!   do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     call Grid_getBlkCenterCoords(blockID,coord)     
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-!
-!#if NDIM == 3
-!
-!     solnData(TEMP_VAR, blkLimitsGC(LOW,IAXIS)   :blkLimitsGC(HIGH,IAXIS),&
-!                        blkLimitsGC(LOW,JAXIS)   :blkLimitsGC(HIGH,JAXIS),&
-!                        blkLimitsGC(LOW,KAXIS)   :blkLimitsGC(HIGH,KAXIS))   = 1.0
-!
-!     solnData(TEMP_VAR, blkLimitsGC(LOW,IAXIS)   :blkLimitsGC(HIGH,IAXIS),&
-!                        blkLimitsGC(LOW,JAXIS)   :blkLimitsGC(HIGH,JAXIS),&
-!                        blkLimitsGC(HIGH,KAXIS)/2:blkLimitsGC(HIGH,KAXIS)  ) = 0.0
-!#elif NDIM == 2
-!     IF (coord(JAXIS) <= 0.5) THEN
-!         solnData(TEMP_VAR,:,:,:) = 1.0
-!     ELSE
-!        solnData(TEMP_VAR,:,:,:) = 0.0
-!     END IF
-!#endif
-!
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!
-!   end do
 
 end subroutine Heat_AD_init
