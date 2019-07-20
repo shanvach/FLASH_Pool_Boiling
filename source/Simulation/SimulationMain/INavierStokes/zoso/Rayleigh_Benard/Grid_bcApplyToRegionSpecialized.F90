@@ -188,6 +188,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
 #include "constants.h"
 #include "Flash.h"
+#include "Heat_AD.h"
 
   use Driver_interface, ONLY : Driver_abortFlash
 
@@ -199,18 +200,9 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                              Grid_getBlkPtr,         &
                              Grid_releaseBlkPtr
 
-
   use Driver_data, ONLY : dr_simTime, dr_dt
 
   use Heat_AD_data
-
-#ifdef FLASH_GRID_PARAMESH
-  use tree , only : lrefine
-#endif
-
-#include "Heat_AD.h"
-#include "constants.h"
-#include "Flash.h"
 
   implicit none
 
@@ -229,7 +221,6 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   integer :: i,j, k,ivar,je,ke,n,varCount,bcTypeActual
   logical :: isFace
-  integer    :: sign
 
   integer :: ia,ib,ja,jb,ka,kb
 
@@ -237,12 +228,6 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   real ::  boundBox(2,MDIM)
 
   real :: xcell,xedge,ycell,yedge,alfadt
-
-  real, save :: TLEVEL
-
-  integer :: countj,counter
-
-  ! Following implementations are written by Akash
 
   je=regionSize(SECOND_DIR)
   ke=regionSize(THIRD_DIR)
@@ -253,131 +238,153 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
   isFace = isFace.or.((gridDataStruct==FACEZ).and.(axis==KAXIS))
 
   applied = .false.
-  !return
-
-  call Grid_getDeltas(blockHandle,del)
 
   call Grid_getBlkBoundBox(blockHandle,boundBox)
   bsize(:) = boundBox(2,:) - boundBox(1,:)
-
   call Grid_getBlkCenterCoords(blockHandle,coord)
+  call Grid_getDeltas(blockHandle,del)
 
+  do ivar = 1, varCount 
+    if (mask(ivar)) then
+      call gr_bcMapBcType(bcTypeActual,bcType,ivar,gridDataStruct,axis,face,idest) 
+       
+      if (face == LOW) then 
 
-  !if(gridDataStruct == CENTER) print *,mask
+        if (axis == IAXIS) then 
+          if (ivar == TEMP_VAR) then
+            select case (ht_Txl_type)
 
-  counter = 1
+            case (DIRICHLET_HT)
+              k = 2*guard+1
+              do i = 1,guard
+                regionData(i,1:je,1:ke,ivar) = 2*ht_Txl_value - regionData(k-i,1:je,1:ke,ivar)
+              end do
+              applied = .true. 
+          
+            case (NEUMANN_HT)
+              k = 2*guard+1
+              do i = 1,guard
+                regionData(i,1:je,1:ke,ivar) = del(IAXIS)*ht_Txl_value + region(k-1,1:je,1:ke,ivar)
+              end do
+              applied = .true.
 
-  do ivar = 1,varCount ! Level 1
-   
-     if(mask(ivar)) then ! Level 2
+            end select 
+          end if
+
+        else if (axis == JAXIS) then 
+          if (ivar == TEMP_VAR) then
+            select case (ht_Tyl_type)
+
+            case (DIRICHLET_HT)
+              k = 2*guard+1
+              do i = 1,guard
+                regionData(i,1:je,1:ke,ivar) = 2*ht_Tyl_value - regionData(k-i,1:je,1:ke,ivar)
+              end do
+              applied = .true.
+
+            case (NEUMANN_HT)
+              k = 2*guard+1
+              do i = 1,guard
+                regionData(i,1:je,1:ke,ivar) = del(JAXIS)*ht_Tyl_value + regionData(k-1,1:je,1:ke,ivar)
+              end do
+              applied = .true.
+
+            end select
+          end if
+
+        else if (axis == KAXIS) then        
+          if (ivar == TEMP_VAR) then
+            select case (ht_Tzl_type)
+
+            case (DIRICHLET_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                  regionData(i,1:je,1:ke,ivar) = 2*ht_Tzl_value - regionData(k-i,1:je,1:ke,ivar)       
+               end do
+               applied = .true.
+
+             case (NEUMANN_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar) = del(KAXIS)*ht_Tzl_value + regionData(k-1,1:je,1:ke,ivar)
+               end do
+               applied = .true.               
+
+             end select
+           end if
+         end if 
+ 
+       else ! if (face == HIGH) then 
+
+         if(axis == IAXIS) then
+           if (ivar == TEMP_VAR) then
+             select case (ht_Txr_type)
+
+             case (DIRICHLET_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Txr_value - regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             case (NEUMANN_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = del(IAXIS)*ht_Txr_value + regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             end select
+           end if
+
+         else if (axis == JAXIS) then
+           if (ivar == TEMP_VAR) then
+             select case (ht_Tyr_type)
+
+             case (DIRICHLET_HT) 
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Tyr_value - regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             case (NEUMANN_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = del(JAXIS)*ht_Tyr_value + regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             end select 
+           end if
+
+         else if (axis == KAXIS) then 
+           if (ivar == TEMP_VAR) then
+             select case (ht_Tzr_type)
+
+             case (DIRICHLET_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Tzr_value - regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             case (NEUMANN_HT)
+               k = 2*guard+1
+               do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar) = del(KAXIS)*ht_Tzr_value + regionData(i,1:je,1:ke,ivar)
+               end do
+               applied = .true.
+
+             end select
+           end if
+         end if 
+
+       end if 
+ 
+     end if
+  end do 
   
-       if(face == LOW) then ! Level 3
-  
-         if(axis == IAXIS) then ! Level 3a
-  
-               if (ivar == TEMP_VAR) then
- 
-               k = 2*guard+1
-               do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-               end do
-
-               applied = .true.
- 
-              end if
-
-
-         else if (axis == JAXIS) then ! Level 3a
- 
-               if (ivar == TEMP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-#if NDIM == 3
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
-#elif NDIM == 2
-                  regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
-#endif
-               end do
-
-               applied = .true.
-
-               end if
-
- 
-         else if (axis == KAXIS) then ! Level 3a
-#if NDIM == 3              
-               if (ivar == TEMP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)       
-               end do
-
-               applied = .true.
-
-               end if
-#endif
-
-         end if ! End Level 3a
- 
-       else ! if face == HIGH ! Level 3
-
-         if(axis == IAXIS) then ! Level 3b
-
-               if (ivar == TEMP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-               end do
-              
-               applied = .true.
-
-               end if
-
- 
-         else if (axis == JAXIS) then ! Level 3b
-
-               if (ivar == TEMP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-#if NDIM == 3
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
-
-#elif NDIM == 2
-                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
-#endif
-               end do
-
-               applied = .true.
-
-               end if
- 
-         else if (axis == KAXIS) then ! Level 3b
-#if NDIM == 3              
-               if (ivar == TEMP_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
-
-               end do
-
-               applied = .true.
-
-               end if
-#endif
-
-         end if ! End Level 3b
-  
-       end if ! End Level 3
- 
-     end if ! End Level 2
- 
-  end do ! End Level 1
-
   return
 
 end subroutine Grid_bcApplyToRegionSpecialized

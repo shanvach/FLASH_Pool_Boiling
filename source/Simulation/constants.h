@@ -78,6 +78,10 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 #define MOVLID_INS -25
 #define OUTFLOW_INS -26
 
+#define DIRICHLET_HT -61
+#define NEUMANN_HT -62
+#define PERIODIC -63
+
 #define DIODE -39
 #define GRIDBC_MG_EXTRAPOLATE -40
 #define HYDROSTATIC_NVDIODE -41
