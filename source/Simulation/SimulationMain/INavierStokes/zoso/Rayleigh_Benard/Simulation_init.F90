@@ -25,7 +25,7 @@ subroutine Simulation_init()
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, sim_zMin, &
                               sim_xMax, sim_yMax, sim_zMax, &
-                              sim_gCell
+                              sim_gCell, sim_init
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -35,7 +35,7 @@ subroutine Simulation_init()
 #include "Flash.h"
 
   
-
+  call RuntimeParameters_get('initType',sim_init)
   call RuntimeParameters_get('xmin',    sim_xMin)
   call RuntimeParameters_get('ymin',    sim_yMin)
   call RuntimeParameters_get('xmax',    sim_xMax)

@@ -23,6 +23,7 @@ module Simulation_data
   !! *** Runtime Parameters *** !!
   real, save    :: sim_xMin, sim_xMax, sim_yMin, sim_yMax, sim_zMin, sim_zMax
   logical, save :: sim_gCell
+  integer, save :: sim_init
 
 integer, save :: sim_meshMe
 end module Simulation_data

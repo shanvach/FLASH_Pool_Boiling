@@ -88,7 +88,7 @@ subroutine Driver_evolveFlash()
 
 !KPD
 #ifdef FLASH_GRID_PARAMESH
-  if (dr_nstep .eq. 1) grid_changed = 1
+  if (dr_nstep .eq. 1) gridChanged = 1
 #endif
 !-----------------------------------------------------------------------------------------
   endRun = .false.
