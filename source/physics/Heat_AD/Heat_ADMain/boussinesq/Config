@@ -40,7 +40,7 @@ D Tzl_boundary_value lower boundary condition in z dir
 PARAMETER Tzl_boundary_value REAL 0.
 
 D Tzr_boundary_value upper boundary condition in z dir
-PARAMETER Tzr_boundary_value 0.
+PARAMETER Tzr_boundary_value REAL 0.
 
 # THIS PART IS FOR PHYSICS CONFIG
 # Variables required by the ht module
