@@ -153,6 +153,22 @@ subroutine Simulation_initBlock(blockId)
      end do
    end do
 
+  k = 1
+  do j=2,blkLimitsGC(HIGH,JAXIS)-1
+   do i=2,blkLimitsGC(HIGH,IAXIS)-1
+
+           solnData(TNGY_VAR,i,j,k) = ((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+           solnData(TNGX_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+
+     end do
+   end do
+
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
   do k=1,1

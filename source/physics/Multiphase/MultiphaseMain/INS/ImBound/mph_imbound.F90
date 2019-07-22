@@ -158,11 +158,11 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
 
-           xprobe(2) = xprobe(1) + del(IAXIS)
-           yprobe(2) = yprobe(1)
+           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
 
-           xprobe(3) = xprobe(1) - del(IAXIS)
-           yprobe(3) = yprobe(1)
+           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
 
            ! Interpolate function at probe 
            do probe_index = 1,3
@@ -200,10 +200,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            enddo
            enddo
 
-           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)*cos(90.0*acos(-1.0)/180.0)
+           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
-           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .lt. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio
+           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0) then
+           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
            end if
 
            end if

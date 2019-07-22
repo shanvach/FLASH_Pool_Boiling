@@ -354,44 +354,6 @@ if(mph_flag == 1) then
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
        !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-    
-  do lb = 1,blockCount
-     blockID = blockList(lb)
-
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get block's dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get block's internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to block's center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-     k = 1
-     do j=2,blkLimitsGC(HIGH,JAXIS)-1
-     do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
-           solnData(NMRX_VAR,i,j,k) = ((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-           solnData(NMRY_VAR,i,j,k) = ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(DFUN_VAR,i+1,j,k) - solnData(DFUN_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(DFUN_VAR,i,j+1,k) - solnData(DFUN_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-
-     end do
-     end do
-
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-  end do
-
 !***********************************************************************************************
 !***********************************************************************************************
 !***********************************************************************************************

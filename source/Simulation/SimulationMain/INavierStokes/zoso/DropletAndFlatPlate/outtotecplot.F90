@@ -270,7 +270,7 @@
                             solnData(DFUN_VAR,:,:,1),tpdfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(NMRX_VAR,:,:,1),tppfun)
+                            solnData(TNGX_VAR,:,:,1),tppfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(SIGP_VAR,:,:,1),tsigp)
@@ -293,7 +293,7 @@
      ! Viscosity: visc(nxb+1,nyb+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(NMRY_VAR,:,:,1),tpvisc)
+                            solnData(TNGY_VAR,:,:,1),tpvisc)
 
      ! Viscosity: visc(nxb+1,nyb+1)
      ! -------------------------------
