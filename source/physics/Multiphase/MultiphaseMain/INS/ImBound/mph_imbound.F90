@@ -150,7 +150,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
          !          real(k - NGUARD - 1)*del(KAXIS)  +  &
          !          0.5*del(KAXIS)
           
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 2.0*del(IAXIS)) then
 
            ! Get probe in fluid
            hnorm = 1.0*del(JAXIS)
@@ -215,8 +215,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
  
-          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS) .and. &
-             solnData(DFUN_VAR,i,j,k) .le. 0.0) solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - 1.5*del(IAXIS)
+          if(solnData(LMDA_VAR,i,j,k) .gt. 2.0*del(IAXIS) .and. &
+             solnData(DFUN_VAR,i,j,k) .le. 0.0) solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - 2.0*del(IAXIS)
 
          end do
         end do
