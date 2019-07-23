@@ -254,7 +254,8 @@ if(mph_flag == 1) then
                           solnData(NRMX_VAR,:,:,:),&
                           solnData(NRMY_VAR,:,:,:),&
                           solnData(SMHV_VAR,:,:,:),&
-                          solnData(SMRH_VAR,:,:,:))
+                          solnData(SMRH_VAR,:,:,:),&
+                          solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -352,7 +353,8 @@ if(mph_flag == 1) then
                            solnData(ALPH_VAR,:,:,:),&
                            mph_thco1,mph_thco2,mph_cp1,mph_cp2,&
                            solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&
-                           solnData(MFLG_VAR,:,:,:),solnData(SMHV_VAR,:,:,:),solnData(SMRH_VAR,:,:,:))!,blockID)
+                           solnData(MFLG_VAR,:,:,:),solnData(SMHV_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
+                           solnData(LMDA_VAR,:,:,:))!,blockID)
      !------------------------------------------------------------------
 
 #elif NDIM ==3
@@ -484,7 +486,8 @@ else if(mph_flag == 0) then
                           mph_sten,mph_crmx,mph_crmn, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                          mph_thco1,mph_thco2,mph_cp1,mph_cp2,solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),blockID)
+                          mph_thco1,mph_thco2,mph_cp1,mph_cp2,solnData(MDOT_VAR,:,:,:),solnData(TMIC_VAR,:,:,:),&
+                          solnData(LMDA_VAR,:,:,:),blockID)
 
 #elif NDIM == 3 
         call Grid_getBlkPtr(blockID,facezData,FACEZ)

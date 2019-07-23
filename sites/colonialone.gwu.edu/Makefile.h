@@ -23,18 +23,18 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-#BLAS_PATH = $(LIB_BASE)/openblas
-BLAS_PATH  = 
+BLAS_PATH = $(LIB_BASE)/openblas
+#BLAS_PATH  = 
 
-#LAPACK_PATH = $(LIB_BASE)/openblas
-LAPACK_PATH  =
+LAPACK_PATH = $(LIB_BASE)/openblas
+#LAPACK_PATH  =
 
 #HYPRE_PATH   = $(LIB_BASE)/hypre2.9.0b
 #HYPRE_PATH   = /groups/balarasgrp/akash/hypre
 HYPRE_PATH    = /home/akashdhruv/hypre-2.11.2/src/hypre
 
-#SUPERLU_PATH = $(LIB_BASE)/SuperLU4.3
-SUPERLU_PATH  = 
+SUPERLU_PATH = $(LIB_BASE)/SuperLU4.3
+#SUPERLU_PATH  = 
 
 # Current directory:
 export cur-dir := $(shell pwd)
