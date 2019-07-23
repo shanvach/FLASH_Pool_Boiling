@@ -277,6 +277,7 @@ if(mph_flag == 1) then
      ! Akash - Modified call to compute specific heat and thermal conductivity
 
      call mph_KPDcurvature2DAB(solnData(DFUN_VAR,:,:,:),               &
+                           solnData(LMDA_VAR,:,:,:),                   &
                            solnData(CURV_VAR,:,:,:),                   &
                            facexData(RH1F_FACE_VAR,:,:,:),             &
                            facexData(RH2F_FACE_VAR,:,:,:),             &
