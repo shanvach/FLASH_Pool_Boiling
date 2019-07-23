@@ -176,7 +176,7 @@
                a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                     pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-               if((lambda(i,j,k)+lambda(i-1,j,k))*0.5 .le. 0.0) then
+               if((lambda(i,j,k)+lambda(i-1,j,k))*0.5 .lt. 0.0) then
 
                rho1x(i,j,k) = a1*a2/(rho1/rho2)
                rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
@@ -204,7 +204,7 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if((lambda(i,j,k)+lambda(i,j-1,k))*0.5 .le. 0.0) then
+              if((lambda(i,j,k)+lambda(i,j-1,k))*0.5 .lt. 0.0) then
 
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
@@ -374,7 +374,7 @@
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
 
-              if(lambda(i,j,k) .le. 0.0 .and. lambda(i+1,j,k) .le. 0.0) then
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. ) then
 
                  !          = (+)            = (+)           = (-)
@@ -470,7 +470,7 @@
 
               end if
 
-             if(lambda(i,j,k) .le. 0.0 .and. lambda(i,j+1,k) .le. 0.0) then
+             if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
