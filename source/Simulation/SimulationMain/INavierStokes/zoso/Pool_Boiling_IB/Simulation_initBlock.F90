@@ -257,7 +257,7 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
            !if(ycell .le. 0.15 + yr .and. ycell .gt. yr .and. xcell .ge. xl .and. xcell .le. xr) solnData(TEMP_VAR,i,j,k) = (0.15 + yr - ycell)/0.15
 
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
            if(dxl .ge. 0.0 .and. dxr .ge. 0.0 .and. dyl .ge. 0.0 .and. dyr .lt. 0.0 .and. dyr .ge. -0.15) solnData(TEMP_VAR,i,j,k) = 1.0 - abs(dyr)/0.15
  
@@ -281,6 +281,23 @@ subroutine Simulation_initBlock(blockId)
         end do
      end do
  
+  k = 1
+  do j=2,blkLimitsGC(HIGH,JAXIS)-1
+   do i=2,blkLimitsGC(HIGH,IAXIS)-1
+
+           solnData(TNGY_VAR,i,j,k) = ((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+           solnData(TNGX_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+
+
+     end do
+   end do
+
+
   !sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 

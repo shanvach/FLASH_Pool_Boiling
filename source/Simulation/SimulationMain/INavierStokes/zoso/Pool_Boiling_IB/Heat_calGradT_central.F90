@@ -40,19 +40,19 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
         thym2 = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j-1,k)))
 
         ! Case 1 !
-        if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .le. 0.0 .and. lambda(i+1,j,k) .le. 0.0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
+        if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
         ! End of Case 1 !
 
         ! Case 2 !
-        if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .le. 0.0 .and. lambda(i-1,j,k) .le. 0.0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
+        if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i-1,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
         ! End of Case 2 !
 
         ! Case 3 !
-        if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .le. 0.0 .and. lambda(i,j+1,k) .le. 0.0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
+        if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
         ! End of Case 3 !
 
         ! Case 4 !
-        if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .le. 0.0 .and. lambda(i,j-1,k) .le. 0.0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
+        if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j-1,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
          ! End of Case 4 ! 
 
          Tx = (Tx_plus - Tx_mins)/(2*dx)
