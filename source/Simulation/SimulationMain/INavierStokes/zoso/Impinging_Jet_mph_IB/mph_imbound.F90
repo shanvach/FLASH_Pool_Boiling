@@ -37,10 +37,6 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   use ImBound_data, only : ib_stencil
 
-  use Simulation_data, only: sim_vlim, sim_psiAdv, sim_psiRcd
-
-  use RuntimeParameters_interface, ONLY : RuntimeParameters_get
-
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
@@ -93,7 +89,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
-  real    :: hnorm, xprobe, yprobe, zprobe, phiprobe
+  real    :: hnorm, xprobe(3), yprobe(3), zprobe, phiprobe
 
   real,parameter  :: htol = 0.0001
 
@@ -106,12 +102,16 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: idim
   real    :: xyz_stencil(ib_stencil,MDIM)
   real :: delaux(MDIM)
-  real :: zp
+  real :: zp(3)
 
   integer, parameter :: derivflag = 0
   integer :: ib_ind
 
   real    :: hratio, veli, this_psi
+
+  real    :: nrmx, nrmy, nmlx, nmly, ib_theta
+
+  integer :: probe_index
 
   do lb = 1,blockCount
 
@@ -137,9 +137,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-           if(solnData(LMDA_VAR,i,j,k) .lt. 0.0 .and. solnData(LMDA_VAR,i,j,k) .gt. -1.5*del(IAXIS)) then
-                          
+                         
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
                    0.5*del(IAXIS)
@@ -148,20 +146,28 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-           !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !        real(k - NGUARD - 1)*del(KAXIS)  +  &
-           !        0.5*del(KAXIS)
+         !  zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+         !          real(k - NGUARD - 1)*del(KAXIS)  +  &
+         !          0.5*del(KAXIS)
           
-           ! Get probe in fluid
-           !hnorm   = 1.*sqrt((1.2*del(IAXIS)*solnData(NMLX_VAR,i,j,k))**2. + (1.2*del(JAXIS)*solnData(NMLY_VAR,i,j,k))**2.)
-           hnorm = 2.0*del(IAXIS)
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
-           xprobe = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           yprobe = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+           ! Get probe in fluid
+           hnorm = 1.0*del(JAXIS)
+
+           xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+           yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+
+           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+
+           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
 
            ! Interpolate function at probe 
-           externalPt(IAXIS) = xprobe
-           externalPt(JAXIS) = yprobe
+           do probe_index = 1,3
+           externalPt(IAXIS) = xprobe(probe_index)
+           externalPt(JAXIS) = yprobe(probe_index)
            externalPt(KAXIS) = 0.0
 
            part_Nml(IAXIS) = solnData(NMLX_VAR,i,j,k)
@@ -170,6 +176,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            ! Cell centered stencil for DFUN interpolation at probe
            gridfl(:) = CENTER
+
            call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
                             ib_external(:,:),dfe,FORCE_FLOW)
 
@@ -185,66 +192,36 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            ! Get shape function ib_external_phile  for points on stencil
            call ib_getInterpFunc(externalPt,xyz_stencil,del,derivflag,ib_external_phile)
 
-           zp = 0.      ! zp = DFUN at probe point
+           zp(probe_index) = 0.      ! zp = DFUN at probe point
 
            do ib_ind = 1 , ib_stencil
-                zp = zp + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
                 solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
+           enddo
 
-           solnData(DFUN_VAR,i,j,k) = zp - (solnData(LMDA_VAR,i,j,k) + hnorm)*cos(sim_psiRcd)
+           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
+           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .le. 0.0) then
+           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
+           end if
 
-           end if 
-
+           end if
+          
          end do
         end do
-
-         ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-
-  end do
- 
-  gcMask = .FALSE.
-  gcMask(DFUN_VAR) = .TRUE.
-
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-  
-  do lb = 1,blockCount
-
-        blockID = blockList(lb)
-
-        call Grid_getBlkBoundBox(blockId,boundBox)
-
-        bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-        call Grid_getBlkCenterCoords(blockId,coord)
- 
-        call Grid_getDeltas(blockID,del)
-
-        ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-
-           solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
+ 
+          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS) .and. &
+             solnData(DFUN_VAR,i,j,k) .le. 0.0) solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - 1.5*del(IAXIS)
 
          end do
         end do
 
-         ! Release pointers:
+        ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
         call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
@@ -253,6 +230,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   end do
  
   gcMask = .FALSE.
+
   gcMask(DFUN_VAR) = .TRUE.
 
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&

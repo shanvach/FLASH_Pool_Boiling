@@ -276,9 +276,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
    call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-   ib_vel_flg  = .false.
-   ib_dfun_flg = .true.
-   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+   !ib_vel_flg  = .false.
+   !ib_dfun_flg = .true.
+   !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
    call cpu_time(t_startMP2a)
 
