@@ -4,8 +4,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
 
+!#define NUCLEATE_BOILING
 #include "Flash.h"
-
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
   use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -32,11 +32,13 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
                             mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
-                            mph_KPDadvectWENO3_3D, mph_KPDlsRedistance_3D
+                            mph_KPDadvectWENO3_3D,mph_KPDlsRedistance_3D
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use Driver_data, ONLY : dr_nstep
+
+  use ins_interface, only: ins_fluxfixRho1,ins_fluxfixRho2
 
   implicit none
 
@@ -59,7 +61,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,blockID,ii,i,j,k
+  integer :: lb,blockID,ii,i,j,k,ierr
 
   real bsize(MDIM),coord(MDIM)
 
@@ -76,9 +78,10 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   integer :: listofBlocks(MAXBLOCKS)
   integer :: count
-  integer :: intval
+  integer :: intval,nxc,nyc,nzc
 
-  if(mph_flag == 1) then
+if(mph_flag == 1) then
+
 !kpd - Level Set Initialization...
   if (dr_nstep .eq. 1) then
 
@@ -88,22 +91,18 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
     !computed 
     !       This is done for first iteration only (filled at end of time step) 
     !-----------------------------------------------------------------------------
+    
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work= intval;
 #endif
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-      !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
-    !-----------------------------------------------------------------------------
-    !#############################################################################
-
-    call mph_bcLevelSet(0.0d0,0.0d0)
 
    !*********************************************************************************************************
    !- kpd - Level Set Distance Function Initialization (if needed)
@@ -197,15 +196,15 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
 #ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
+    intval = 1
+    !intval = 2
     interp_mask_unk = intval;   interp_mask_unk_res = intval;
     interp_mask_work= intval;
 #endif
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
     !*********************************************************************************************************
-    call mph_bcLevelSet(0.0d0,0.0d0)
+    !call mph_bcLevelSet(0.0d0,0.0d0)
 
       lsT = lsT + lsDT
 
@@ -265,6 +264,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
      !----------------------------------------------------------
      !- kpd - Call 2-D curvature Routine:
      !----------------------------------------------------------
+     ! Akash - Modified call to compute specific heat and thermal conductivity
+
      call mph_KPDcurvature2DAB(solnData(DFUN_VAR,:,:,:),               &
                            solnData(CURV_VAR,:,:,:),                   &
                            facexData(RH1F_FACE_VAR,:,:,:),             &
@@ -279,7 +280,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                            mph_sten,mph_crmx,mph_crmn,                 &
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2)!,blockID)
+                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2)
      !------------------------------------------------------------------
 
 #elif NDIM ==3
@@ -304,7 +305,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                            facezData(RH2F_FACE_VAR,:,:,:),             &
                            solnData(PFUN_VAR,:,:,:),                   &
                            mph_rho1,mph_rho2,                          &
-                           solnData(VISC_VAR,:,:,:), mph_vis1,mph_vis2 )
+                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2)
         !----------------------------------------------------------
 
 #endif
@@ -329,14 +330,17 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   gcMask(PFUN_VAR) = .TRUE.                                ! Phase Function
   gcMask(CURV_VAR) = .TRUE.                                ! Curvature
   gcMask(VISC_VAR) = .TRUE.                                ! Viscosity
+
   gcMask(NUNK_VARS+RH1F_FACE_VAR) = .TRUE.                 ! rho1x
   gcMask(NUNK_VARS+1*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1y
   gcMask(NUNK_VARS+RH2F_FACE_VAR) = .TRUE.                 ! rho2x
   gcMask(NUNK_VARS+1*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2y
+
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
   gcMask(NUNK_VARS+2*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2z
 #endif
+
 #ifdef FLASH_GRID_PARAMESH
   intval = 1
   !intval = 2
@@ -354,11 +358,12 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 !***********************************************************************************************
 !***********************************************************************************************
 
+else if(mph_flag == 0) then
 
-  else if(mph_flag == 0) then
     !-----------------------------------------------------
     !- kpd - Loop through current block for curvature 2dC
     !-----------------------------------------------------
+
     do lb = 1,blockCount
      blockID = blockList(lb)
 !    do lb = 1,count
@@ -381,6 +386,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
      !- kpd - Call 2-D curvature Routine:
      !----------------------------------------------------------
      call mph_KPDcurvature2DC(solnData(DFUN_VAR,:,:,:), &
+                          solnData(LMDA_VAR,:,:,:),&
                           solnData(CURV_VAR,:,:,:), &
                           facexData(RH1F_FACE_VAR,:,:,:), &
                           facexData(RH2F_FACE_VAR,:,:,:), &
@@ -393,7 +399,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                           del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
                           mph_sten,mph_crmx,mph_crmn, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))!,blockID)
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
 
 #elif NDIM == 3 
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
@@ -422,7 +428,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                            facezData(RH1F_FACE_VAR,:,:,:)   , &
                            facezData(RH2F_FACE_VAR,:,:,:)   , &
-                           facezData(SIGM_FACE_VAR,:,:,:)  )
+                           facezData(SIGM_FACE_VAR,:,:,:))
 
 #endif
      !-----------------------------------------------
@@ -446,9 +452,13 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   gcMask(NUNK_VARS+1*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1y
   gcMask(NUNK_VARS+RH2F_FACE_VAR) = .TRUE.                 ! rho2x
   gcMask(NUNK_VARS+1*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2y
+
   gcMask(SIGP_VAR) = .TRUE.                                ! Poisson Jump
   gcMask(NUNK_VARS+SIGM_FACE_VAR) = .TRUE.                 ! Momentum Jump X
   gcMask(NUNK_VARS+1*NFACE_VARS+SIGM_FACE_VAR) = .TRUE.    ! Momentum Jump Y
+
+  gcMask(CURV_VAR) = .TRUE.
+
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
   gcMask(NUNK_VARS+2*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2z
@@ -464,9 +474,24 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   interp_mask_facez = intval; interp_mask_facez_res = intval;
 #endif
 
-  print*,"KPD - Filling Density Guard Cells."
+  !print*,"KPD - Filling Density Guard Cells."
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
-  end if
+  nxc = NXB + NGUARD + 1
+  nyc = NYB + NGUARD + 1
+  nzc = NZB + NGUARD + 1  
+
+#ifdef FLASH_GRID_PARAMESH
+  call ins_fluxfixRho1(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
+                   blockCount,blockList)
+#endif
+
+#ifdef FLASH_GRID_PARAMESH
+  call ins_fluxfixRho2(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
+                   blockCount,blockList)
+#endif
+
+end if
+
 end subroutine
