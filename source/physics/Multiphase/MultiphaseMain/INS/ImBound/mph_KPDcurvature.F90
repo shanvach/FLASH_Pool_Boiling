@@ -122,7 +122,7 @@
            do i = ix1-1,ix2+1
               pf(i,j,k) = 0.
 
-              if(s(i,j,k).ge.0. .or. lambda(i,j,k) .ge. 0.0) then
+              if(s(i,j,k).ge.0.) then
                  pf(i,j,k) = 1.                       !- kpd - Set phase function on each side of interface
                  visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
                  !print*,"vis1",i,j,visc(i,j,k)
@@ -150,16 +150,8 @@
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
               !rho1x(i,j,k) = a1*a2/rho1
               !rho2x(i,j,k) = (1. - a1*a2)/rho2
-
-              if(0.5*(lambda(i,j,k)+lambda(i-1,j,k)) .ge. 0.0) then
-              rho1x(i,j,k) = rho2/rho1
-              rho2x(i,j,k) = 0.0
-
-              else
               rho1x(i,j,k) = a1*a2/(rho1/rho2)
               rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
-
-              end if
 
            end do
         end do
@@ -175,15 +167,8 @@
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
               !rho1y(i,j,k) = a1*a2/rho1
               !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              if(0.5*(lambda(i,j,k)+lambda(i,j-1,k)) .ge. 0.0) then
-              rho1y(i,j,k) = rho2/rho1
-              rho2y(i,j,k) = 0.0
-
-              else
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
-
-              end if
 
            end do
         end do
