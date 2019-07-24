@@ -60,7 +60,7 @@ subroutine Multiphase_init( )
   mph_dist_flag  = .true.
   mph_jet_tstamp = dr_simTime
   mph_jet_twait  = 50.0
-  mph_jet_period = 50.0
+  mph_jet_period = 30.0
   mph_vel_scalar = 1.0
 
 end subroutine Multiphase_init

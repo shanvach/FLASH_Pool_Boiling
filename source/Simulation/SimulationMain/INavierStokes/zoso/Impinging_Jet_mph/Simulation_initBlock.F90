@@ -153,7 +153,8 @@ subroutine Simulation_initBlock(blockId)
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
 
-           R_init = 0.5
+           R_init = 0.3 + 0.2*(-ycell+sim_jet_depth)/sim_jet_depth
+           !R_init = 0.5
 #endif        
 
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,-ycell+sim_jet_depth)
