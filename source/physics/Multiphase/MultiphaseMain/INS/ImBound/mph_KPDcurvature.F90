@@ -151,7 +151,7 @@
               !rho1x(i,j,k) = a1*a2/rho1
               !rho2x(i,j,k) = (1. - a1*a2)/rho2
 
-              if(lambda(i,j,k) .ge. 0.0) then
+              if(0.5*(lambda(i,j,k)+lambda(i-1,j,k)) .ge. 0.0) then
               rho1x(i,j,k) = rho2/rho1
               rho2x(i,j,k) = 0.0
 
@@ -175,7 +175,7 @@
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
               !rho1y(i,j,k) = a1*a2/rho1
               !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              if(lambda(i,j,k) .ge. 0.0) then
+              if(0.5*(lambda(i,j,k)+lambda(i,j-1,k)) .ge. 0.0) then
               rho1y(i,j,k) = rho2/rho1
               rho2y(i,j,k) = 0.0
 
