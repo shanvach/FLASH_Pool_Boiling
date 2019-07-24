@@ -222,11 +222,11 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     end do
 
-    ib_temp_flg = .true.
-    ib_vel_flg  = .false.
-    ib_dfun_flg = .false.
+    !ib_temp_flg = .true.
+    !ib_vel_flg  = .false.
+    !ib_dfun_flg = .false.
 
-    if(dr_nstep>1) call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+    !if(dr_nstep>1) call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.

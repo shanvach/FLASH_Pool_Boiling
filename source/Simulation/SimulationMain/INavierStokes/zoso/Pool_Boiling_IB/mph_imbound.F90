@@ -202,8 +202,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
-           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .le. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
+           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
+           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(45.0*acos(-1.0)/180)
            end if
 
            end if
@@ -216,7 +216,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
  
           if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS) .and. &
-             solnData(DFUN_VAR,i,j,k) .le. 0.0) solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - 1.5*del(IAXIS)
+             solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(DFUN_VAR,i,j,k) = -solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS)
 
          end do
         end do
