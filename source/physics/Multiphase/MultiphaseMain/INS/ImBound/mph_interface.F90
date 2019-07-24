@@ -47,7 +47,7 @@ Module mph_interface
 !end interface
 
 interface
-        subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
+        subroutine mph_KPDcurvature2DAB(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2
@@ -55,21 +55,21 @@ interface
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                                rho2y,pf,w,sigx,sigy,visc
+                                                rho2y,pf,w,sigx,sigy,visc,&
+                                                lambda
         end subroutine mph_KPDcurvature2DAB
 end interface
 
 interface
-        subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,lambda)
+        subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx, dy, rho1, rho2, xit
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                                rho2y,pf,w,sigx,sigy
-        real, dimension(:,:,:), intent(in) :: lambda
+                                                rho2y,pf,w,sigx,sigy,lambda
         end subroutine mph_KPDcurvature2DC
 end interface
 
@@ -201,12 +201,14 @@ interface
 end interface
 
 interface
-     subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
-     integer, intent(in) :: sweepOrder
-     integer, INTENT(INOUT) :: blockCount
-     integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-     real,    INTENT(IN) :: timeEndAdv,dt,dtOld
-     end subroutine
+      subroutine mph_imbound(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
+      integer, INTENT(IN) :: sweepOrder
+      integer, INTENT(INOUT) :: blockCount
+      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+
+      end subroutine
 end interface
 ! End
 

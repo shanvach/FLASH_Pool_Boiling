@@ -76,7 +76,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
 
       eps = 1E-15
   
-      Lb  = sim_yMax-sim_yMin-2.0
+      Lb  = sim_yMax - 2.0
 
       call Grid_getDeltas(blockID,del)
       call Grid_getBlkCenterCoords(blockId,coord)
@@ -424,7 +424,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            + Mdens*(tyyp - tyym)*dy1                 &
                            + gravX                                   
 
-            if(ycell .ge. Lb) ru(i,j,kz1) = ru(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1 
+            !if(ycell .ge. Lb) ru(i,j,kz1) = ru(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1 
 
           enddo
        enddo
@@ -766,7 +766,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            + Mdens* (tyyp - tyym)*dy1                 &
                            + gravY                                    ! kpd - gravity term                         
  
-             if(ycell .ge. Lb) rv(i,j,kz1) = rv(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
+             !if(ycell .ge. Lb) rv(i,j,kz1) = rv(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
 
           enddo
        enddo
@@ -1366,7 +1366,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + gravX*(1.0  + ht_Ra*tempface)  
  
                
-               if(ycell .ge. Lb) ru(i,j,k) = ru(i,j,k) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1
+               !if(ycell .ge. Lb) ru(i,j,k) = ru(i,j,k) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1
 
             enddo
          enddo
@@ -1860,7 +1860,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tyzp - tyzm)*dz1                &
                            + gravY*(1.0  + ht_Ra*tempface)           
 
-              if(ycell .ge. Lb) rv(i,j,k) = rv(i,j,k) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
+              !if(ycell .ge. Lb) rv(i,j,k) = rv(i,j,k) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
 
             enddo
          enddo
@@ -2357,7 +2357,7 @@ SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,      &
                            + Mdens* (tyzp - tyzm)*dy1                &
                            + gravZ* (1.0  + ht_Ra*tempface)                  
 
-              if(ycell .ge. Lb) rw(i,j,k) = rw(i,j,k) - ins_convvel(HIGH,JAXIS)*(wyplus - wyminus)*dy1
+              !if(ycell .ge. Lb) rw(i,j,k) = rw(i,j,k) - ins_convvel(HIGH,JAXIS)*(wyplus - wyminus)*dy1
  
             enddo
          enddo

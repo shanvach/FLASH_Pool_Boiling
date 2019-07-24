@@ -206,6 +206,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   call MPI_BCAST(sim_ibm_x, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
   call MPI_BCAST(sim_ibm_y, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
 
+  sim_nuc_site_y(2) = 0.6 + sim_ibm_y
+
 !----- Reconstruct IBM level set function lambda ---!
 do lb = 1,blockCount
 
@@ -304,12 +306,12 @@ do lb = 1,blockCount
                  if(veli .ge. 0.0) then
                  if(abs(veli) .le. mph_vlim) then
 
-                 !     mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                 !                             (mph_psi_adv + ht_psi)/2.0d0
+                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                                              (mph_psi_adv + ht_psi)/2.0d0
 
                  else
         
-                 !     mph_psi(i,k,blockID) = mph_psi_adv
+                      mph_psi(i,k,blockID) = mph_psi_adv
                         
                  end if
                  end if
@@ -428,7 +430,7 @@ enddo
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
+              if (solnData(DFUN_VAR,i,j,1) .gt. 0 .and. solnData(LMDA_VAR,i,j,1) .le. 0.0) then
                 volSum = volSum + (del(DIR_X) * del(DIR_Y))
               end if
            end do
@@ -616,7 +618,27 @@ do nuc_index =1,sim_nucSiteDens
        end do
 
      end if
-  
+ 
+     if(nuc_index == 2) then
+
+       do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+
+              if(solnData(LMDA_VAR,i,j,1) .lt. 0.0 .and. solnData(LMDA_VAR,i,j-1,1) .ge. 0.0) then
+
+                   if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) then
+                        isAttached = isAttached .or. .true.
+                   else
+                        isAttached = isAttached .or. .false.
+
+                   end if
+              end if    
+
+        end do
+       end do
+
+     end if
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do

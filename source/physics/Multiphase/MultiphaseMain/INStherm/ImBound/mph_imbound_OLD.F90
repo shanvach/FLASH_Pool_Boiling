@@ -27,7 +27,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
+                             mph_radius, mph_isAttached, mph_timeStamp, mph_vlim, mph_psi_adv
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -37,9 +38,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   use ImBound_data, only : ib_stencil
 
-  use Simulation_data, only: sim_vlim, sim_psiAdv, sim_psiRcd
-
-  use RuntimeParameters_interface, ONLY : RuntimeParameters_get
+  use Heat_AD_data, only : ht_psi
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -112,9 +111,6 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: ib_ind
 
   real    :: hratio, veli, this_psi
-
-  call RuntimeParameters_get('psiAdv', sim_psiAdv)
-  call RuntimeParameters_get('psiRcd', sim_psiRcd)
 
   do lb = 1,blockCount
 
@@ -223,14 +219,14 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                     select case(dir)
                     case(FACEX) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facexData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            facexData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
                     case(FACEY) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            faceyData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            faceyData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
 #if NDIM == MDIM
                     case(FACEZ)
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ii,CONSTANT_ONE) * &
-                            facezData(VELC_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+                            facezData(VELI_FACE_VAR,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
 #endif
                     end select
                 enddo
@@ -245,29 +241,29 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
         
-            this_psi = sim_psiRcd
+            this_psi = ht_psi
 
             ! Compute the dynamic contact angle based on the vel_probe = approximation for velocity vector at the solid-liq-gas  interface
 
-            !if(veli .ge. 0.0) then
-            !     if(abs(veli) .le. sim_vlim) then
+            if(veli .ge. 0.0) then
+                 if(abs(veli) .le. mph_vlim) then
 
-            !          this_psi = ((sim_psiAdv - sim_psiRcd)/(2*sim_vlim))*abs(veli) + &
-            !                                  (sim_psiAdv + sim_psiRcd)/2.0d0
+                      this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+                                              (mph_psi_adv + ht_psi)/2.0d0
 
-            !     else
+                 else
         
-            !    this_psi = sim_psiAdv
-            !            
-            !     end if
-            ! end if
+                this_psi = mph_psi_adv
+                        
+                 end if
+             end if
 
              !! Dynamic contact angle done 
 
              !hratio = max(solnData(LMDA_VAR,i,j,k)/del(IAXIS),htol)*del(IAXIS)
              hratio = solnData(LMDA_VAR,i,j,k)
 
-             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(sim_psiRcd)
+             solnData(DFUN_VAR,i,j,k) = zp - (hratio + hnorm)*cos(this_psi)
 
 
            end if 

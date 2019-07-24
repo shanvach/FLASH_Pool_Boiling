@@ -4,7 +4,8 @@
 
 
         subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,alph,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv,smrh)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,alph,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv,smrh,&
+           lambda)
 
    
         implicit none
@@ -21,7 +22,7 @@
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,visc,&
-                                               alph,nrmx,nrmy,mflg,smhv,smrh
+                                               alph,nrmx,nrmy,mflg,smhv,smrh,lambda
 
         !--------------------------
         !- kpd - Local variables...
@@ -175,8 +176,18 @@
                a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                     pf(i,j,k)/abs(pf(i,j,k)+eps)
 
+               if((lambda(i,j,k)+lambda(i-1,j,k))*0.5 .le. 0.0) then
+
                rho1x(i,j,k) = a1*a2/(rho1/rho2)
                rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+               else
+
+               rho1x(i,j,k) = 0.0
+               rho2x(i,j,k) = 1.0
+
+               end if
+
 
            end do
         end do
@@ -193,8 +204,17 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
+              if((lambda(i,j,k)+lambda(i,j-1,k))*0.5 .le. 0.0) then
+
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              else
+
+              rho1y(i,j,k) = 0.0
+              rho2y(i,j,k) = 1.0
+
+              end if
 
            end do
         end do
@@ -260,7 +280,7 @@
 !=========================================================================
 
         subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,blockID)   
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,lambda,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
@@ -283,7 +303,7 @@
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot
+        real, dimension(:,:,:), intent(in) :: mdot,lambda
 
         integer, intent(in) :: blockID
 
@@ -353,7 +373,9 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
+
+              if(lambda(i,j,k) .le. 0.0 .and. lambda(i+1,j,k) .le. 0.0) then
+              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. ) then
 
                  !          = (+)            = (+)           = (-)
                  th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i,j,k)))
@@ -396,22 +418,13 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
-
 
               end if
 
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0. ) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
 
@@ -453,21 +466,16 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i+1,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
+              end if
 
               end if
+
+             if(lambda(i,j,k) .le. 0.0 .and. lambda(i,j+1,k) .le. 0.0) then
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
+              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1. ) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
 
@@ -514,7 +522,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0. ) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) 
  
@@ -556,6 +564,7 @@
                  icrv(i,j,k) = 1
                  icrv(i,j+1,k) = 1
 
+              end if
               end if
 
            end do

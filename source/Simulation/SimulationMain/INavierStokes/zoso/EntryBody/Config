@@ -19,6 +19,7 @@ REQUIRES Driver
 
 REQUIRES physics/Multiphase
 REQUIRES physics/Multiphase/MultiphaseMain/INS
+REQUIRES physics/Multiphase/MultiphaseMain/INS/ImBound
 
 REQUIRES physics/IncompNS
 REQUIRES physics/IncompNS/IncompNSMain/vardens
@@ -49,10 +50,6 @@ VARIABLE preo    # Shizhao for fsi
 FACEVAR  velo
 
 # Level set parameters to define IBM - temporary
-
-VARIABLE lmda TYPE: GENERIC
-VARIABLE nmlx TYPE: GENERIC
-VARIABLE nmly TYPE: GENERIC
 
 PARAMETER quadrant       BOOLEAN  FALSE
 

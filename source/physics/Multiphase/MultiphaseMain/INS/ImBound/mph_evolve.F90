@@ -4,7 +4,6 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
 
-!#define NUCLEATE_BOILING
 #include "Flash.h"
 
   ! Modules Use:
@@ -268,6 +267,7 @@ if(mph_flag == 1) then
      ! Akash - Modified call to compute specific heat and thermal conductivity
 
      call mph_KPDcurvature2DAB(solnData(DFUN_VAR,:,:,:),               &
+                           solnData(LMDA_VAR,:,:,:),                   &
                            solnData(CURV_VAR,:,:,:),                   &
                            facexData(RH1F_FACE_VAR,:,:,:),             &
                            facexData(RH2F_FACE_VAR,:,:,:),             &
@@ -387,6 +387,7 @@ else if(mph_flag == 0) then
      !- kpd - Call 2-D curvature Routine:
      !----------------------------------------------------------
      call mph_KPDcurvature2DC(solnData(DFUN_VAR,:,:,:), &
+                          solnData(LMDA_VAR,:,:,:),&
                           solnData(CURV_VAR,:,:,:), &
                           facexData(RH1F_FACE_VAR,:,:,:), &
                           facexData(RH2F_FACE_VAR,:,:,:), &
@@ -399,8 +400,7 @@ else if(mph_flag == 0) then
                           del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
                           mph_sten,mph_crmx,mph_crmn, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                          solnData(LMDA_VAR,:,:,:))
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
 
 #elif NDIM == 3 
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
