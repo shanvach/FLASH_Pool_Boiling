@@ -12,6 +12,7 @@ REQUIRES Driver
 
 REQUIRES physics/Multiphase
 REQUIRES physics/Multiphase/MultiphaseMain/INS
+REQUIRES physics/Multiphase/MultiphaseMain/INS/ImBound
 
 REQUIRES physics/IncompNS
 REQUIRES physics/IncompNS/IncompNSMain/vardens
@@ -47,12 +48,7 @@ PARAMETER waveA          REAL  0.0
 
 # Level set parameters to define IBM - temporary
 
-VARIABLE lmda TYPE: GENERIC
-VARIABLE nmlx TYPE: GENERIC
-VARIABLE nmly TYPE: GENERIC
 VARIABLE dfrc TYPE: GENERIC
-VARIABLE tngx TYPE: GENERIC
-VARIABLE tngy TYPE: GENERIC
 
 PARTICLEPROP dfun REAL
 PARTICLEPROP difp REAL
