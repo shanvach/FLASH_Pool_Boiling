@@ -42,8 +42,9 @@ module Multiphase_data
   integer, save :: mph_meshNumProcs
   integer, save :: mph_meshComm
 
-  real, save :: mph_jet_vel(NXB,NZB,MAXBLOCKS)
-  real, save :: mph_jet_src(NXB,NZB,MAXBLOCKS)
+  real, save :: mph_jet_vel(NXB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
+  real, save :: mph_jet_src(NXB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
+
   real, save :: mph_srf_src(NYB,NZB,MAXBLOCKS)
   real, save :: mph_prs_src(NYB,NZB,MAXBLOCKS)
   real, save :: mph_prs_fac(NYB,NZB,MAXBLOCKS)

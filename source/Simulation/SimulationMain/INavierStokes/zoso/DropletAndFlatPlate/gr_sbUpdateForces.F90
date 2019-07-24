@@ -1532,10 +1532,10 @@ subroutine gr_sbUpdateForces
 
      if(ib_dfun_flg) then
 
-     solnData(CURV_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
                        blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
                        blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &
-     solnData(CURV_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
                        blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
                        blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &
      ib_dt*                                                                &

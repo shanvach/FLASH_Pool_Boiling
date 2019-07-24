@@ -285,10 +285,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                 - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
+                  !                               - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
 
                   !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
@@ -311,10 +312,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                  -mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                  !regionData(i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
+                  !                                -mph_prs_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
 
                   !regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
                end do
 
             else
@@ -323,19 +325,21 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar)= mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
+                        !regionData(guard+1,1:je,1:ke,ivar)= mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
                         !regionData(guard+1,1:je,1:ke,ivar) = 0.0
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        !regionData(i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
                         !regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        !regionData(i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -483,8 +487,10 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                   - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                  !regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
+                  !                                 - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
                end do
 
                else if(ivar == DFUN_VAR) then
@@ -507,8 +513,10 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
-                                                   - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                  !regionData(k-i,1:je,1:ke,ivar) = 2*mph_prs_src(1:je,1:ke,blockHandle) &
+                  !                                 - mph_prs_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+
+                  regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
                end do
 
            else
@@ -517,17 +525,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                         if (isFace) then
                                 
-                        regionData(guard+1,1:je,1:ke,ivar)=mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
+                        !regionData(guard+1,1:je,1:ke,ivar)=mph_vly_flg(1:je,1:ke,blockHandle)*regionData(guard+1,1:je,1:ke,ivar)
 
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        !regionData(k-i,1:je,1:ke,ivar) = mph_vly_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        !regionData(k-i,1:je,1:ke,ivar) = mph_vlx_fac(1:je,1:ke,blockHandle)*regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -564,9 +574,14 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                elseif (ivar == DFUN_VAR) then
 
+               ja = endPoints(LOW,IAXIS)
+               jb = endPoints(HIGH,IAXIS)
+               ka = endPoints(LOW,KAXIS)
+               kb = endPoints(HIGH,KAXIS)
+
                k = 2*guard+1
                do i = 1,guard
-                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_src(1:je,1:ke,blockHandle) - regionData(i,1:je,1:ke,ivar)
+                  regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_src(ja:jb,ka:kb,blockHandle) - regionData(i,1:je,1:ke,ivar)
                end do
 
                else
@@ -589,13 +604,19 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
               if (ivar == VELC_FACE_VAR) then
          
-                        if(isFace) then
+ 
+                        ja = endPoints(LOW,IAXIS)
+                        jb = endPoints(HIGH,IAXIS)
+                        ka = endPoints(LOW,KAXIS)
+                        kb = endPoints(HIGH,KAXIS)
 
-                        regionData(guard+1,1:je,1:ke,ivar) = mph_jet_vel(1:je,1:ke,blockHandle)
+                       if(isFace) then
+
+                        regionData(guard+1,1:je,1:ke,ivar) = mph_jet_vel(ja:jb,ka:kb,blockHandle)
 
                         k=2*guard+2
                         do i=1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_vel(1:je,1:ke,blockHandle) - regionData(i,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = 2*mph_jet_vel(ja:jb,ka:kb,blockHandle) - regionData(i,1:je,1:ke,ivar)
                         enddo
 
                         else

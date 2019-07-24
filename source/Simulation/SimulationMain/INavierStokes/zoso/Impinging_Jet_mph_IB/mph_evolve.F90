@@ -530,12 +530,12 @@ else if(mph_flag == 0) then
        zcell = 0.0
 
        if(sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) .le. 0.5) then
-          mph_jet_vel(i-NGUARD,k,blockID) = -1.0
+          mph_jet_vel(i,k,blockID) = -1.0
        else
-          mph_jet_vel(i-NGUARD,k,blockID) =  0.0
+          mph_jet_vel(i,k,blockID) =  0.0
        end if
 
-       mph_jet_src(i-NGUARD,k,blockID)  = sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) - 0.5
+       mph_jet_src(i,k,blockID)  = sqrt((xcell-sim_jet_x)**2+(zcell-sim_jet_z)**2) - 0.5
 
      end do
 
