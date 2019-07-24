@@ -21,7 +21,6 @@
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,visc,lambda
-
         !--------------------------
         !- kpd - Local variables...
         !--------------------------
@@ -150,7 +149,7 @@
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
               !rho1x(i,j,k) = a1*a2/rho1
               !rho2x(i,j,k) = (1. - a1*a2)/rho2
-              if(lambda(i,j,k) .ge. 0.0) then
+              if(0.5*(lambda(i,j,k)+lambda(i-1,j,k)) .ge. 0.0) then
               rho1x(i,j,k) = rho2/rho1
               rho2x(i,j,k) = 0.0
 
@@ -174,7 +173,7 @@
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
               !rho1y(i,j,k) = a1*a2/rho1
               !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              if(lambda(i,j,k) .ge. 0.0) then
+              if(0.5*(lambda(i,j,k)+lambda(i,j-1,k)) .ge. 0.0) then
               rho1y(i,j,k) = rho2/rho1
               rho2y(i,j,k) = 0.0
 
@@ -239,7 +238,6 @@
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,lambda
-
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
         !- kpd - 
@@ -287,7 +285,6 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
-              !if(lambda(i,j,k)*lambda(i+1,j,k) .gt. 0.0) then
               if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
 
@@ -379,7 +376,6 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              !if(lambda(i,j,k)*lambda(i,j+1,k) .gt. 0.0) then
               if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
 
