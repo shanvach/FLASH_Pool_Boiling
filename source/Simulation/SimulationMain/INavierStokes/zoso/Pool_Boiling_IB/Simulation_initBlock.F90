@@ -257,12 +257,12 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
            !if(ycell .le. 0.15 + yr .and. ycell .gt. yr .and. xcell .ge. xl .and. xcell .le. xr) solnData(TEMP_VAR,i,j,k) = (0.15 + yr - ycell)/0.15
 
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
            !if(dxl .ge. 0.0 .and. dxr .ge. 0.0 .and. dyl .ge. 0.0 .and. dyr .lt. 0.0 .and. dyr .ge. -0.15) solnData(TEMP_VAR,i,j,k) = 1.0 - abs(dyr)/0.15
  
-           !if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .ge. -0.15) &
-           !   solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15 
+           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .ge. -0.15) &
+              solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15 
 
         enddo
      enddo
