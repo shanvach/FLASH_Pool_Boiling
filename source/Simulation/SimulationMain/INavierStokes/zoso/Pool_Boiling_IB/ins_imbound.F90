@@ -157,7 +157,7 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
                
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
-                   1.0*del(IAXIS)
+                   0.0*del(IAXIS)
 
            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS) +  &
@@ -242,7 +242,7 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS) +  &
-                   1.0*del(JAXIS)
+                   0.0*del(JAXIS)
 
            ! Get probe in fluid
 

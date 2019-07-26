@@ -2,8 +2,8 @@ subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #include "Flash.h"
 
-!#define GCELL_FORCING
-#define LINE_FORCING
+#define GCELL_FORCING
+!#define LINE_FORCING
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
