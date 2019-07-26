@@ -171,20 +171,12 @@
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
 
-
                a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                      
                a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                     pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-               if((lambda(i,j,k)+lambda(i-1,j,k))*0.5 .gt. 0.0) then
-               rho1x(i,j,k) = 0.0
-               rho2x(i,j,k) = 1.0
-
-               else
                rho1x(i,j,k) = a1*a2/(rho1/rho2)
                rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
-
-               end if
 
           end do
         end do
@@ -196,20 +188,12 @@
         do i = ix1-1,ix2+1
            do j = jy1-1,jy2+1
 
-
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if((lambda(i,j,k)+lambda(i,j-1,k))*0.5 .gt. 0.0) then
-              rho1y(i,j,k) = 0.0
-              rho2y(i,j,k) = 1.0
-        
-              else
               rho1y(i,j,k) = a1*a2/(rho1/rho2)
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
-
-              end if
 
            end do
         end do
