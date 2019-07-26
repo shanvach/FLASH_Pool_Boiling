@@ -2,7 +2,7 @@
 !!
 !! NAME
 !!
-!! mph_iblset(blockCound,blockList)
+!! mph_iblset(blockCount,blockList,ibd)
 !!
 !! SYNOPSIS
 !! 
@@ -18,7 +18,7 @@
 !! Written by Elizabeth Gregorio (EG)
 !!
 
-subroutine mph_iblset(blockCount,blockList)
+subroutine mph_iblset(blockCount,blockList,blockId,ibd)
 
 #include "Flash.h"
 
@@ -46,18 +46,16 @@ subroutine mph_iblset(blockCount,blockList)
 
   ! IO variables
   integer, intent(in) :: ibd
-
-  ! Internal Variables
-  integer :: numPart, e, ptelem, max_ptelem, nel, p
-  real, allocatable, dimension(:) :: xpos,ypos,dist,angl
-  real, allocatable, dimension(:) :: xacc,yacc,zacc,xnrm,ynrm,znrm
-  integer, allocatable, dimension(:) :: loc_num
-
-  ! Arugments List
-  integer, intent(in) :: sweepOrder
+  integer, intent(in) :: blockId
   integer, INTENT(INOUT) :: blockCount
   integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
 
+  ! Internal Variables
+  integer :: numPart, e, ptelem, max_ptelem, nel, p
+  real, allocatable, dimension(:) :: xpos,ypos
+  integer, allocatable, dimension(:) :: loc_num
+
+  ! Arugments List
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
 
   real, dimension(2,MDIM) :: boundBox
@@ -76,12 +74,20 @@ subroutine mph_iblset(blockCount,blockList)
   integer :: count
   integer :: intval
 
+  ! For the algorithm
+  real, allocatable, dimension(:) :: PA, PB, P1, P0, v1, v2
+  real, allocatable, dimension(:) :: angl, dist
+  real :: u,dot,det,ind
+  integer :: nelm=2 ! Dimension for the points, 2 for (x,y) in 2-D
+
   ! Maximum number of particles per element (in the immersed boundary):
   nel = sm_bodyInfo(ibd)%ws_nel
   max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
 
   allocate( xpos(max_ptelem), xnrm(max_ptelem) )
   allocate( ypos(max_ptelem), ynrm(max_ptelem) )
+  allocate( PA(nelm), PB(nelm), P1(nelm) )
+  allocate( P0(nelm), v1(nelm), v2(nelm) )
   allocate( dist(max_ptelem-1), angl(max_ptelm-1) )
   allocate( loc_num(max_ptelem) )
 
@@ -121,62 +127,65 @@ subroutine mph_iblset(blockCount,blockList)
                    real(i - NGUARD - 1)*del(IAXIS) +   &
                    0.5*del(IAXIS)
 
-           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                   real(j - NGUARD - 1)*del(JAXIS)  +  &
-                   0.5*del(JAXIS) 
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
+                   real(j - NGUARD - 1)*del(JAXIS) +  &
+                   0.5*del(JAXIS)
+
+           zcell  = 0.0 
 
            do k=1,max_ptelem-1
 
-           ! The following commented commands are written in a hybrid of Matlab
-           ! and Fortran, they need to be ALL in Fortran and for THIS Flash code
-           ! before they are uncommented.
+             ! End points for the line segment of the IB
+             ! PA is on the left and PB is on the right
+               PA = (/xpos(k), ypos(k)/)
+               PB = (/xpos(k+1), ypos(k+1)/)
 
-           ! End points for the line segment of the IB
-           ! PA is on the left and PB is on the right
-           ! PA = [xpos(k), ypos(k)]
-           ! PB = [xpos(k+1), ypos(k+1)]
+             ! Grid cell point
+               P1 = (/xcell, ycell/)
 
-           ! Grid cell point
-           ! P1 = [xcell, ycell]
+             ! Drop a normal from P1 to the line made by connecting PA PB (not the
+             ! line segment)
+               u = ((P1(1)-PA(1))*(PB(1)-PA(1)) + (P1(2)-PA(2))*(PB(2)-PA(2))) / &
+                   ((PB(1)-PA(1))*(PB(1)-PA(1)) + (PB(2)-PA(2))*(PB(2)-PA(2)))
 
-           ! Drop a normal from P1 to the line of PA PB
-           ! u = ((P1(1)-PA(1))*(PB(1)-PA(1)) + (P1(2)-PA(2))*(PB(2)-PA(2))) / &
-           !     ((PB(1)-PA(1))*(PB(1)-PA(1)) + (PB(2)-PA(2))*(PB(2)-PA(2)))
+             ! Re-assign u if the normal hits the line segment to the left of PA or
+             ! the right of PB
+               if (u .lt. 0) then
+                  u = 0
+               else if (u .gt. 1) then
+                  u = 1
+               end if 
 
-           ! Re-assign u if P1 is left of PA or right of PB
-           ! if (u .lt. 0) then
-           !    u = 0
-           ! else if (u .gt. 1) then
-           !    u = 1
-           ! end if 
+             ! Find the point on the line segment with the shortest distance to P1
+             ! (If the normal hits the line outside the line segment it is
+             !  reassigned to hit the closer endpoint.)
+               P0 = PA + (PB - PA)*u
 
-           ! Find the point on the line segment with the shortest distance to P1
-           ! P0 = PA + (PB - PA)*u
+             ! Determine the quadrent and angle for the "normal"
+             ! (If to the left or right of the line segment the vector with the 
+             !  shortest distance to the line segment will not be perpendicular)
+             
+               if (P0(1) .eq. PA(1) .and. P0(2) .eq. P2(2)) then
+                  v1 = P1 - P0
+                  v2 = P0 - PB
+               else
+                  v1 = P1 - P0
+                  v2 = P0 - PA
+               end if
 
-           ! Determine the quadrent and angle for the "normal"
-           ! (If to the left or right of the line segment the vector with the 
-           !  shortest distance to the line segment will not be perpendicular)
-           ! 
-           ! if (P0(1) .eq. PA(1) .and. P0(2) .eq. P2(2)) then
-           !    v1 = P1 - P0 ! REMEMBER v1 and v2 need to be declared at the top
-           !                   of this file!
-           !    v2 = P0 - PB
-           ! else
-           !    v1 = P1 - P0
-           !    v2 = P0 - PA
-           ! end if
+               dot =   v1(1)*v2(1) + v1(2)*v2(2)
+               det = -(v1(1)*v2(1) - v1(2)*v2(2))
+            
+               angl(k) = atan2(det, dot)
+               dist(k) = sqrt(v1(1)^2 + v2(2)^2)
 
-           ! dot =   v1(1)*v2(1) + v1(2)*v2(2)
-           ! det = -(v1(1)*v2(1) - v1(2)*v2(2))
-           ! angle(k) = atan2(det, dot)
-
-           ! d(k) = sqrt(v1(1)^2 + v2(2)^2)
-
-           ! Loops through all points on the grid
+             ! Loops through all points on the grid
 
            end do
-           ! ind = find(d==min(d)) ! Would need to declare ind in the beginning!
-           ! lambda(i,j) = d(ind(1))*sign(angle(ind(1)))
+
+           ind = minloc(dist)
+           solnData(LMDA_VAR,i,j,k) = dist(ind(1))*sign(angle(ind(1)))
+
          end do
         end do
 
