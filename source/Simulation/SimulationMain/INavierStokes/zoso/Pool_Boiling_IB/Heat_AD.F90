@@ -222,17 +222,13 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     end do
 
-    !ib_temp_flg = .true.
-    !ib_vel_flg  = .false.
-    !ib_dfun_flg = .false.
-
-    !if(dr_nstep>1) call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+    call Heat_imbound(blockCount,blockList,timeEndAdv,dt,TEMP_VAR)
 
    end do !End RK-2
 

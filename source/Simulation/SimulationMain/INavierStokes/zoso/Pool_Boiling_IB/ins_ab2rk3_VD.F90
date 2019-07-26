@@ -593,16 +593,18 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   ! Rescale Velocities at outflows for overall conservation: 
   !call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout) !- ML: commented out due to error with neumann_ins bc?
 
-  ib_temp_flg = .false.
-  ib_vel_flg  = .true.
-  ib_dfun_flg = .false.
+  !ib_temp_flg = .false.
+  !ib_vel_flg  = .true.
+  !ib_dfun_flg = .false.
 
-  CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
+  !CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
   ! Force Immersed Boundaries:
-  call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-  CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
-  ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
-  if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
+  !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+  !CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
+  !ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
+  !if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
+
+  call ins_imbound(blockCount,blockList,timeEndAdv,dt,VELC_FACE_VAR)
 
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)

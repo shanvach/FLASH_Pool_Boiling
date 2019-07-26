@@ -37,10 +37,6 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   use ImBound_data, only : ib_stencil
 
-  ! Following routine is written by Akash
-  ! Actual calls written by Shizao and Keegan
-  ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
-
   implicit none
 
 #include "constants.h"

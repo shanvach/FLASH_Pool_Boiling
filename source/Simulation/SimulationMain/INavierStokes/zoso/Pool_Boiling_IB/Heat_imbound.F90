@@ -1,6 +1,9 @@
-subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #include "Flash.h"
+
+!#define GCELL_FORCING
+#define LINE_FORCING
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -24,10 +27,12 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                              Grid_fillGuardCells,    &
                              Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
-  use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
+  use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ,&
+                            ins_predcorrflg
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
+                             mph_radius, mph_isAttached, mph_timeStamp, mph_vlim, mph_psi_adv
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -46,10 +51,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   include "Flash_mpi.h"
 
   ! Arugments List
-  integer, intent(in) :: sweepOrder
   integer, INTENT(INOUT) :: blockCount
   integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-  real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+  real,    INTENT(IN) :: timeEndAdv,dt
+  integer, intent(in) :: ivar
 
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
 
@@ -72,7 +77,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real :: lsDT,lsT,minCellDiag
   real :: volSum,volSumAll
 
-  real :: vol, cx, cy, vx, vy
+  real :: vol, cx, cy
   real :: xh, yh, xl, yl
 
   !- kpd - For Overall Solver Timer... 
@@ -85,7 +90,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
-  real    :: hnorm, xprobe(3), yprobe(3), zprobe, phiprobe
+  real    :: hnorm, xprobe, yprobe, zprobe, phiprobe
 
   real,parameter  :: htol = 0.0001
 
@@ -98,16 +103,15 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: idim
   real    :: xyz_stencil(ib_stencil,MDIM)
   real :: delaux(MDIM)
-  real :: zp(3)
+  real :: zp
 
   integer, parameter :: derivflag = 0
   integer :: ib_ind
 
-  real    :: hratio, veli, this_psi
+  real    :: hratio, temp, this_psi
 
-  real    :: nrmx, nrmy, nmlx, nmly, ib_theta
-
-  integer :: probe_index
+  real :: lambda
+  real :: nx, ny, m, n
 
   do lb = 1,blockCount
 
@@ -133,91 +137,94 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-                         
+
+           lambda = solnData(LMDA_VAR,i,j,k)
+
+           nx = solnData(NMLX_VAR,i,j,k)
+           ny = solnData(NMLY_VAR,i,j,k)
+
+#ifdef LINE_FORCING
+           if(abs(lambda) .lt. 1.0*del(IAXIS)) then
+#endif
+
+#ifdef GCELL_FORCING
+           if(lambda .ge. 0.0 .and. lambda .lt. 1.5*del(IAXIS)) then
+#endif
+               
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
                    0.5*del(IAXIS)
 
-           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS) +  &
                    0.5*del(JAXIS)
-
-         !  zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-         !          real(k - NGUARD - 1)*del(KAXIS)  +  &
-         !          0.5*del(KAXIS)
-          
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
-
+         
            ! Get probe in fluid
-           hnorm = 1.0*del(JAXIS)
 
-           xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+#ifdef LINE_FORCING
+           if(lambda .lt. 0.0) then
+             hnorm =  1.5*del(IAXIS)
+           else
+             hnorm = -1.5*del(IAXIS)
+           end if
+#endif
 
-           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+#ifdef GCELL_FORCING
+           hnorm = 1.0*del(IAXIS)
+#endif
 
-           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+           xprobe = xcell + nx*(lambda+hnorm)
+           yprobe = ycell + ny*(lambda+hnorm)
 
            ! Interpolate function at probe 
-           do probe_index = 1,3
-           externalPt(IAXIS) = xprobe(probe_index)
-           externalPt(JAXIS) = yprobe(probe_index)
+           externalPt(IAXIS) = xprobe
+           externalPt(JAXIS) = yprobe
            externalPt(KAXIS) = 0.0
 
-           part_Nml(IAXIS) = solnData(NMLX_VAR,i,j,k)
-           part_Nml(JAXIS) = solnData(NMLY_VAR,i,j,k)
+           part_Nml(IAXIS) = nx
+           part_Nml(JAXIS) = ny
            part_Nml(KAXIS) = 0.0
 
-           ! Cell centered stencil for DFUN interpolation at probe
-           gridfl(:) = CENTER
+           gridfl(:)   = CENTER
+           delaux(1:NDIM) = 0.5*del(1:NDIM)
 
-           call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
+           ! Define Interpolation Stencil For Particle:
+           call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
                             ib_external(:,:),dfe,FORCE_FLOW)
 
-           delaux = 0.5*del
-
-           xyz_stencil(:,:) = 0.
-
+           ! Interpolation of the values of velocity to Lagrangian points:
+           xyz_stencil(:,:) = 0. 
            do idim = 1,NDIM
               xyz_stencil(:,idim) = coord(idim) - 0.5*bsize(idim) + &
-                                    real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim)
+              real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim) 
            enddo
 
-           ! Get shape function ib_external_phile  for points on stencil
-           call ib_getInterpFunc(externalPt,xyz_stencil,del,derivflag,ib_external_phile)
+           call ib_getInterpFunc(externalPt,xyz_stencil,del,0,ib_external_phile)
+                
+           temp = 0
 
-           zp(probe_index) = 0.      ! zp = DFUN at probe point
+           do ii = 1 , ib_stencil      
+              temp = temp + ib_external_phile(ii,CONSTANT_ONE) * &
+              solnData(ivar,ib_external(ii,IAXIS),ib_external(ii,JAXIS),ib_external(ii,KAXIS));   
+           end do
 
-           do ib_ind = 1 , ib_stencil
-                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
-           enddo
-           enddo
+           m = abs(lambda)
+           n = abs(lambda+hnorm)
 
-           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
+#ifdef LINE_FORCING
+           solnData(ivar,i,j,k) = (m*temp+n)/(m+n)    
+#endif
 
-           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .le. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
+#ifdef GCELL_FORCING
+           solnData(ivar,i,j,k) = 2.0 - temp
+#endif
+
            end if
-
-           end if
-          
-         end do
-        end do
-
-        k = 1
-        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
- 
-          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS) .and. &
-             solnData(DFUN_VAR,i,j,k) .le. 0.0) solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - 1.5*del(IAXIS)
 
          end do
         end do
 
-        ! Release pointers:
+         ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
         call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
@@ -226,10 +233,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   end do
  
   gcMask = .FALSE.
-
-  gcMask(DFUN_VAR) = .TRUE.
+  gcMask(TEMP_VAR) = .TRUE.
 
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-end subroutine mph_imbound
+end subroutine Heat_imbound
