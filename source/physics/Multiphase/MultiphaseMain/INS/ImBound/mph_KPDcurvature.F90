@@ -36,6 +36,7 @@
 
         real, dimension(ix2,jy2) :: adf
         real :: axr,axl,ayr,ayl,ax,ay
+        real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
         crmx = -1E10
         crmn = 1E10
@@ -45,6 +46,14 @@
 
         !- kpd - For 2D runs 
         k=1
+
+         sunion = s
+
+         do j=jy1-2,jy2+2
+            do i=ix1-2,ix2+2
+                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+            end do
+         end do
 
         !- kpd - Compute the curvature ---------------
 
@@ -122,7 +131,7 @@
            do i = ix1-1,ix2+1
               pf(i,j,k) = 0.
 
-              if(s(i,j,k).ge.0.) then
+              if(sunion(i,j,k).ge.0.) then
                  pf(i,j,k) = 1.                       !- kpd - Set phase function on each side of interface
                  visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
                  !print*,"vis1",i,j,visc(i,j,k)
@@ -170,6 +179,10 @@
               rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
            end do
         end do
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
       end subroutine mph_KPDcurvature2DAB
 
