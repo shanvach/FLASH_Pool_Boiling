@@ -11,7 +11,7 @@
         implicit none
 
 #include "Flash.h"
-
+#include "constants.h"
         !*************************************************************************
 
         !---------------------------------
@@ -38,6 +38,7 @@
 
         real, dimension(ix2,jy2) :: adf
         real :: axr,axl,ayr,ayl,ax,ay
+        real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
         crmx = -1E10
         crmn = 1E10
@@ -51,6 +52,14 @@
         kz1 = k
 
         !- kpd - Compute the curvature ---------------
+
+         sunion = s
+
+         do j=jy1-2,jy2+2
+            do i=ix1-2,ix2+2
+                sunion(i,j,kz1) = min(s(i,j,kz1),-lambda(i,j,kz1))
+            end do
+         end do
 
         crv = 0.
         do j = jy1,jy2
@@ -125,7 +134,7 @@
         k=1
 
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
-        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
         !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *pf(ix1-1:ix2+1,jy1-1:jy2+1,k)
         visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)       
@@ -230,6 +239,10 @@
         !         + ((s(ix1-1:ix2+1,jy1:jy2+2,kz1) - &
         !             s(ix1-1:ix2+1,jy1-2:jy2,kz1))/2./dy)**2 )
 
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
 
       end subroutine mph_KPDcurvature2DAB
@@ -449,7 +462,7 @@
 
               end if
 
-             if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above

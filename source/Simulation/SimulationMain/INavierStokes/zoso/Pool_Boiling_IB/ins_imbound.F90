@@ -2,8 +2,8 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #include "Flash.h"
 
-#define GCELL_FORCING
-!#define LINE_FORCING
+!#define GCELL_FORCING
+#define LINE_FORCING
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -29,10 +29,6 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
   use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ,&
                             ins_predcorrflg
-
-  use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
-                             mph_radius, mph_isAttached, mph_timeStamp, mph_vlim, mph_psi_adv
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -110,7 +106,8 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
   real    :: hratio, veli, this_psi
 
-  real :: lambdax, lambday
+  real :: lambdax, lambday,   lambdaxr, lambdayr
+  real :: lambdaxl, lambdayl, lambdaxc, lambdayc
   real :: ux,uy,vx,vy,m,n
 
   do lb = 1,blockCount
@@ -135,12 +132,21 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
         k = 1
-        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+        do j=blkLimitsGC(LOW,JAXIS)+1,blkLimitsGC(HIGH,JAXIS)-1
+         do i=blkLimitsGC(LOW,IAXIS)+1,blkLimitsGC(HIGH,IAXIS)-1
 
            lambdax = 0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k))
            lambday = 0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k))
 
+           lambdaxc = solnData(LMDA_VAR,i,j,k)
+           lambdayc = solnData(LMDA_VAR,i,j,k)
+              
+           lambdaxr = solnData(LMDA_VAR,i+1,j,k)
+           lambdayr = solnData(LMDA_VAR,i,j+1,k)
+
+           lambdaxl = solnData(LMDA_VAR,i-1,j,k)
+           lambdayl = solnData(LMDA_VAR,i,j-1,k)
+         
            ux = 0.5*(solnData(NMLX_VAR,i,j,k)+solnData(NMLX_VAR,i-1,j,k))
            uy = 0.5*(solnData(NMLY_VAR,i,j,k)+solnData(NMLY_VAR,i-1,j,k))
 
@@ -148,11 +154,13 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
            vy = 0.5*(solnData(NMLY_VAR,i,j,k)+solnData(NMLY_VAR,i,j-1,k))
 
 #ifdef LINE_FORCING
-           if(abs(lambdax) .lt. 1.0*del(IAXIS)) then
+           !if(abs(lambdax) .le. 1.0*del(IAXIS)) then
+           if(lambdax .le. 0.0 .and. lambdax .ge. -1.0*del(IAXIS)) then
 #endif
 
 #ifdef GCELL_FORCING
-           if(lambdax .ge. 0.0 .and. lambdax .lt. 1.5*del(IAXIS)) then
+           if(lambdax .ge. 0.0 .and. lambdax .le. 1.0*del(IAXIS)) then
+           !if(lambdax .ge. 0.0) then
 #endif
                
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
@@ -167,9 +175,9 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #ifdef LINE_FORCING
            if(lambdax .lt. 0.0) then
-             hnorm =  1.5*del(IAXIS)
+             hnorm =  2.0*del(IAXIS)
            else
-             hnorm = -1.5*del(IAXIS)
+             hnorm = -2.0*del(IAXIS)
            end if
 #endif
 
@@ -219,21 +227,23 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
            n = abs(lambdax+hnorm)
 
 #ifdef LINE_FORCING
-           facexData(ivar,i,j,k) = m*veli/(m+n)    
+           facexData(ivar,i,j,k) = 0.0 !m*veli/(m+n)    
 #endif
 
 #ifdef GCELL_FORCING
-           facexData(ivar,i,j,k) = -veli
+           facexData(ivar,i,j,k) = -veli*(lambdax/hnorm)
 #endif
 
            end if
 
 #ifdef LINE_FORCING
-           if(abs(lambday) .lt. 1.0*del(IAXIS)) then
+           !if(abs(lambday) .le. 1.0*del(IAXIS)) then
+           if(lambday .le. 0.0 .and. lambday .ge. -1.0*del(IAXIS)) then
 #endif
 
 #ifdef GCELL_FORCING
-           if(lambday .ge. 0.0 .and. lambday .lt. 1.5*del(IAXIS)) then
+           if(lambday .ge. 0.0 .and. lambday .le. 1.0*del(IAXIS)) then
+           !if(lambday .ge. 0.0) then
 #endif                    
       
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
@@ -248,9 +258,9 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #ifdef LINE_FORCING
            if(lambday .lt. 0.0) then
-             hnorm =  1.5*del(IAXIS)
+             hnorm =  2.0*del(IAXIS)
            else
-             hnorm = -1.5*del(IAXIS)
+             hnorm = -2.0*del(IAXIS)
            end if
 #endif
 
@@ -300,11 +310,11 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
            n = abs(lambday+hnorm)
 
 #ifdef LINE_FORCING
-           faceyData(ivar,i,j,k) = m*veli/(m+n)    
+           faceyData(ivar,i,j,k) = 0.0 !m*veli/(m+n)    
 #endif
 
 #ifdef GCELL_FORCING
-           faceyData(ivar,i,j,k) = -veli
+           faceyData(ivar,i,j,k) = -veli*(lambday/hnorm)
 #endif
 
            end if
@@ -320,14 +330,14 @@ subroutine ins_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
   end do
  
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+ivar) = .TRUE.                 ! ustar
-  gcMask(NUNK_VARS+1*NFACE_VARS+ivar) = .TRUE.    ! vstar
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+ivar) = .TRUE.    ! wstar
-#endif
-  ins_predcorrflg = .false.
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+!  gcMask = .FALSE.
+!  gcMask(NUNK_VARS+ivar) = .TRUE.                 ! ustar
+!  gcMask(NUNK_VARS+1*NFACE_VARS+ivar) = .TRUE.    ! vstar
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+ivar) = .TRUE.    ! wstar
+!#endif
+!  ins_predcorrflg = .false.
+!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
 end subroutine ins_imbound

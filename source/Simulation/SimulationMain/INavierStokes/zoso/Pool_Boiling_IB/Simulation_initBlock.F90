@@ -92,10 +92,10 @@ subroutine Simulation_initBlock(blockId)
   real :: rot_rect
 
 
-  xl =  -4.0;
-  xr =   4.0;
-  yl =   3.0;
-  yr =   5.0;
+  xl =  -2.0;
+  xr =   2.0;
+  yl =   2.0;
+  yr =   3.0;
   !rot_rect = 3*acos(-1.0)/4;
   rot_rect = 0.0*cos(-1.0)/4;
 
@@ -257,7 +257,7 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
            !if(ycell .le. 0.15 + yr .and. ycell .gt. yr .and. xcell .ge. xl .and. xcell .le. xr) solnData(TEMP_VAR,i,j,k) = (0.15 + yr - ycell)/0.15
 
-           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
            !if(dxl .ge. 0.0 .and. dxr .ge. 0.0 .and. dyl .ge. 0.0 .and. dyr .lt. 0.0 .and. dyr .ge. -0.15) solnData(TEMP_VAR,i,j,k) = 1.0 - abs(dyr)/0.15
  

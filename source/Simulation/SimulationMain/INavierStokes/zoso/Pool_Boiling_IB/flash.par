@@ -86,10 +86,10 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =   -8.00
-xmax =    8.00
+xmin =   -4.00
+xmax =    4.00
 ymin =    0.00
-ymax =   16.00
+ymax =    8.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -115,8 +115,8 @@ restart         = .false.
 nend = 1000000000
 tmax            = 2500.0
 cflflg          = 0
-cfl             = 0.4
-sigma		= 0.4
+cfl             = 0.2
+sigma		= 0.2
 dtspec          = 1.0d-4
 dtinit          = 1.0d-4
 tstep_change_factor=1.01
@@ -141,8 +141,8 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 40
-nblocky	= 40
+nblockx	= 8
+nblocky	= 8
 
 lrefine_min	= 1
 lrefine_max     = 1

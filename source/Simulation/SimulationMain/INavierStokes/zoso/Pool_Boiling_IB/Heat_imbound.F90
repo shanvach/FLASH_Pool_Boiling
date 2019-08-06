@@ -2,8 +2,8 @@ subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #include "Flash.h"
 
-#define GCELL_FORCING
-!#define LINE_FORCING
+!#define GCELL_FORCING
+#define LINE_FORCING
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -144,11 +144,11 @@ subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
            ny = solnData(NMLY_VAR,i,j,k)
 
 #ifdef LINE_FORCING
-           if(abs(lambda) .lt. 1.0*del(IAXIS)) then
+           if(abs(lambda) .le. 1.0*del(IAXIS)) then
 #endif
 
 #ifdef GCELL_FORCING
-           if(lambda .ge. 0.0 .and. lambda .lt. 1.5*del(IAXIS)) then
+           if(lambda .ge. 0.0 .and. lambda .le. 1.0*del(IAXIS)) then
 #endif
                
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
@@ -163,9 +163,9 @@ subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 
 #ifdef LINE_FORCING
            if(lambda .lt. 0.0) then
-             hnorm =  1.5*del(IAXIS)
+             hnorm =  2.0*del(IAXIS)
            else
-             hnorm = -1.5*del(IAXIS)
+             hnorm = -2.0*del(IAXIS)
            end if
 #endif
 
@@ -216,7 +216,7 @@ subroutine Heat_imbound(blockCount,blockList,timeEndAdv,dt,ivar)
 #endif
 
 #ifdef GCELL_FORCING
-           solnData(ivar,i,j,k) = 2.0 - temp
+           solnData(ivar,i,j,k) = (2.0*(lambda+hnorm) - temp*lambda)/hnorm
 #endif
 
            end if
