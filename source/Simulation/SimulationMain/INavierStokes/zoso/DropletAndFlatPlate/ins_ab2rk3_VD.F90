@@ -594,6 +594,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
   ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
+
+  !call ins_imbound(blockCount,blockList,timeEndAdv,dt,VELC_FACE_VAR)
  
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
