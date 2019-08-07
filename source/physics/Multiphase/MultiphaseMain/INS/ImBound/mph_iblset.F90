@@ -145,20 +145,25 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            zcell  = 0.0 
 
-           do k=1,max_ptelem-1
+           do k=1,max_ptelem
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
                PA = (/xpos(k), ypos(k)/)
-               PB = (/xpos(k+1), ypos(k+1)/)
+               
+               if (k .eq. max_ptelem) then
+                  PB = (/xpos(1), ypos(1)/)
+               else
+                  PB = (/xpos(k+1), ypos(k+1)/)
+               end if
 
              ! Grid cell point
                P1 = (/xcell, ycell/)
 
              ! Drop a normal from P1 to the line made by connecting PA PB (not the
              ! line segment)
-               u = ((P1(i)-PA(i))*(PB(i)-PA(i)) + (P1(j)-PA(j))*(PB(j)-PA(j))) / &
-                   ((PB(i)-PA(i))*(PB(i)-PA(i)) + (PB(j)-PA(j))*(PB(j)-PA(j)))
+               u = ((P1(1)-PA(1))*(PB(1)-PA(1)) + (P1(2)-PA(2))*(PB(2)-PA(2))) / &
+                   (sum((PB-PA)**2))
 
              ! Re-assign u if the normal hits the line segment to the left of PA or
              ! the right of PB
@@ -177,12 +182,12 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! (If to the left or right of the line segment the vector with the 
              !  shortest distance to the line segment will not be perpendicular)
              
-               if (P0(i) .eq. PA(i) .and. P0(j) .eq. P2(j)) then
+               if (P0(1) .eq. PA(1) .and. P0(2) .eq. P2(2)) then
                   v1 = P1 - P0
                   v2 = P0 - PB
                else
                   v1 = P1 - P0
-                  v2 = P0 - PA
+                  v2 = PA - P0
                end if
 
                dot =   v1(1)*v2(1) + v1(2)*v2(2)
@@ -190,7 +195,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
   
             
                angl(k) = atan2(det, dot)
-               dist(k) = sqrt(v1(1)**2 + v2(2)**2)
+               dist(k) = sqrt(v1(1)**2 + v1(2)**2)
 
              ! Loops through all points on the grid
 
@@ -198,7 +203,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            ind = minloc(dist,1) ! Finds the index of the minimum distance
            mvd = dist(ind)      ! Gets the minimum distance value
-           mva = angl(ind)      ! Gets teh angle for the minimum distance
+           mva = angl(ind)      ! Gets the angle for the minimum distance
 
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
