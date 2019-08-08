@@ -25,9 +25,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 #include "SolidMechanics.h"
 
   ! Modules Used
-  use SolidMechanics_data, only: sm_bodyInfo
-  use sm_element_interface, only: sm_el02_mapParticles, sm_el10_mapParticles, &
-                                  sm_el01_mapParticles
+!  use SolidMechanics_data, only: sm_bodyInfo
+!  use sm_element_interface, only: sm_el02_mapParticles, sm_el10_mapParticles, &
+!                                  sm_el01_mapParticles
   use gr_sbData, ONLY : gr_sbBodyInfo
   use Driver_interface, ONLY : Driver_abortFlash
 
@@ -40,9 +40,12 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
                              Grid_fillGuardCells,    &
                              Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
-  use ib_interface, ONLY : ib_stencils
+  use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
 
-  use ImBound_data, only : ib_stencil
+!  use ib_interface, ONLY : ib_stencils
+
+!  use ImBound_data, only : ib_stencil
 
   implicit none
 
@@ -58,9 +61,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 !  integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
 
   ! Internal Variables
-  integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
+!  integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
   real, allocatable, dimension(:) :: xpos,ypos
-  integer, allocatable, dimension(:) :: loc_num
+!  integer, allocatable, dimension(:) :: loc_num
 
   ! Arugments List
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
@@ -71,32 +74,37 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID,ind,mva,mvd
+  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID,mva,mvd
 
   real bsize(MDIM),coord(MDIM)
 
   real del(MDIM),xcell,ycell,zcell
 
   integer :: listofBlocks(MAXBLOCKS)
-  integer :: count
+!  integer :: count
   integer :: intval
 
   ! For the algorithm
   real, allocatable, dimension(:) :: PA, PB, P1, P0, P2, v1, v2
-  real, allocatable, dimension(:) :: angl, dist, ones
+  real, allocatable, dimension(:) :: angl, dist, ones,ind
   real :: u,dot,det
   integer :: nelm=2 ! Dimension for the points, 2 for (x,y) in 2-D
 
-  nel = sm_bodyInfo(ibd)%ws_nel
-  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
-  max_ptm1 = max_ptelem-1
+!  nel = sm_bodyInfo(ibd)%ws_nel
+!  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
+!  max_ptm1 = max_ptelem-1
+
+  integer :: max_ptelem=4,max_ptm1=4
 
   allocate( xpos(max_ptelem) )
   allocate( ypos(max_ptelem) )
   allocate( PA(nelm), PB(nelm), P1(nelm), P2(nelm) )
-  allocate( P0(nelm), v1(nelm), v2(nelm) )
+  allocate( P0(nelm), v1(nelm), v2(nelm), ind(1) )
   allocate( dist(max_ptm1), angl(max_ptm1), ones(max_ptm1) )
-  allocate( loc_num(max_ptelem) )
+!  allocate( loc_num(max_ptelem) )
+
+  xpos = (/-3,  3,  3, -3/)
+  ypos = (/-3, -3, -4, -4/)
 
   do lb = 1,max_ptm1
       ones(lb) = 1.0
@@ -124,10 +132,10 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
         call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
             ! Point to blocks center and face vars:
-            call Grid_getBlkPtr(blockID,solnData,CENTER)
-            call Grid_getBlkPtr(blockID,facexData,FACEX)
-            call Grid_getBlkPtr(blockID,faceyData,FACEY)
-            call Grid_getBlkPtr(blockID,facezData,FACEZ)
+        call Grid_getBlkPtr(blockID,solnData,CENTER)
+        call Grid_getBlkPtr(blockID,facexData,FACEX)
+        call Grid_getBlkPtr(blockID,faceyData,FACEY)
+        call Grid_getBlkPtr(blockID,facezData,FACEZ)
         
 
         k = 1
@@ -163,7 +171,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! Drop a normal from P1 to the line made by connecting PA PB (not the
              ! line segment)
                u = ((P1(1)-PA(1))*(PB(1)-PA(1)) + (P1(2)-PA(2))*(PB(2)-PA(2))) / &
-                   (sum((PB-PA)**2))
+                   (sum((PB-PA)**2)) 
 
              ! Re-assign u if the normal hits the line segment to the left of PA or
              ! the right of PB
@@ -201,9 +209,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            end do
 
-           ind = minloc(dist,1) ! Finds the index of the minimum distance
-           mvd = dist(ind)      ! Gets the minimum distance value
-           mva = angl(ind)      ! Gets the angle for the minimum distance
+           ind = minloc(dist) ! Finds the index of the minimum distance
+           mvd = dist(ind(1)) ! Gets the minimum distance value
+           mva = angl(ind(1)) ! Gets the angle for the minimum distance
 
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
@@ -254,5 +262,11 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
         call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
+
+  deallocate( xpos )
+  deallocate( ypos )
+  deallocate( PA, PB, P1, P2 )
+  deallocate( P0, v1, v2 )
+  deallocate( dist, angl, ones )
 
 end subroutine mph_iblset
