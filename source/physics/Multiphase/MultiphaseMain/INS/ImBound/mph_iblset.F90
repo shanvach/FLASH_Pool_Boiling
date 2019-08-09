@@ -94,7 +94,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 !  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
 !  max_ptm1 = max_ptelem-1
 
-  integer :: max_ptelem=4,max_ptm1=4
+  integer :: max_ptelem=2,max_ptm1=2 ! for box should be 4
 
   allocate( xpos(max_ptelem) )
   allocate( ypos(max_ptelem) )
@@ -103,8 +103,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
   allocate( dist(max_ptm1), angl(max_ptm1), ones(max_ptm1) )
 !  allocate( loc_num(max_ptelem) )
 
-  xpos = (/-3,  3,  3, -3/)
-  ypos = (/-3, -3, -4, -4/)
+  xpos = (/-3,  3/)!,  3, -3/)
+  ypos = (/-3, -3/)!, -4, -4/)
 
   do lb = 1,max_ptm1
       ones(lb) = 1.0
@@ -171,7 +171,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! Drop a normal from P1 to the line made by connecting PA PB (not the
              ! line segment)
                u = ((P1(1)-PA(1))*(PB(1)-PA(1)) + (P1(2)-PA(2))*(PB(2)-PA(2))) / &
-                   (sum((PB-PA)**2)) 
+                   (((PB(1)-PA(1))**2)+((PB(2)-PA(2))**2)) 
 
              ! Re-assign u if the normal hits the line segment to the left of PA or
              ! the right of PB
@@ -184,24 +184,23 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! Find the point on the line segment with the shortest distance to P1
              ! (If the normal hits the line outside the line segment it is
              !  reassigned to hit the closer endpoint.)
-               P0 = PA + (PB - PA)*u
+               P0 = (/(PA(1) + (PB(1) - PA(1))*u),(PA(2) + (PB(2) - PA(1))*u)/)
 
              ! Determine the quadrent and angle for the "normal"
              ! (If to the left or right of the line segment the vector with the 
              !  shortest distance to the line segment will not be perpendicular)
              
                if (P0(1) .eq. PA(1) .and. P0(2) .eq. P2(2)) then
-                  v1 = P1 - P0
-                  v2 = P0 - PB
+                  v1 = (/(P1(1) - P0(1)),(P1(2) - P0(2))/)
+                  v2 = (/(P0(1) - PB(1)),(P1(2) - P0(2))/)
                else
-                  v1 = P1 - P0
-                  v2 = PA - P0
+                  v1 = (/(P1(1) - P0(1)),(P1(2) - P0(2))/)
+                  v2 = (/(PA(1) - P0(1)),(P1(2) - P0(2))/)
                end if
 
                dot =   v1(1)*v2(1) + v1(2)*v2(2)
                det = -(v1(1)*v2(1) - v1(2)*v2(2))
   
-            
                angl(k) = atan2(det, dot)
                dist(k) = sqrt(v1(1)**2 + v1(2)**2)
 
@@ -209,9 +208,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            end do
 
-           ind = minloc(dist) ! Finds the index of the minimum distance
-           mvd = dist(ind(1)) ! Gets the minimum distance value
-           mva = angl(ind(1)) ! Gets the angle for the minimum distance
+           !ind = minloc(dist) ! Finds the index of the minimum distance
+           mvd = dist(1) ! Gets the minimum distance value
+           mva = angl(1) ! Gets the angle for the minimum distance
 
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
