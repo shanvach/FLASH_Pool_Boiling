@@ -100,7 +100,7 @@ end interface
 !end interface
 
 interface
-        subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
+        subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2)
 
@@ -111,13 +111,13 @@ interface
         real, dimension(:,:,:), intent(inout):: s,crv, &
                                                 rho1x,rho2x,rho1y, &
                                                 rho2y,pf, &
-                                                rho1z,rho2z, visc
+                                                rho1z,rho2z, visc,lambda
 
         end subroutine mph_KPDcurvature3DAB
 end interface
 
 interface
-        subroutine mph_KPDcurvature3DC(s,crv,rho1x,rho2x,rho1y,rho2y, &
+        subroutine mph_KPDcurvature3DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y, &
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
@@ -128,7 +128,7 @@ interface
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy, &
-                                                rho1z,rho2z,sigz
+                                                rho1z,rho2z,sigz,lambda
 
         end subroutine mph_KPDcurvature3DC
 end interface
