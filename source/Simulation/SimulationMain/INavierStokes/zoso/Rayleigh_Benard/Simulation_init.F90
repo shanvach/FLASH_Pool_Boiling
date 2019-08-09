@@ -35,7 +35,7 @@ subroutine Simulation_init()
 #include "Flash.h"
 
   
-  call RuntimeParameters_get('initType',sim_init)
+  call RuntimeParameters_get('initial_flowType', sim_init)
   call RuntimeParameters_get('xmin',    sim_xMin)
   call RuntimeParameters_get('ymin',    sim_yMin)
   call RuntimeParameters_get('xmax',    sim_xMax)

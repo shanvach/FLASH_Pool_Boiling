@@ -174,9 +174,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   ! debug VAR:
   integer aa,bb,cc
-  real :: meanPres,meanVelx,meanVely,meanVelz
-  real :: minu,maxu,minv,maxv,minw,maxw,minp,maxp,mndivv,mxdivv
-  real :: vecminaux(5),vecmaxaux(5),vecmin(5),vecmax(5)
+  real :: meanPres,meanVelx,meanVely,meanVelz,meanTemp
+  real :: minu,maxu,minv,maxv,minw,maxw,minp,maxp,mint,maxt,mndivv,mxdivv
+  real :: vecminaux(6),vecmaxaux(6),vecmin(6),vecmax(6)
 
   logical :: gridChanged 
 
@@ -921,8 +921,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   ! ----- --- --- ----------
   mxdivv = -10.**(10.)
   mndivv =  10.**(10.)  
-  maxu   = mxdivv; maxv = maxu; maxw = maxu; maxp = maxu;
-  minu   = mndivv; minv = minu; minw = minu; minp = minu;
+  maxu   = mxdivv; maxv = maxu; maxw = maxu; maxp = maxu; maxt = maxu
+  minu   = mndivv; minv = minu; minw = minu; minp = minu; mint = minu
   do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -964,6 +964,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   maxp = max(maxp,maxval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minp = min(minp,minval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
 
+  maxt = max(maxt,maxval(solnData(TEMP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
+  mint = min(mint,minval(solnData(TEMP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
 
 #elif NDIM == 2
 
@@ -978,6 +980,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   maxp = max(maxp,maxval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minp = min(minp,minval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
+
+  maxt = max(maxt,maxval(solnData(TEMP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
+  mint = min(mint,minval(solnData(TEMP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
 
   mxdivv = max( mxdivv,maxval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,1) - &
                     facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_X) + &
@@ -1010,11 +1015,13 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   vecminaux(4) = minw
   vecmaxaux(5) = maxp
   vecminaux(5) = minp
+  vecmaxaux(6) = maxt
+  vecminaux(6) = mint
   
-  call MPI_Allreduce(vecmaxaux, vecmax, 5, FLASH_REAL,&
+  call MPI_Allreduce(vecmaxaux, vecmax, 6, FLASH_REAL,&
                      MPI_MAX, MPI_COMM_WORLD, ierr)
 
-  call MPI_Allreduce(vecminaux, vecmin, 5, FLASH_REAL,&
+  call MPI_Allreduce(vecminaux, vecmin, 6, FLASH_REAL,&
                      MPI_MIN, MPI_COMM_WORLD, ierr)
   
 
@@ -1026,6 +1033,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      write(*,'(A24,2g14.6)') ' Min , Max  W =',vecmin(4),vecmax(4) !minw,maxw
 #endif
      write(*,'(A24,2g14.6)') ' Min , Max  P =',vecmin(5),vecmax(5) !minp,maxp
+     write(*,'(A24,2g14.6)') ' Min , Max  T =',vecmin(6),vecmax(6) !mint,maxt
      write(*,'(A24,2g14.6)') ' Min , Max  Divergence =',vecmin(1),vecmax(1) !mndivv,mxdivv
   endif
 

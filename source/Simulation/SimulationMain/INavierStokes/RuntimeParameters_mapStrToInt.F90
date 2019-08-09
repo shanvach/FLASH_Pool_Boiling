@@ -118,6 +118,22 @@ constKey = EQTSYMMETRIC
 #ifdef MOVLID_INS
      constKey = MOVLID_INS
 #endif
+
+  case("DIRICHLET_HT","Dirichlet_ht","dirichlet_ht")
+#ifdef DIRICHLET_HT
+     constKey = DIRICHLET_HT
+#endif
+
+  case("NEUMANN_HT","Neumann_ht","neumann_ht")
+#ifdef NEUMANN_HT
+     constKey = NEUMANN_HT
+#endif
+ 
+  case("PERIODIC_HT","Periodic_ht","periodic_ht")
+#ifdef PERIODIC_HT
+     constKey = PERIODIC_HT
+#endif
+ 
    case ("hydrostatic", "HYDROSTATIC")
 #ifdef HYDROSTATIC
      constKey = HYDROSTATIC

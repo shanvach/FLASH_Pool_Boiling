@@ -80,7 +80,7 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 
 #define DIRICHLET_HT -61
 #define NEUMANN_HT -62
-#define PERIODIC -63
+#define PERIODIC_HT -63
 
 #define DIODE -39
 #define GRIDBC_MG_EXTRAPOLATE -40

@@ -7,7 +7,7 @@ D ht_invsqrtRaPr        1/SQRT(RaPr)
 # --------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
 D Txl_boundary_type lower (left) boundary condition in x dir
-PARAMETER Txl_boundary_type STRING "dirichlet_ht"
+PARAMETER Txl_boundary_type STRING "DIRICHLET_HT"
 
 D Txr_boundary_type upper (right) boundary condition in x dir
 PARAMETER Txr_boundary_type STRING "dirichlet_ht"

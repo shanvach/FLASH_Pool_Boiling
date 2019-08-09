@@ -246,7 +246,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   do ivar = 1, varCount 
     if (mask(ivar)) then
-      call gr_bcMapBcType(bcTypeActual,bcType,ivar,gridDataStruct,axis,face,idest) 
+      !call gr_bcMapBcType(bcTypeActual,bcType,ivar,gridDataStruct,axis,face,idest) 
        
       if (face == LOW) then 
 
@@ -264,7 +264,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
             case (NEUMANN_HT)
               k = 2*guard+1
               do i = 1,guard
-                regionData(i,1:je,1:ke,ivar) = del(IAXIS)*ht_Txl_value + region(k-1,1:je,1:ke,ivar)
+                regionData(i,1:je,1:ke,ivar) = del(IAXIS)*ht_Txl_value + regionData(k-1,1:je,1:ke,ivar)
               end do
               applied = .true.
 

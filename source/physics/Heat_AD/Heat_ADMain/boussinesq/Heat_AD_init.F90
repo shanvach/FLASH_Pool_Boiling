@@ -2,7 +2,7 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use Heat_AD_data
 
-   use IncompNS_data, only: ins_Ra, ins_Pr, ins_isCoupled
+   use IncompNS_data, only: ins_Ra, ins_Pr, ins_isCoupled, ins_meshME
 
    use RuntimeParameters_interface, only: RuntimeParameters_get, &
                                           RuntimeParameters_mapStrToInt
@@ -10,6 +10,9 @@ subroutine Heat_AD_init(blockCount,blockList)
 
 #include "constants.h"
 #include "Flash.h"
+
+   integer, INTENT(INOUT) :: blockCount
+   integer, INTENT(INOUT) :: blockList(MAXBLOCKS)
 
    character(len=MAX_STRING_LENGTH) :: Txl_bcString, Txr_bcString
    character(len=MAX_STRING_LENGTH) :: Tyl_bcString, Tyr_bcString
@@ -42,5 +45,17 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get('Tzr_boundary_value', ht_Tzr_value)
 
    ht_invsqrtRaPr = 1. / (ins_Ra * ins_Pr)**0.5
+
+   if (ins_meshMe .eq. MASTER_PE) then
+     !write(*,*) 'Head_AD Boundary Conditions'
+     !write(*,*) '            Low(Type / Value)                            High(Type / Value)'
+     !write(*,*) 'I   : (',ht_Txl_type,' / ',ht_Txl_value,') (',ht_Txr_type,' / ',ht_Txr_value,')'
+     !write(*,*) 'J   : (',ht_Tyl_type,' / ',ht_Tyl_value,') (',ht_Tyr_type,' / ',ht_Tyr_value,')'
+     !write(*,*) 'K   : (',ht_Tzl_type,' / ',ht_Tzl_value,') (',ht_Tzr_type,' / ',ht_Tzr_value,')'
+     !write(*,*) Txl_bcString,' ',Txr_bcString
+     !write(*,*) Tyl_bcString,' ',Tyr_bcString
+     !write(*,*) Tzl_bcString,' ',Tzr_bcString
+     write(*,*) '1/SQRT(Ra Pr) = ',ht_invsqrtRaPr
+   endif
 
 end subroutine Heat_AD_init

@@ -19,7 +19,7 @@ D   Re  Reynolds number
 PARAMETER Re        REAL     1.
 
 D Flag for flow field initialization (sim_init)
-PARAMETER initType  INTEGER  0
+PARAMETER initial_flowType  INTEGER  0
 
 D  Momentum and Heat equations are coupled
 PARAMETER coupled_transport  BOOLEAN  true
