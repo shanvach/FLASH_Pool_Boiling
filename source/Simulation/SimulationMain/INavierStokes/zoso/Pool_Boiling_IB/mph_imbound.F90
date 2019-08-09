@@ -161,7 +161,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
 
            ! Interpolate function at probe 
-           do probe_index = 1,3
+           do probe_index = 1,1
            externalPt(IAXIS) = xprobe(probe_index)
            externalPt(JAXIS) = yprobe(probe_index)
            externalPt(KAXIS) = 0.0
@@ -198,9 +198,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
-           if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
+           !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
            solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(45.0*acos(-1.0)/180)
-           end if
+           !end if
 
            end if
           
@@ -211,8 +211,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
  
-          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS) .and. &
-             solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(DFUN_VAR,i,j,k) = -solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS)
+          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
+             solnData(DFUN_VAR,i,j,k) = &
+             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
 
          end do
         end do
