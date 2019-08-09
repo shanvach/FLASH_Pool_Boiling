@@ -74,9 +74,10 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID
+  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID,p_i
 
   real :: mva, mvd
+  !real :: angl, dist
 
   real bsize(MDIM),coord(MDIM)
 
@@ -96,7 +97,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 !  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
 !  max_ptm1 = max_ptelem-1
 
-  integer :: max_ptelem=2,max_ptm1=2 ! for box should be 4
+  integer :: max_ptelem=4,max_ptm1=4 ! for box should be 4
 
   allocate( xpos(max_ptelem) )
   allocate( ypos(max_ptelem) )
@@ -104,13 +105,15 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
   allocate( P0(nelm), v1(nelm), v2(nelm), ind(1) )
   allocate( dist(max_ptm1), angl(max_ptm1), ones(max_ptm1) )
 !  allocate( loc_num(max_ptelem) )
+!  allocate( dist(1), angl(1) )
 
-  xpos = (/-3,  3/)!,  3, -3/)
-  ypos = (/-3, -3/)!, -4, -4/)
 
-  do lb = 1,max_ptm1
-      ones(lb) = 1.0
-  end do
+  xpos = (/-3,  3,  3, -3/)
+  ypos = (/-3, -3, -4, -4/)
+
+!  do lb = 1,max_ptm1
+!      ones(lb) = 1.0
+!  end do
 
   ! Loop through all the grid points
   do lb = 1,blockCount
@@ -133,7 +136,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
         ! Get Blocks internal limits indexes:
         call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
-            ! Point to blocks center and face vars:
+        ! Point to blocks center and face vars:
         call Grid_getBlkPtr(blockID,solnData,CENTER)
         call Grid_getBlkPtr(blockID,facexData,FACEX)
         call Grid_getBlkPtr(blockID,faceyData,FACEY)
@@ -155,16 +158,16 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            zcell  = 0.0 
 
-           do k=1,max_ptelem
+           do p_i=1,max_ptelem ! p_i is short for panel_index
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
-               PA = (/xpos(k), ypos(k)/)
+               PA = (/xpos(p_i), ypos(p_i)/)
                
-               if (k .eq. max_ptelem) then
+               if (p_i .eq. max_ptelem) then
                   PB = (/xpos(1), ypos(1)/)
                else
-                  PB = (/xpos(k+1), ypos(k+1)/)
+                  PB = (/xpos(p_i+1), ypos(p_i+1)/)
                end if
 
              ! Grid cell point
@@ -203,8 +206,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
                dot =   v1(1)*v2(1) + v1(2)*v2(2)
                det = -(v1(1)*v2(1) - v1(2)*v2(2))
   
-               angl(k) = atan2(det, dot)
-               dist(k) = sqrt(v1(1)**2 + v1(2)**2)
+               angl(p_i) = atan2(det, dot)
+               dist(p_i) = sqrt(v1(1)**2 + v1(2)**2)
 
              ! Loops through all points on the grid
 
@@ -213,20 +216,20 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
            if (mph_meshMe .eq. 0) print*,"angl = (",angl,")"
            if (mph_meshMe .eq. 0) print*,"dist = (",dist,")"
 
-           if ( dist(1) .lt. dist(2) ) then
-               mvd = dist(1)
-               mva = angl(1)
-           else
-               mvd = dist(2)
-               mva = angl(2)
-           end if
+           !if ( dist(1) .lt. dist(2) ) then
+           !    mvd = dist!(1)
+           !    mva = angl!(1)
+           !else
+           !    mvd = dist(2)
+           !    mva = angl(2)
+           !end if
 
+           ind = minloc(dist) ! Finds the index of the minimum distance
+           mvd = dist(1) ! Gets the minimum distance value
+           mva = angl(1) ! Gets the angle for the minimum distance
+           
            if (mph_meshMe .eq. 0) print*,"mvd = (",mvd,")"
            if (mph_meshMe .eq. 0) print*,"mva = (",mva,")"
-
-           !ind = minloc(dist) ! Finds the index of the minimum distance
-           !mvd = dist(1) ! Gets the minimum distance value
-           !mva = angl(1) ! Gets the angle for the minimum distance
 
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
@@ -236,6 +239,13 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
          end do
         end do
+!--------------------------------------------------------------------
+    gcMask = .FALSE.
+    gcMask(LMDA_VAR) = .TRUE.
+
+    call Grid_fillGuardCells(CENTER,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+!--------------------------------------------------------------------
 
         k = 1
         do j=2,blkLimitsGC(HIGH,JAXIS)-1
