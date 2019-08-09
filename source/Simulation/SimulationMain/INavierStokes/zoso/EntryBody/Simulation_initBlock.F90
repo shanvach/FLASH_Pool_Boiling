@@ -133,7 +133,7 @@ subroutine Simulation_initBlock(blockId)
            solnData(DFUN_VAR,i,j,k) = ycell+4.0
            solnData(LMDA_VAR,i,j,k) = 0.5-sqrt(xcell**2+ycell**2+zcell**2)
 
-           solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
 
         enddo
      enddo
