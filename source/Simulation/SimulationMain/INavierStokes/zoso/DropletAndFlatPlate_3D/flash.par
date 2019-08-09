@@ -44,12 +44,12 @@ gr_sbNumBodies =  1
 geometry	= "cartesian"
 
 #       Size of computational volume
-xmin =   -4.0
-xmax =    4.0
-ymin =   -4.0
-ymax =    4.0
-zmin =   -4.0
-zmax =    4.0
+xmin =   -2.0
+xmax =    2.0
+ymin =   -2.0
+ymax =    2.0
+zmin =   -2.0
+zmax =    2.0
 
 #       Boundary conditions
 xl_boundary_type = "noslip_ins"
@@ -101,12 +101,12 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalStep = 100000
 
 #plotFileIntervalTime = 0.01
-plotFileIntervalStep = 500
+plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 6
-nblocky	= 6
-nblockz = 6
+nblockx	= 12
+nblocky	= 12
+nblockz = 12
 
 lrefine_min	= 1
 lrefine_max     = 1

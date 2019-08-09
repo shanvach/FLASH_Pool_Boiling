@@ -159,7 +159,7 @@ subroutine Simulation_initBlock(blockId)
            !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr) !rectangle
            solnData(LMDA_VAR,i,j,k) = 0.5-sqrt(xcell**2+ycell**2+zcell**2) !circle
 
-           solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
 
            dfunbub = 0.2-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+(zcell-zbubble)**2)
 
