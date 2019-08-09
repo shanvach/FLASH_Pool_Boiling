@@ -303,6 +303,7 @@ if(mph_flag == 1) then
         !           phase function, and face densities:
         !----------------------------------------------------------
         call mph_KPDcurvature3DAB(solnData(DFUN_VAR,:,:,:),            &
+                           solnData(LMDA_VAR,:,:,:),                   &
                            solnData(CURV_VAR,:,:,:),                   &
                            del(DIR_X),del(DIR_Y), del(DIR_Z),          &
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
@@ -421,6 +422,7 @@ else if(mph_flag == 0) then
         !----------------------------------------------------------
 
         call mph_KPDcurvature3DC( solnData(DFUN_VAR,:,:,:)  , &
+                           solnData(LMDA_VAR,:,:,:)         , &
                            solnData(CURV_VAR,:,:,:)         , &
                            facexData(RH1F_FACE_VAR,:,:,:)   , &
                            facexData(RH2F_FACE_VAR,:,:,:)   , &
