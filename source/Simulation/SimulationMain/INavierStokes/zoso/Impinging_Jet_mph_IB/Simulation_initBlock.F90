@@ -168,7 +168,7 @@ subroutine Simulation_initBlock(blockId)
            !R_init = 0.5
            !R_init = 0.0 + 0.5*(ycell+sim_jet_depth)/sim_jet_depth
 
-           dfun_rect = -min(-sim_jet_depth-ycell-0.1, 21-xcell, xcell+21, ycell+79)
+           dfun_rect = -min(-sim_jet_depth-ycell, 21-xcell, xcell+21, ycell+79)
            solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,dfun_rect)
            
            !solnData(DFUN_VAR,i,j,k)  = dfun_rect
@@ -191,7 +191,7 @@ subroutine Simulation_initBlock(blockId)
            solnData(LMDA_VAR,i,j,k)  = max(solnData(LMDA_VAR,i,j,k),min(dxl,dxr,dyl,dyr))
 
 
-           !solnData(DFUN_VAR,i,j,k)  = max(solnData(DFUN_VAR,i,j,k),solnData(LMDA_VAR,i,j,k))
+           solnData(DFUN_VAR,i,j,k)  = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
 
            !dfun_rect = -min(R_init-sqrt((xcell-0.0)**2+(zcell-0.0)**2),ycell+0.5)
            !solnData(DFUN_VAR,i,j,k)  = min(dfun_rect,ycell+sim_jet_depth)
