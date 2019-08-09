@@ -62,25 +62,25 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
 
         !______________________IB Jumps_______________________!
 
-        ! Case 1 !
-        if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) &
-        call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Twall_high,max(tol,thxp2))
-        ! End of Case 1 !
+        !! Case 1 !
+        !if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) &
+        !call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Twall_high,max(tol,thxp2))
+        !! End of Case 1 !
 
-        ! Case 2 !
-        if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) &
-        call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Twall_high,max(tol,thxm2))
-        ! End of Case 2 !
+        !! Case 2 !
+        !if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) &
+        !call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Twall_high,max(tol,thxm2))
+        !! End of Case 2 !
 
-        ! Case 3 !
-        if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) &
-        call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Twall_high,max(tol,thyp2))
-        ! End of Case 3 !
+        !! Case 3 !
+        !if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) &
+        !call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Twall_high,max(tol,thyp2))
+        !! End of Case 3 !
 
-        ! Case 4 !
-        if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) &
-        call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Twall_high,max(tol,thym2))
-        ! End of Case 4 ! 
+        !! Case 4 !
+        !if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) &
+        !call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Twall_high,max(tol,thym2))
+        !! End of Case 4 ! 
  
         Tx = (Tx_plus - Tx_mins)/(2*dx)
         Ty = (Ty_plus - Ty_mins)/(2*dy)
