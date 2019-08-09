@@ -74,7 +74,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
   real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
-  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID,mva,mvd
+  integer :: lb,ii,jj,kk,ierr,i,j,k,dir,blockID
+
+  real :: mva, mvd
 
   real bsize(MDIM),coord(MDIM)
 
@@ -208,14 +210,28 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            end do
 
+           if (mph_meshMe .eq. 0) print*,"angl = (",angl,")"
+           if (mph_meshMe .eq. 0) print*,"dist = (",dist,")"
+
+           if ( dist(1) .lt. dist(2) ) then
+               mvd = dist(1)
+               mva = angl(1)
+           else
+               mvd = dist(2)
+               mva = angl(2)
+           end if
+
+           if (mph_meshMe .eq. 0) print*,"mvd = (",mvd,")"
+           if (mph_meshMe .eq. 0) print*,"mva = (",mva,")"
+
            !ind = minloc(dist) ! Finds the index of the minimum distance
-           mvd = dist(1) ! Gets the minimum distance value
-           mva = angl(1) ! Gets the angle for the minimum distance
+           !mvd = dist(1) ! Gets the minimum distance value
+           !mva = angl(1) ! Gets the angle for the minimum distance
 
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
            else
-               solnData(LMDA_VAR,i,j,k) = mvd*sign(1,mva)
+               solnData(LMDA_VAR,i,j,k) = mvd*sign(1.0,mva)
            end if
 
          end do
