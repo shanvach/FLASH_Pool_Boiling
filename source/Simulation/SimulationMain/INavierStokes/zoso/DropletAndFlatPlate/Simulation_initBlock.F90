@@ -85,6 +85,7 @@ subroutine Simulation_initBlock(blockId)
   real :: th_radii
   real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
 
+  real :: xdrop, ydrop, xbubble, ybubble, dfunbub
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -116,10 +117,24 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
 
-  xl = -3.0
-  xr =  3.0
+  !xl = -0.25
+  !xr =  0.25
+  !yl = -4.0
+  !yr =  4.0
+
+  !xdrop = -0.6
+  !ydrop =  3.0
+
+  xl = -3.00
+  xr =  3.00
   yl = -3.25
-  yr = -3.0
+  yr = -3.00
+
+  xdrop = 0.0
+  ydrop = -1.0
+
+  xbubble = 0.6
+  ybubble = -3.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -141,9 +156,17 @@ subroutine Simulation_initBlock(blockId)
            dyl = ycell - yl
            dyr = yr - ycell
 
-           solnData(DFUN_VAR,i,j,k) = sqrt(xcell**2+ycell**2+zcell**2)-0.5
+           solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)-0.5
 
-           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr)
+           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr) !rectangle
+           !solnData(LMDA_VAR,i,j,k) = 1.5-sqrt(xcell**2+ycell**2+zcell**2) !circle
+
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
+
+           dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
+
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
+           !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
         enddo
      enddo
