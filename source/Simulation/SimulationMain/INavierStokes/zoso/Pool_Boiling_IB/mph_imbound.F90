@@ -85,7 +85,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
-  real    :: hnorm, xprobe(3), yprobe(3), zprobe, phiprobe
+  real    :: hnorm, xprobe(3), yprobe(3), zprobe(3), phiprobe
 
   real,parameter  :: htol = 0.0001
 
@@ -131,6 +131,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
         k = 1
+#if NDIM == 3
+       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+#endif
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
                          
@@ -142,9 +145,13 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-         !  zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-         !          real(k - NGUARD - 1)*del(KAXIS)  +  &
-         !          0.5*del(KAXIS)
+          zcell = 0.0
+
+#if NDIM == 3
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
+#endif
           
            if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
@@ -153,22 +160,32 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+           zprobe(1) = 0.0
 
-           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+#if NDIM == 3
+           zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+#endif
+           !xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           !yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+           !zprobe(2) = 0.0
 
-           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+           !xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
+           !yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
+           !zprobe(3) = 0.0
 
            ! Interpolate function at probe 
            do probe_index = 1,1
            externalPt(IAXIS) = xprobe(probe_index)
            externalPt(JAXIS) = yprobe(probe_index)
-           externalPt(KAXIS) = 0.0
+           externalPt(KAXIS) = zprobe(probe_index)
 
            part_Nml(IAXIS) = solnData(NMLX_VAR,i,j,k)
            part_Nml(JAXIS) = solnData(NMLY_VAR,i,j,k)
            part_Nml(KAXIS) = 0.0
+
+#if NDIM == 3
+           part_Nml(KAXIS) = solnData(NMLZ_VAR,i,j,k)
+#endif
 
            ! Cell centered stencil for DFUN interpolation at probe
            gridfl(:) = CENTER
@@ -206,8 +223,14 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
           
          end do
         end do
+#if NDIM == 3
+        end do
+#endif
 
 !        k = 1
+!#if NDIM == 3
+!       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+!#endif
 !        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
 !         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 ! 
@@ -217,7 +240,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 !
 !         end do
 !        end do
-
+!#if NDIM == 3
+!        end do
+!#endif
         ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
