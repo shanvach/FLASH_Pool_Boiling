@@ -1,11 +1,11 @@
-# Runtime parameters for the Rayleigh Benard Cavity problem.
+# Runtime parameters for the Heated Taylor Green problem.
 
 # Simulation Controlling Parameters
-Ra              = 1000.0
-Pr              =    1.0
-Re              =  100.0
-coupled_transport = .false.
-initial_flowType  = 2
+Ra              =   1.0e4
+Pr              = 130.0
+Re              =   1.0
+coupled_transport = .true.
+initial_flowType  = 0 
 
 # Grid dimensionality and geometry
 geometry	= "cartesian"
@@ -15,89 +15,100 @@ xmin		=  0.000000000000000
 xmax		=  1.000000000000000
 ymin		=  0.000000000000000
 ymax		=  1.000000000000000
-#zmin            =  0.000000000000000
-#zmax            =  1.000000000000000
+zmin            =  0.000000000000000
+zmax            =  1.000000000000000
 
 # Momentum Boundary conditions
 xl_boundary_type = "noslip_ins"
 xr_boundary_type = "noslip_ins"
 yl_boundary_type = "noslip_ins"
 yr_boundary_type = "noslip_ins"
-#zl_boundary_type = "noslip_ins"
-#zr_boundary_type = "noslip_ins"
+zl_boundary_type = "noslip_ins"
+zr_boundary_type = "noslip_ins"
 
 # Temperature Wall Boundary Conditions
 Txl_boundary_type = "neumann_ht"
 Txr_boundary_type = "neumann_ht"
-Tyl_boundary_type = "dirichlet_ht"
-Tyr_boundary_type = "dirichlet_ht"
-#Tzl_boundary_type = "dirichlet_ht"
-#Tzr_boundary_type = "dirichlet_ht"
+Tyl_boundary_type = "neumann_ht"
+Tyr_boundary_type = "neumann_ht"
+Tzl_boundary_type = "dirichlet_ht"
+Tzr_boundary_type = "dirichlet_ht"
 
 Txl_boundary_value = 0.00
 Txr_boundary_value = 0.00
-Tyl_boundary_value = 1.00
+Tyl_boundary_value = 0.00
 Tyr_boundary_value = 0.00
-#Tzl_boundary_value = 0.00
-#Tzr_boundary_value = 0.00
+Tzl_boundary_value = 1.00
+Tzr_boundary_value = 0.00
 
 # Simulation (grid, time, I/O) parameters
-run_comment	= "Rayleigh Benard problem"
-log_file	= "INS_Rayleigh_Benard.log"
-basenm		= "INS_Rayleigh_Benard_"
+run_comment	= "Rayleugh Benard (1k-0.7) problem"
+log_file	= "INS_Rayleigh.log"
+basenm		= "INS_Rayleigh_"
 restart         = .false.
 #checkPointFileNumber=1
 #plotFileNumber  = 1
-nend            = 1000
-tmax            = 300. 
-dtinit          = 1.e-5
-tstep_change_factor = 1.
+nend            = 3000000
+tmax            = 120. 
 
 # Simulation Output Parameters
 plot_var_1	= "pres"
 plot_var_2      = "delp"
 plot_var_3      = "temp"
   
-checkpointFileIntervalTime = 5.0
-checkpointFileIntervalStep = 2000 
+checkpointFileIntervalTime = 60.0
+checkpointFileIntervalStep = 3000000 
 
-plotFileIntervalTime = 5.0
-plotFileIntervalStep = 100
+plotFileIntervalTime = 0.5
+plotFileIntervalStep = 1000000
 
 # Process Specification for UG
-#iProcs		= 4	#number of procs in the i direction
-#jProcs		= 4	#number of procs in the j direction
+iProcs		= 4	#number of procs in the i direction
+jProcs		= 4	#number of procs in the j direction
 #kProcs		= 1	#number of procs in the k direction
 
 # Process Specification for PM
 #      AMR parameters
-nblockx = 1
-nblocky = 2
-lrefine_min     = 1
-lrefine_max     = 1
-nrefs           = 0
-refine_var_1    = "pres"
+#nblockx = 1
+#nblocky = 1
+#lrefine_min     = 2
+#lrefine_max     = 3 
+#nrefs           = 0
+#refine_var_1    = "pres"
 
 # Poisson Solver Boundary Conditions
-xl_mg_boundary_type = "periodic"
-xr_mg_boundary_type = "periodic"
-yl_mg_boundary_type = "periodic"
-yr_mg_boundary_type = "periodic"
+#xl_mg_boundary_type = "outflow"
+#xr_mg_boundary_type = "outflow"
+#yl_mg_boundary_type = "outflow"
+#yr_mg_boundary_type = "outflow"
 
 # Other AMR options
-gr_pmRpDivergenceFree = 1
-gr_pmRpNfieldDivf = 2
-gr_pmRpConsvFluxes = .TRUE.
-gr_pmRpConsvFluxDensities = .FALSE.
-gr_pfftDiffOpDiscretize = 2
-pfft_setupOnce = .false.
-flux_correct    = .true.
-convertToConsvdInMeshInterp = .true.
+#gr_pmRpDivergenceFree = 1
+#gr_pmRpNfieldDivf = 2
+#gr_pmRpConsvFluxes = .TRUE.
+#gr_pmRpConsvFluxDensities = .FALSE.
+#gr_pfftDiffOpDiscretize = 2
+#pfft_setupOnce = .false.
+#flux_correct    = .true.
+#convertToConsvdInMeshInterp = .false.
+
+# Other Multigrid options
+#mgrid_npresmooth = 1
+#mgrid_npossmooth = 8
+#mgrid_print_norm = .true.
+#mgrid_max_residual_norm = 1.e-10
+#mgrid_max_vcycles = 20
+#mg_maxResidualNorm = 1.e-10
+#bipcgs_max_residual_norm = 1.e-10
+#bipcgs_max_cycles = 1000
+#bipcgs_print_norm = .true.
 
 # Other Simulation Properties
-intschm         = 2
-cflflg          = 0
-cfl             = 0.3
-sigma           = 0.2
-#dtspec          = 1.e-5 iGridSize/iprocs  etc.
+#intschm             = 2
+#cflflg              = 0
+cfl                 = 0.30
+sigma               = 0.20
+dtspec              = 1.0 
+dtinit              = 1.0
+tstep_change_factor = 1.
 
