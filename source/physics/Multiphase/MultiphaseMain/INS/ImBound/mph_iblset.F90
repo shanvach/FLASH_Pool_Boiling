@@ -181,9 +181,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! Re-assign u if the normal hits the line segment to the left of PA or
              ! the right of PB
                if (u .lt. 0) then
-                  u = 0
+                  u = 0.0
                else if (u .gt. 1) then
-                  u = 1
+                  u = 1.0
                end if 
 
              ! Find the point on the line segment with the shortest distance to P1
@@ -195,16 +195,16 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
              ! (If to the left or right of the line segment the vector with the 
              !  shortest distance to the line segment will not be perpendicular)
              
-               if (P0(1) .eq. PA(1) .and. P0(2) .eq. P2(2)) then
+               if (P0(1) .eq. PA(1) .and. P0(2) .eq. PA(2)) then
                   v1 = (/(P1(1) - P0(1)),(P1(2) - P0(2))/)
-                  v2 = (/(P0(1) - PB(1)),(P1(2) - P0(2))/)
+                  v2 = (/(P0(1) - PB(1)),(P0(2) - PB(2))/)
                else
                   v1 = (/(P1(1) - P0(1)),(P1(2) - P0(2))/)
-                  v2 = (/(PA(1) - P0(1)),(P1(2) - P0(2))/)
+                  v2 = (/(PA(1) - P0(1)),(PA(2) - P0(2))/)
                end if
 
                dot =   v1(1)*v2(1) + v1(2)*v2(2)
-               det = -(v1(1)*v2(1) - v1(2)*v2(2))
+               det = -(v1(1)*v2(2) - v1(2)*v2(1))
   
                angl(p_i) = atan2(det, dot)
                dist(p_i) = sqrt(v1(1)**2 + v1(2)**2)
@@ -225,8 +225,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
            !end if
 
            ind = minloc(dist) ! Finds the index of the minimum distance
-           mvd = dist(1) ! Gets the minimum distance value
-           mva = angl(1) ! Gets the angle for the minimum distance
+           mvd = dist(ind(1)) ! Gets the minimum distance value
+           mva = angl(ind(1)) ! Gets the angle for the minimum distance
            
            if (mph_meshMe .eq. 0) print*,"mvd = (",mvd,")"
            if (mph_meshMe .eq. 0) print*,"mva = (",mva,")"
