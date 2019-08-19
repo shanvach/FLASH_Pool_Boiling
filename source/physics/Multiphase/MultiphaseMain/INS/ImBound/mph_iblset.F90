@@ -88,7 +88,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
   integer :: intval
 
   ! For the algorithm
-  real, allocatable, dimension(:) :: PA, PB, P1, P0, P2, v1, v2
+  real, allocatable, dimension(:) :: PA, PB, P1, P0, v1, v2
   real, allocatable, dimension(:) :: angl, dist, ones,ind
   real :: u,dot,det
   integer :: nelm=2 ! Dimension for the points, 2 for (x,y) in 2-D
@@ -97,19 +97,19 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 !  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
 !  max_ptm1 = max_ptelem-1
 
-  integer :: max_ptelem=4,max_ptm1=4 ! for box should be 4
+  integer :: max_ptelem=2,max_ptm1=1 ! for box should be 4
 
   allocate( xpos(max_ptelem) )
   allocate( ypos(max_ptelem) )
-  allocate( PA(nelm), PB(nelm), P1(nelm), P2(nelm) )
-  allocate( P0(nelm), v1(nelm), v2(nelm), ind(1) )
+  allocate( PA(nelm), PB(nelm), P1(nelm) )
+  allocate( P0(nelm), v1(nelm), v2(nelm), ind(max_ptelem) )
   allocate( dist(max_ptm1), angl(max_ptm1), ones(max_ptm1) )
 !  allocate( loc_num(max_ptelem) )
 !  allocate( dist(1), angl(1) )
 
 
-  xpos = (/-3,  3,  3, -3/)
-  ypos = (/-3, -3, -4, -4/)
+  xpos = (/-3.0,  3.0,  3.0, -3.0/)
+  ypos = (/-3.0, -3.0, -3.5, -3.5/)
 
 !  do lb = 1,max_ptm1
 !      ones(lb) = 1.0
@@ -158,7 +158,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
            zcell  = 0.0 
 
-           do p_i=1,max_ptelem ! p_i is short for panel_index
+           do p_i=1,max_ptelem-1 ! p_i is short for panel_index
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
@@ -209,6 +209,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
                angl(p_i) = atan2(det, dot)
                dist(p_i) = sqrt(v1(1)**2 + v1(2)**2)
 
+               !angl = atan2(det, dot)
+               !dist = sqrt(v1(1)**2 + v1(2)**2)
+
              ! Loops through all points on the grid
 
            end do
@@ -217,8 +220,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
            if (mph_meshMe .eq. 0) print*,"dist = (",dist,")"
 
            !if ( dist(1) .lt. dist(2) ) then
-           !    mvd = dist!(1)
-           !    mva = angl!(1)
+               !mvd = dist!(1)
+               !mva = angl!(1)
            !else
            !    mvd = dist(2)
            !    mva = angl(2)
@@ -290,8 +293,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
   deallocate( xpos )
   deallocate( ypos )
-  deallocate( PA, PB, P1, P2 )
-  deallocate( P0, v1, v2 )
+  deallocate( PA, PB, P1 )
+  deallocate( P0, v1, v2, ind )
   deallocate( dist, angl, ones )
 
 end subroutine mph_iblset
