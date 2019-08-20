@@ -97,7 +97,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 !  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
 !  max_ptm1 = max_ptelem-1
 
-  integer :: max_ptelem=2,max_ptm1=1 ! for box should be 4
+  integer :: max_ptelem=4,max_ptm1=4 ! for box should be 4
 
   allocate( xpos(max_ptelem) )
   allocate( ypos(max_ptelem) )
@@ -153,12 +153,12 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
                    0.5*del(IAXIS)
 
            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +   &
-                   real(j - NGUARD - 1)*del(JAXIS) +  &
+                   real(j - NGUARD - 1)*del(JAXIS) +   &
                    0.5*del(JAXIS)
 
            zcell  = 0.0 
 
-           do p_i=1,max_ptelem-1 ! p_i is short for panel_index
+           do p_i=1,max_ptelem ! p_i is short for panel_index
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
@@ -242,6 +242,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
          end do
         end do
+
 !--------------------------------------------------------------------
     gcMask = .FALSE.
     gcMask(LMDA_VAR) = .TRUE.
