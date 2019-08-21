@@ -43,14 +43,14 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
          do j=jy1,jy2
            do i=ix1,ix2
 
-              if(abs(sunion(i,j,kz1)) .le. sp) then ! Symmetric smearing - AD
+              if(abs(sunion(i,j,kz1)) .le. sp .and. lambda(i,j,kz1) .lt. 0.0) then ! Symmetric smearing - AD
               !if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
 
               smhv(i,j,kz1) = 0.5 + sunion(i,j,kz1)/(2*sp) + sin(2*pi*sunion(i,j,kz1)/(2*sp))/(2*pi)
 
               else
 
-                  if(s(i,j,kz1) .ge. 0.0) then
+                  if(sunion(i,j,kz1) .ge. 0.0) then
 
                         smhv(i,j,kz1) = 1.0
   
@@ -61,8 +61,6 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
                   end if
 
               end if
-
-              if(lambda(i,j,kz1) .ge. 0.0) smhv(i,j,kz1) = 0.0
 
            end do
          end do
