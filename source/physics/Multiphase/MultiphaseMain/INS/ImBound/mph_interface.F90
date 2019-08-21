@@ -212,14 +212,12 @@ interface
 end interface
 
 interface
-      subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd) ! Added by EG
+      subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder) ! Added by EG
 
       integer, INTENT(IN) :: sweepOrder
       integer, INTENT(INOUT) :: blockCount
-      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
       real,    INTENT(IN) :: timeEndAdv,dt,dtOld
-      !integer, INTENT(INOUT) :: blockID
-      integer, intent(in) :: ibd
 
       end subroutine
 end interface

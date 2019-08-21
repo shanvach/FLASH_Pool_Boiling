@@ -292,12 +292,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
     !- EG - update the IB level set distance function
-    if (dr_nstep .eq. 1) then
-    !  do lb = 1,blockCount
-    !    blockID = blockList(lb) 
-         call mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
-    !  enddo
-    end if
+   call mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
