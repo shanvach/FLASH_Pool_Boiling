@@ -89,9 +89,10 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
 
   ! For the algorithm
   real, allocatable, dimension(:) :: PA, PB, P1, P0, v1, v2
-  real, allocatable, dimension(:) :: angl, dist, ones,ind
+  real, allocatable, dimension(:) :: angl, dist, ones
+  integer,allocatable,dimension(:):: ind
   real :: u,dot,det
-  integer :: nelm=2 ! Dimension for the points, 2 for (x,y) in 2-D
+  integer :: nelm=2,test ! Dimension for the points, 2 for (x,y) in 2-D
 
 !  nel = sm_bodyInfo(ibd)%ws_nel
 !  max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
@@ -227,10 +228,30 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,ibd)
            !    mva = angl(2)
            !end if
 
-           ind = minloc(dist) ! Finds the index of the minimum distance
-           mvd = dist(ind(1)) ! Gets the minimum distance value
-           mva = angl(ind(1)) ! Gets the angle for the minimum distance
-           
+           !ind = minloc(dist) ! Finds the index of the minimum distance
+           !mvd = dist(ind(1)) ! Gets the minimum distance value
+           !mva = angl(ind(1)) ! Gets the angle for the minimum distance
+          
+           do test=1,max_ptm1
+               do p_i=1,3
+                   if (dist(p_i) > dist(p_i+1)) then
+
+                       dist(p_i) = dist(p_i) + dist(p_i+1)
+                       dist(p_i+1) = dist(p_i) - dist(p_i+1)
+                       dist(p_i) = dist(p_i) - dist(p_i+1)
+
+                       angl(p_i) = angl(p_i) + angl(p_i+1)
+                       angl(p_i+1) = angl(p_i) - angl(p_i+1)
+                       angl(p_i) = angl(p_i) - angl(p_i+1)
+
+
+                   end if
+               end do
+           end do
+
+           mvd = dist(1)
+           mva = angl(1)
+ 
            if (mph_meshMe .eq. 0) print*,"mvd = (",mvd,")"
            if (mph_meshMe .eq. 0) print*,"mva = (",mva,")"
 
