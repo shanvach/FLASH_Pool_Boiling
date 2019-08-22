@@ -222,17 +222,20 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     end do
 
-    !ib_temp_flg = .true.
-    !ib_vel_flg  = .false.
-    !ib_dfun_flg = .false.
-
-    !if(dr_nstep>1) call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+    !call Heat_imbound(blockCount,blockList,timeEndAdv,dt,TEMP_VAR)
+    
+    !if(dr_nstep > 1) then
+    !ib_temp_flg = .true.
+    !ib_vel_flg  = .false.
+    !ib_dfun_flg = .false.
+    !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+    !end if
 
    end do !End RK-2
 
@@ -490,6 +493,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate Mass Flux
      call Heat_calMdot(solnData(MDOT_VAR,:,:,:),&
+                       solnData(LMDA_VAR,:,:,:),&
                        solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                        mph_thco2,mph_thco1,&
                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&

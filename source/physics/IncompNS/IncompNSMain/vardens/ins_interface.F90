@@ -217,6 +217,32 @@ Module ins_interface
 
   interface
 
+      SUBROUTINE ins_rhs3d_weno3(uni,vni,wni,tv,ru1,ix1,ix2,jy1,jy2,kz1,kz2,     &
+                           dx,dy,dz,ru,rv,rw,visc,rho1x,rho2x,rho1y,rho2y, &
+                           rho1z,rho2z,gravX, gravY, gravZ ) 
+      implicit none
+      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
+      REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni,vni,wni,tv,visc, &
+                                           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z
+      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
+      end SUBROUTINE ins_rhs3d_weno3
+
+
+      SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv,visc,&
+                           rho1x, rho2x, rho1y, rho2y,gravX, gravY)
+      implicit none
+      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
+      REAL, INTENT(IN):: ru1, dx, dy, gravX, gravY
+      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
+      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
+      end SUBROUTINE ins_rhs2d_weno3
+
+
+  end interface
+
+  interface
+
       SUBROUTINE ins_rhs3d(uni,vni,wni,tv,ru1,ix1,ix2,jy1,jy2,kz1,kz2,     &
                            dx,dy,dz,ru,rv,rw)
       implicit none

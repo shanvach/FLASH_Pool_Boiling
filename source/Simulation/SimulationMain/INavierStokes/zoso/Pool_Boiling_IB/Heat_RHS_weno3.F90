@@ -4,7 +4,8 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
   use Heat_AD_interface, only: Heat_GFMstencil_o1, Heat_GFMstencil_o2
-
+  use Driver_data, only: dr_dt
+ 
 #include "Heat_AD.h"
 
   implicit none
@@ -75,38 +76,47 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) &
+     call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
      ! End of Case 1 !
 
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i-1,j,k) .lt. 0.0) call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i-1,j,k) .lt. 0.0) &
+     call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
      ! End of Case 2 !
 
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) &
+     call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
      ! End of Case 3 !
 
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j-1,k) .lt. 0.0) call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j-1,k) .lt. 0.0) &
+     call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
      ! End of Case 4 ! 
+ 
+     !______________________IB Terms_______________________!
 
-     !------- IB Jumps------!
      ! Case 1 !
-     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_plus,Tij,1.0,max(tol,thxp2))
+     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) &
+     call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Twall_high,max(tol,thxp2))
      ! End of Case 1 !
 
      ! Case 2 !
-     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) call Heat_GFMstencil_o1(Tx_mins,Tij,1.0,max(tol,thxm2))
+     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) &
+     call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Twall_high,max(tol,thxm2))
      ! End of Case 2 !
 
      ! Case 3 !
-     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_plus,Tij,1.0,max(tol,thyp2))
+     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) &
+     call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Twall_high,max(tol,thyp2))
      ! End of Case 3 !
 
      ! Case 4 !
-     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) call Heat_GFMstencil_o1(Ty_mins,Tij,1.0,max(tol,thym2))
+     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) &
+     call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Twall_high,max(tol,thym2))
      ! End of Case 4 ! 
-     
+    
      !______________________Advection Terms_______________________!
 
      !----------------- WENO3 X-Direction ------------!
@@ -364,7 +374,10 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
 
     else
 
-    T_rhs(i,j,k) = Txx + Tyy
+    !T_rhs(i,j,k) = (coeff*(Tx_plus-Tij)/dx - coeff*(Tij-Tx_mins)/dx)/dx + &
+    !               (coeff*(Ty_plus-Tij)/dy - coeff*(Tij-Ty_mins)/dy)/dy
+
+    T_rhs(i,j,k) = (1.0-Tij)/dr_dt
 
     end if
 

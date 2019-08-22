@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/DropletAndFlatPlate_3D  -3d -auto  -nxb=20 -nyb=20 -nzb=20 -opt -maxblocks=200 -gridinterpolation=native +pm4dev  -objdir=DropletAndFlatPlate_3D -site=splash.seas.gwu.edu Bittree=1

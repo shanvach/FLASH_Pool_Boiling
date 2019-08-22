@@ -316,7 +316,8 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
               del,coord,bsize,ib_ht_ielem(:,:),ib_ht_phile(:,:),     &
               ib_temp,FORCE_FLOW,blockID,CENTER_IND)
 
-        ib_Ftemp  = invdt*(part_temp - ib_temp)
+        !ib_Ftemp  = invdt*(part_temp - ib_temp)
+        ib_Ftemp = invdt*(1.0 - ib_temp)
         particleData(FTEMP_IND)  = particleData(FTEMP_IND) + ib_Ftemp
         particleData(TEMPITP_IND)  = ib_temp
 

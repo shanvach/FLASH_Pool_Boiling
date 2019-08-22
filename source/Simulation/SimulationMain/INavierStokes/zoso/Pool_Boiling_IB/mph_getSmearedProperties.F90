@@ -6,6 +6,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         integer, intent(in) :: ix1,ix2,jy1,jy2
         real, intent(in) :: dx, dy, rho1, rho2
@@ -19,6 +20,8 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
         real, dimension(:,:,:), intent(inout) :: smhv,smrh
         INTEGER, parameter :: kz1 = 1
 
+        real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
+
          pi = acos(-1.0)
 
          !sp=0.5*dx
@@ -29,17 +32,25 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
          sp = 1.5*dx
 
+         sunion = s
+
+         do j=jy1,jy2
+            do i=ix1,ix2
+                sunion(i,j,kz1) = min(s(i,j,kz1),-lambda(i,j,kz1))
+            end do
+         end do
+
          do j=jy1,jy2
            do i=ix1,ix2
 
-              if(abs(s(i,j,kz1)) .le. sp) then ! Symmetric smearing - AD
+              if(abs(sunion(i,j,kz1)) .le. sp .and. lambda(i,j,kz1) .lt. 0.0) then ! Symmetric smearing - AD
               !if(abs(s(i,j,kz1)) .le. sp .and. s(i,j,kz1) .lt. 0.0) then ! Asymmetric smearing - AD
 
-              smhv(i,j,kz1) = 0.5 + s(i,j,kz1)/(2*sp) + sin(2*pi*s(i,j,kz1)/(2*sp))/(2*pi)
+              smhv(i,j,kz1) = 0.5 + sunion(i,j,kz1)/(2*sp) + sin(2*pi*sunion(i,j,kz1)/(2*sp))/(2*pi)
 
               else
 
-                  if(s(i,j,kz1) .ge. 0.0) then
+                  if(sunion(i,j,kz1) .ge. 0.0) then
 
                         smhv(i,j,kz1) = 1.0
   
@@ -51,18 +62,11 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
               end if
 
-              if(lambda(i,j,kz1) .ge. 0.0) then
-                smrh(i,j,kz1) = (rho2/rho2)
-                smhv(i,j,kz1) = 0.0
-              else
-                smrh(i,j,kz1) = (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(i,j,kz1)
-              end if
-
            end do
          end do
 
-         !smrh(ix1:ix2,jy1:jy2,kz1) = &
-         !        (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
+         smrh(ix1:ix2,jy1:jy2,kz1) = &
+                 (rho2/rho2) + (rho1/rho2 - rho2/rho2) * smhv(ix1:ix2,jy1:jy2,kz1)
 
          smrh(ix1:ix2,jy1:jy2,kz1) = 1./smrh(ix1:ix2,jy1:jy2,kz1)
 
@@ -110,7 +114,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
               else
 
-                  if(s(i,j,k) .gt. 0.0) then
+                  if(s(i,j,k) .ge. 0.0) then
 
                         smhv(i,j,k) = 1.0
   
@@ -133,5 +137,3 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
 
 end subroutine mph_getSmearedProperties3D
-
-

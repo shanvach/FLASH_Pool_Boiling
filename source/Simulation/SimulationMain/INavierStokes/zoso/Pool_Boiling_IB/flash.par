@@ -12,10 +12,10 @@ pt_maxPerProc=3500
 invRe = 0.003
 
 # Prandtl Number
-Pr = 7
+Pr = 7.0
 
 # Stefan Number
-St = 0.16
+St = 0.4
 
 iConvU = 0
 
@@ -35,7 +35,7 @@ thco1 = 1.0
 thco2 = 7.0
 
 cp1   = 1.0
-cp2   = 270.0
+cp2   = 277.0
 
 # Gravity in the +y direction
 gravX =   0.0
@@ -86,10 +86,10 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =   -8.00
-xmax =    8.00
+xmin =   -5.00
+xmax =    5.00
 ymin =    0.00
-ymax =   16.00
+ymax =   10.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -115,10 +115,10 @@ restart         = .false.
 nend = 1000000000
 tmax            = 2500.0
 cflflg          = 0
-cfl             = 0.4
-sigma		= 0.4
-dtspec          = 1.0d-4
-dtinit          = 1.0d-4
+cfl             = 0.1
+sigma		= 0.1
+dtspec          = 0.5d-4
+dtinit          = 0.5d-4
 tstep_change_factor=1.01
 
 
@@ -141,8 +141,8 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 40
-nblocky	= 40
+nblockx	= 10
+nblocky	= 10
 
 lrefine_min	= 1
 lrefine_max     = 1

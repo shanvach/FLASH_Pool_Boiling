@@ -123,10 +123,10 @@ module Heat_AD_interface
    end interface
 
    interface
-      subroutine Heat_calMdot(mdot,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2,kz1,kz2)
+      subroutine Heat_calMdot(mdot,lambda,Tnl,Tnv,alpha_l,alpha_v,nx,ny,ix1,ix2,jy1,jy2,kz1,kz2)
         implicit none
         real, dimension(:,:,:), intent(inout) :: mdot
-        real, dimension(:,:,:), intent(in) :: Tnl,Tnv,nx,ny
+        real, dimension(:,:,:), intent(in) :: Tnl,Tnv,nx,ny,lambda
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(in) :: alpha_l,alpha_v
       end subroutine Heat_calMdot
