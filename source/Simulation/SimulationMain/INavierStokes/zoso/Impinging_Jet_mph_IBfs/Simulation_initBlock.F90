@@ -134,12 +134,12 @@ subroutine Simulation_initBlock(blockId)
   xl =  15.00
   xr =  16.00
   yl =  10.00
-  yr =  25.00
+  yr =  20.00
 
   xl2 =  -16.00
   xr2 =  -15.00
   yl2 =   10.00
-  yr2 =   25.00
+  yr2 =   20.00
 
 
   !- kpd - Initialize the distance function in the 1st quadrant 
