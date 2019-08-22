@@ -14,6 +14,8 @@
 !! 
 !! Subroutine to find the distance function lambda for 
 !! the immersed boundary (IB).
+!! 
+!! Author - Elizabeth Gregorio 
 
 subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
