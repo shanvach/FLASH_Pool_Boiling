@@ -84,7 +84,7 @@ subroutine Simulation_initBlock(blockId)
   integer :: Nuc_Index, bli
   real :: th_radii
   real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
-
+  real :: zl,zr,dzl,dzr
   real :: xdrop, ydrop, xbubble, ybubble, dfunbub, zdrop, zbubble
   !----------------------------------------------------------------------
   
@@ -118,13 +118,15 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
 
-  xl = -0.25
-  xr =  0.25
-  yl = -4.0
-  yr =  4.0
+  xl = -3.00
+  xr =  3.00
+  yl = -3.25
+  yr = -3.00
+  zl = -3.00
+  zr =  3.00
 
   xdrop = 0.0 !-0.6
-  ydrop = 1.0 !3.0
+  ydrop = 2.0 !3.0
   zdrop = 0.0
 
   xbubble =  0.0  !0.6
@@ -153,11 +155,13 @@ subroutine Simulation_initBlock(blockId)
            dxr = xr - xcell
            dyl = ycell - yl
            dyr = yr - ycell
+           dzl = zcell - zl
+           dzr = zr - zcell
 
-           solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+(zcell-zdrop)**2)-0.2
+           solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+(zcell-zdrop)**2)-0.5
 
-           !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr) !rectangle
-           solnData(LMDA_VAR,i,j,k) = 0.5-sqrt(xcell**2+ycell**2+zcell**2) !circle
+           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr,dzl,dzr) !cuboid
+           !solnData(LMDA_VAR,i,j,k) = 0.5-sqrt(xcell**2+ycell**2+zcell**2) !sphere
 
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
 
