@@ -125,9 +125,9 @@ subroutine Simulation_initBlock(blockId)
   zl = -3.00
   zr =  3.00
 
-  xdrop = 0.0 !-0.6
-  ydrop = 2.0 !3.0
-  zdrop = 0.0
+  xdrop =  0.0 !-0.6
+  ydrop = -1.0 !3.0
+  zdrop =  0.0
 
   xbubble =  0.0  !0.6
   ybubble = -0.6 !-3.0
