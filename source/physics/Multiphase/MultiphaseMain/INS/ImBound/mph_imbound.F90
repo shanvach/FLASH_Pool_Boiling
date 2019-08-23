@@ -207,16 +207,26 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            zp(probe_index) = 0.      ! zp = DFUN at probe point
 
+#if NDIM == 2
            do ib_ind = 1 , ib_stencil
                 zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
                 solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
+#endif
+
+#if NDIM == 3
+           do ib_ind = 1 , ib_stencil
+                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));
+           enddo
+#endif
+
            enddo
 
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
            !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
+           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(60.0*acos(-1.0)/180)
            !end if
 
            end if
@@ -227,22 +237,22 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         end do
 #endif
 
-        k = 1
-#if NDIM == 3
-       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-#endif
-        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
- 
-          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
-             solnData(DFUN_VAR,i,j,k) = &
-             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
-
-         end do
-        end do
-#if NDIM == 3
-        end do
-#endif
+!        k = 1
+!#if NDIM == 3
+!       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+!#endif
+!        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+!         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+! 
+!          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
+!             solnData(DFUN_VAR,i,j,k) = &
+!             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
+!
+!         end do
+!        end do
+!#if NDIM == 3
+!        end do
+!#endif
         ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
