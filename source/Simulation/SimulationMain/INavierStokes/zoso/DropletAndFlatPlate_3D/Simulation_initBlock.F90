@@ -247,6 +247,10 @@ subroutine Simulation_initBlock(blockId)
   facezData(RH1F_FACE_VAR,:,:,:) = 0.0
   facezData(RH2F_FACE_VAR,:,:,:) = 0.0
 
+  facexData(POLD_FACE_VAR,:,:,:) = 0.0
+  faceyData(POLD_FACE_VAR,:,:,:) = 0.0
+  facezData(POLD_FACE_VAR,:,:,:) = 0.0
+
   ! Release pointer
   call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 

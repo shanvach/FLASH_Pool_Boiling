@@ -272,12 +272,16 @@ subroutine Simulation_initBlock(blockId)
   facexData(RH2F_FACE_VAR,:,:,:) = 0.0
   faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
 
+  facexData(POLD_FACE_VAR,:,:,:) = 0.0
+  faceyData(POLD_FACE_VAR,:,:,:) = 0.0
+
 #if NDIM == 3
   facezData(VELC_FACE_VAR,:,:,:) = 0.0
   facezData(RHDS_FACE_VAR,:,:,:) = 0.0
   facezData(SIGM_FACE_VAR,:,:,:) = 0.0
   facezData(RH1F_FACE_VAR,:,:,:) = 0.0
   facezData(RH2F_FACE_VAR,:,:,:) = 0.0
+  facezData(POLD_FACE_VAR,:,:,:) = 0.0
 #endif
 
   ! Release pointer
