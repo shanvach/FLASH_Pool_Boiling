@@ -52,8 +52,8 @@
         do k=kz1-2,kz2+2
          do j=jy1-2,jy2+2
             do i=ix1-2,ix2+2
-                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+                sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+                !sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
             end do
          end do
         end do

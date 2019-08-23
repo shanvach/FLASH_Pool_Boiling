@@ -210,6 +210,10 @@ SUBROUTINE ins_corrector_VD(uni,vni,wni,sigx,sigy,sigz,p,ix1,ix2,jy1,jy2,kz1,kz2
 
       coef = dt*alfa
 
+      poldx = 0.0
+      poldy = 0.0
+      poldz = 0.0
+
       !- kpd - Doesn't loop through boundary X-mom locations.
       !        Those were taken care of in ab2rk3
       do k=kz1,kz2

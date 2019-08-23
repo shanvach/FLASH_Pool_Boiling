@@ -133,7 +133,7 @@ mgrid_npresmooth = 5
 mgrid_npossmooth = 4
 mgrid_print_norm = .true.
 mgrid_max_residual_norm = 1.e-10
-mgrid_max_vcycles = 20
+mgrid_max_vcycles = 2
 
 # BiPCGStab Parameters:
 bipcgs_max_residual_norm = 1.e-10
