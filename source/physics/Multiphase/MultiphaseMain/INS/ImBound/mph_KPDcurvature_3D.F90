@@ -40,6 +40,8 @@
         real, parameter :: eps = 1E-13
 
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: b1,b2
 
         !*****************************************************************
 
@@ -48,15 +50,24 @@
         !---------------------------------------------
 
         sunion = s
+        pfl = 0.0
 
-        do k=kz1-2,kz2+2
-         do j=jy1-2,jy2+2
-            do i=ix1-2,ix2+2
-                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-            end do
-         end do
-        end do
+        !do k=kz1-2,kz2+2
+        ! do j=jy1-2,jy2+2
+        !    do i=ix1-2,ix2+2
+        !        sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+        !        !sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+        !    end do
+        ! end do
+        !end do
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
+        (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
+        (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
 
         crv = 0.
         do k = kz1,kz2
@@ -131,14 +142,10 @@
         do k = kz1-1,kz2+1
            do j = jy1-1,jy2+1
               do i = ix1-1,ix2+1
-                 pf(i,j,k) = 0.
 
-                 if(sunion(i,j,k).ge.0.) then
-                    pf(i,j,k) = 1.                       
-                    visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
-                 else
-                    visc(i,j,k) = vis2/vis2
-                 end if
+              visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+                              (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
+                             (pfl(i,j,k))*(vis2/vis2)
 
               end do
            end do
@@ -164,10 +171,13 @@
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1x(i,j,k) = a1*a2/rho1
-              !rho2x(i,j,k) = (1. - a1*a2)/rho2
-              rho1x(i,j,k) = a1*a2/(rho1/rho2)
-              rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.               
+              b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
+                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+
+              rho1x(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do
@@ -187,10 +197,13 @@
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1y(i,j,k) = a1*a2/rho1
-              !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              rho1y(i,j,k) = a1*a2/(rho1/rho2)
-              rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.           
+              b2 = pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps) * &
+                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+
+              rho1y(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do
@@ -210,10 +223,13 @@
               a1 = (pf(i,j,k-1) + pf(i,j,k)) / 2.           
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1z(i,j,k) = a1*a2/rho1
-              !rho2z(i,j,k) = (1. - a1*a2)/rho2
-              rho1z(i,j,k) = a1*a2/(rho1/rho2)
-              rho2z(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              b1 = (pfl(i,j,k-1) + pfl(i,j,k)) / 2.           
+              b2 = pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps) * &
+                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+
+              rho1z(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do

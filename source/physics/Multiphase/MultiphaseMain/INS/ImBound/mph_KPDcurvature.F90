@@ -37,26 +37,36 @@
         real, dimension(ix2,jy2) :: adf
         real :: axr,axl,ayr,ayl,ax,ay
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: b1,b2
 
         crmx = -1E10
         crmn = 1E10
 
+        pfl = 0.0
 
         !*************************************************************************
 
-        !- kpd - For 2D runs 
+        ! For 2D runs 
         k=1
 
          sunion = s
 
-         do j=jy1-2,jy2+2
-            do i=ix1-2,ix2+2
-                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-            end do
-         end do
+         !do j=jy1-2,jy2+2
+         !   do i=ix1-2,ix2+2
+         !       !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+         !       sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+         !   end do
+         !end do
 
-        !- kpd - Compute the curvature ---------------
+         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
+         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+
+         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
+         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+
+
+        !- Compute the curvature ---------------
 
         crv = 0.
         do j = jy1,jy2
@@ -94,54 +104,18 @@
            end do
         end do
 
-!       !---- RIAZ'S IMPLEMENTATION ----!
-!
-!        do j = jy1,jy2
-!           do i = ix1,ix2
-!
-!              adf(i,j) = sqrt( ((s(i+1,j,k)-s(i-1,j,k))/2./dx)**2 + &
-!                               ((s(i,j+1,k)-s(i,j-1,k))/2./dy)**2 )
-!
-!           end do
-!        end do
-!
-!        crv = 0.
-!        do j = jy1+1,jy2-1
-!           do i = ix1+1,ix2-1
-!
-!              axr = (adf(i,j)+adf(i+1,j))/2.
-!              axl = (adf(i-1,j)+adf(i,j))/2.
-!              ayr = (adf(i,j)+adf(i,j+1))/2.
-!              ayl = (adf(i,j-1)+adf(i,j))/2.
-!
-!              ax = (s(i+1,j,k)-s(i,j,k))/axr - (s(i,j,k)-s(i-1,j,k))/axl
-!              ay = (s(i,j+1,k)-s(i,j,k))/ayr - (s(i,j,k)-s(i,j-1,k))/ayl
-!
-!              crv(i,j,k) = ax/dx**2 + ay/dy**2
-!
-!           end do
-!        end do
-
-        !*************************************************************************
-
         !----------------------------------
-        !- kpd - Compute the phase function
+        !- Compute viscosity function
         !----------------------------------
         k=1
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
-              pf(i,j,k) = 0.
 
-              if(sunion(i,j,k).ge.0.) then
-                 pf(i,j,k) = 1.                       !- kpd - Set phase function on each side of interface
-                 visc(i,j,k) = vis1/vis2               !- kpd - Set viscosity on each side of interface
-                 !print*,"vis1",i,j,visc(i,j,k)
-              else
-                 visc(i,j,k) = vis2/vis2
-                 !print*,"vis2",i,j,visc(i,j,k)
-              end if
-              !print*,"VISC",i,j,k,visc(i,j,k)
-              !print*,"PFUN",i,j,pf(i,j,k),visc(i,j,k)
+              visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+                              (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
+                             (pfl(i,j,k))*(vis1/vis2)
+
+
            end do
         end do
 
@@ -155,13 +129,19 @@
         !- kpd - Loop through boundary and interior cell faces
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
+
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1x(i,j,k) = a1*a2/rho1
-              !rho2x(i,j,k) = (1. - a1*a2)/rho2
-              rho1x(i,j,k) = a1*a2/(rho1/rho2)
-              rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                       
+              b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
+                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+
+
+              rho1x(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho1/rho2)
+
            end do
         end do
 
@@ -171,18 +151,22 @@
         !- kpd - Loop through boundary and interior cell faces
         do i = ix1-1,ix2+1
            do j = jy1-1,jy2+1
+
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
-              !rho1y(i,j,k) = a1*a2/rho1
-              !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              rho1y(i,j,k) = a1*a2/(rho1/rho2)
-              rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+
+              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.           
+              b2 = pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps) * &
+                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+
+              rho1y(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho1/rho2)
+
            end do
         end do
 
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
-
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
       end subroutine mph_KPDcurvature2DAB
