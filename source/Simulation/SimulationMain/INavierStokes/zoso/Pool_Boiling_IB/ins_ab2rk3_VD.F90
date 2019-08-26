@@ -531,7 +531,10 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-            ins_gama,ins_rhoa,ins_alfa )
+            ins_gama,ins_rhoa,ins_alfa, &
+                        facexData(POLD_FACE_VAR,:,:,:),&
+                        faceyData(POLD_FACE_VAR,:,:,:),&
+                        facezData(POLD_FACE_VAR,:,:,:))
 
 
      ! save RHS for next step
@@ -613,6 +616,51 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 !*************************************************************************************************
 !*************************************************************************************************
 !*************************************************************************************************
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     k = 1
+
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
+             facexData(VELC_FACE_VAR,i,j,k) = facexData(VELC_FACE_VAR,i,j,k) + dt* facexData(POLD_FACE_VAR,i,j,k)
+        end do
+     end do
+ 
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+             faceyData(VELC_FACE_VAR,i,j,k) = faceyData(VELC_FACE_VAR,i,j,k) + dt* faceyData(POLD_FACE_VAR,i,j,k)
+        end do
+     end do
+        
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
+#endif
+  ins_predcorrflg = .false.
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----
@@ -905,7 +953,10 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
                          faceyData(RH1F_FACE_VAR,:,:,:),            &
                          faceyData(RH2F_FACE_VAR,:,:,:),            &
                          facezData(RH1F_FACE_VAR,:,:,:),            &
-                         facezData(RH2F_FACE_VAR,:,:,:) )
+                         facezData(RH2F_FACE_VAR,:,:,:),            & 
+                         facexData(POLD_FACE_VAR,:,:,:),            &
+                         faceyData(POLD_FACE_VAR,:,:,:),            &
+                         facezData(POLD_FACE_VAR,:,:,:))
 
      !- kpd - The final pressure update (For pressure correction ONLY!)
      !        When pressure correction method is not used ins_prescoeff should
@@ -937,7 +988,15 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
 #if NDIM == 3
   gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! w
 #endif
+
+  gcMask(NUNK_VARS+POLD_FACE_VAR) = .TRUE.                 ! poldx
+  gcMask(NUNK_VARS+1*NFACE_VARS+POLD_FACE_VAR) = .TRUE.    ! poldy
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+POLD_FACE_VAR) = .TRUE.    ! poldy
+#endif
+
   ins_predcorrflg = .false.
+
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)         
 

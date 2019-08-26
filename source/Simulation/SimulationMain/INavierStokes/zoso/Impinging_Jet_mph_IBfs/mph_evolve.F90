@@ -295,7 +295,7 @@ if(mph_flag == 1) then
                            mph_sten,mph_crmx,mph_crmn,                 &
                            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2)
+                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2,blockID)
      !------------------------------------------------------------------
 
 #elif NDIM ==3
@@ -321,7 +321,7 @@ if(mph_flag == 1) then
                            facezData(RH2F_FACE_VAR,:,:,:),             &
                            solnData(PFUN_VAR,:,:,:),                   &
                            mph_rho1,mph_rho2,                          &
-                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2)
+                           solnData(VISC_VAR,:,:,:),mph_vis1,mph_vis2,blockID)
         !----------------------------------------------------------
 
 #endif

@@ -343,7 +343,7 @@
                              solnData(SIGP_VAR,:,:,1),tsigp)
                                                                                                                                                                                                                 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(TMIC_VAR,:,:,1),tptes)
+                            solnData(ALPH_VAR,:,:,1),tptes)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(LMDA_VAR,:,:,1),tlamda)

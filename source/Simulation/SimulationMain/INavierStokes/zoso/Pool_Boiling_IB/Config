@@ -89,6 +89,10 @@ GUARDCELLS 3
 VARIABLE PTES
 VARIABLE RTES
 
+# Akash - for testing IB
+
+FACEVAR POLD
+
 #/Generic_Direct
 
 #DATAFILES libtecio.a

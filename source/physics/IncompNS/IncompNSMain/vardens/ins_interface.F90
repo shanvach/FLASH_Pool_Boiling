@@ -133,6 +133,19 @@ Module ins_interface
       REAL :: gama,rhoa,alfa
       END SUBROUTINE ins_predictor_VD
 
+      SUBROUTINE ins_predictor_VD_IB(uni,vni,wni,unew,vnew,wnew,uold,vold,&
+        wold,p,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,gama,rhoa,alfa,poldx,poldy,poldz)
+      implicit none
+      INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
+      REAL, INTENT(IN) :: dt,dx,dy,dz
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: unew,vnew,wnew,&
+                                            uold,vold,wold,&
+                                            p,poldx,poldy,poldz
+      REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni
+      REAL :: gama,rhoa,alfa
+      END SUBROUTINE ins_predictor_VD_IB
+
+
       SUBROUTINE ins_divergence_VD(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
          dx,dy,dz,divv)
       implicit none
@@ -150,6 +163,23 @@ Module ins_interface
       REAL, DIMENSION(:,:,:), INTENT(IN) :: p,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z
       REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni,sigx,sigy,sigz
       END SUBROUTINE ins_corrector_VD
+
+      SUBROUTINE ins_corrector_VD_IB(uni,vni,wni,sigx,sigy,sigz,p,ix1,ix2,jy1,jy2,kz1,kz2, &
+        dt,dx,dy,dz,alfa,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,poldx,poldy,poldz)
+      implicit none
+      INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
+      REAL, INTENT(IN) :: dt,dx,dy,dz,alfa
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: p,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z
+      REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni,sigx,sigy,sigz,&
+                                                poldx,poldy,poldz
+      END SUBROUTINE ins_corrector_VD_IB
+
+      SUBROUTINE ins_firstCorrector_VD_IB(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,dt,poldx,poldy,poldz)
+      INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
+      REAL, INTENT(IN) :: dt
+      REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: poldx,poldy,poldz
+      END SUBROUTINE ins_firstCorrector_VD_IB
 
   end interface
 

@@ -207,10 +207,20 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            zp(probe_index) = 0.      ! zp = DFUN at probe point
 
+#if NDIM == 2
            do ib_ind = 1 , ib_stencil
                 zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
                 solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
            enddo
+#endif
+
+#if NDIM == 3
+           do ib_ind = 1 , ib_stencil
+                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));
+           enddo
+#endif
+
            enddo
 
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)

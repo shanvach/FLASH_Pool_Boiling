@@ -363,6 +363,8 @@ subroutine Simulation_initBlock(blockId)
   facexData(RH2F_FACE_VAR,:,:,:) = 0.0
   faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
 
+  facexData(POLD_FACE_VAR,:,:,:) = 0.0
+  faceyData(POLD_FACE_VAR,:,:,:) = 0.0
 
 !!$  ! Point to blocks center and face vars:
 !!$  call Grid_getBlkPtr(blockID,solnData,CENTER)
