@@ -2,21 +2,27 @@
 !=========================================================================
 !=========================================================================
 
+!#define LEVEL_SET_UNION
+#define THREE_PHASE_TREATMENT
+#define FREE_SURFACE_TREATMENT
 
         subroutine mph_KPDcurvature2DAB(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,blockID)
 
+
+        use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
    
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         !*************************************************************************
 
         !---------------------------------
         !- kpd - Data from routine call...
         !---------------------------------
-        integer, intent(in) :: ix1,ix2,jy1,jy2
+        integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
         real, intent(in) :: dx, dy, rho1, rho2, xit, vis1, vis2 
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
@@ -40,10 +46,25 @@
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
         real :: b1,b2
 
+        real :: del(MDIM),bsize(MDIM),coord(MDIM)
+        real, dimension(2,MDIM) :: boundBox
+
+        real :: xcell,ycell
+        real :: rho3,vis3
+        real :: free_surface_loc
+
+        call Grid_getDeltas(blockID,del)
+        call Grid_getBlkCenterCoords(blockId,coord)
+        call Grid_getBlkBoundBox(blockId,boundBox)
+
+        bsize(:) = boundBox(2,:) - boundBox(1,:)
+
         crmx = -1E10
         crmn = 1E10
 
         pfl = 0.0
+
+        free_surface_loc = -4.0
 
         !*************************************************************************
 
@@ -52,19 +73,22 @@
 
          sunion = s
 
-         !do j=jy1-2,jy2+2
-         !   do i=ix1-2,ix2+2
-         !       !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-         !       sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-         !   end do
-         !end do
+#ifdef LEVEL_SET_UNION
+         do j=jy1-2,jy2+2
+            do i=ix1-2,ix2+2
+                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+            end do
+         end do
+#endif
 
          pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
          pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
+#ifdef THREE_PHASE_TREATMENT
          pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
          pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
-
+#endif
 
         !- Compute the curvature ---------------
 
@@ -111,9 +135,27 @@
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
 
+              xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                      real(i - NGUARD - 1)*del(IAXIS) +   &
+                      0.5*del(IAXIS)
+
+              ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
+
+#ifdef FREE_SURFACE_TREATMENT
+             if(ycell .gt. free_surface_loc) then
+                vis3 = vis1
+             else
+                vis3 = vis2
+             end if
+#else
+              vis3 = vis1
+#endif
+
               visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
-                             (pfl(i,j,k))*(vis1/vis2)
+                             (pfl(i,j,k))*(vis3/vis2)
 
 
            end do
@@ -130,6 +172,23 @@
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
 
+              xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                      real(i - NGUARD - 1)*del(IAXIS)
+
+              ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)  +  &
+                      0.5*del(JAXIS)
+
+#ifdef FREE_SURFACE_TREATMENT
+             if(ycell .gt. free_surface_loc) then
+                rho3 = rho1
+             else
+                rho3 = rho2
+             end if
+#else
+              rho3 = rho1
+#endif
+
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
@@ -138,9 +197,8 @@
               b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
 
-
               rho1x(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho3/rho2)
 
            end do
         end do
@@ -152,6 +210,23 @@
         do i = ix1-1,ix2+1
            do j = jy1-1,jy2+1
 
+              xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                      real(i - NGUARD - 1)*del(IAXIS) +   &
+                      0.5*del(IAXIS)
+
+              ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                      real(j - NGUARD - 1)*del(JAXIS)
+
+#ifdef FREE_SURFACE_TREATMENT
+             if(ycell .gt. free_surface_loc) then
+                rho3 = rho1
+             else
+                rho3 = rho2
+             end if
+#else
+              rho3 = rho1
+#endif
+
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
@@ -161,7 +236,7 @@
                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
 
               rho1y(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho3/rho2)
 
            end do
         end do

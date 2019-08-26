@@ -2,21 +2,24 @@
 !=========================================================================
 !=========================================================================
 
+!#define LEVEL_SET_UNION
+#define THREE_PHASE_TREATMENT
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
-           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2)
+           rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2,blockID)
 
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         !*****************************************************************
 
         !---------------------------------
         !- kpd - Data from routine call...
         !---------------------------------
-        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2,blockID
         real, intent(in) :: dx, dy, dz, rho1, rho2, vis1, vis2
         real, dimension(:,:,:), intent(inout):: s,crv, &
                                                 rho1x,rho2x,rho1y, &
@@ -52,22 +55,26 @@
         sunion = s
         pfl = 0.0
 
-        !do k=kz1-2,kz2+2
-        ! do j=jy1-2,jy2+2
-        !    do i=ix1-2,ix2+2
-        !        sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-        !        !sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-        !    end do
-        ! end do
-        !end do
+#ifdef LEVEL_SET_UNION
+        do k=kz1-2,kz2+2
+         do j=jy1-2,jy2+2
+            do i=ix1-2,ix2+2
+                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
+            end do
+         end do
+        end do
+#endif
 
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
         (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
 
+#ifdef THREE_PHASE_TREATMENT
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
         (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+#endif
 
         crv = 0.
         do k = kz1,kz2
