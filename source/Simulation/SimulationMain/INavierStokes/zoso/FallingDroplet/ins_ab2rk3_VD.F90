@@ -89,8 +89,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
               ins_setInterpValsGcell,&
                            ins_rhs3d_VD,&
                            ins_rhs2d_VD,&
-                           ins_rhs2d_PC,&
-                           ins_rhs3d_PC,&
                            ins_rhs2d_weno3,&
                            ins_rhs3d_weno3,&
                        ins_predictor_VD,&
@@ -457,7 +455,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      !- avd - For Predictor Step (newu, newv & neww are RHS)
-     call ins_rhs3d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs3d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
                        faceyData(VELC_FACE_VAR,:,:,:),            &
                        facezData(VELC_FACE_VAR,:,:,:),            &
                        solnData(TVIS_VAR,:,:,:),                  &
@@ -493,7 +491,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      end if
 
      ! ML - GFM for velocity jump condition
-     call ins_rhs2d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs2d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
