@@ -24,11 +24,11 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "SolidMechanics.h"
 
   ! Modules Used
-  !use SolidMechanics_data, only: sm_bodyInfo
-  !use sm_element_interface, only: sm_el02_mapParticles, sm_el10_mapParticles, &
-  !                                sm_el01_mapParticles
+  use SolidMechanics_data, only: sm_bodyInfo
+  use sm_element_interface, only: sm_el02_mapParticles, sm_el10_mapParticles, &
+                                  sm_el01_mapParticles
 
-  use gr_sbData, ONLY : gr_sbBodyInfo
+  use gr_sbData, ONLY : gr_sbBodyInfo,gr_sbNumBodies
   use Driver_interface, ONLY : Driver_abortFlash
 
   use Grid_interface, ONLY : Grid_getListOfBlocks,   &
@@ -43,8 +43,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
                              mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
 
-  !use ib_interface, ONLY : ib_stencils
-  !use ImBound_data, only : ib_stencil
+  use ib_interface, ONLY : ib_stencils
+  use ImBound_data, only : ib_stencil
+!  use gr_sbData, only: xb, yb
 
   implicit none
 
@@ -55,8 +56,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real,    INTENT(IN) :: timeEndAdv,dt,dtOld
 
   ! Internal Variables
-  !integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
-  !integer, allocatable, dimension(:) :: loc_num
+  integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
+  integer, allocatable, dimension(:) :: loc_num
 
   ! Arugments List
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
@@ -84,25 +85,34 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real, allocatable, dimension(:) :: angl, dist
   integer, allocatable, dimension(:):: ind
   real :: u,dot,det
-  integer :: nelm=2 ! Dimension for the points, 2 for (x,y) in 2-D
+  integer :: nelm=2,ibd ! Dimension for the points, 2 for (x,y) in 2-D
 
-  integer :: max_ptelem=4 ! for box should be 4
+  !integer :: max_ptelem=4 ! for box should be 4
 
-  !nel = sm_bodyInfo(ibd)%ws_nel
-  !max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
-  !max_ptm1 = max_ptelem-1
+  do ibd=1,gr_sbNumBodies
+      nel = sm_bodyInfo(ibd)%ws_nel
+      max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
+      max_ptm1 = max_ptelem-1
+      if (mph_meshMe .eq. 0) print*,"Getting sm_bodyInfo"
+  end do
 
   allocate(xpos(max_ptelem),ypos(max_ptelem))
   allocate(angl(max_ptelem),dist(max_ptelem))
   allocate(PA(nelm),PB(nelm),P1(nelm),P0(nelm),v1(nelm),v2(nelm))
   allocate(ind(nelm))
 
-  xpos = (/3.0,  -3.0, -3.0,  3.0/)
-  ypos = (/-3.0, -3.0, -3.25, -3.25/)
+  do ibd=1,gr_sbNumBodies
+      xpos = sm_bodyInfo(ibd)%xB(1:nel)
+      ypos = sm_bodyInfo(ibd)%yB(1:nel)
+      if (mph_meshMe .eq. 0) print*,"Getting xpos and ypos"
+  end do
+
+  !xpos = (/3.0,  -3.0, -3.0,  3.0/)
+  !ypos = (/-3.0, -3.0, -3.25, -3.25/)
 
   ! Loop through all the grid points
   do lb = 1,blockCount
-
+        if (mph_meshMe .eq. 0) print*,"Starting blockCount loop"
         ! Loop through all the blocks
         blockID = blockList(lb)
 
@@ -130,7 +140,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           
+!           if (mph_meshMe .eq. 0) print*,"Starting Eulerian grid loop"    
            angl = 0.0
            dist = 0.0
 
@@ -147,15 +157,21 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            do p_i=1,max_ptelem ! p_i is short for panel_index
 
+!             if (mph_meshMe .eq. 0) print*,"Starting Lagrangian point loop"
+
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
                PA = (/xpos(p_i), ypos(p_i)/)
-              
+
+!             if (mph_meshMe .eq. 0) print*,"PA assigned"      
+
                if (p_i .eq. max_ptelem) then
                   PB = (/xpos(1), ypos(1)/)
                else
                   PB = (/xpos(p_i+1), ypos(p_i+1)/)
                end if
+
+!             if (mph_meshMe .eq. 0) print*,"PB assigned, p_i = ",p_i,", max_ptelem = ",max_ptelem
 
              ! Grid cell point
                P1 = (/xcell, ycell/)
@@ -199,6 +215,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            end do
 
+
            !if ( dist(1) .lt. dist(2) ) then
                !mvd = dist!(1)
                !mva = angl!(1)
@@ -223,7 +240,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        angl(p_i+1) = angl(p_i) - angl(p_i+1)
                        angl(p_i) = angl(p_i) - angl(p_i+1)
 
-
                 end if
            end do
            end do
@@ -247,7 +263,10 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
-
+  
+  call MPI_BARRIER()        
+  if (mph_meshMe .eq. 0) print*,"Loops ended"
+!go to 100
 !--------------------------------------------------------------------
     gcMask = .FALSE.
     gcMask(LMDA_VAR) = .TRUE.
@@ -255,7 +274,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 !--------------------------------------------------------------------
-
+!100 continue
+  if (mph_meshMe .eq. 0) print*,"masks done"
   do lb=1,blockCount
 
         ! Loop through all the blocks
@@ -298,10 +318,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
             end do
         end do
 
-        k = 1
+        !k = 1
         do j=2,blkLimitsGC(HIGH,JAXIS)-1
             do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
                solnData(TNGY_VAR,i,j,k) = ((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
@@ -310,9 +329,14 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                       sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
                                            ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
 
-
             end do
         end do        
+
+        ! Release pointers:
+        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
 
