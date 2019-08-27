@@ -25,7 +25,7 @@ subroutine sm_surf_MapParticles(ibd)
   use gr_sbData, ONLY : gr_sbBodyInfo
   use Driver_interface, ONLY : Driver_abortFlash
   use Simulation_data, only: sim_ibm_x, sim_ibm_y, sim_ibm_z
-
+  use Driver_data, only: dr_simTime
   implicit none
   
   ! IO variables
@@ -152,15 +152,19 @@ subroutine sm_surf_MapParticles(ibd)
 
   enddo
 
-  sim_ibm_x = ((x2**2+y2**2)*(y3-y1) + (x1**2+y1**2)*(y2-y3) + (x3**2+y3**2)*(y1-y2)) &
-            / (2*((x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)))
+  !sim_ibm_x = ((x2**2+y2**2)*(y3-y1) + (x1**2+y1**2)*(y2-y3) + (x3**2+y3**2)*(y1-y2)) &
+  !          / (2*((x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)))
  
-  sim_ibm_y = ((x2**2+y2**2)*(x3-x1) + (x1**2+y1**2)*(x2-x3) + (x3**2+y3**2)*(x1-x2)) &
-            / (2*((y2-y1)*(x3-x1)-(y3-y1)*(x2-x1)))
+  !sim_ibm_y = ((x2**2+y2**2)*(x3-x1) + (x1**2+y1**2)*(x2-x3) + (x3**2+y3**2)*(x1-x2)) &
+  !          / (2*((y2-y1)*(x3-x1)-(y3-y1)*(x2-x1)))
 
   !sim_ibm_x = xpos(1) - 0.5
   !sim_ibm_y = ypos(1)
  
+  sim_ibm_x = 0.0
+  sim_ibm_y = -1.0*dr_simTime
+  sim_ibm_z = 0.0
+
   print *,"P1: ", x1, y1, z1
   print *,"P2: ", x2, y2, z2
   print *,"P3: ", x3, y3, z3

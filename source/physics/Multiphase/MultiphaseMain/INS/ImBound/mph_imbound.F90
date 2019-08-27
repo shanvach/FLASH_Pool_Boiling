@@ -226,7 +226,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
            !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(60.0*acos(-1.0)/180)
+           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
            !end if
 
            end if
