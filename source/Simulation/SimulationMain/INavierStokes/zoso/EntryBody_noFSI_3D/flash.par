@@ -46,8 +46,8 @@ geometry	= "cartesian"
 #       Size of computational volume
 xmin =   -4.0
 xmax =    4.0
-ymin =   -4.0
-ymax =    2.0
+ymin =   -9.0
+ymax =    1.0
 zmin =   -4.0
 zmax =    4.0
 
@@ -79,8 +79,8 @@ tmax            = 10.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 0.4d-4
-dtinit          = 0.4d-4
+dtspec          = 1.0d-4
+dtinit          = 1.0d-4
 tstep_change_factor=1.00
 
 
@@ -101,11 +101,11 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalStep = 100000
 
 #plotFileIntervalTime = 0.01
-plotFileIntervalStep = 1000
+plotFileIntervalStep = 500
 
 ##	AMR parameters
 nblockx	= 8
-nblocky	= 6
+nblocky	= 10
 nblockz = 8
 
 lrefine_min	= 1
