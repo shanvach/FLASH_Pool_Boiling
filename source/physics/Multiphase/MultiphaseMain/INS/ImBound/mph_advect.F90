@@ -38,7 +38,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
 
-  use mph_interface, only: mph_imbound, mph_iblset
+  use mph_interface, only: mph_imbound
 
   use ImBound_interface, ONLY : ImBound
 
@@ -87,8 +87,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
 
-  integer :: ibd
-
   !- kpd - For Overall Solver Timer... 
   real :: t_startMP1,t_stopMP1,t_startMP2,t_startMP2a,t_stopMP2
 
@@ -121,11 +119,11 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
      blockID = blockList(lb)
 
-     call Grid_getBlkBoundBox(blockID,boundBox)
+     call Grid_getBlkBoundBox(blockId,boundBox)
 
      bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-     call Grid_getBlkCenterCoords(blockID,coord)
+     call Grid_getBlkCenterCoords(blockId,coord)
 
      ! Get blocks dx, dy ,dz:
      call Grid_getDeltas(blockID,del)
@@ -290,9 +288,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-
-    !- EG - update the IB level set distance function
-   call mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
