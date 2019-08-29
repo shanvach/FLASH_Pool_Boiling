@@ -57,7 +57,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   ! Internal Variables
   integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
-  integer, allocatable, dimension(:) :: loc_num
+  !integer, allocatable, dimension(:) :: loc_num
 
   ! Arugments List
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
@@ -83,28 +83,29 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real, allocatable, dimension(:) :: xpos,ypos
   real, allocatable, dimension(:) :: PA, PB, P1, P0, v1, v2
   real, allocatable, dimension(:) :: angl, dist
-  integer, allocatable, dimension(:):: ind
+  !integer, allocatable, dimension(:):: ind
   real :: u,dot,det
   integer :: nelm=2,ibd ! Dimension for the points, 2 for (x,y) in 2-D
 
   !integer :: max_ptelem=4 ! for box should be 4
 
   do ibd=1,gr_sbNumBodies
-      nel = sm_bodyInfo(ibd)%ws_nel
-      max_ptelem = maxval(sm_bodyInfo(ibd)%ws_ptelem(1:nel))
+      max_ptelem = sm_bodyInfo(ibd)%nnp
+      !max_ptelem = nel
       max_ptm1 = max_ptelem-1
-      if (mph_meshMe .eq. 0) print*,"Getting sm_bodyInfo"
+      MPI_Bcast()
   end do
 
   allocate(xpos(max_ptelem),ypos(max_ptelem))
   allocate(angl(max_ptelem),dist(max_ptelem))
   allocate(PA(nelm),PB(nelm),P1(nelm),P0(nelm),v1(nelm),v2(nelm))
-  allocate(ind(nelm))
+  !allocate(ind(nelm))
 
   do ibd=1,gr_sbNumBodies
-      xpos = sm_bodyInfo(ibd)%xB(1:nel)
-      ypos = sm_bodyInfo(ibd)%yB(1:nel)
-      if (mph_meshMe .eq. 0) print*,"Getting xpos and ypos"
+      xpos = sm_bodyInfo(ibd)%xB!(1:nel)
+      ypos = sm_bodyInfo(ibd)%yB!(1:nel)
+      MPI_Bcast()
+      MPI_Bcast()
   end do
 
   !xpos = (/3.0,  -3.0, -3.0,  3.0/)
@@ -140,7 +141,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-!           if (mph_meshMe .eq. 0) print*,"Starting Eulerian grid loop"    
+           if (mph_meshMe .eq. 0) print*,"Starting Eulerian grid loop"    
            angl = 0.0
            dist = 0.0
 
@@ -157,19 +158,20 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            do p_i=1,max_ptelem ! p_i is short for panel_index
 
-!             if (mph_meshMe .eq. 0) print*,"Starting Lagrangian point loop"
+             !if (mph_meshMe .eq. 0) print*,"Starting Lagrangian point loop"
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
                PA = (/xpos(p_i), ypos(p_i)/)
 
-!             if (mph_meshMe .eq. 0) print*,"PA assigned"      
+             !if (mph_meshMe .eq. 0) print*,"PA = (",PA,")"      
 
                if (p_i .eq. max_ptelem) then
                   PB = (/xpos(1), ypos(1)/)
                else
                   PB = (/xpos(p_i+1), ypos(p_i+1)/)
                end if
+             !if (mph_meshMe .eq. 0) print*,"PB = (",PB,")"      
 
 !             if (mph_meshMe .eq. 0) print*,"PB assigned, p_i = ",p_i,", max_ptelem = ",max_ptelem
 
@@ -246,6 +248,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            mvd = dist(1)
            mva = angl(1)
+
+  !        if (mph_meshMe .eq. 0) print*,"Minimum Values, mvd = ",mvd,", mva = ",mva
  
            if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
@@ -263,10 +267,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
-  
-  call MPI_BARRIER()        
-  if (mph_meshMe .eq. 0) print*,"Loops ended"
-!go to 100
+
+  print*,"Loops ended"
+
 !--------------------------------------------------------------------
     gcMask = .FALSE.
     gcMask(LMDA_VAR) = .TRUE.
@@ -274,8 +277,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 !--------------------------------------------------------------------
-!100 continue
+
   if (mph_meshMe .eq. 0) print*,"masks done"
+
   do lb=1,blockCount
 
         ! Loop through all the blocks
@@ -343,6 +347,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   deallocate(xpos,ypos)
   deallocate(angl,dist)
   deallocate(PA,PB,P1,P0,v1,v2)
-  deallocate(ind)
+  !deallocate(ind)
 
 end subroutine mph_iblset
