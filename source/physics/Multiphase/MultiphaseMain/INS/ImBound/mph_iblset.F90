@@ -15,7 +15,7 @@
 !! Subroutine to find the distance function lambda for 
 !! the immersed boundary (IB).
 !! 
-!! Author - Elizabeth Gregorio 
+!! Author - Elizabeth Gregorio, Akash Dhruv
 
 subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
@@ -24,7 +24,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "SolidMechanics.h"
 
   ! Modules Used
-  use SolidMechanics_data, only: sm_bodyInfo
+  use SolidMechanics_data, only: sm_bodyInfo,sm_meshMe
   use sm_element_interface, only: sm_el02_mapParticles, sm_el10_mapParticles, &
                                   sm_el01_mapParticles
 
@@ -49,6 +49,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   implicit none
 
+  include "Flash_mpi.h"
+
   ! IO variables
   integer, intent(in) :: sweepOrder
   integer, INTENT(INOUT) :: blockCount
@@ -56,8 +58,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real,    INTENT(IN) :: timeEndAdv,dt,dtOld
 
   ! Internal Variables
-  integer :: numPart, e, ptelem, max_ptelem, nel, p, max_ptm1
-  !integer, allocatable, dimension(:) :: loc_num
+  integer :: numPart, e, ptelem,  nel, p
+  integer, allocatable, dimension(:) :: max_ptelem
 
   ! Arugments List
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
@@ -80,36 +82,56 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: intval
 
   ! For the algorithm
-  real, allocatable, dimension(:) :: xpos,ypos
+  real, allocatable, dimension(:,:) :: xpos,ypos
   real, allocatable, dimension(:) :: PA, PB, P1, P0, v1, v2
-  real, allocatable, dimension(:) :: angl, dist
-  !integer, allocatable, dimension(:):: ind
+  real, allocatable, dimension(:,:) :: angl, dist
   real :: u,dot,det
   integer :: nelm=2,ibd ! Dimension for the points, 2 for (x,y) in 2-D
 
-  !integer :: max_ptelem=4 ! for box should be 4
 
+  allocate(max_ptelem(gr_sbNumBodies))
+
+  max_ptelem = 0.0
+
+  do ibd=1,gr_sbNumBodies 
+     if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
+        max_ptelem(ibd) = sm_bodyInfo(ibd)%nnp-1
+     end if
+  end do
+ 
   do ibd=1,gr_sbNumBodies
-      max_ptelem = sm_bodyInfo(ibd)%nnp
-      !max_ptelem = nel
-      max_ptm1 = max_ptelem-1
-      MPI_Bcast()
+     call MPI_BCAST(max_ptelem(ibd), 1, FLASH_INTEGER, sm_BodyInfo(ibd)%BodyMaster, MPI_COMM_WORLD, ierr)
   end do
 
-  allocate(xpos(max_ptelem),ypos(max_ptelem))
-  allocate(angl(max_ptelem),dist(max_ptelem))
+  allocate(xpos(maxval(max_ptelem),gr_sbNumBodies),ypos(maxval(max_ptelem),gr_sbNumBodies))
+  allocate(angl(maxval(max_ptelem),gr_sbNumBodies),dist(maxval(max_ptelem),gr_sbNumBodies))
   allocate(PA(nelm),PB(nelm),P1(nelm),P0(nelm),v1(nelm),v2(nelm))
-  !allocate(ind(nelm))
+
+  xpos = 0.0
+  ypos = 0.0
+  
+  angl = 0.0
+  dist = 0.0
+
+  PA = 0.0
+  PB = 0.0
+  P0 = 0.0
+  P1 = 0.0
+
+  v1 = 0.0
+  v2 = 0.0
 
   do ibd=1,gr_sbNumBodies
-      xpos = sm_bodyInfo(ibd)%xB!(1:nel)
-      ypos = sm_bodyInfo(ibd)%yB!(1:nel)
-      MPI_Bcast()
-      MPI_Bcast()
+     if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
+        xpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%xB(2:max_ptelem(ibd)+1)
+        ypos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%yB(2:max_ptelem(ibd)+1)
+     end if
   end do
 
-  !xpos = (/3.0,  -3.0, -3.0,  3.0/)
-  !ypos = (/-3.0, -3.0, -3.25, -3.25/)
+  do ibd=1,gr_sbNumBodies
+        call MPI_BCAST(xpos(:,ibd), max_ptelem(ibd), FLASH_REAL, sm_BodyInfo(ibd)%BodyMaster, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(ypos(:,ibd), max_ptelem(ibd), FLASH_REAL, sm_BodyInfo(ibd)%BodyMaster, MPI_COMM_WORLD, ierr)
+  end do
 
   ! Loop through all the grid points
   do lb = 1,blockCount
@@ -141,7 +163,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         k = 1
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           if (mph_meshMe .eq. 0) print*,"Starting Eulerian grid loop"    
+
            angl = 0.0
            dist = 0.0
 
@@ -156,20 +178,21 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            zcell  = 0.0 
 
-           do p_i=1,max_ptelem ! p_i is short for panel_index
+           do ibd=1,gr_sbNumBodies ! Loop through bodies
+           do p_i=1,max_ptelem(ibd) ! p_i is short for panel_index
 
              !if (mph_meshMe .eq. 0) print*,"Starting Lagrangian point loop"
 
              ! End points for the line segment of the IB
              ! PA is on the left and PB is on the right
-               PA = (/xpos(p_i), ypos(p_i)/)
+               PA = (/xpos(p_i,ibd), ypos(p_i,ibd)/)
 
              !if (mph_meshMe .eq. 0) print*,"PA = (",PA,")"      
 
-               if (p_i .eq. max_ptelem) then
-                  PB = (/xpos(1), ypos(1)/)
+               if (p_i .eq. max_ptelem(ibd)) then
+                  PB = (/xpos(1,ibd), ypos(1,ibd)/)
                else
-                  PB = (/xpos(p_i+1), ypos(p_i+1)/)
+                  PB = (/xpos(p_i+1,ibd), ypos(p_i+1,ibd)/)
                end if
              !if (mph_meshMe .eq. 0) print*,"PB = (",PB,")"      
 
@@ -212,51 +235,49 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                dot =   v1(1)*v2(1) + v1(2)*v2(2)
                det = -(v1(1)*v2(2) - v1(2)*v2(1))
   
-               angl(p_i) = atan2(det, dot)
-               dist(p_i) = sqrt(v1(1)**2 + v1(2)**2)
+               angl(p_i,ibd) = atan2(det, dot)
+               dist(p_i,ibd) = sqrt(v1(1)**2 + v1(2)**2)
 
            end do
+       
+           do pp_i=1,max_ptelem(ibd) 
+           do p_i=1,max_ptelem(ibd)-1
+              if (dist(p_i,ibd) > dist(p_i+1,ibd)) then
 
+                       dist(p_i,ibd) = dist(p_i,ibd) + dist(p_i+1,ibd)
+                       dist(p_i+1,ibd) = dist(p_i,ibd) - dist(p_i+1,ibd)
+                       dist(p_i,ibd) = dist(p_i,ibd) - dist(p_i+1,ibd)
 
-           !if ( dist(1) .lt. dist(2) ) then
-               !mvd = dist!(1)
-               !mva = angl!(1)
-           !else
-           !    mvd = dist(2)
-           !    mva = angl(2)
-           !end if
-
-           !ind = minloc(dist) ! Finds the index of the minimum distance
-           !mvd = dist(ind(1)) ! Gets the minimum distance value
-           !mva = angl(ind(1)) ! Gets the angle for the minimum distance
-         
-           do pp_i=1,max_ptelem 
-           do p_i=1,max_ptelem-1
-              if (dist(p_i) > dist(p_i+1)) then
-
-                       dist(p_i) = dist(p_i) + dist(p_i+1)
-                       dist(p_i+1) = dist(p_i) - dist(p_i+1)
-                       dist(p_i) = dist(p_i) - dist(p_i+1)
-
-                       angl(p_i) = angl(p_i) + angl(p_i+1)
-                       angl(p_i+1) = angl(p_i) - angl(p_i+1)
-                       angl(p_i) = angl(p_i) - angl(p_i+1)
+                       angl(p_i,ibd) = angl(p_i,ibd) + angl(p_i+1,ibd)
+                       angl(p_i+1,ibd) = angl(p_i,ibd) - angl(p_i+1,ibd)
+                       angl(p_i,ibd) = angl(p_i,ibd) - angl(p_i+1,ibd)
 
                 end if
            end do
            end do
 
-           mvd = dist(1)
-           mva = angl(1)
-
-  !        if (mph_meshMe .eq. 0) print*,"Minimum Values, mvd = ",mvd,", mva = ",mva
+          mva = angl(1,ibd)
+          mvd = dist(1,ibd)
+      
+          if(ibd .eq. 1) then
  
-           if (mva .eq. 0.0) then
+             if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
-           else
-               solnData(LMDA_VAR,i,j,k) = -mvd*sign(1.0,mva)
-           end if
+             else
+               solnData(LMDA_VAR,i,j,k) = mvd*sign(1.0,mva)
+             end if
 
+          else
+
+             if (mva .eq. 0.0) then
+               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),0.0)
+             else
+               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),mvd*sign(1.0,mva))
+             end if
+
+          end if
+
+          end do !End body loop
          end do
         end do
 
@@ -268,8 +289,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   end do
 
-  print*,"Loops ended"
-
 !--------------------------------------------------------------------
     gcMask = .FALSE.
     gcMask(LMDA_VAR) = .TRUE.
@@ -277,8 +296,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 !--------------------------------------------------------------------
-
-  if (mph_meshMe .eq. 0) print*,"masks done"
 
   do lb=1,blockCount
 
@@ -347,6 +364,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   deallocate(xpos,ypos)
   deallocate(angl,dist)
   deallocate(PA,PB,P1,P0,v1,v2)
-  !deallocate(ind)
+  deallocate(max_ptelem)
 
 end subroutine mph_iblset
