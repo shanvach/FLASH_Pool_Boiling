@@ -202,7 +202,7 @@ subroutine Simulation_initBlock(blockId)
 
 
 
-    ! channel flow (left to right)
+    ! channel flow (left to right w/ T=0)
     case (10)
 
       solnData(PRES_VAR,:,:,:) = 0.0
@@ -221,6 +221,58 @@ subroutine Simulation_initBlock(blockId)
       facezData(RHDS_FACE_VAR,:,:,:) = 0.0
 #endif      
 
+
+
+    ! channel flow (left to right w/ init T)
+    case (11)
+
+      solnData(PRES_VAR,:,:,:) = 0.0
+      solnData(DELP_VAR,:,:,:) = 0.0
+      solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(TVIS_VAR,:,:,:) = 0.0
+      solnData(TEMP_VAR,:,:,:) = 0.0
+
+      facexData(VELC_FACE_VAR,:,:,:) = 1.0
+      faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+      facexData(RHDS_FACE_VAR,:,:,:) = 0.0
+      faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
+
+#if NDIM == 3
+      facezData(VELC_FACE_VAR,:,:,:) = 0.0
+      facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+#endif      
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, CENTER)
+      do k=1, blkLimitsGC(HIGH,KAXIS)
+        do j=1, blkLimitsGC(HIGH,JAXIS)
+          do i=1, blkLimitsGC(HIGH,IAXIS)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
+            solnData(TEMP_VAR,i,j,k) = (1.0 - xcell)
+          enddo
+        enddo
+      enddo
+
+
+
+
+    ! channel flow (bottom to top w/ T=8)
+    case (12)
+
+      solnData(PRES_VAR,:,:,:) = 0.0
+      solnData(DELP_VAR,:,:,:) = 0.0
+      solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(TVIS_VAR,:,:,:) = 0.0
+      solnData(TEMP_VAR,:,:,:) = 1.0
+
+      facexData(VELC_FACE_VAR,:,:,:) = 0.0
+      faceyData(VELC_FACE_VAR,:,:,:) = 1.0
+      facexData(RHDS_FACE_VAR,:,:,:) = 0.0
+      faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
+
+#if NDIM == 3
+      facezData(VELC_FACE_VAR,:,:,:) = 0.0
+      facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+#endif      
 
 
 

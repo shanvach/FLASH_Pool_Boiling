@@ -1,1 +1,1 @@
-./setup INavierStokes/zoso/Rayleigh_Benard/ -3d -auto -opt -nxb=12 -nyb=12 -nzb=48 +ug PfftSolver=DirectSolver -objdir=ugRBCAV_3D -site=splash.seas.gwu.edu
+./setup INavierStokes/zoso/Rayleigh_Benard/ -2d -auto -opt -nxb=16 -nyb=16 +ug PfftSolver=DirectSolver -objdir=ugRBCAV_2D16 -site=manwe
