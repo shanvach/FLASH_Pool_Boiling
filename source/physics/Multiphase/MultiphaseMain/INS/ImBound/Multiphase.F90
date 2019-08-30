@@ -14,7 +14,8 @@ subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,mph_fl
       integer, intent(in) :: mph_flag
 
 #if NDIM == 2
-      if(mph_flag == 1) &
+      !if(mph_flag == 1) & ! For moving bodies
+      if(mph_flag == 1 .and. dr_nstep == 1) & ! For stationary bodies
       call mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
