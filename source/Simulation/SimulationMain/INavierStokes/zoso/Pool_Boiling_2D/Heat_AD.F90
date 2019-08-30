@@ -102,8 +102,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    !if (dr_simTime .ge. 1600.00 .and. dr_simTime .le. 1900.00) then
 
-   !  ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
-   !  mph_rho2 = 170 - 0.1*(dr_simTime-1600.00)
+   !  ht_Tsat  = 0.0011*(dr_simTime-1600.00) + 0.0
+   !  mph_rho2 = 185 - 0.15*(dr_simTime-1600.00)
+   !  mph_cp2  = 185 - 0.15*(dr_simTime-1600.00)
 
    !  if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
 

@@ -201,11 +201,14 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
-
-           solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.15  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+           if(ycell .le. 0.8  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
               xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.15 - ycell)/0.15
+              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.8 - ycell)/0.8
+
+           !solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+           !if(ycell .le. 9.7721  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+           !   xcell .ge. -100.0 .and. xcell .le. 100.0 .and. &
+           !   zcell .ge. -100.0 .and. zcell .le. 100.0) solnData(TEMP_VAR,i,j,k) = (9.7721 - ycell)/9.7721  
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
