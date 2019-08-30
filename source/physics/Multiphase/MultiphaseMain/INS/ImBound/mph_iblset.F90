@@ -15,7 +15,9 @@
 !! Subroutine to find the distance function lambda for 
 !! the immersed boundary (IB).
 !! 
-!! Author - Elizabeth Gregorio, Akash Dhruv
+!! Author - Elizabeth Gregorio
+
+#define IBD_SIGN 1
 
 subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
@@ -123,8 +125,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   do ibd=1,gr_sbNumBodies
      if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
-        xpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%xB(2:max_ptelem(ibd)+1)
-        ypos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%yB(2:max_ptelem(ibd)+1)
+        xpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%xB(2:max_ptelem(ibd)+1) + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(1,2:max_ptelem(ibd)+1))
+        ypos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%yB(2:max_ptelem(ibd)+1) + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(2,2:max_ptelem(ibd)+1))
      end if
   end do
 
@@ -135,7 +137,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   ! Loop through all the grid points
   do lb = 1,blockCount
-        if (mph_meshMe .eq. 0) print*,"Starting blockCount loop"
         ! Loop through all the blocks
         blockID = blockList(lb)
 
@@ -264,7 +265,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
              if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = 0.0
              else
-               solnData(LMDA_VAR,i,j,k) = mvd*sign(1.0,mva)
+               solnData(LMDA_VAR,i,j,k) = IBD_SIGN*mvd*sign(1.0,mva)
              end if
 
           else
@@ -272,7 +273,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
              if (mva .eq. 0.0) then
                solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),0.0)
              else
-               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),mvd*sign(1.0,mva))
+               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),IBD_SIGN*mvd*sign(1.0,mva))
              end if
 
           end if
@@ -339,7 +340,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
             end do
         end do
 
-        !k = 1
         do j=2,blkLimitsGC(HIGH,JAXIS)-1
             do i=2,blkLimitsGC(HIGH,IAXIS)-1
                solnData(TNGY_VAR,i,j,k) = ((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&

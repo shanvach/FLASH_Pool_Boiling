@@ -116,19 +116,8 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
-
-  !xl = -0.25
-  !xr =  0.25
-  !yl = -4.0
-  !yr =  4.0
-
   !xdrop = -0.6
   !ydrop =  3.0
-
-  xl = -3.00
-  xr =  3.00
-  yl = -3.25
-  yr = -3.00
 
   xdrop = 0.0
   ydrop = -1.0
@@ -151,58 +140,16 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           dxl = xcell - xl
-           dxr = xr - xcell
-           dyl = ycell - yl
-           dyr = yr - ycell
-
            solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)-0.5
 
-           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr) !rectangle
-           !solnData(LMDA_VAR,i,j,k) = 1.5-sqrt(xcell**2+ycell**2+zcell**2) !circle
-
-           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
-
-           dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
+           !dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
+           !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
-           !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
         enddo
      enddo
   enddo
-
-  k = 1
-  do j=2,blkLimitsGC(HIGH,JAXIS)-1
-   do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
-           solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-
-     end do
-   end do
-
-  k = 1
-  do j=2,blkLimitsGC(HIGH,JAXIS)-1
-   do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
-           solnData(TNGY_VAR,i,j,k) = ((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-           solnData(TNGX_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
-
-
-     end do
-   end do
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

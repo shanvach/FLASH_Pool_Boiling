@@ -57,6 +57,7 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
         u(a,i)   = u(a,i) - 1.0*dr_simTime
         ud(a,i)  = -1.0
         udd(a,i) = body%qddn(idx2)
+        body%qn(idX2) = -1.0*dr_simTime
 
         else
         u(a,i)   = u(a,i) + body%qn(idx2)
