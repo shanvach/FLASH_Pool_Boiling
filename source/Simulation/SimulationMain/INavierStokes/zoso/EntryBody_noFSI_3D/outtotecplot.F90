@@ -139,7 +139,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p phi lambda'//NULLCHR,  &
+             'x y z u v w p phi lambda visc'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -295,6 +295,8 @@
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(LMDA_VAR,:,:,:),mdotp)
 
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(VISC_VAR,:,:,:),tprds)
 
      ! Divergence: 
      ! ----------
@@ -458,6 +460,9 @@
      i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(mdotp)
+     i = TecDat(ijk,arraylb,0)
+
+     arraylb = sngl(tprds)
      i = TecDat(ijk,arraylb,0)
 
 
