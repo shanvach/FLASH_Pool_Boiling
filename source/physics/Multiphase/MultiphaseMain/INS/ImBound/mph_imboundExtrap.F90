@@ -1,4 +1,4 @@
-subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine mph_imboundExtrap(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 #include "Flash.h"
 
@@ -113,6 +113,14 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real :: dphidn
 
+  real :: lambda_old(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+  real :: nx_mins, ny_mins, nz_mins, nx_plus, ny_plus, nz_plus
+  real :: lambdax_mins, lambday_mins, lambdaz_mins, lambdax_plus, lambday_plus, lambdaz_plus
+  real :: dt_ext
+  integer :: extrap_index
+  real :: nxconv, nyconv, nzconv
+
+  do extrap_index=1,3
   do lb = 1,blockCount
 
         blockID = blockList(lb)
@@ -134,6 +142,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,faceyData,FACEY)
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
+        lambda_old = solnData(LMDA_VAR,:,:,:)
+
+        dt_ext = 0.5d0*del(IAXIS)
+
         k = 1
 #if NDIM == 3
        do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
@@ -141,96 +153,40 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
                          
-           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                   real(i - NGUARD - 1)*del(IAXIS) +   &
-                   0.5*del(IAXIS)
+            nxconv = -solnData(NMLX_VAR,i,j,k)
+            nyconv = -solnData(NMLY_VAR,i,j,k)
+            nzconv = -solnData(NMLZ_VAR,i,j,k)
 
-           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-                   real(j - NGUARD - 1)*del(JAXIS)  +  &
-                   0.5*del(JAXIS)
+            nx_plus = max(nxconv,0.)
+            nx_mins = min(nxconv,0.)
 
-           zcell = 0.0
+            ny_plus = max(nyconv,0.)
+            ny_mins = min(nyconv,0.)
 
-#if NDIM == 3
-           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-                   real(k - NGUARD - 1)*del(KAXIS)  +  &
-                   0.5*del(KAXIS)
+            lambdax_plus = (lambda_old(i+1,j,k)-lambda_old(i,j,k))/del(IAXIS)
+            lambday_plus = (lambda_old(i,j+1,k)-lambda_old(i,j,k))/del(JAXIS)
+
+            lambdax_mins = (lambda_old(i,j,k)-lambda_old(i-1,j,k))/del(IAXIS)
+            lambday_mins = (lambda_old(i,j,k)-lambda_old(i,j-1,k))/del(JAXIS)
+
+#if NDIM == 3        
+            nz_plus = max(nzconv,0.)
+            nz_mins = min(nzconv,0.)
+
+            lambdaz_plus = (lambda_old(i,j,k+1)-lambda_old(i,j,k))/del(IAXIS)
+            lambdaz_mins = (lambda_old(i,j,k)-lambda_old(i,j,k-1))/del(JAXIS)
+#else
+            nz_plus = 0.0
+            nz_mins = 0.0
+
+            lambdaz_plus = 0.0
+            lambdaz_mins = 0.0
 #endif
-          
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) then
 
-           ! Get probe in fluid
-           hnorm  = 1.0*del(JAXIS)
-           hnorm2 = 1.5*del(JAXIS)
-
-           xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           zprobe(1) = 0.0
-
-           xprobe(2) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
-           yprobe(2) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
-           zprobe(2) = 0.0
-
-#if NDIM == 3
-           zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           zprobe(2) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
-#endif
-           ! Interpolate function at probe 
-           do probe_index = 1,1
-           externalPt(IAXIS) = xprobe(probe_index)
-           externalPt(JAXIS) = yprobe(probe_index)
-           externalPt(KAXIS) = zprobe(probe_index)
-
-           part_Nml(IAXIS) = solnData(NMLX_VAR,i,j,k)
-           part_Nml(JAXIS) = solnData(NMLY_VAR,i,j,k)
-           part_Nml(KAXIS) = 0.0
-
-#if NDIM == 3
-           part_Nml(KAXIS) = solnData(NMLZ_VAR,i,j,k)
-#endif
-
-           ! Cell centered stencil for DFUN interpolation at probe
-           gridfl(:) = CENTER
-
-           call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
-                            ib_external(:,:),dfe,FORCE_FLOW)
-
-           delaux = 0.5*del
-
-           xyz_stencil(:,:) = 0.
-
-           do idim = 1,NDIM
-              xyz_stencil(:,idim) = coord(idim) - 0.5*bsize(idim) + &
-                                    real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim)
-           enddo
-
-           ! Get shape function ib_external_phile  for points on stencil
-           call ib_getInterpFunc(externalPt,xyz_stencil,del,derivflag,ib_external_phile)
-
-           zp(probe_index) = 0.      ! zp = DFUN at probe point
-
-#if NDIM == 2
-           do ib_ind = 1 , ib_stencil
-                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),1);
-           enddo
-#endif
-
-#if NDIM == 3
-           do ib_ind = 1 , ib_stencil
-                zp(probe_index) = zp(probe_index) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));
-           enddo
-#endif
-
-           enddo
-
-           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
-
-           dphidn = cos(45*acos(-1.0)/180)
-           !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
-
-           solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn
+              solnData(LMDA_VAR,i,j,k) = lambda_old(i,j,k) - dt_ext*(nx_plus*lambdax_mins+nx_mins*lambdax_plus + &
+                                                                     ny_plus*lambday_mins+ny_mins*lambday_plus + &
+                                                                     nz_plus*lambdaz_mins+nz_mins*lambdaz_plus)
 
            end if
           
@@ -240,22 +196,6 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         end do
 #endif
 
-!        k = 1
-!#if NDIM == 3
-!       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-!#endif
-!        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-!         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-! 
-!          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
-!             solnData(DFUN_VAR,i,j,k) = &
-!             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
-!
-!         end do
-!        end do
-!#if NDIM == 3
-!        end do
-!#endif
         ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -271,4 +211,5 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
-end subroutine mph_imbound
+  end do
+end subroutine mph_imboundExtrap
