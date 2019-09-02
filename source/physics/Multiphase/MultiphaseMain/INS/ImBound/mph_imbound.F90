@@ -87,6 +87,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real    :: hnorm, xprobe(3), yprobe(3), zprobe(3), phiprobe
 
+  real    :: hnorm2
+
   real,parameter  :: htol = 0.0001
 
   integer :: gridfl(MDIM)
@@ -158,22 +160,23 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
            ! Get probe in fluid
-           hnorm = 1.2*del(JAXIS)
+           hnorm  = 1.0*del(JAXIS)
+           hnorm2 = 1.5*del(JAXIS)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            zprobe(1) = 0.0
 
-           xprobe(2) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+2.0*hnorm)
-           yprobe(2) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+2.0*hnorm)
+           xprobe(2) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
+           yprobe(2) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
            zprobe(2) = 0.0
 
 #if NDIM == 3
            zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           zprobe(2) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+2.0*hnorm)
+           zprobe(2) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
 #endif
            ! Interpolate function at probe 
-           do probe_index = 1,2
+           do probe_index = 1,1
            externalPt(IAXIS) = xprobe(probe_index)
            externalPt(JAXIS) = yprobe(probe_index)
            externalPt(KAXIS) = zprobe(probe_index)
@@ -225,7 +228,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
            dphidn = cos(90*acos(-1.0)/180)
-           !dphidn = (zp(2)-zp(1))/hnorm
+           !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
 
            solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn
 
