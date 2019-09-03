@@ -25,6 +25,8 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
                                 areai, loc_num )
   use SolidMechanics_data, only: sm_structure
   use Driver_interface, only: Driver_abortFlash
+  use Driver_data, only: dr_simTime
+
   implicit none
   
   ! IO Variables
@@ -50,10 +52,26 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
      u(a,1) = body%x(idx1)
      u(a,2) = body%y(idx1)
      do i = 1,NDIM
+
+        if(i==1) then
+
+        idx2     = body%ID(i,idx1)
+
+        body%qn(idx2)  = 0.0*dr_simTime
+        body%qdn(idx2) = 0.0
+
+        u(a,i)   = u(a,i) + body%qn(idx2)
+        ud(a,i)  = body%qdn(idx2)
+        udd(a,i) = body%qddn(idx2)
+ 
+        else
         idx2     = body%ID(i,idx1)
         u(a,i)   = u(a,i) + body%qn(idx2)
         ud(a,i)  = body%qdn(idx2)
         udd(a,i) = body%qddn(idx2)
+
+        end if
+
      end do
   enddo
 

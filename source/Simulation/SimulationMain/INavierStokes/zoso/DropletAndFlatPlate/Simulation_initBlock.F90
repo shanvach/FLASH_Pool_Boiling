@@ -147,6 +147,7 @@ subroutine Simulation_initBlock(blockId)
            !dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
            !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
+           !solnData(DFUN_VAR,i,j,k) = ycell
  
         enddo
      enddo
