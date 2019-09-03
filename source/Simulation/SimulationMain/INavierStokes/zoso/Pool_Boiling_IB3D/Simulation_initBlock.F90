@@ -186,7 +186,7 @@ subroutine Simulation_initBlock(blockId)
   !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
   sim_nucSiteDens = 1
-  sim_nuc_radii   = 0.2
+  sim_nuc_radii   = 0.3
   sim_nuc_site_x  = 0.0 !- (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
   sim_nuc_site_y  = yr+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0

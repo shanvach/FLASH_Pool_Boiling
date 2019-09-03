@@ -401,7 +401,7 @@
      !tprds = ht_Nu_l
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(RTES_VAR,:,:,:),tprds)
+                             solnData(LMDA_VAR,:,:,:),tprds)
          
      ! VORTICITY:
      ! ---------

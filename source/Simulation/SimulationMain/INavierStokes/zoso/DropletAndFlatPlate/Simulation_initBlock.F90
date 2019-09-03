@@ -116,14 +116,14 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
-  !xdrop = -0.6
+  !xdrop = -3.35
   !ydrop =  3.0
+
+  !xbubble = -2.15
+  !ybubble = -3.0
 
   xdrop = 0.0
   ydrop = -1.0
-
-  xbubble = 0.6
-  ybubble = -3.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -142,11 +142,12 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)-0.5
 
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
+
            !dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
            !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
-           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
-
+ 
         enddo
      enddo
   enddo

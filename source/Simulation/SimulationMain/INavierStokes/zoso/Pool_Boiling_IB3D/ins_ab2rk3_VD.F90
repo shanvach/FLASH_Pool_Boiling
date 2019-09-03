@@ -630,25 +630,37 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     k = 1
-
+    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
              facexData(VELC_FACE_VAR,i,j,k) = facexData(VELC_FACE_VAR,i,j,k) + dt* facexData(POLD_FACE_VAR,i,j,k)
         end do
      end do
- 
+    end do
+
+   do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
              faceyData(VELC_FACE_VAR,i,j,k) = faceyData(VELC_FACE_VAR,i,j,k) + dt* faceyData(POLD_FACE_VAR,i,j,k)
         end do
      end do
-        
+  end do
+ 
+  do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)+1
+     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+             facezData(VELC_FACE_VAR,i,j,k) = facezData(VELC_FACE_VAR,i,j,k) + dt* facezData(POLD_FACE_VAR,i,j,k)
+        end do
+     end do
+  end do
+      
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
 
