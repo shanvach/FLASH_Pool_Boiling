@@ -1,6 +1,6 @@
 
    
-     subroutine mph_KPDadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,blockID)
+     subroutine mph_KPDadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,lambda,blockID)
 
         use Simulation_data, ONLY : sim_xMax, sim_xMin, sim_yMin, &
                                     sim_yMax, sim_zMin, sim_zMax, &
@@ -21,7 +21,7 @@
 #include "Flash.h"
 #include "constants.h"
 
-        real, dimension(:,:,:), intent(inout):: s,u,v,w
+        real, dimension(:,:,:), intent(inout):: s,u,v,w,lambda
         real, intent(in) :: dt,dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2,blockID
 

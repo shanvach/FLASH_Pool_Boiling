@@ -326,7 +326,7 @@ enddo
                           del(DIR_Z), &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),blockID)
+                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),solnData(LMDA_VAR,:,:,:),blockID)
 
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
@@ -362,7 +362,7 @@ enddo
                           del(DIR_X), &
                           del(DIR_Y), &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),blockID)
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),solnData(LMDA_VAR,:,:,:),blockID)
 
         if(ii == 1) then
         !KPD - Compute the Bubble Volume
