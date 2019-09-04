@@ -1,8 +1,8 @@
 
    
-     subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
+     subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,lambda,blockID)
 
-        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin, sim_jet_depth
+        use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_yMin
 
         use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
@@ -16,7 +16,7 @@
 #include "Flash.h"
 #include "constants.h"
 
-        real, dimension(:,:,:), intent(inout):: s,u,v
+        real, dimension(:,:,:), intent(inout):: s,u,v,lambda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
 
@@ -55,8 +55,7 @@
 
         !- kpd - Froude base damping distance...
         !xd = sim_xMax - (2.*pi*(Fn**2.))
-        !xd  = ins_xDampR
-        xd = 20.0
+        xd  = ins_xDampL
 
 
         call Grid_getDeltas(blockID,del)
@@ -91,13 +90,13 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-              if (abs(xcell) .gt. xd) then
+              if (xcell .gt. xd) then
                  !- kpd - LS non-reflective damping term for boundaries 
-                 AA = ((abs(xcell)-xd)/(sim_xMax-xd))**2.0
+                 AA = ((xcell-xd)/(sim_xMax-xd))**2.0
               end if
-              !if (xcell .lt. ins_xDampR) then
-              !   AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
-              !end if
+              if (xcell .lt. ins_xDampR) then
+                 AA = ((xcell-ins_xDampR)/(sim_xMin-ins_xDampR))**2.0
+              end if
   
 
               !***************** KPD **********************
@@ -361,10 +360,10 @@
               fly = a1l*fT1l + a2l*fT2l + a3l*fT3l
               !---------------------------------------------------------
               !---------------------------------------------------------
-
-              s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                   - dt*(fry*vr - fly*vl)/dy !&
-                                   !- 0.15*AA*(so(i,j,k)+ycell-sim_jet_depth)
+              if(lambda(i,j,k) .lt. 0.0) then
+                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+                                      - dt*(fry*vr - fly*vl)/dy
+              end if
 
            end do
         end do

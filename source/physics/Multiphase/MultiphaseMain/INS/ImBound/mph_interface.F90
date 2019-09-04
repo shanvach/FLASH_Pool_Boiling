@@ -134,9 +134,9 @@ interface
 end interface
 
 interface
-        subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,jy1,ix2,jy2,blockID) 
+        subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,jy1,ix2,jy2,lambda,blockID) 
 
-        real, dimension(:,:,:), intent(inout):: s,u,v
+        real, dimension(:,:,:), intent(inout):: s,u,v,lambda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
 
@@ -144,9 +144,9 @@ interface
 end interface
 
 interface
-        subroutine mph_KPDadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,ix1,jy1,ix2,jy2,kz1,kz2,blockID)
+        subroutine mph_KPDadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,ix1,jy1,ix2,jy2,kz1,kz2,lambda,blockID)
 
-        real, dimension(:,:,:), intent(inout):: s,u,v,w
+        real, dimension(:,:,:), intent(inout):: s,u,v,w,lambda
         real, intent(in) :: dt,dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2,blockID
 
