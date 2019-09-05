@@ -57,8 +57,15 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
         idx2     = body%ID(i,idx1)
 
+        !if(dr_simTime < 2.0 .or. dr_simTime > 4.0) then
         body%qn(idx2)  = 1.0*dr_simTime
         body%qdn(idx2) = 1.0
+
+        !else
+        !body%qn(idx2)  = -1.0*dr_simTime
+        !body%qdn(idx2) = -1.0
+
+        !end if
 
         u(a,i)   = u(a,i) + body%qn(idx2)
         ud(a,i)  = body%qdn(idx2)
