@@ -71,7 +71,7 @@
         sunion = s
         pfl = 0.0
 
-        free_surface_loc = -1.0
+        free_surface_loc = 0.0
 
 #ifdef LEVEL_SET_UNION
         do k=kz1-2,kz2+2
