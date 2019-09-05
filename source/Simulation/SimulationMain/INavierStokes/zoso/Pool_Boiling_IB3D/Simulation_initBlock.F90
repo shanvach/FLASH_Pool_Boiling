@@ -92,12 +92,12 @@ subroutine Simulation_initBlock(blockId)
   real :: rot_rect
   real :: zl,zr,dzl,dzr
 
-  xl = -3.00
-  xr =  3.00
-  yl = -3.25
-  yr = -3.00
-  zl = -3.00
-  zr =  3.00
+  xl = -2.00
+  xr =  2.00
+  yl =  2.00
+  yr =  3.00
+  zl = -2.00
+  zr =  2.00
 
   !rot_rect = 3*acos(-1.0)/4;
   rot_rect = 0.0*cos(-1.0)/4;
