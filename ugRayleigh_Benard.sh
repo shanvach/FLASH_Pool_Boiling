@@ -1,1 +1,1 @@
-./setup INavierStokes/zoso/Rayleigh_Benard/ -2d -auto -opt -nxb=16 -nyb=16 +ug PfftSolver=DirectSolver -objdir=ugRBCAV_2D16 -site=manwe
+./setup INavierStokes/zoso/Rayleigh_Benard/ -3d -auto -opt -nxb=32 -nyb=64 -nzb=256 +ug PfftSolver=DirectSolver -objdir=ugRBCAV_3D256 -site=manwe
