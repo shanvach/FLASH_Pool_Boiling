@@ -59,6 +59,14 @@
 
         sunion = s
 
+        !do k=kz1-2,kz2+2
+        !do j=jy1-2,jy2+2
+        !   do i=ix1-2,ix2+2
+        !       sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+        !   end do
+        !end do
+        !end do
+
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
 
@@ -212,13 +220,13 @@
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
-              b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
-                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+              b1 = 1.0 - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
+              b2 = (1.0 - pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
+                    (1.0 - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
 
-              rho1x(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
+              rho1x(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.0-b1*b2)/(rho2/rho2)
 
               end do
            end do
@@ -235,12 +243,12 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
-              b2 = pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps) * &
-                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+              b1 = 1.0 - (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
+              b2 = (1.0 - pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
+                   (1.0 - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-              rho1y(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
+              rho1y(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1-b1*b2)/(rho2/rho2)
 
               end do
            end do
@@ -257,12 +265,12 @@
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              b1 = (pfl(i,j,k-1) + pfl(i,j,k)) / 2.
-              b2 = pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps) * &
-                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
+              b1 = 1.0 - (pfl(i,j,k-1) + pfl(i,j,k)) / 2.
+              b2 = (1.0 - pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps)) * &
+                   (1.0 - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-              rho1z(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2z(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
+              rho1z(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1-b1*b2)/(rho2/rho2)
 
               end do
            end do

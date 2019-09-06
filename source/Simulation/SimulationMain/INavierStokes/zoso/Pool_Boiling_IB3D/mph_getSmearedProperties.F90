@@ -111,6 +111,13 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
        sunion = s
        pfl = 0.0
 
+       !do k=kz1,kz2 
+       ! do j=jy1,jy2
+       !     do i=ix1,ix2
+       !         sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+       !     end do
+       !  end do
+       !end do
 
        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = 0.0
        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0 
@@ -120,13 +127,13 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
         do j=jy1,jy2
           do i=ix1,ix2
 
-              if(abs(s(i,j,k)) .le. sp .and. lambda(i,j,kz1) .lt. 0.0) then
+              if(abs(sunion(i,j,k)) .le. sp .and. lambda(i,j,kz1) .lt. 0.0) then
 
-              smhv(i,j,k) = 0.5 + s(i,j,k)/(2*sp) + sin(2*pi*s(i,j,k)/(2*sp))/(2*pi)
+              smhv(i,j,k) = 0.5 + sunion(i,j,k)/(2*sp) + sin(2*pi*sunion(i,j,k)/(2*sp))/(2*pi)
 
               else
 
-                  if(s(i,j,k) .ge. 0.0) then
+                  if(sunion(i,j,k) .ge. 0.0) then
 
                         smhv(i,j,k) = 1.0
   

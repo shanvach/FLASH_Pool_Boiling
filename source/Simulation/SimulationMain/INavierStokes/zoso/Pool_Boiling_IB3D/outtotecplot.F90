@@ -161,7 +161,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p Phi T mdot Hflux'//NULLCHR,  &
+             'x y z u v w p Phi T mdot lambda visc'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -324,7 +324,7 @@
                              solnData(TNLQ_VAR,:,:,:),tnlp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(TNVP_VAR,:,:,:),tnvp)
+                             solnData(VISC_VAR,:,:,:),tnvp)
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(NRMX_VAR,:,:,:),nxp)
@@ -558,6 +558,9 @@
      !i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(tprds)
+     i = TecDat(ijk,arraylb,0)
+
+     arraylb = sngl(tnvp)
      i = TecDat(ijk,arraylb,0)
 
      ! Write Div Ustar:
