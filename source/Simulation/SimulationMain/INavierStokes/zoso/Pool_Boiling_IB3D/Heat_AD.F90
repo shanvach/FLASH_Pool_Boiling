@@ -154,7 +154,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
-                     solnData(CURV_VAR,:,:,:))
+                     solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -174,7 +174,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
+                     solnData(LMDA_VAR,:,:,:))
 #endif
 
      if (step == 1) then
@@ -222,17 +223,20 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     end do
 
-    ib_temp_flg = .true.
-    ib_vel_flg  = .false.
-    ib_dfun_flg = .false.
-
-    if(dr_nstep>1) call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-
     gcMask = .FALSE.
     gcMask(TEMP_VAR)=.TRUE.
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
+
+    !call Heat_imbound(blockCount,blockList,timeEndAdv,dt,TEMP_VAR)
+    
+    !if(dr_nstep > 1) then
+    !ib_temp_flg = .true.
+    !ib_vel_flg  = .false.
+    !ib_dfun_flg = .false.
+    !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+    !end if
 
    end do !End RK-2
 
@@ -282,7 +286,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -293,13 +297,14 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                         blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                        solnData(MFLG_VAR,:,:,:))
+                        solnData(MFLG_VAR,:,:,:),&
+                        solnData(LMDA_VAR,:,:,:))
 #endif
 
      ! Microlayer contribution - only for nucleate boiling
      !if(dr_nstep .gt. 1) then
 
-     solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(2.0*del(DIR_X)*del(DIR_Y)))
+     !solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(2.0*del(DIR_X)*del(DIR_Y)))
 
      !solnData(TNLQ_VAR,:,:,:) = solnData(TNLQ_VAR,:,:,:) + solnData(TMIC_VAR,:,:,:)*(ht_qmic/(del(DIR_X)))
 
@@ -490,6 +495,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate Mass Flux
      call Heat_calMdot(solnData(MDOT_VAR,:,:,:),&
+                       solnData(LMDA_VAR,:,:,:),&
                        solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                        mph_thco2,mph_thco1,&
                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&

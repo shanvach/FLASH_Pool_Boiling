@@ -87,6 +87,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real    :: hnorm, xprobe(3), yprobe(3), zprobe(3), phiprobe
 
+  real    :: hnorm2
+
   real,parameter  :: htol = 0.0001
 
   integer :: gridfl(MDIM)
@@ -108,6 +110,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real    :: nrmx, nrmy, nmlx, nmly, ib_theta
 
   integer :: probe_index
+
+  real :: dphidn
 
   do lb = 1,blockCount
 
@@ -145,7 +149,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-          zcell = 0.0
+           zcell = 0.0
 
 #if NDIM == 3
            zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
@@ -156,23 +160,21 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
            ! Get probe in fluid
-           hnorm = 1.0*del(JAXIS)
+           hnorm  = 1.0*del(JAXIS)
+           hnorm2 = 1.5*del(JAXIS)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            zprobe(1) = 0.0
 
+           xprobe(2) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
+           yprobe(2) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
+           zprobe(2) = 0.0
+
 #if NDIM == 3
            zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+           zprobe(2) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
 #endif
-           !xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           !yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
-           !zprobe(2) = 0.0
-
-           !xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           !yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
-           !zprobe(3) = 0.0
-
            ! Interpolate function at probe 
            do probe_index = 1,1
            externalPt(IAXIS) = xprobe(probe_index)
@@ -225,9 +227,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
-           !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(90.0*acos(-1.0)/180)
-           !end if
+           dphidn = cos(90*acos(-1.0)/180)
+           !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
+
+           solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn
 
            end if
           

@@ -6,11 +6,12 @@
         subroutine mph_KPDcurvature3DAB(s,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
            rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,pf,rho1,rho2,visc,vis1,vis2, &
-           alph,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg,smhv)
+           alph,thco1,thco2,cp1,cp2,nrmx,nrmy,nrmz,mflg,smhv,lambda)
 
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         !*****************************************************************
 
@@ -25,6 +26,7 @@
                                                 rho1z,rho2z,visc,alph, &
                                                 nrmx,nrmy,nrmz,mflg,smhv
 
+        real, intent(in), dimension(:,:,:) :: lambda
         !--------------------------
         !- kpd - Local variables...
         !--------------------------
@@ -41,6 +43,10 @@
                 zijl,zijr,zid,zij,zidl,zidr
         real, parameter :: eps = 1E-13
 
+        real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: b1,b2
+
         !*****************************************************************
 
         !---------------------------------------------
@@ -49,6 +55,24 @@
 
         crv = 0.
         mflg = 0.0
+        pfl = 0.0
+
+        sunion = s
+
+        !do k=kz1-2,kz2+2
+        !do j=jy1-2,jy2+2
+        !   do i=ix1-2,ix2+2
+        !       sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
+        !   end do
+        !end do
+        !end do
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
 
         do k = kz1,kz2
            do j = jy1,jy2
@@ -120,15 +144,21 @@
         !- kpd - Set phase function on each side of interface
         !----------------------------------------------------
 
-        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
-        pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+        do k=kz1-1,kz2+1
+        do j=jy1-1,jy2+1
+          do i=ix1-1,ix2+1
 
-        !visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = vis2/vis2     + (vis1/vis2 - vis2/vis2)  *pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
-        visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = vis2/vis2     + (vis1/vis2 - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)
-        !visc(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = 1./(vis2/vis2 + (vis2/vis1 - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))
+              visc(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+                              (smhv(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
+                             (pfl(i,j,k))*(vis2/vis2)
 
-        alph(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1) 
+              alph(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(thco2/cp2)/(thco2/cp2) + &
+                              (pf(i,j,k))*(1-pfl(i,j,k))*(thco1/cp1)/(thco2/cp2) + &
+                             (pfl(i,j,k))*(thco2/cp2)/(thco2/cp2)
 
+          end do
+        end do
+        end do
 
        do k = kz1+2,kz2-2
         do j = jy1+2,jy2-2
@@ -179,10 +209,6 @@
         !- kpd - These are FACE VALUED inverse densities for each phase
         !--------------------------------------------------------------
 
-        !- kpd - density on x-faces
-        !rho1x = 0.
-        !rho2x = 0.
-        !- kpd - Loop through boundary and interior cell faces
         do k = kz1-1,kz2+1
            do j = jy1-1,jy2+1
               do i = ix1-1,ix2+1
@@ -194,26 +220,18 @@
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
+              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
+              b2 = (pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
+                    (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-            !  !rho1x(i,j,k) = a1*a2/rho1
-            !  !rho2x(i,j,k) = (1. - a1*a2)/rho2
-              rho1x(i,j,k) = a1*a2/(rho1/rho2)
-              rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
 
-            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i-1,j,k))*0.5)
-            !  a1 = 1/a1
-
-            !  rho1x(i,j,k) = a1-(rho2/rho2)
-            !  rho2x(i,j,k) = a1-rho1x(i,j,k)
+              rho1x(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do
         end do
 
-        !- kpd - density on y-faces
-        !rho1y = 0.
-        !rho2y = 0.
-        !- kpd - Loop through boundary and interior cell faces
         do i = ix1-1,ix2+1
            do k = kz1-1,kz2+1
               do j = jy1-1,jy2+1
@@ -225,26 +243,17 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-            !  !rho1y(i,j,k) = a1*a2/rho1
-            !  !rho2y(i,j,k) = (1. - a1*a2)/rho2
-              rho1y(i,j,k) = a1*a2/(rho1/rho2)
-              rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
+              b2 = (pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i,j-1,k))*0.5)
-            !  a1 = 1/a1
-
-            !  rho1y(i,j,k) = a1-(rho2/rho2)
-            !  rho2y(i,j,k) = a1-rho1y(i,j,k)
-
+              rho1y(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do
         end do
 
-        !- kpd - density on z-faces
-        !rho1z = 0.
-        !rho2z = 0.
-        !- kpd - Loop through boundary and interior cell faces
         do i = ix1-1,ix2+1
            do j = jy1-1,jy2+1
               do k = kz1-1,kz2+1
@@ -256,16 +265,12 @@
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-            !  !rho1z(i,j,k) = a1*a2/rho1
-            !  !rho2z(i,j,k) = (1. - a1*a2)/rho2
-              rho1z(i,j,k) = a1*a2/(rho1/rho2)
-              rho2z(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+              b1 = (pfl(i,j,k-1) + pfl(i,j,k)) / 2.
+              b2 = (pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-            !  a1 = rho2/rho2 + (rho1/rho2 - rho2/rho2)*((smhv(i,j,k)+smhv(i,j,k-1))*0.5)
-            !  a1 = 1/a1
-
-            !  rho1z(i,j,k) = a1-(rho2/rho2)
-            !  rho2z(i,j,k) = a1-rho1z(i,j,k)
+              rho1z(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
               end do
            end do
@@ -326,7 +331,7 @@
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz,mdot,tmic,temp,blockID)
+                                       rho2z,sigz,mdot,tmic,temp,lambda,blockID)
 
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
@@ -347,7 +352,7 @@
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,temp
+        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda
 
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
@@ -395,6 +400,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell to right
               !--------------------------------------------------------------
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
 
                  th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i,j,k)))
@@ -433,15 +439,6 @@
 
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
-
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
 
               end if
 
@@ -487,20 +484,13 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i+1,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
-
+              end if
               end if
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
@@ -582,10 +572,12 @@
                  icrv(i,j+1,k) = 1
 
               end if
+              end if
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell to front
               !--------------------------------------------------------------
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j,k+1) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i,j,k+1).eq.1.) then
 
                  th = abs(s(i,j,k+1))/(abs(s(i,j,k+1))+abs(s(i,j,k)))
@@ -622,15 +614,6 @@
 
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
-
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then 
-
-                        tmic(i,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) - (ht_fmic*xit/(2.0*dx*dx))/aa/dz
-
-                 end if
 
               end if
 
@@ -674,17 +657,8 @@
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then 
-
-                        tmic(i,j,k+1) = 1.0
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
-                        w(i,j,k+1)    = w(i,j,k+1)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dz**2
-                        sigz(i,j,k+1) = sigz(i,j,k+1) + (ht_fmic*xit/(2.0*dx*dx))/aa/dz
-
-                 end if
-
               end if
-
+              end if
               !--------------------------------------------------------------
               !--------------------------------------------------------------
 

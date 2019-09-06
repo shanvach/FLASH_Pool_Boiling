@@ -65,7 +65,7 @@ subroutine Simulation_initBlock(blockId)
 
   real, dimension(MDIM)  :: coord,bsize,del
   real ::  boundBox(2,MDIM)
-  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData
+  real, pointer, dimension(:,:,:,:) :: solnData, facexData,faceyData,facezData
 
   real :: xcell,xedge,ycell,yedge,zcell
 
@@ -85,6 +85,40 @@ subroutine Simulation_initBlock(blockId)
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
   real :: th_radii
+  real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
+  real :: mxl,mxr,myl,myr
+  real :: cxl,cxr,cyl,cyr
+  real, dimension(5) :: rect_x, rect_y, x_temp, y_temp
+  real :: rot_rect
+  real :: zl,zr,dzl,dzr
+
+  xl = -2.00
+  xr =  2.00
+  yl =  2.00
+  yr =  3.00
+  zl = -2.00
+  zr =  2.00
+
+  !rot_rect = 3*acos(-1.0)/4;
+  rot_rect = 0.0*cos(-1.0)/4;
+
+  rect_x(1) = xl;
+  rect_x(2) = xl;
+  rect_x(3) = xr;
+  rect_x(4) = xr;
+  rect_x(5) = xl;
+
+  rect_y(1) = yl;
+  rect_y(2) = yr;
+  rect_y(3) = yr;
+  rect_y(4) = yl;
+  rect_y(5) = yl;
+
+  !x_temp = rect_x;
+  !y_temp = rect_y - 4;
+
+  !rect_x = x_temp*cos(rot_rect) - y_temp*sin(rot_rect);
+  !rect_y = y_temp*cos(rot_rect) + x_temp*sin(rot_rect) + 4;
 
   !----------------------------------------------------------------------
   
@@ -113,7 +147,7 @@ subroutine Simulation_initBlock(blockId)
   ! Point to Blocks face variables: 
   call Grid_getBlkPtr(blockID,facexData,FACEX)
   call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
+  call Grid_getBlkPtr(blockID,facezData,FACEZ)
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
   A0 = sim_waveA
@@ -152,9 +186,9 @@ subroutine Simulation_initBlock(blockId)
   !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
   sim_nucSiteDens = 1
-  sim_nuc_radii   = 0.2
-  sim_nuc_site_x  = 0.0
-  sim_nuc_site_y  = 0.6
+  sim_nuc_radii   = 0.3
+  sim_nuc_site_x  = 0.0 !- (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
+  sim_nuc_site_y  = yr+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -170,13 +204,16 @@ subroutine Simulation_initBlock(blockId)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-           !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !        real(k - NGUARD - 1)*del(KAXIS)  +  &
-           !        0.5*del(KAXIS)
+           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                   real(k - NGUARD - 1)*del(KAXIS)  +  &
+                   0.5*del(KAXIS)
 
-           zcell = 0.0
-
-
+           dxl = xcell - xl;
+           dxr = xr - xcell;
+           dyl = ycell - yl;
+           dyr = yr - ycell;      
+           dzl = zcell - zl
+           dzr = zr - zcell
 
            do nuc_index=1,sim_nucSiteDens
 
@@ -195,37 +232,43 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-           solnData(LMDA_VAR,i,j,k) = 0.5 - sqrt(xcell**2+ycell**2+zcell**2)
+           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr,dzl,dzr)
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
 
-           th_radii = sqrt(xcell**2+ycell**2+zcell**2)
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
-           if(th_radii .le. 0.5) solnData(TEMP_VAR,i,j,k) = 1.0
-           if(th_radii .gt. 0.5 .and. th_radii .le. 0.7) solnData(TEMP_VAR,i,j,k) = 1.0 - ((th_radii - 0.5)/(0.7 - 0.5))
- 
+           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .ge. -0.15) &
+              solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15 
+
         enddo
      enddo
   enddo
 
-  k = 1
-     do j=2,blkLimitsGC(HIGH,JAXIS)-1
-        do i=2,blkLimitsGC(HIGH,IAXIS)-1
+ do k=2,blkLimitsGC(HIGH,KAXIS)-1
+  do j=2,blkLimitsGC(HIGH,JAXIS)-1
+   do i=2,blkLimitsGC(HIGH,IAXIS)-1
 
            solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
                                       sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
 
-           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(IAXIS))/&
+           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))/&
                                       sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2)
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
 
+           solnData(NMLZ_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))/&
+                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
+                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
 
-        end do
      end do
- 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+   end do
+  end do
 
+  !sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
@@ -286,6 +329,17 @@ subroutine Simulation_initBlock(blockId)
   facexData(RH2F_FACE_VAR,:,:,:) = 0.0
   faceyData(RH2F_FACE_VAR,:,:,:) = 0.0
 
+  facexData(POLD_FACE_VAR,:,:,:) = 0.0
+  faceyData(POLD_FACE_VAR,:,:,:) = 0.0
+  facezData(POLD_FACE_VAR,:,:,:) = 0.0
+
+  facezData(VELC_FACE_VAR,:,:,:) = 0.0
+  facezData(VELI_FACE_VAR,:,:,:) = 0.0
+  facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+ 
+  facezData(RH1F_FACE_VAR,:,:,:) = 0.0
+  facezData(RH2F_FACE_VAR,:,:,:) = 0.0
+  facezData(SIGM_FACE_VAR,:,:,:) = 0.0
 
 !!$  ! Point to blocks center and face vars:
 !!$  call Grid_getBlkPtr(blockID,solnData,CENTER)
@@ -318,8 +372,7 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_releaseBlkPtr(blockID,facexData,FACEX)
   call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-
-
+  call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   return
 

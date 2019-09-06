@@ -27,6 +27,7 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
   use Driver_interface, only: Driver_abortFlash
   use sm_misc_interface,only : sm_crossprod
   use Driver_data, only: dr_simTime
+  use IncompNS_data, only: ins_gravY
 
   implicit none
   
@@ -60,10 +61,14 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
         idx2     = body%ID(i,idx1)
 
         if(i == 2) then
-        u(a,i)   = u(a,i) - 1.0*dr_simTime
-        ud(a,i)  = -1.0
+
+        body%qn(idx2)   = -0.5*dr_simTime + 0.5*ins_gravY*dr_simTime*dr_simTime
+        body%qdn(idx2)  = -0.5 + ins_gravY*dr_simTime        
+        body%qddn(idx2) = ins_gravY
+
+        u(a,i)   = u(a,i) + body%qn(idx2)
+        ud(a,i)  = body%qdn(idx2)
         udd(a,i) = body%qddn(idx2)
-        body%qn(idx2) = -1.0*dr_simTime
 
         else
         u(a,i)   = u(a,i) + body%qn(idx2)

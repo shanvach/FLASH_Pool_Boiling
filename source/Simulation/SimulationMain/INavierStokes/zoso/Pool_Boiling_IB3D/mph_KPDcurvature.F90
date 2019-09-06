@@ -4,13 +4,14 @@
 
 
         subroutine mph_KPDcurvature2DAB(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,alph,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv,smrh)
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,alph,thco1,thco2,cp1,cp2,nrmx,nrmy,mflg,smhv,smrh,&
+           lambda)
 
    
         implicit none
 
 #include "Flash.h"
-
+#include "constants.h"
         !*************************************************************************
 
         !---------------------------------
@@ -21,7 +22,7 @@
         real, intent(out) :: crmx, crmn
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,visc,&
-                                               alph,nrmx,nrmy,mflg,smhv,smrh
+                                               alph,nrmx,nrmy,mflg,smhv,smrh,lambda
 
         !--------------------------
         !- kpd - Local variables...
@@ -37,11 +38,15 @@
 
         real, dimension(ix2,jy2) :: adf
         real :: axr,axl,ayr,ayl,ax,ay
+        real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: b1,b2
 
         crmx = -1E10
         crmn = 1E10
 
         mflg = 0.0
+        pfl  = 0.0
 
         !*************************************************************************
 
@@ -49,7 +54,19 @@
         k=1
         kz1 = k
 
-        !- kpd - Compute the curvature ---------------
+        sunion = s
+
+        !do j=jy1-2,jy2+2
+        !   do i=ix1-2,ix2+2
+        !       sunion(i,j,kz1) = min(s(i,j,kz1),-lambda(i,j,kz1))
+        !   end do
+        !end do
+
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
         crv = 0.
         do j = jy1,jy2
@@ -87,51 +104,19 @@
            end do
         end do
 
-       !---- RIAZ'S IMPLEMENTATION ----!
+        do j=jy1-1,jy2+1
+          do i=ix1-1,ix2+1
 
-!        do j = jy1,jy2
-!           do i = ix1,ix2
+              visc(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+                              (smhv(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
+                             (pfl(i,j,k))*(vis2/vis2)
 
-!              adf(i,j) = sqrt( ((s(i+1,j,k)-s(i-1,j,k))/2./dx)**2 + &
-!                               ((s(i,j+1,k)-s(i,j-1,k))/2./dy)**2 )
+              alph(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(thco2/cp2)/(thco2/cp2) + &
+                              (pf(i,j,k))*(1-pfl(i,j,k))*(thco1/cp1)/(thco2/cp2) + &
+                             (pfl(i,j,k))*(thco2/cp2)/(thco2/cp2)
 
-!           end do
-!        end do
-
-!        crv = 0.
-!        do j = jy1+1,jy2-1
-!           do i = ix1+1,ix2-1
-
-!              axr = (adf(i,j)+adf(i+1,j))/2.
-!              axl = (adf(i-1,j)+adf(i,j))/2.
-!              ayr = (adf(i,j)+adf(i,j+1))/2.
-!              ayl = (adf(i,j-1)+adf(i,j))/2.
-
-!              ax = (s(i+1,j,k)-s(i,j,k))/axr - (s(i,j,k)-s(i-1,j,k))/axl
-!              ay = (s(i,j+1,k)-s(i,j,k))/ayr - (s(i,j,k)-s(i,j-1,k))/ayl
-
-!              crv(i,j,k) = ax/dx**2 + ay/dy**2
-
-!           end do
-!        end do
-
-        !*************************************************************************
-
-        !----------------------------------
-        !- kpd - Compute the phase function
-        !----------------------------------
-
-        k=1
-
-        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
-        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
-
-        !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *pf(ix1-1:ix2+1,jy1-1:jy2+1,k)
-        visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = vis2/vis2     + (vis1/vis2   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k)       
-        !visc(ix1-1:ix2+1,jy1-1:jy2+1,k) = 1./(vis2/vis2 + (vis2/vis1   - vis2/vis2)  *smhv(ix1-1:ix2+1,jy1-1:jy2+1,k))
-
-        alph(ix1-1:ix2+1,jy1-1:jy2+1,k) = (thco2/cp2)/(thco2/cp2) + ((thco1/cp1)/(thco2/cp2) - (thco2/cp2)/(thco2/cp2))*pf(ix1-1:ix2+1,jy1-1:jy2+1,k)
-
+          end do
+        end do
 
         do j = jy1+1,jy2-1
          do i = ix1+1,ix2-1
@@ -170,15 +155,19 @@
         do j = jy1-1,jy2+1
            do i = ix1-1,ix2+1
 
-
                a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                      
                a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                     pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-               rho1x(i,j,k) = a1*a2/(rho1/rho2)
-               rho2x(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+               b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
+               b2 = (pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
+                    (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
-           end do
+
+              rho1x(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
+
+          end do
         end do
 
         !- kpd - density on y-face
@@ -188,13 +177,16 @@
         do i = ix1-1,ix2+1
            do j = jy1-1,jy2+1
 
-
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              rho1y(i,j,k) = a1*a2/(rho1/rho2)
-              rho2y(i,j,k) = (1. - a1*a2)/(rho2/rho2)
+              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.           
+              b2 = (pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
+
+              rho1y(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho2/rho2)
 
            end do
         end do
@@ -232,6 +224,9 @@
         !             s(ix1-1:ix2+1,jy1-2:jy2,kz1))/2./dy)**2 )
 
 
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
+        pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,s(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+
 
       end subroutine mph_KPDcurvature2DAB
 
@@ -260,7 +255,7 @@
 !=========================================================================
 
         subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,blockID)   
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,lambda,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
@@ -283,7 +278,7 @@
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot
+        real, dimension(:,:,:), intent(in) :: mdot,lambda
 
         integer, intent(in) :: blockID
 
@@ -353,7 +348,9 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
+
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
+              if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. ) then
 
                  !          = (+)            = (+)           = (-)
                  th = abs(s(i+1,j,k))/(abs(s(i+1,j,k))+abs(s(i,j,k)))
@@ -396,22 +393,13 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
-
 
               end if
 
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell to right
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i+1,j,k).eq.0. ) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))
 
@@ -453,21 +441,16 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i+1,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
+              end if
 
               end if
+
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
+              if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1. ) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
 
@@ -514,7 +497,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=1 in current cell and pf=0 in cell above
               !--------------------------------------------------------------
-              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
+              if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0. ) then
 
                  th = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j+1,k))) 
  
@@ -556,6 +539,7 @@
                  icrv(i,j,k) = 1
                  icrv(i,j+1,k) = 1
 
+              end if
               end if
 
            end do

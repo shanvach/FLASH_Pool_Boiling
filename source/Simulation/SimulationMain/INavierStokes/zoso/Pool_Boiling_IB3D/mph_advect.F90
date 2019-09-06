@@ -85,7 +85,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   real bsize(MDIM),coord(MDIM)
   
-  real del(MDIM),xcell,ycell,zcell,rc,xcellp,zcellp
+  real del(MDIM),xcell,ycell, ycellp,zcell,rc,xcellp,zcellp
 
   real    :: r_avg
   integer :: n_avg
@@ -326,7 +326,7 @@ enddo
                           del(DIR_Z), &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),blockID)
+                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),solnData(LMDA_VAR,:,:,:),blockID)
 
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
@@ -362,13 +362,13 @@ enddo
                           del(DIR_X), &
                           del(DIR_Y), &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),blockID)
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),solnData(LMDA_VAR,:,:,:),blockID)
 
         if(ii == 1) then
         !KPD - Compute the Bubble Volume
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
+              if (solnData(DFUN_VAR,i,j,1) .gt. 0 .and. solnData(LMDA_VAR,i,j,1) .le. 0.0) then
                 volSum = volSum + (del(DIR_X) * del(DIR_Y))
               end if
            end do
@@ -439,11 +439,6 @@ enddo
  end do   !End ii RK loop
 
 
-    !ib_temp_flg = .false.
-    !ib_vel_flg  = .false.
-    !ib_dfun_flg = .true.
-
-    !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
     call mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 
@@ -509,54 +504,23 @@ do nuc_index =1,sim_nucSiteDens
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-     ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-              real(blkLimits(LOW,JAXIS) - NGUARD - 1)*del(JAXIS)  +  &
-              0.5*del(JAXIS)
+     do j=blkLimitsGC(LOW,JAXIS),blkLimitsGC(HIGH,JAXIS)
+         do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
 
-     if(abs(ycell-0.5*del(JAXIS)) .le. tol) then
+           if(solnData(LMDA_VAR,i,j,1) .le. 0.0 .and. solnData(LMDA_VAR,i,j,1) .ge. -0.15) then
 
-       do k=blkLimitsGC(LOW,KAXIS),blkLimitsGC(HIGH,KAXIS)
-        do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)-1
-
-           xcell  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           xcellp = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
-                    real(i+1 - NGUARD - 1)*del(IAXIS)  +  &
-                    0.5*del(IAXIS)
-
-           !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !         real(k - NGUARD - 1)*del(KAXIS)  +  &
-           !         0.5*del(KAXIS)
-
-           !zcellp = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-           !         real(k+1 - NGUARD - 1)*del(KAXIS)  +  &
-           !         0.5*del(KAXIS)
-
-           if((xcell .le. sim_nuc_site_x(nuc_index)) .and. (xcellp .ge. sim_nuc_site_x(nuc_index))) then ! .and. &
-              !(zcell .le. sim_nuc_site_z(nuc_index)) .and. (zcellp .ge. sim_nuc_site_z(nuc_index))) then
-
-             if ((solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k)   .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k)   .ge. 0.0)) then ! .or. &
-                 !(solnData(DFUN_VAR,i,blkLimits(LOW,JAXIS),k+1) .ge. 0.0) .or. (solnData(DFUN_VAR,i+1,blkLimits(LOW,JAXIS),k+1) .ge. 0.0)) then
-                        
+                   if(solnData(DFUN_VAR,i,j,1) .ge. 0.0) then
                         isAttached = isAttached .or. .true.
-             else
+                   else
                         isAttached = isAttached .or. .false.
-             end if 
 
-             nucSiteTemp = (solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k) + &
-                            solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k))/2.0 ! + &
-                            !solnData(TEMP_VAR,i,blkLimits(LOW,JAXIS),k+1) + & 
-                            !solnData(TEMP_VAR,i+1,blkLimits(LOW,JAXIS),k+1))/4.0
+                   end if
 
            end if
 
-        end do
-       end do
-
-     end if
-  
+         end do
+      end do
+ 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
   end do
@@ -572,10 +536,11 @@ do nuc_index =1,sim_nucSiteDens
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
 
   if( (mph_isAttachedAll(nuc_index) .eqv. .false.) .and. &
-      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime) .and. &
-      (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
+      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime)) then !.and. &
+      !(mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
 
-  do lb = 1,blockCount
+  if(ins_meshMe .eq. MASTER_PE) print*, "Bubble reneucleation at site ",nuc_index
+      do lb = 1,blockCount
 
      blockID = blockList(lb)
      call Grid_getBlkBoundBox(blockId,boundBox)
@@ -602,13 +567,15 @@ do nuc_index =1,sim_nucSiteDens
                   real(j - NGUARD - 1)*del(JAXIS)  +  &
                   0.5*del(JAXIS)
 
-         !zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 + &
-         !         real(k - NGUARD - 1)*del(KAXIS)  + &
-         !         0.5*del(KAXIS)
-
+#if NDIM == MDIM
+         zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 + &
+                 real(k - NGUARD - 1)*del(KAXIS)  + &
+                 0.5*del(KAXIS)
+#else
          zcell = 0.0
+#endif
 
-         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
+         nuc_dfun  = sim_nuc_radii(nuc_index) - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
 
          solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
 
@@ -631,6 +598,8 @@ do nuc_index =1,sim_nucSiteDens
     call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
+  else
+  if(ins_meshMe .eq. MASTER_PE) print*, "No reneucleation at site ", nuc_index
   end if
 
 end do

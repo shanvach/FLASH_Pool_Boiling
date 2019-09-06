@@ -1,6 +1,6 @@
 
    
-     subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,blockID)
+     subroutine mph_KPDadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,lambda,blockID)
 
         use Simulation_data, ONLY : sim_xMax, sim_yMax, sim_xMin, sim_sinkB, sim_yMin
 
@@ -16,7 +16,7 @@
 #include "Flash.h"
 #include "constants.h"
 
-        real, dimension(:,:,:), intent(inout):: s,u,v
+        real, dimension(:,:,:), intent(inout):: s,u,v,lambda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
 
@@ -365,19 +365,19 @@
               !---------------------------------------------------------
               !---------------------------------------------------------
 
-
-              if(ycell .lt. Lb) then
+              if(lambda(i,j,k) .lt. 0.0) then
+              !if(ycell .lt. Lb) then
 
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy
-              else
+              !else
 
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*Cb*(ycell-Lb)/(Ly-Lb)
-                                      !- dt*Cb*(ycell-Ly+Lb)/Lb
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*Cb*(ycell-Lb)/(Ly-Lb)
+              !                        !- dt*Cb*(ycell-Ly+Lb)/Lb
+              !end if
               end if
-
            end do
         end do
 

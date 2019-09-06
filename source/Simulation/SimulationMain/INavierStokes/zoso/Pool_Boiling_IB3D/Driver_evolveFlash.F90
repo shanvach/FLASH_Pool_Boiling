@@ -59,8 +59,6 @@ subroutine Driver_evolveFlash()
   use IncompNS_data, only : ins_cflflg
   use Multiphase_interface, only: Multiphase
   use Heat_AD_interface, only: Heat_AD
-
-  use Simulation_data, only: sim_flux_flg, sim_data_flg
   !use mph_interface, only : mph_advect
 
   use gr_sbData, only : gr_sbNumBodies, gr_sbBodyInfo
@@ -101,7 +99,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
 !-----------------------------------------------------------------------------------------
   endRun = .false.
 
-  call Logfile_stamp( 'Entering evolution loop' , '[Driver_evolveFlash]')
+  !call Logfile_stamp( 'Entering evolution loop' , '[Driver_evolveFlash]')
   call Timers_start("evolution")
 
   ! Initial Timestep:
@@ -130,8 +128,6 @@ if (dr_nstep .eq. 1) grid_changed = 1
   end if
 
   firstfileflag = 0
-  sim_data_flg = .true.
-  sim_flux_flg = .true.
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
   ! Write to Bodies to Tecplot:
@@ -161,7 +157,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
         write (strBuff(3,1), "(A)") "dt"
         write (strBuff(3,2), "(A)") trim(adjustl(NumToStr))
         
-        call Logfile_stamp( strBuff, 3, 2, "step")
+        !call Logfile_stamp( strBuff, 3, 2, "step")
      end if
 
 
@@ -171,30 +167,26 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !--------------------------------------------------------------------
      !--------------------------------------------------------------------
      !----
+     dr_simTime = dr_simTime + dr_dt
 
      call Timers_start("Multiphase")
      call Multiphase( blockCount, blockList,   &
               dr_simTime, dr_dt, dr_dtOld,  sweepDummy,1)
      call Timers_stop("Multiphase")
 
-
      call Timers_start("Heat_AD")
      call Heat_AD( blockCount, blockList,   &
               dr_simTime, dr_dt, dr_dtOld,  sweepDummy)
      call Timers_stop("Heat_AD")
-
 
      call Timers_start("Multiphase")
      call Multiphase( blockCount, blockList,   &
               dr_simTime, dr_dt, dr_dtOld,  sweepDummy,0)
      call Timers_stop("Multiphase")
 
-
 #ifdef DEBUG_DRIVER
      print*, 'going into IncompNS'
 #endif
-     dr_simTime = dr_simTime + dr_dt
-
      !print *,"Time step: ",dr_dt
 
      call Timers_start("IncompNS")
@@ -229,30 +221,18 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !--------------------------------------------------------------------
      if (ins_cflflg .eq. 1) then ! Constant cfl       
        if (dr_nstep .gt. 1) then
-       sim_data_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
+       tecplot_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
                       dr_dt/IO_plotFileIntervalTime)
        else
-       sim_data_flg = .false.
+       tecplot_flg = .false.
        endif
      else                        ! Constant timestep
-       sim_data_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
+       tecplot_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
      endif
 
-
-     if (ins_cflflg .eq. 1) then ! Constant cfl       
-       if (dr_nstep .gt. 1) then
-       sim_flux_flg = (1/(0.1*IO_plotFileIntervalTime)*MOD(dr_simtime,(0.1*IO_plotFileIntervalTime)) .le. &
-                      dr_dt/(0.1*IO_plotFileIntervalTime))
-       else
-       sim_flux_flg = .false.
-       endif
-     else                        ! Constant timestep
-       sim_flux_flg = (MOD(dr_nstep,int(0.1*IO_plotFileIntervalStep)) .eq. 0)
-     endif
-
-     if (sim_flux_flg .or. sim_data_flg) then
+     if (tecplot_flg) then
         ! Write to Grid to Tecplot:
-        if(sim_data_flg) count = count + 1
+        count = count + 1
         call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                           0.0,blockList,blockCount,firstfileflag)
 
@@ -282,7 +262,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
 
      
 
-     !call sm_ioWriteStates()
+     call sm_ioWriteStates()
 
 
 
@@ -335,7 +315,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
     
      !print *,"dr_dt: ",dr_dt 
      call Timers_start("io")
-     call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
+     !call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
      call Timers_stop("io")
 
      if(endRun) exit
@@ -365,11 +345,11 @@ if (dr_nstep .eq. 1) grid_changed = 1
   enddo
 
   call Timers_stop("evolution")
-  call Logfile_stamp( 'Exiting evolution loop' , '[Driver_evolveFlash]')
-  if(.NOT.endRun) call IO_outputFinal()
+  !call Logfile_stamp( 'Exiting evolution loop' , '[Driver_evolveFlash]')
+  !if(.NOT.endRun) call IO_outputFinal()
   call Timers_getSummary(dr_nstep)
-  call Logfile_stamp( "FLASH run complete.", "LOGFILE_END")
-  call Logfile_close()
+  !call Logfile_stamp( "FLASH run complete.", "LOGFILE_END")
+  !call Logfile_close()
 
 
 
