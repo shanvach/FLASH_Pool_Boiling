@@ -1,7 +1,5 @@
 subroutine ImBound_setData()
-
   use IncompNS_data, only : ins_invRe
-
   use ImBound_data,  only : ib_nu 
 
   implicit none
