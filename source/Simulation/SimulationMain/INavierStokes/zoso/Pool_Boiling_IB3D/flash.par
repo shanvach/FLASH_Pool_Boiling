@@ -6,7 +6,7 @@ gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
 # Particles
-pt_maxPerProc=3500
+pt_maxPerProc=200000
 
 # Inverse of Reynolds Number
 invRe = 0.003
@@ -147,9 +147,9 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 10
-nblocky	= 10
-nblockz = 10
+nblockx	= 5
+nblocky	= 5
+nblockz = 5
 
 lrefine_min	= 1
 lrefine_max     = 1
