@@ -11,7 +11,7 @@ subroutine Heat_Solve2d(T_p, T_o, u, v, dt, dx, dy, dz, ix1,ix2, jy1, jy2)
   real, intent(in) :: dt, dx, dy, dz 
   integer, intent(in) :: ix1, ix2, jy1, jy2
 
-  real :: T_res
+!  real :: T_res
 
   integer :: i,j
 
@@ -23,6 +23,7 @@ subroutine Heat_Solve2d(T_p, T_o, u, v, dt, dx, dy, dz, ix1,ix2, jy1, jy2)
   ! with Loop Vectorization ! (Second Order Central)
 
   T_p(ix1:ix2,jy1:jy2,1) = T_o(ix1:ix2,jy1:jy2,1) &
+  +  dt*ht_invsqrtRaPr*ht_source_term&  
   +((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)+T_o(ix1-1:ix2-1,jy1:jy2,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
   +((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,1)+T_o(ix1:ix2,jy1-1:jy2-1,1)-2*T_o(ix1:ix2,jy1:jy2,1))&
   -((dt*(u(ix1+1:ix2+1,jy1:jy2,1) + u(ix1:ix2,jy1:jy2,1))/2)/(2*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,1)-T_o(ix1-1:ix2-1,jy1:jy2,1))&
@@ -52,7 +53,8 @@ subroutine Heat_Solve2d(T_p, T_o, u, v, dt, dx, dy, dz, ix1,ix2, jy1, jy2)
      Ty_plus = T_o(i,j+1,1)-T_o(i,j,1)
      Ty_mins = T_o(i,j,1)-T_o(i,j-1,1)
 
-     T_p(i,j,1) = T_o(i,j,1) + ((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
+     T_p(i,j,1) = T_o(i,j,1) +   dt*ht_invsqrtRaPr*ht_source_term&
+                             + ((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(i+1,j,1)+T_o(i-1,j,1)-2.*T_o(i,j,1))&
                              + ((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(i,j+1,1)+T_o(i,j-1,1)-2.*T_o(i,j,1))&
                              - ((dt)/dx) * (u_plus*Tx_mins + u_mins*Tx_plus)&
                              - ((dt)/dy) * (v_plus*Ty_mins + v_mins*Ty_plus)
@@ -62,13 +64,13 @@ subroutine Heat_Solve2d(T_p, T_o, u, v, dt, dx, dy, dz, ix1,ix2, jy1, jy2)
 
 #endif
 
-  do i = ix1,ix2
-     T_res = T_res + sum((T_o(i,:,1)-T_p(i,:,1))**2)
-  end do
-
-  T_res = sqrt(T_res/size(T_o))
-
-  print *,T_res
+!  do i = ix1,ix2
+!     T_res = T_res + sum((T_o(i,:,1)-T_p(i,:,1))**2)
+!  end do
+!
+!  T_res = sqrt(T_res/size(T_o))
+!
+!  print *,T_res
 
 end subroutine Heat_Solve2d
 
@@ -87,7 +89,7 @@ subroutine Heat_Solve3d(T_p, T_o, u, v, w, dt, dx, dy, dz, &
   real, intent(in) :: dt, dx, dy, dz 
   integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
 
-  real :: T_res
+!  real :: T_res
 
   integer :: i,j,k
 
@@ -99,7 +101,7 @@ subroutine Heat_Solve3d(T_p, T_o, u, v, w, dt, dx, dy, dz, &
 
   ! with Loop Vectorization ! (Second Order Central)
 
-  T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_o(ix1:ix2,jy1:jy2,kz1:kz2) &
+  T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_o(ix1:ix2,jy1:jy2,kz1:kz2) + dt*ht_invsqrtRaPr*ht_source_term&
   +((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(ix1+1:ix2+1,jy1:jy2,kz1:kz2)+T_o(ix1-1:ix2-1,jy1:jy2,kz1:kz2)&
                                                                 -2*T_o(ix1:ix2,jy1:jy2,kz1:kz2))&
   +((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(ix1:ix2,jy1+1:jy2+1,kz1:kz2)+T_o(ix1:ix2,jy1-1:jy2-1,kz1:kz2)&
@@ -144,7 +146,8 @@ subroutine Heat_Solve3d(T_p, T_o, u, v, w, dt, dx, dy, dz, &
      Tz_plus = T_o(i,j,k+1)-T_o(i,j,k)
      Tz_mins = T_o(i,j,k)-T_o(i,j,k-1)
 
-     T_p(i,j,k) = T_o(i,j,k) + ((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(i+1,j,k)+T_o(i-1,j,k)-2.*T_o(i,j,k))&
+     T_p(i,j,k) = T_o(i,j,k) +   dt*ht_invsqrtRaPr*ht_source_term&
+                             + ((dt*ht_invsqrtRaPr)/(dx*dx))*(T_o(i+1,j,k)+T_o(i-1,j,k)-2.*T_o(i,j,k))&
                              + ((dt*ht_invsqrtRaPr)/(dy*dy))*(T_o(i,j+1,k)+T_o(i,j-1,k)-2.*T_o(i,j,k))&
                              + ((dt*ht_invsqrtRaPr)/(dz*dz))*(T_o(i,j,k+1)+T_o(i,j,k-1)-2.*T_o(i,j,k))&
                              - ((dt)/dx) * (u_plus*Tx_mins + u_mins*Tx_plus)&
@@ -156,14 +159,14 @@ subroutine Heat_Solve3d(T_p, T_o, u, v, w, dt, dx, dy, dz, &
 
 #endif
 
-  do i = ix1,ix2
-  do j = jy1,jy2
-     T_res = T_res + sum((T_o(i,j,:)-T_p(i,j,:))**2)
-  end do
-  end do
-
-  T_res = sqrt(T_res/size(T_o))
-
-  print *,T_res
+!  do i = ix1,ix2
+!  do j = jy1,jy2
+!     T_res = T_res + sum((T_o(i,j,:)-T_p(i,j,:))**2)
+!  end do
+!  end do
+!
+!  T_res = sqrt(T_res/size(T_o))
+!
+!  print *,T_res
 
 end subroutine Heat_Solve3d

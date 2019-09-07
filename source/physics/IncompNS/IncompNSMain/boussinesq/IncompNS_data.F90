@@ -42,6 +42,7 @@ module IncompNS_data
   real, save :: ins_Pr
   real, save :: ins_Re
   logical, save :: ins_isCoupled
+  logical, save :: ins_isHeated
   real, save :: ins_invsqrtRa_Pr
   real, save :: ins_invRe
   real, save :: ins_dtspec

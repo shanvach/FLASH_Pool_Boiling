@@ -3,10 +3,10 @@ PPDEFINE INS_BOUSSINESQ
 
 # Runtime parameters
 
-D cfl                   Courant Number
-D sigma			Viscous Condition Parameter
-D invsqrtRa_Pr          1/sqrt(Ra/Pr)
-D ins_invRe             1/Re or 1/sqrt(Ra/Pr)
+#D cfl                   Courant Number
+#D sigma			Viscous Condition Parameter
+#D invsqrtRa_Pr          1/sqrt(Ra/Pr)
+#D ins_invRe             1/Re or 1/sqrt(Ra/Pr)
 # ----------------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDENT CONFIG FILE
 D   Ra  Rayleigh number
@@ -23,6 +23,9 @@ PARAMETER initial_flowType  INTEGER  0
 
 D  Momentum and Heat equations are coupled
 PARAMETER coupled_transport  BOOLEAN  true
+
+D  Source term in the Heat equation
+PARAMETER internally_heated  BOOLEAN  false
 
 D   isgs   Subgrid scale model flag
 PARAMETER isgs          INTEGER  0

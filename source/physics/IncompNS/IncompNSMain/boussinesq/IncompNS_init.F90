@@ -46,6 +46,7 @@ subroutine IncompNS_init(restart)
   call RuntimeParameters_get("Pr",ins_Pr)
   call RuntimeParameters_get("Re",ins_Re)
   call RuntimeParameters_get("coupled_transport",ins_isCoupled)
+  call RuntimeParameters_get("internally_heated",ins_isHeated)
   call RuntimeParameters_get("sigma",ins_sigma)
   call RuntimeParameters_get("dtspec",ins_dtspec)
   call RuntimeParameters_get("intschm",ins_intschm)
@@ -86,6 +87,7 @@ subroutine IncompNS_init(restart)
      write(*,*) 'ins_Pr =',ins_Pr
      write(*,*) 'ins_Re =',ins_Re
      write(*,*) 'ins_isCoupled =',ins_isCoupled
+     write(*,*) 'ins_isHeated  =',ins_isHeated
      write(*,*) '1/sqrt(Ra/Pr) = ',ins_invsqrtRa_Pr
      write(*,*) 'ins_sigma =',ins_sigma
      write(*,*) 'ins_dtspec=',ins_dtspec

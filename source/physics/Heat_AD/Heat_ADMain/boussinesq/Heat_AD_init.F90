@@ -2,7 +2,8 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    use Heat_AD_data
 
-   use IncompNS_data, only: ins_Ra, ins_Pr, ins_isCoupled, ins_meshME
+   use IncompNS_data, only: ins_Ra, ins_Pr, &
+                            ins_isCoupled, ins_isHeated, ins_meshME
 
    use RuntimeParameters_interface, only: RuntimeParameters_get, &
                                           RuntimeParameters_mapStrToInt
@@ -45,6 +46,11 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get('Tzr_boundary_value', ht_Tzr_value)
 
    ht_invsqrtRaPr = 1. / (ins_Ra * ins_Pr)**0.5
+   if (ins_isHeated) then
+           ht_source_term = 1.0
+   else
+           ht_source_term = 0.0
+   endif
 
    if (ins_meshMe .eq. MASTER_PE) then
      !write(*,*) 'Head_AD Boundary Conditions'
@@ -56,6 +62,7 @@ subroutine Heat_AD_init(blockCount,blockList)
      !write(*,*) Tyl_bcString,' ',Tyr_bcString
      !write(*,*) Tzl_bcString,' ',Tzr_bcString
      write(*,*) '1/SQRT(Ra Pr) = ',ht_invsqrtRaPr
+     write(*,*) 'Volume Source = ',ht_source_term
    endif
 
 end subroutine Heat_AD_init

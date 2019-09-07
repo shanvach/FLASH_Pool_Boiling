@@ -2,12 +2,12 @@
 PPDEFINE HT_BOUSSINESQ 1
 
 # Runtime parameters
-D ht_invsqrtRaPr        1/SQRT(RaPr) 
+#D ht_invsqrtRaPr        1/SQRT(RaPr) 
 
 # --------------------------------------
 # THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
 D Txl_boundary_type lower (left) boundary condition in x dir
-PARAMETER Txl_boundary_type STRING "DIRICHLET_HT"
+PARAMETER Txl_boundary_type STRING "dirichlet_ht"
 
 D Txr_boundary_type upper (right) boundary condition in x dir
 PARAMETER Txr_boundary_type STRING "dirichlet_ht"
