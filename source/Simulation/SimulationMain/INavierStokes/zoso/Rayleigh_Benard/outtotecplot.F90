@@ -1,4 +1,3 @@
-#ifdef NDIM==3
 ! Subroutine outtotecplot
 !
 ! Subroutine to write out to Tecplot data in binary form.
@@ -8,6 +7,8 @@
 #include "constants.h"
 #include "Flash.h"
 
+
+#if NDIM == 3
   subroutine outtotecplot(mype,time,dt,istep,count,&
            timer,blockList,blockCount,firstfileflag)
 
@@ -118,7 +119,7 @@
   nyc = NYB + NGUARD + 1
   nzc = NZB + NGUARD + 1
 
-
+  write(*,*) "Write 3D Tecplot Data"
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &
         count, mype
@@ -536,7 +537,7 @@
 
   End subroutine centervals2corners
 
-#else
+#endif
 
 ! Subroutine outtotecplot
 !
@@ -544,8 +545,10 @@
 !
 ! ---------------------------------------------------------------------------
 
-#include "constants.h"
-#include "Flash.h"
+!#include "constants.h"
+!#include "Flash.h"
+
+#if NDIM == 2
 
   subroutine outtotecplot(mype,time,dt,istep,count,&
            timer,blockList,blockCount,firstfileflag)
@@ -661,6 +664,7 @@
   nxc = NXB + NGUARD + 1
   nyc = NYB + NGUARD + 1
 
+  write(*,*) "Write 2D TecPlot Data"
   ! write solution data to data.XXXX.XX
   !write(filename,'("./IOData/data.",i4.4,".",i2.2,".plt")') &
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &
