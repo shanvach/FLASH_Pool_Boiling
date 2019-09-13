@@ -56,8 +56,8 @@ ymax =    60.0
 #       Boundary conditions
 xl_boundary_type = "slip_ins"
 xr_boundary_type = "slip_ins"
-yl_boundary_type = "inflow_ins"
-yr_boundary_type = "outflow_ins"
+yl_boundary_type = "noslip_ins"
+yr_boundary_type = "noslip_ins"
 
 #      Poisson Solver Boundary Conditions
 xl_mg_boundary_type = "outflow"
@@ -76,11 +76,11 @@ restart         = .false.
 nend = 100000000
 #nend = 3
 tmax            = 2500.0
-cflflg          = 1
+cflflg          = 0
 cfl             = 0.01
 sigma		= 0.01
-dtspec          = 1.0d-2
-dtinit          = 1.0d-2
+dtspec          = 1.0d-3
+dtinit          = 1.0d-3
 tstep_change_factor=1.01
 
 
@@ -97,15 +97,15 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-checkpointFileIntervalTime = 2.5
-#checkpointFileIntervalStep = 100000
+#checkpointFileIntervalTime = 2.5
+checkpointFileIntervalStep = 100000
 
-plotFileIntervalTime = 2.5
-#plotFileIntervalStep = 1
+#plotFileIntervalTime = 2.5
+plotFileIntervalStep = 500
 
 ##	AMR parameters
-nblockx	= 10
-nblocky	= 10
+nblockx	= 20
+nblocky	= 20
 
 lrefine_min	= 1
 lrefine_max     = 1
