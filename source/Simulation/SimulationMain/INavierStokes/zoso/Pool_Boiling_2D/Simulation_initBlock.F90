@@ -201,9 +201,9 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
-           if(ycell .le. 0.8  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.8 - ycell)/0.8
+           if(ycell .le. 0.15  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+              xcell .ge. -2.0 .and. xcell .le. 2.0 .and. &
+              zcell .ge. -2.0 .and. zcell .le. 2.0) solnData(TEMP_VAR,i,j,k) = (0.15 - ycell)/0.15
 
            !solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            !if(ycell .le. 9.7721  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
