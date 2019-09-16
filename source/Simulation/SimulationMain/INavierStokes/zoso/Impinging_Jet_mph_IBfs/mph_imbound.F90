@@ -260,7 +260,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            if(ycell .ge. ya_one-0.2) then
               solnData(DFUN_VAR,i,j,k) = solnData(LMDA_VAR,i,j,k) - hnorm2
            else
-              solnData(DFUN_VAR,i,j,k) = ya_one-0.2-ycell
+              !solnData(DFUN_VAR,i,j,k) = ya_one-0.2-ycell
+              solnData(DFUN_VAR,i,j,k) = abs(solnData(LMDA_VAR,i,j,k)) + hnorm2
            end if
 
            end if

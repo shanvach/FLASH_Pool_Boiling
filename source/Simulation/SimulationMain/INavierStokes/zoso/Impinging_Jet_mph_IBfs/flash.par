@@ -56,8 +56,8 @@ ymax =    60.0
 #       Boundary conditions
 xl_boundary_type = "slip_ins"
 xr_boundary_type = "slip_ins"
-yl_boundary_type = "noslip_ins"
-yr_boundary_type = "noslip_ins"
+yl_boundary_type = "inflow_ins"
+yr_boundary_type = "outflow_ins"
 
 #      Poisson Solver Boundary Conditions
 xl_mg_boundary_type = "outflow"
