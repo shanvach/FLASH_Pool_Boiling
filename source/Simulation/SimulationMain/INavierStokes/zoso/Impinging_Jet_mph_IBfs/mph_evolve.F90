@@ -96,10 +96,10 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   real :: amp, omega, pi, offset, phase
 
-  amp = 0.25
+  amp = 0.5
   omega = 0.02
   pi = acos(-1.0)
-  offset = 0.25
+  offset = 0.5
   phase = pi
 
 if(mph_flag == 1) then
