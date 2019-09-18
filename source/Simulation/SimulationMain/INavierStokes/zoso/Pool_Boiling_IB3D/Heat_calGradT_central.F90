@@ -23,10 +23,10 @@ subroutine Heat_calGradT_central(Tnl,Tnv,T,s,pf,dx,dy,dz,ix1,ix2,jy1,jy2,nx,ny,m
     do i=ix1,ix2
       do j=jy1,jy2
 
-        Tx_plus = T(i+1,j,k)
-        Tx_mins = T(i-1,j,k)
-        Ty_plus = T(i,j+1,k)
-        Ty_mins = T(i,j-1,k)
+        Tx_plus = T(i,j,k) !T(i+1,j,k)
+        Tx_mins = T(i,j,k) !T(i-1,j,k)
+        Ty_plus = T(i,j,k) !T(i,j+1,k)
+        Ty_mins = T(i,j,k) !T(i,j-1,k)
         Tij     = T(i,j,k)
 
         thxp1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i+1,j,k)))

@@ -64,8 +64,8 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
         idx2     = body%ID(i,idx1)
 
-        body%qn(idx2)  = amp*sin(2*pi*omega*dr_simTime + phase) + offset
-        body%qdn(idx2) = 2*pi*omega*amp*cos(2*pi*omega*dr_simTime);
+        !body%qn(idx2)  = amp*sin(2*pi*omega*dr_simTime + phase) + offset
+        !body%qdn(idx2) = 2*pi*omega*amp*cos(2*pi*omega*dr_simTime);
 
         u(a,i)   = u(a,i) + body%qn(idx2)
         ud(a,i)  = body%qdn(idx2)

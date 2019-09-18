@@ -161,26 +161,30 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
           
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
            ! Get probe in fluid
            hnorm  = 1.0*del(JAXIS)
-           hnorm2 = 1.5*del(JAXIS)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            zprobe(1) = 0.0
 
-           xprobe(2) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
-           yprobe(2) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
+           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*hnorm
+           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*hnorm
            zprobe(2) = 0.0
+
+           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*hnorm
+           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*hnorm
+           zprobe(3) = 0.0
 
 #if NDIM == 3
            zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
-           zprobe(2) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm2)
+           zprobe(2) = zprobe(1) + solnData(TNGZ_VAR,i,j,k)*hnorm
+           zprobe(3) = zprobe(1) - solnData(TNGZ_VAR,i,j,k)*hnorm
 #endif
            ! Interpolate function at probe 
-           do probe_index = 1,1
+           do probe_index = 1,3
            externalPt(IAXIS) = xprobe(probe_index)
            externalPt(JAXIS) = yprobe(probe_index)
            externalPt(KAXIS) = zprobe(probe_index)
@@ -232,6 +236,9 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            enddo
 #endif
 
+
+           if(probe_index == 1) then
+
            veli=0
 
            do dir=1,NDIM
@@ -260,14 +267,14 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                     select case(dir)
                     case(FACEX) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                            facexData(VELC_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+                            facexData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
                     case(FACEY) 
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                            faceyData(VELC_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+                            faceyData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
 #if NDIM == MDIM
                      case(FACEZ)
                     vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
-                            facezData(VELC_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+                            facezData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
 #endif
                     end select
                 enddo 
@@ -275,22 +282,24 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                veli = veli + vel_probe(dir) * part_Tng(dir)
 
            enddo
+           end if
 
            enddo
 
             this_psi = ht_psi
 
+            !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0) then
             !if(veli .ge. 0.0) then
             !     if(abs(veli) .le. 0.2) then
             !          this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli)+ &
             !                                  (mph_psi_adv + ht_psi)/2.0d0
-
+            !
             !     else
-
-            !    this_psi = mph_psi_adv
-
+            !     this_psi = mph_psi_adv
+            !    
             !     end if
-           !end if
+            !end if
+            !end if
 
            dphidn = cos(this_psi)
            !dphidn = cos(90*acos(-1.0)/180)
