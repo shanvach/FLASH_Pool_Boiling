@@ -4,12 +4,8 @@
 # Set the HDF5/MPI library paths -- these need to be updated for your system
 #----------------------------------------------------------------------------
 
-#MPI_PATH = /usr
-#MPI_PATH = /usr/local/mpich2intel
-MPI_PATH = /usr/
-HDF4_PATH  =
-HDF5_PATH  = /usr/local/hdf5/
-#HDF5_PATH = /opt/hdf5-1.8.9
+MPI_PATH = /apps/mpi/openmpi-4.0.2a1
+HDF5_PATH  = /apps/hdf5/1.8.20
 ZLIB_PATH  = /usr
 
 PAPI_PATH  =
@@ -19,8 +15,6 @@ NCMPI_PATH =
 MPE_PATH   =
 
 BLAS_PATH    = /usr
-#/local
-#HYPRE_PATH   = /usr/local/hypre_2.9
 HYPRE_PATH    = /usr/local/hypre
 SUPERLU_PATH = /usr/local/SuperLU_4.3
 
