@@ -147,7 +147,7 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   force_fl(KAXIS) = force_dir(IAXIS) .and. force_dir(JAXIS)
 #endif
 
-  if(ib_vel_flg) then
+  if(ib_vel_flg .or. ib_dfun_flg) then
 
   if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
 
@@ -177,10 +177,10 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
         ! The particle forcing field:
         ib_FuL(i)  = invdt*(part_Vel(i) - ib_uL(i)) 
-        particleData(FORCE_IND(i))  = particleData(FORCE_IND(i)) + ib_FuL(i)
-        particleData(VELITP_IND(i))  = ib_uL(i)
+        if(ib_vel_flg) particleData(FORCE_IND(i))  = particleData(FORCE_IND(i)) + ib_FuL(i)
+        if(ib_vel_flg) particleData(VELITP_IND(i))  = ib_uL(i)
 
-        particleData(HL_PART_PROP) = hl
+        if(ib_vel_flg) particleData(HL_PART_PROP) = hl
 
         !call Timers_start("ib_extrapEpoints")
         ! Extrapolation of Forces to the Eulerian Points (Check what 
@@ -222,9 +222,9 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
         ! The particle forcing field:
         ib_FuL(i)  = invdt*(part_Vel(i) - ib_uL(i))
-        particleData(FORCE_IND(i))  = particleData(FORCE_IND(i)) + ib_FuL(i)
+        if(ib_vel_flg) particleData(FORCE_IND(i))  = particleData(FORCE_IND(i)) + ib_FuL(i)
 
-        particleData(HL_PART_PROP) = hl
+        if(ib_vel_flg) particleData(HL_PART_PROP) = hl
 
         !call Timers_start("ib_extrapEpoints")
         ! Extrapolation of Forces to the Eulerian Points (Check what 
@@ -265,7 +265,7 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   
     ! Particle Forcing field:
     ib_FuL(idir)  = invdt*(part_Vel(idir) - ib_uL(idir))
-    particleData(FORCE_IND(idir))  = particleData(FORCE_IND(idir)) + ib_FuL(idir)
+    if(ib_vel_flg) particleData(FORCE_IND(idir))  = particleData(FORCE_IND(idir)) + ib_FuL(idir)
 
     ! Extrapolation of Forces to the Eulerian Points
     factor = sb*particleData(HL_PART_PROP)/PRODUCT(del(1:NDIM))
@@ -302,8 +302,6 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
   if(ib_temp_flg) then
 
-     if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
-
      gridfl(:) = CENTER
      indx(:)   = CONSTANT_ZERO
 
@@ -325,58 +323,6 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 
         call ib_extrapEpoints(part_Pos,sb,tl,del,ib_ht_ielem(:,:),ib_ht_phile(:,:),   &
                               ib_Ftemp,blockID,CENTER_IND)
-
-     endif
-
-     endif
-
-  endif
-
-  if(ib_dfun_flg) then
-
-     if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
-
-     gridfl(:) = CENTER
-     indx(:)   = CONSTANT_ZERO
-
-     if (force_center) then
-
-        ! External Point  
-        hnorm   = 1.*sqrt((del(IAXIS)*part_Nml(IAXIS))**2. + (del(JAXIS)*part_Nml(JAXIS))**2.)
-      
-        externalPt(IAXIS) = part_Pos(IAXIS) + part_Nml(IAXIS)*hnorm
-        externalPt(JAXIS) = part_Pos(JAXIS) + part_Nml(JAXIS)*hnorm
-        externalPt(KAXIS) = 0.0
-
-        call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
-                         ib_external(:,:),dfe,FORCE_FLOW)
-
-        call ib_interpLpoints(externalPt, gridfl, &
-                              del, coord, bsize, ib_external(:,:), ib_external_phile(:,:), &
-                              external_dfun,FORCE_FLOW,blockID,CENTER_IND)
-        
-        part_dfun = external_dfun - hnorm*cos(60*pi/180)
-
-        particleData(DFUN_PART_PROP) = part_dfun
-
-        ! Forcing
-        call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
-                         ib_dfun_ielem(:,:),dfl,FORCE_FLOW)
-
-        call ib_interpLpoints(part_Pos,gridfl,                     &
-              del,coord,bsize,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),     &
-              ib_dfun,FORCE_FLOW,blockID,CENTER_IND)
-
-        ib_Fdfun  = invdt*(part_dfun - ib_dfun)
-        particleData(FTP_PART_PROP)  = particleData(FTP_PART_PROP) + ib_Fdfun
-        particleData(DIFP_PART_PROP) = ib_dfun
-
-        particleData(DF_PART_PROP) = dfl
-
-        call ib_extrapEpoints(part_Pos,sb,dfl,del,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),   &
-                              ib_Fdfun,blockID,CENTER_IND)
-
-     endif
 
      endif
 

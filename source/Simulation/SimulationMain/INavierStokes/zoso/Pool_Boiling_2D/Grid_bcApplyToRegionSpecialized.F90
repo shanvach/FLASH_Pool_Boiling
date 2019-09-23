@@ -398,7 +398,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                do jjj = 1,je
                do i = 1,guard
 
-                  regionData(i,jjj,kkk,ivar) = regionData(k-i,jjj,kkk,ivar) - del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
+                  regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) - (guard+1-i)*del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
                   
                end do
                end do

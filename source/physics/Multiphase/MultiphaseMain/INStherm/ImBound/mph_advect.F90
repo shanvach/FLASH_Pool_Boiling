@@ -150,7 +150,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       solnData(NRMX_VAR,:,:,:),&
                       solnData(NRMY_VAR,:,:,:),&
                       facexData(VELI_FACE_VAR,:,:,:),            &
-                      faceyData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                      faceyData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 
 #endif
 
@@ -179,7 +179,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                       solnData(NRMZ_VAR,:,:,:),&
                       facexData(VELI_FACE_VAR,:,:,:),            &
                       faceyData(VELI_FACE_VAR,:,:,:),            &
-                      facezData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                      facezData(VELI_FACE_VAR,:,:,:),solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 
 #endif
          !---------------------------------------------------------------------
@@ -202,6 +202,11 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+    ib_temp_flg = .false.
+    ib_vel_flg  = .false.
+    ib_dfun_flg = .true.
+    call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
 
 !---- Advancing/Receding Contact Angle -------!
 

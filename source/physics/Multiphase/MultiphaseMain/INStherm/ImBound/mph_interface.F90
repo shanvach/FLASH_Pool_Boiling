@@ -233,13 +233,13 @@ end interface
 interface
         subroutine mph_getInterfaceVelocity(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy, &
                            visc,rho1x,rho2x,rho1y,rho2y,gravX,gravY, &
-                           mdot,smrh,xnorm,ynorm,uint,vint,curv)
+                           mdot,smrh,xnorm,ynorm,uint,vint,curv,lambda)
 
         implicit none
         INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
         REAL, INTENT(IN):: ru1, dx, dy, gravX,gravY
         REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, visc, rho1x, rho2x, rho1y, rho2y
-        REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,curv
+        REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,mdot,smrh,curv,lambda
         REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint
 
         end subroutine
@@ -248,13 +248,13 @@ end interface
 interface
         subroutine mph_getInterfaceVelocity_3D(uni,vni,wni,ru1,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz,&
                            visc,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,gravX,gravY,gravZ,&
-                           mdot,smrh,xnorm,ynorm,znorm,uint,vint,wint,curv)
+                           mdot,smrh,xnorm,ynorm,znorm,uint,vint,wint,curv,lambda)
 
         implicit none
         INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2,kz1,kz2
         REAL, INTENT(IN):: ru1, dx, dy, dz, gravX, gravY, gravZ
         REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, visc, rho1x, rho2x, rho1y, rho2y, rho1z, rho2z
-        REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,znorm,mdot,smrh,curv
+        REAL, DIMENSION(:,:,:), INTENT(IN) :: xnorm,ynorm,znorm,mdot,smrh,curv,lambda
         REAL, DIMENSION(:,:,:), INTENT(OUT):: uint, vint, wint
 
         end subroutine
