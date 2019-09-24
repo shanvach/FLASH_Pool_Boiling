@@ -54,6 +54,7 @@
        facevaryyan(NXB+2*NGUARD,NYB+2*NGUARD+1), & 
        difffacevary(NXB+2*NGUARD,NYB+2*NGUARD+1)
 
+  real phivar(NXB+2*NGUARD,NYB+2*NGUARD)
 
   real presvar(NXB+2*NGUARD,NYB+2*NGUARD),       &
        presvar_an(NXB+2*NGUARD,NYB+2*NGUARD),    &
@@ -341,14 +342,13 @@
   enddo
   i = TecEnd()
 
-
   ! write solution data to PRES.XXXX.XX
   write(filename,'("./IOData/PRES.",i4.4,".",i2.2,".plt")') &
         count, mype
 
 
   i = TecIni('AMR2D'//NULLCHR,        &    
-      'x y pnum'//NULLCHR,   &
+      'x y pnum phinum'//NULLCHR,   &
       filename//NULLCHR,              &
       './IOData/'//NULLCHR,           &
       Debug,VIsdouble)
@@ -381,6 +381,7 @@
                   
             !presvar(i,j) = solnData(DUST_VAR,i,j,1)
             presvar(i,j) = solnData(PRES_VAR,i,j,1)
+            phivar(i,j) = solnData(LMDA_VAR,i,j,1)
 
          enddo
       enddo
@@ -423,6 +424,11 @@
       ! Write pnum:
       arraylb3(:,:,1) =  &
       sngl(presvar(NGUARD+1:nxc-1,NGUARD+1:nyc-1))
+      i = TecDat(ijk3,arraylb3,0)
+
+      ! Write phinum
+      arraylb3(:,:,1) =  &
+      sngl(phivar(NGUARD+1:nxc-1,NGUARD+1:nyc-1))
       i = TecDat(ijk3,arraylb3,0)
    enddo
    i = TecEnd()
