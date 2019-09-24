@@ -123,6 +123,9 @@ if (dr_nstep .eq. 1) grid_changed = 1
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
 
+  call outtotecplot_uv(dr_globalME,dr_simtime,dr_dt,dr_nstep,count, &
+                       0.0,blockList,blockCount,firstfileflag)
+
   firstfileflag = 1
   do dr_nstep = dr_nBegin, dr_nend
      
@@ -205,6 +208,9 @@ if (dr_nstep .eq. 1) grid_changed = 1
         count = count + 1
         call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                           0.0,blockList,blockCount,firstfileflag)
+
+        call outtotecplot_uv(dr_globalME,dr_simtime,dr_dt,dr_nstep,count, &
+                       0.0,blockList,blockCount,firstfileflag)
 
      if (count .gt. 0) firstfileflag = 1
      endif

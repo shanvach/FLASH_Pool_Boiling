@@ -122,8 +122,8 @@ subroutine Simulation_initBlock(blockId)
   !xbubble = -2.15
   !ybubble = -3.0
 
-  xdrop = 0.0
-  ydrop = -1.0
+  xdrop = -0.7071
+  ydrop =  0.7071
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)

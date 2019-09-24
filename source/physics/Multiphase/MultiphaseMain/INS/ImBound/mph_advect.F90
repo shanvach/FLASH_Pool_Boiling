@@ -82,7 +82,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: n_avg
   !kpd
   real :: lsDT,lsT,minCellDiag
-  real :: volSum,volSumAll
+  real :: volSum,volSumAll,volSumRad,mph_wet_diameter
 
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
@@ -112,6 +112,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     volSum = 0.0
     volSumAll = 0.0
+    volSumRad = 0.0
+    mph_wet_diameter = 0.0
 
   do ii=1,1
 
@@ -212,6 +214,30 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 #endif
 
+! Get the diameter of wetted area on the plate
+#if NDIM==2
+       ! do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+       !    do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+               if (solnData(DFUN_VAR,i,j,1) .lt. 0) then
+                  volSumRad = volSumRad + (del(DIR_X) * del(DIR_Y))
+                  if (solnData(LMDA_VAR,i-1,j,1) .lt. 0 .and. solnData(LMDA_VAR,i+1,j,1) .gt. 0) then
+                      mph_wet_diameter = sqrt(volSumRad/acos(-1.0))
+                  end if
+                  if (solnData(LMDA_VAR,i-1,j,1) .gt. 0 .and. solnData(LMDA_VAR,i+1,j,1) .lt. 0) then
+                      mph_wet_diameter = sqrt(volSumRad/acos(-1.0))
+                  end if
+                  if (solnData(LMDA_VAR,i,j-1,1) .lt. 0 .and. solnData(LMDA_VAR,i,j+1,1) .gt. 0) then
+                      mph_wet_diameter = sqrt(volSumRad/acos(-1.0))
+                  end if
+                  if (solnData(LMDA_VAR,i,j-1,1) .gt. 0 .and. solnData(LMDA_VAR,i,j+1,1) .lt. 0) then
+       !               mph_wet_diameter = mph_wet_diameter + sqrt(del(DIR_X)**2 + del(DIR_Y)**2)    
+                      mph_wet_diameter = sqrt(volSumRad/acos(-1.0))
+                  end if
+               end if
+       !    end do
+       ! end do
+#endif
+
      ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -226,6 +252,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
                        MPI_SUM, MPI_COMM_WORLD, ierr)
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
+    if (mph_meshMe .eq. 0) print*,"Total Wet Diameter: ", mph_wet_diameter
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     endif
 
