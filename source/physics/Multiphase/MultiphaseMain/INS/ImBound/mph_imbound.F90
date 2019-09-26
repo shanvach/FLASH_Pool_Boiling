@@ -157,7 +157,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
           
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
            ! Get probe in fluid
            hnorm  = 1.0*del(JAXIS)

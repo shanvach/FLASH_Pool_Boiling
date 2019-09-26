@@ -16,6 +16,7 @@ REQUIRES physics/Multiphase/MultiphaseMain/INStherm/ImBound
 
 REQUIRES physics/Heat_AD
 REQUIRES physics/Heat_AD/Heat_ADMain/vardens
+REQUIRES physics/Heat_AD/Heat_ADMain/vardens/ImBound
 
 REQUIRES physics/IncompNS
 REQUIRES physics/IncompNS/IncompNSMain/vardensTHERM

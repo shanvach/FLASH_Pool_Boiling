@@ -27,7 +27,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   use IncompNS_data, ONLY : ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
 
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe
+                             mph_vis1,mph_vis2,mph_lsit, mph_inls, mph_meshMe,&
+                             mph_vlim, mph_psi_adv
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -36,6 +37,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   use ib_interface, ONLY : ib_stencils
 
   use ImBound_data, only : ib_stencil
+
+  use Heat_AD_data, only : ht_psi
 
   implicit none
 
@@ -87,10 +90,13 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real    :: hnorm, xprobe(3), yprobe(3), zprobe(3), phiprobe
 
+  real    :: hnorm2
+
   real,parameter  :: htol = 0.0001
 
   integer :: gridfl(MDIM)
   real    :: externalPt(MDIM), part_Nml(MDIM), dfe
+  real    :: part_Tng(MDIM)
   integer, dimension(ib_stencil,MDIM) :: ib_external
   real, dimension(ib_stencil,NDIM+1) :: ib_external_phile
   integer,parameter,dimension(MDIM):: FACE_IND =(/FACEX,FACEY,FACEZ/)
@@ -108,6 +114,8 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real    :: nrmx, nrmy, nmlx, nmly, ib_theta
 
   integer :: probe_index
+
+  real :: dphidn
 
   do lb = 1,blockCount
 
@@ -145,7 +153,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
 
-          zcell = 0.0
+           zcell = 0.0
 
 #if NDIM == 3
            zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
@@ -153,26 +161,28 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
           
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 
            ! Get probe in fluid
-           hnorm = 1.0*del(JAXIS)
+           hnorm  = 1.0*del(JAXIS)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            zprobe(1) = 0.0
 
+           xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*hnorm
+           yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*hnorm
+           zprobe(2) = 0.0
+
+           xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*hnorm
+           yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*hnorm
+           zprobe(3) = 0.0
+
 #if NDIM == 3
            zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
+           zprobe(2) = zprobe(1) + solnData(TNGZ_VAR,i,j,k)*hnorm
+           zprobe(3) = zprobe(1) - solnData(TNGZ_VAR,i,j,k)*hnorm
 #endif
-           !xprobe(2) = xprobe(1) + solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           !yprobe(2) = yprobe(1) + solnData(TNGY_VAR,i,j,k)*del(JAXIS)
-           !zprobe(2) = 0.0
-
-           !xprobe(3) = xprobe(1) - solnData(TNGX_VAR,i,j,k)*del(IAXIS)
-           !yprobe(3) = yprobe(1) - solnData(TNGY_VAR,i,j,k)*del(JAXIS)
-           !zprobe(3) = 0.0
-
            ! Interpolate function at probe 
            do probe_index = 1,1
            externalPt(IAXIS) = xprobe(probe_index)
@@ -183,8 +193,13 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            part_Nml(JAXIS) = solnData(NMLY_VAR,i,j,k)
            part_Nml(KAXIS) = 0.0
 
+           part_Tng(IAXIS) = solnData(NRMX_VAR,i,j,k)
+           part_Tng(JAXIS) = solnData(NRMY_VAR,i,j,k)
+           part_Tng(KAXIS) = 0.0
+
 #if NDIM == 3
            part_Nml(KAXIS) = solnData(NMLZ_VAR,i,j,k)
+           part_Tng(KAXIS) = solnData(NRMZ_VAR,i,j,k)
 #endif
 
            ! Cell centered stencil for DFUN interpolation at probe
@@ -221,13 +236,77 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            enddo
 #endif
 
+
+           if(probe_index == 1) then
+
+           veli=0
+
+           do dir=1,NDIM
+
+                gridfl(:) = CENTER
+                gridfl(dir) = FACES
+                delaux(1:NDIM)   = 0.5*del(1:NDIM)
+                delaux(dir) = 0.
+
+                ! Define Interpolation Stencil For Particle:
+                call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize,   &
+                                 ib_external(:,:),dfe,FORCE_FLOW)
+
+                ! Interpolation of the values of velocity to Lagrangian points:
+                xyz_stencil(:,:) = 0. 
+                do idim = 1,NDIM
+                    xyz_stencil(:,idim) = coord(idim) - 0.5*bsize(idim) + &
+                        real(ib_external(1:ib_stencil,idim) - NGUARD - 1)*del(idim) + delaux(idim) 
+                enddo
+
+                call ib_getInterpFunc(externalPt,xyz_stencil,del,derivflag,ib_external_phile)
+
+                vel_probe(dir) = 0.
+
+                do ib_ind = 1 , ib_stencil      
+                    select case(dir)
+                    case(FACEX) 
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                            facexData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+                    case(FACEY) 
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                            faceyData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+#if NDIM == MDIM
+                     case(FACEZ)
+                    vel_probe(dir) = vel_probe(dir) + ib_external_phile(ib_ind,CONSTANT_ONE) * &
+                            facezData(VELI_FACE_VAR,ib_external(ib_ind,IAXIS),ib_external(ib_ind,JAXIS),ib_external(ib_ind,KAXIS));   
+#endif
+                    end select
+                enddo 
+
+               veli = veli + vel_probe(dir) * part_Tng(dir)
+
+           enddo
+           end if
+
            enddo
 
-           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
+            this_psi = ht_psi
 
-           !if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0 .or. zp(1) .ge. 0.0) then
-           solnData(DFUN_VAR,i,j,k) = zp(1)-hratio*cos(45.0*acos(-1.0)/180)
+           ! if(zp(1)*zp(2) .le. 0.0 .or. zp(1)*zp(3) .le. 0.0) then
+           ! if(veli .ge. 0.0) then
+           !      if(abs(veli) .le. 0.2) then
+           !           this_psi = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli)+ &
+           !                                   (mph_psi_adv + ht_psi)/2.0d0
+
+           !      else
+           !      this_psi = mph_psi_adv
+
+           !      end if
+           ! end if
            !end if
+
+           dphidn = cos(this_psi)
+           !dphidn = cos(90*acos(-1.0)/180)
+           !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
+
+           hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
+           solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn
 
            end if
           

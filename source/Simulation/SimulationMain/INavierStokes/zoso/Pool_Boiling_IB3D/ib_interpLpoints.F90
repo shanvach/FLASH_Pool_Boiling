@@ -108,9 +108,9 @@ subroutine ib_interpLpoints(xp,gridfl,          &
   if(ib_dfun_flg) then
 
   zp = 0.;
-  do i = 1 , ib_stencil
+  do i = 1 , ib_stencil      
      zp = zp + phile(i,CONSTANT_ONE) * &
-               faceData(DFUN_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));
+               faceData(VELI_FACE_VAR,ielem(i,IAXIS),ielem(i,JAXIS),ielem(i,KAXIS));   
   enddo
   zL = zp;
 

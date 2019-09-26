@@ -140,12 +140,12 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
      ! Case 5 !
      if(lambda(i,j,k)*lambda(i,j,k+1) .le. 0.d0) &
      call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Twall_high,max(tol,thzp2))
-     ! End of Case 4 ! 
+     ! End of Case 5 ! 
  
      ! Case 6 !
      if(lambda(i,j,k)*lambda(i,j,k-1) .le. 0.d0) &
      call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Twall_high,max(tol,thzm2))
-     ! End of Case 4 ! 
+     ! End of Case 6 ! 
  
      !______________________Advection Terms_______________________!
 

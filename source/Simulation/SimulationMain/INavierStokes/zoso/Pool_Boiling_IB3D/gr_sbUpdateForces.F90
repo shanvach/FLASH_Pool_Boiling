@@ -1451,6 +1451,7 @@ subroutine gr_sbUpdateForces
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      ! Get Blocks internal limits indexes:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
@@ -1480,6 +1481,56 @@ subroutine gr_sbUpdateForces
                              blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
                              blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
+
+#ifdef ITER_FORCING
+
+     facexData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
+     facexData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
+     facexData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
+
+     faceyData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
+     faceyData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
+     faceyData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
+#endif
+#if NDIM == MDIM
+     ! Z velocities:
+     facezData(VELC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) = &                       
+     facezData(VELC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) + &  
+     ib_dt*                                                                &
+     facezData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1)
+
+#ifdef ITER_FORCING
+     ! Z velocities:
+     facezData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) = &                       
+     facezData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) + &  
+     facezData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1)
+#endif
+#endif
+
      end if
 
      if(ib_temp_flg) then
@@ -1499,17 +1550,54 @@ subroutine gr_sbUpdateForces
 
      if(ib_dfun_flg) then
 
-     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &
-     solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &
+     ! X velocities:
+     facexData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
+     facexData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
      ib_dt*                                                                &
-     solnData(DFRC_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                       blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                       blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
+     facexData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
+     ! Y velocities:
+     faceyData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
+     faceyData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
+     ib_dt*                                                                &
+     faceyData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
+
+#if NDIM == MDIM
+     ! Z velocities:
+     facezData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) = &                       
+     facezData(VELI_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) + &  
+     ib_dt*                                                                &
+     facezData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1)
+#endif
+
+     !solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+     !                  blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+     !                  blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &
+     !solnData(DFUN_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+     !                  blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+     !                  blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &
+     !ib_dt*                                                                &
+     !solnData(DFRC_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
+     !                  blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
+     !                  blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
      !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
      !   do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
@@ -1548,64 +1636,12 @@ subroutine gr_sbUpdateForces
      !end do
 
      end if
-
-#ifdef ITER_FORCING
-
-     facexData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
-     facexData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
-     facexData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS)+1, &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
-
-     faceyData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) = &                       
-     faceyData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) + &  
-     faceyData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS)+1,   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
-#endif
-#if NDIM == MDIM
-     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-     ! Z velocities:
-     facezData(VELC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) = &                       
-     facezData(VELC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) + &  
-     ib_dt*                                                                &
-     facezData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1)
-#ifdef ITER_FORCING
-     ! Z velocities:
-     facezData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) = &                       
-     facezData(FORO_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1) + &  
-     facezData(FORC_FACE_VAR,blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), &
-                             blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),   &
-                             blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)+1)
-#endif
-#endif
-
      ! Release face data (velocities):
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-#if NDIM == MDIM
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
+
   enddo
 
 

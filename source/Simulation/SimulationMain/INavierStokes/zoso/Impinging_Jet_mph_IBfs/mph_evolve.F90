@@ -94,6 +94,14 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
 
   real :: free_surface_local
 
+  real :: amp, omega, pi, offset, phase
+
+  amp = 0.5
+  omega = 0.02
+  pi = acos(-1.0)
+  offset = 0.5
+  phase = pi
+
 if(mph_flag == 1) then
 
 !kpd - Level Set Initialization...
@@ -511,23 +519,25 @@ else if(mph_flag == 0) then
 #endif
 
 
-  if(mph_dist_flag .and. dr_simTime .lt. (mph_jet_tstamp + mph_jet_period)) then
+  !if(mph_dist_flag .and. dr_simTime .lt. (mph_jet_tstamp + mph_jet_period)) then
  
-    mph_vel_scalar = 1.0 !+ 2.5*abs(sin((dr_simTime - mph_jet_tstamp)*3.14/mph_jet_period))
+  !  mph_vel_scalar = 1.0 !+ 2.5*abs(sin((dr_simTime - mph_jet_tstamp)*3.14/mph_jet_period))
 
-  else
+  !else
    
-    if(mph_dist_flag) mph_jet_tstamp = dr_simTime
+  !  if(mph_dist_flag) mph_jet_tstamp = dr_simTime
 
-    mph_dist_flag = .false.
-    mph_vel_scalar = 1.0
+  !  mph_dist_flag = .false.
+  !  mph_vel_scalar = 1.0
 
-    if(dr_simTime .gt. (mph_jet_tstamp + mph_jet_twait)) then
-        mph_dist_flag = .true.
-        mph_jet_tstamp = dr_simTime
-    end if
+  !  if(dr_simTime .gt. (mph_jet_tstamp + mph_jet_twait)) then
+  !      mph_dist_flag = .true.
+  !      mph_jet_tstamp = dr_simTime
+  !  end if
     
-  end if
+  !end if
+
+  mph_vel_scalar = 1.0 + amp*cos(2*pi*omega*dr_simTime + phase) + offset
 
   if(mph_meshMe .eq. MASTER_PE) print *,"Jet Velocity:", dr_simTime,  mph_vel_scalar
 

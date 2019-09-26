@@ -15,9 +15,7 @@
 !! Subroutine to find the distance function lambda for 
 !! the immersed boundary (IB).
 !! 
-!! Author - Elizabeth Gregorio
-
-#define IBD_SIGN 1
+!! Authors - Elizabeth Gregorio, Akash Dhruv
 
 subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
@@ -89,7 +87,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real, allocatable, dimension(:,:) :: angl, dist
   real :: u,dot,det
   integer :: nelm=2,ibd ! Dimension for the points, 2 for (x,y) in 2-D
-
+  integer :: countit
+  real    :: miny, maxy, mratio, nratio, xit
 
   allocate(max_ptelem(gr_sbNumBodies))
 
@@ -123,6 +122,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   v1 = 0.0
   v2 = 0.0
 
+  ! MPI procedure to transfer body info from local to all procs
+
   do ibd=1,gr_sbNumBodies
      if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
         xpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%xB(2:max_ptelem(ibd)+1) + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(1,2:max_ptelem(ibd)+1))
@@ -134,6 +135,8 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call MPI_BCAST(xpos(:,ibd), max_ptelem(ibd), FLASH_REAL, sm_BodyInfo(ibd)%BodyMaster, MPI_COMM_WORLD, ierr)
         call MPI_BCAST(ypos(:,ibd), max_ptelem(ibd), FLASH_REAL, sm_BodyInfo(ibd)%BodyMaster, MPI_COMM_WORLD, ierr)
   end do
+
+  ! End MPI procedure
 
   ! Loop through all the grid points
   do lb = 1,blockCount
@@ -165,7 +168,6 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-           angl = 0.0
            dist = 0.0
 
            ! x and y coordinates for the current grid cell
@@ -180,6 +182,10 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
            zcell  = 0.0 
 
            do ibd=1,gr_sbNumBodies ! Loop through bodies
+
+               countit = 0         ! Counter to check no. of intersections with 
+                                   ! the body
+
            do p_i=1,max_ptelem(ibd) ! p_i is short for panel_index
 
              !if (mph_meshMe .eq. 0) print*,"Starting Lagrangian point loop"
@@ -233,48 +239,59 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                   v2 = (/(PA(1) - P0(1)),(PA(2) - P0(2))/)
                end if
 
-               dot =   v1(1)*v2(1) + v1(2)*v2(2)
-               det = -(v1(1)*v2(2) - v1(2)*v2(1))
-  
-               angl(p_i,ibd) = atan2(det, dot)
                dist(p_i,ibd) = sqrt(v1(1)**2 + v1(2)**2)
+ 
+               ! Find if the horizontal ray on right-side intersects with body
+               miny = min(PA(2),PB(2))
+               maxy = max(PA(2),PB(2))
+
+               if(ycell .gt. miny .and. ycell .lt. maxy) then
+
+                 ! Method #1 use ratios to divide the current panel using
+                 ! y intersection and find x
+
+                 !mratio = PA(2) - ycell
+                 !nratio = ycell - PB(2)
+                 !xit = (mratio*PB(1) + nratio*PA(1))/(mratio + nratio)
+
+
+                 ! Method #2 use the equation of line instead
+
+                 mratio = (PB(2)-PA(2))/(PB(1)-PA(1))          
+                 xit = PA(1) + (ycell - PA(2))/mratio
+
+                 ! Check to make sure that the intersection is on the right
+
+                 if(xit .ge. xcell) countit = countit + 1
+
+               end if
 
            end do
        
-           do pp_i=1,max_ptelem(ibd) 
-           do p_i=1,max_ptelem(ibd)-1
-              if (dist(p_i,ibd) > dist(p_i+1,ibd)) then
-
-                       dist(p_i,ibd) = dist(p_i,ibd) + dist(p_i+1,ibd)
-                       dist(p_i+1,ibd) = dist(p_i,ibd) - dist(p_i+1,ibd)
-                       dist(p_i,ibd) = dist(p_i,ibd) - dist(p_i+1,ibd)
-
-                       angl(p_i,ibd) = angl(p_i,ibd) + angl(p_i+1,ibd)
-                       angl(p_i+1,ibd) = angl(p_i,ibd) - angl(p_i+1,ibd)
-                       angl(p_i,ibd) = angl(p_i,ibd) - angl(p_i+1,ibd)
-
-                end if
-           end do
-           end do
-
-          mva = angl(1,ibd)
-          mvd = dist(1,ibd)
+          ! Get minimum absoulte distance
+          mvd = minval(dist(:,ibd))
       
-          if(ibd .eq. 1) then
- 
-             if (mva .eq. 0.0) then
-               solnData(LMDA_VAR,i,j,k) = 0.0
-             else
-               solnData(LMDA_VAR,i,j,k) = IBD_SIGN*mvd*sign(1.0,mva)
-             end if
+          ! Construct level set - if intersections are positive then the point
+          ! lies outside (-), if odd then the point lies inside (+)
 
+          ! For first body explicitly satisfy level set, and then compare with
+          ! existing level set for successive bodies
+
+          if(ibd .eq. 1) then
+
+               if(mod(countit,2) == 0) then
+                  solnData(LMDA_VAR,i,j,k) = -mvd
+               else
+                  solnData(LMDA_VAR,i,j,k) = mvd
+               end if
+               
           else
 
-             if (mva .eq. 0.0) then
-               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),0.0)
-             else
-               solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),IBD_SIGN*mvd*sign(1.0,mva))
-             end if
+               if(mod(countit,2) == 0) then
+                  solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),-mvd)
+               else
+                  solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),mvd)
+               endif
 
           end if
 
