@@ -73,52 +73,39 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real    :: dxmin
 
    iter_count = 0
-
-!_________________________________Microlayer solution_____________________________________________!
-
-   if(ht_microFlg) then
-
-      print *,"Calculating minimum dx: "
-
-      dxmin    = 1e10
-
-      do lb = 1,blockCount
-
-        blockID = blockList(lb)
-        call Grid_getDeltas(blockID,del)
-        dxmin = min(dxmin,del(JAXIS))
-
-      end do
-
-      call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
-       
-      ht_microFlg = .FALSE. 
-
-   end if
-
-   !if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
-
-   !call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-   !call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-
-   if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
-
 !______________________________________Energy Equation____________________________________________!
 
    T_resBlock   = 0.0
 
-   !if (dr_simTime .ge. 1600.00 .and. dr_simTime .le. 1900.00) then
+   if(dr_nstep == 1) then
 
-   !  ht_Tsat  = 0.0013*(dr_simTime-1600.00) + 0.0
-   !  mph_rho2 = 170 - 0.1*(dr_simTime-1600.00)
+    do lb = 1,blockCount
 
-   !  if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+     blockID = blockList(lb)
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-   !  call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+      do k=1,blkLimitsGC(HIGH,KAXIS)
+        do j=1,blkLimitsGC(HIGH,JAXIS)
+           do i=1,blkLimitsGC(HIGH,IAXIS)
 
-   !  print *,"qmic: ",ht_qmic
+           solnData(TEMP_VAR,i,j,k) = 0.0
 
-   !end if
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+
+           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k).ge. -0.15) &
+              solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15
+
+           end do
+        end do
+      end do
+ 
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+    end do
+ 
+   end if
 
    do step = 1,1 ! RK-2 Loop
     do lb = 1,blockCount
@@ -174,7 +161,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
+                     solnData(LMDA_VAR,:,:,:))
 #endif
 
      if (step == 1) then
@@ -227,15 +215,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-
-    !call Heat_imbound(blockCount,blockList,timeEndAdv,dt,TEMP_VAR)
-    
-    !if(dr_nstep > 1) then
-    !ib_temp_flg = .true.
-    !ib_vel_flg  = .false.
-    !ib_dfun_flg = .false.
-    !call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
-    !end if
 
    end do !End RK-2
 
@@ -296,7 +275,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                         blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                        solnData(MFLG_VAR,:,:,:))
+                        solnData(MFLG_VAR,:,:,:),&
+                        solnData(LMDA_VAR,:,:,:))
 #endif
 
      ! Microlayer contribution - only for nucleate boiling

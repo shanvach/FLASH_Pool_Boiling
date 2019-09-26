@@ -195,8 +195,6 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-          solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-
         enddo
      enddo
   enddo

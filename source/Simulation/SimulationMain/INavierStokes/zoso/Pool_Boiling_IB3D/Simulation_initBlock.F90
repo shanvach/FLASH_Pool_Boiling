@@ -232,15 +232,6 @@ subroutine Simulation_initBlock(blockId)
           
            end do
 
-           solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr,dzl,dzr)
-
-           solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
-
-           if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k) .ge. -0.15) &
-              solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15 
-
         enddo
      enddo
   enddo
