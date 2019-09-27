@@ -130,7 +130,7 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           solnData(DFUN_VAR,i,j,k) = ycell+4.0
+           solnData(DFUN_VAR,i,j,k) = ycell+2.0
 
         enddo
      enddo
