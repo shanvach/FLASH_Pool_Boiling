@@ -1,8 +1,8 @@
-!! source/physics/Multiphase/MultiphaseMain/INS/ImBound
+!! source/physics/ImBound/ImBoundMain/LevelSet
 !!
 !! NAME
 !!
-!! mph_iblset(blockCount,blockList)
+!! ib_lset(blockCount,blockList,dt)
 !!
 !! SYNOPSIS
 !! 
@@ -17,7 +17,7 @@
 !! 
 !! Authors - Elizabeth Gregorio, Akash Dhruv
 
-subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine ib_lset(blockCount,blockList,dt)
 
 #include "Flash.h"
 #include "constants.h"
@@ -52,10 +52,9 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   include "Flash_mpi.h"
 
   ! IO variables
-  integer, intent(in) :: sweepOrder
   integer, INTENT(INOUT) :: blockCount
   integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-  real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+  real,    INTENT(IN) :: dt
 
   ! Internal Variables
   integer :: numPart, e, ptelem,  nel, p
@@ -92,7 +91,7 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   allocate(max_ptelem(gr_sbNumBodies))
 
-  max_ptelem = 0.0
+  max_ptelem = 0
 
   do ibd=1,gr_sbNumBodies 
      if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
@@ -383,4 +382,4 @@ subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   deallocate(PA,PB,P1,P0,v1,v2)
   deallocate(max_ptelem)
 
-end subroutine mph_iblset
+end subroutine ib_lset

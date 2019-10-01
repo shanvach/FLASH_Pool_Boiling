@@ -1,8 +1,10 @@
-subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
+subroutine ib_advect (blockCount,blockList,dt)
 
 #include "Flash.h"
 #include "ImBound.h"
 #include "constants.h"
+
+#define IB_REDISTANCE
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -27,14 +29,12 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                 Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 
 
-      use mph_interface, only: mph_IBadvectWENO3, mph_IBadvectWENO3_3D, mph_KPDlsRedistance, &
-                               mph_KPDlsRedistance_3D
+      use ib_lset_interface, only: ib_advectWENO3, ib_advectWENO3_3D, ib_lsRedistance, &
+                                   ib_lsRedistance_3D
 
       use Driver_data, ONLY : dr_nstep, dr_simTime
 
       use IncompNS_data, ONLY : ins_meshMe,ins_alfa,ins_gravX,ins_gravY,ins_invRe,ins_gravZ
-
-      use Multiphase_data, only: mph_lsit, mph_inls, mph_meshMe
 
       implicit none
 
@@ -42,10 +42,9 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   include "Flash_mpi.h"
 
-      integer, INTENT(IN) :: sweepOrder
       integer, INTENT(INOUT) :: blockCount
       integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+      real,    INTENT(IN) :: dt
 
       integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
       real, dimension(2,MDIM) :: boundBox
@@ -60,6 +59,18 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
       logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
       real :: lsDT,lsT,minCellDiag
+  
+      integer :: max_lsit
+
+      real :: amp, omega, pi, offset, phase
+
+      amp = 0.5
+      omega = 0.1
+      pi = acos(-1.0)
+      offset = 0.5
+      phase = pi
+
+      max_lsit = 3
 
       do lb = 1,blockCount
 
@@ -83,11 +94,14 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_getBlkPtr(blockID,faceyData,FACEY)
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-        facexData(VELB_FACE_VAR,:,:,:) =  0.0
-        faceyData(VELB_FACE_VAR,:,:,:) =  0.0
+        facexData(VELB_FACE_VAR,:,:,:) =   0.0
+
+        !faceyData(VELB_FACE_VAR,:,:,:) =  0.0
+        !faceyData(VELB_FACE_VAR,:,:,:) = -1.0
+        faceyData(VELB_FACE_VAR,:,:,:) =  2*pi*omega*amp*sin(2*pi*omega*dr_simTime);
 
 #if NDIM == 2
-        call mph_IBadvectWENO3(solnData(LMDA_VAR,:,:,:), &
+        call ib_advectWENO3(solnData(LMDA_VAR,:,:,:), &
                           facexData(VELB_FACE_VAR,:,:,:), &
                           faceyData(VELB_FACE_VAR,:,:,:), &
                           dt, &
@@ -99,7 +113,7 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 #if NDIM == 3
         facezData(VELB_FACE_VAR,:,:,:) = 0.0
-        call mph_IBadvectWENO3_3D(solnData(LMDA_VAR,:,:,:), &
+        call ib_advectWENO3_3D(solnData(LMDA_VAR,:,:,:), &
                           facexData(VELB_FACE_VAR,:,:,:), &
                           faceyData(VELB_FACE_VAR,:,:,:), &
                           facezData(VELB_FACE_VAR,:,:,:), &
@@ -128,7 +142,8 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 !--------------------------------------------------------------------
 
-   do ii = 1,mph_lsit
+#ifdef IB_REDISTANCE
+   do ii = 1,max_lsit
 
      !------------------------------
      !- kpd - Level set redistancing 
@@ -160,13 +175,13 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #if NDIM == 3
         lsDT = MIN(10.0*dt,0.001)
         minCellDiag =SQRT((SQRT(del(DIR_X)**2.+del(DIR_Y)**2.))**2.+del(DIR_Z)**2.)
-        if ( ii .eq. mph_lsit .AND. lb .eq. 1 .AND. mph_meshMe .eq. 0) then
+        if ( ii .eq. max_lsit .AND. lb .eq. 1 .AND. ins_meshMe .eq. 0) then
            print*,"IB Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
         end if
 
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(LMDA_VAR,:,:,:)
 
-        call mph_KPDlsRedistance_3D(solnData(LMDA_VAR,:,:,:), &
+        call ib_lsRedistance_3D(solnData(LMDA_VAR,:,:,:), &
                           facexData(VELB_FACE_VAR,:,:,:), &
                           faceyData(VELB_FACE_VAR,:,:,:), &
                           facezData(VELB_FACE_VAR,:,:,:), &
@@ -180,13 +195,13 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
         minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.)
         lsDT = minCellDiag/2.0d0
-        if ( ii .eq. mph_lsit .AND. lb .eq. 1 .AND. mph_meshMe .eq. 0) then
+        if ( ii .eq. max_lsit .AND. lb .eq. 1 .AND. ins_meshMe .eq. 0) then
            print*,"IB Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
         end if
 
         if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(LMDA_VAR,:,:,:)
 
-        call mph_KPDlsRedistance(solnData(LMDA_VAR,:,:,:), &
+        call ib_lsRedistance(solnData(LMDA_VAR,:,:,:), &
                           facexData(VELB_FACE_VAR,:,:,:),  &
                           faceyData(VELB_FACE_VAR,:,:,:),  &
                           del(DIR_X),del(DIR_Y),  &
@@ -210,7 +225,8 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
     lsT = lsT + lsDT
 
    end do
- 
+#endif
+
 #if NDIM == 2
   do lb=1,blockCount
 
@@ -335,4 +351,4 @@ subroutine mph_ibadvect (blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
   end do
 #endif
 
-end subroutine mph_ibadvect
+end subroutine ib_advect

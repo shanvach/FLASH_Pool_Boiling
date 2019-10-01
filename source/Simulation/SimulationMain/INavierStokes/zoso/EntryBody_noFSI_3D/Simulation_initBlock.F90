@@ -150,20 +150,7 @@ subroutine Simulation_initBlock(blockId)
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
 
-
-           dxl = xcell - xl
-           dxr = xr - xcell
-           dyl = ycell - yl
-           dyr = yr - ycell
-           dzl = zcell - zl
-           dzr = zr - zcell
-
            !solnData(DFUN_VAR,i,j,k) = sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+(zcell-zdrop)**2)-0.5
-
-           !solnData(LMDA_VAR,i,j,k) = min(dxl,dxr,dyl,dyr,dzl,dzr) !cuboid
-           solnData(LMDA_VAR,i,j,k) = 0.5-sqrt(xcell**2+ycell**2+zcell**2) !sphere
-
-           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),-solnData(LMDA_VAR,i,j,k))
 
            !dfunbub = 0.2-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+(zcell-zbubble)**2)
 
@@ -176,28 +163,6 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
- do k=2,blkLimitsGC(HIGH,KAXIS)-1
-  do j=2,blkLimitsGC(HIGH,JAXIS)-1
-   do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
-           solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-           solnData(NMLZ_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-     end do
-   end do
-  end do
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
   do k=1,1

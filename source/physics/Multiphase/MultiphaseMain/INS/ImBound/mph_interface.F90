@@ -212,17 +212,6 @@ interface
 end interface
 
 interface
-      subroutine mph_iblset(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder) ! Added by EG
-
-      integer, INTENT(IN) :: sweepOrder
-      integer, INTENT(INOUT) :: blockCount
-      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
-
-      end subroutine
-end interface
-
-interface
       subroutine mph_imboundExtrap(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
       integer, INTENT(IN) :: sweepOrder
@@ -230,43 +219,6 @@ interface
       integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
       real,    INTENT(IN) :: timeEndAdv,dt,dtOld
 
-      end subroutine
-end interface
-
-interface
-     subroutine mph_IBadvectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
-        real, dimension(:,:,:), intent(inout):: s
-        real, dimension(:,:,:), intent(in) :: u,v
-        real, intent(in) :: dt,dx,dy
-        integer, intent(in) :: ix1,ix2,jy1,jy2
-     end subroutine
-end interface
-
-interface
-        subroutine mph_IBadvectWENO3_3D(s,u,v,w,dt,dx,dy,dz,&
-                                        ix1,ix2,jy1,jy2,kz1,kz2)
-        real, dimension(:,:,:), intent(inout):: s
-        real, dimension(:,:,:), intent(in)   :: u,v,w
-        real, intent(in) :: dt,dx,dy,dz
-        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
-        end subroutine
-end interface
-
-interface
-     subroutine mph_ibadvect(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
-      integer, INTENT(IN) :: sweepOrder
-      integer, INTENT(INOUT) :: blockCount
-      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
-     end subroutine
-end interface
-
-interface
-      subroutine mph_iblset_3D(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
-      integer, INTENT(IN) :: sweepOrder
-      integer, INTENT(INOUT) :: blockCount
-      integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
-      real,    INTENT(IN) :: timeEndAdv,dt,dtOld
       end subroutine
 end interface
 ! End
