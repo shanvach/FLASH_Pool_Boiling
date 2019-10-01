@@ -117,14 +117,6 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
-
-  xl = -3.00
-  xr =  3.00
-  yl = -3.25
-  yr = -3.00
-  zl = -3.00
-  zr =  3.00
-
   xdrop =  0.0 !-0.6
   ydrop = -1.0 !3.0
   zdrop =  0.0

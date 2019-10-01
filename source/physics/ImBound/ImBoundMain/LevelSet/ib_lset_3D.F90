@@ -86,13 +86,15 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
   real, allocatable, dimension(:,:) :: xcenter,ycenter,zcenter
   real, allocatable, dimension(:,:,:) :: normal
   integer, allocatable, dimension(:,:,:) :: elem
-  real, dimension(3) :: PA, PB, P1, P0, PC, nrm, lx, ln, min_vec, max_vec, tempvec, PP, vec, PN
+  real, dimension(3) :: PA, PB, P1, P0, PC, nrm, lx, ln 
+  real, dimension(3) :: min_vec, max_vec, tempvec, PP, vec, PN
+  real, dimension(3) :: vecA, vecB, vecW
+  real :: dotD, da, db
   real :: tempnorm, tempnorm1, tempnorm2, tempnorm3
   real, allocatable, dimension(:,:) :: dist
   real :: du,dn
   integer :: nelm=3,ibd ! Dimension for the points, 2 for (x,y) in 2-D
   integer :: countit
-  real    :: miny, maxy, mratio, nratio, xit
   integer TAIB(2),count_rateIB
   real*8  ETIB
 
@@ -167,7 +169,7 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
         PB = (/xpos(elem(2,ielem,ibd),ibd), ypos(elem(2,ielem,ibd),ibd), zpos(elem(2,ielem,ibd),ibd)/) 
         PC = (/xpos(elem(3,ielem,ibd),ibd), ypos(elem(3,ielem,ibd),ibd), zpos(elem(3,ielem,ibd),ibd)/)
 
-        call cross_product(tempvec,PA-PB,PB-PC)
+        call cross_product(tempvec,PB-PA,PC-PA)
         call norm(tempnorm,tempvec)
 
         normal(1,ielem,ibd) = tempvec(1)/tempnorm
@@ -233,10 +235,9 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
 
            do ielem=1,max_wsnel(ibd) ! Loop through elements on each body
 
-
                 P1 = (/xcell, ycell, zcell/)
-                P0 = (/xcenter(ielem,ibd), ycenter(ielem,ibd), zcenter(ielem,ibd)/)
 
+                P0 = (/xcenter(ielem,ibd), ycenter(ielem,ibd), zcenter(ielem,ibd)/)
                 PA = (/xpos(elem(1,ielem,ibd),ibd), ypos(elem(1,ielem,ibd),ibd), zpos(elem(1,ielem,ibd),ibd)/)
                 PB = (/xpos(elem(2,ielem,ibd),ibd), ypos(elem(2,ielem,ibd),ibd), zpos(elem(2,ielem,ibd),ibd)/)
                 PC = (/xpos(elem(3,ielem,ibd),ibd), ypos(elem(3,ielem,ibd),ibd), zpos(elem(3,ielem,ibd),ibd)/)
@@ -249,7 +250,10 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
                 lx = (/1.0, 0.0, 0.0/)
                 ln = nrm
 
-                vec = P1-P0
+                vec  = PA-P1
+                vecA = PB-PA;
+                vecB = PC-PA;
+                dotD = dot_product(vecA,vecB)**2 - dot_product(vecA,vecA)*dot_product(vecB,vecB)
 
                 if(abs(dot_product(lx,nrm)) .lt. 1e-13) then
                    du = 0.0
@@ -259,14 +263,22 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
 
                 end if
                 
-                PP = P1 + du*lx
+                PP   = P1 + du*lx
+                vecW = PP-PA;                 
+                da = (dot_product(vecA,vecB)*dot_product(vecW,vecB) - dot_product(vecB,vecB)*dot_product(vecW,vecA))/dotD
+                db = (dot_product(vecA,vecB)*dot_product(vecW,vecA) - dot_product(vecA,vecA)*dot_product(vecW,vecB))/dotD;
 
-                if(all(PP .gt. min_vec) .and. all(PP .lt. max_vec) .and. PP(1) .gt. P1(1)) countit = countit + 1
+
+                if(da .ge. 0.0 .and. da .le. 1.0 .and. db .ge. 0.0 .and. (da+db) .le. 1.0 .and. du .gt. 0.0) &
+                   countit = countit + 1
 
                 dn = dot_product(vec,nrm)/dot_product(ln,nrm)
                 PN = P1 + dn*ln
+                vecW = PN-PA;                 
+                da = (dot_product(vecA,vecB)*dot_product(vecW,vecB) - dot_product(vecB,vecB)*dot_product(vecW,vecA))/dotD
+                db = (dot_product(vecA,vecB)*dot_product(vecW,vecA) - dot_product(vecA,vecA)*dot_product(vecW,vecB))/dotD;
 
-                if(all(PN .gt. min_vec) .and. all(PN .lt. max_vec)) then
+                if(da .ge. 0.0 .and. da .le. 1.0 .and. db .ge. 0.0 .and. (da+db) .le. 1.0) then
 
                         call norm(tempnorm,P1-PN)
                         dist(ielem,ibd) = tempnorm
@@ -276,8 +288,9 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
                         call norm(tempnorm1, P1-PA)
                         call norm(tempnorm2, P1-PB)
                         call norm(tempnorm3, P1-PC)
+                        call norm(tempnorm,  P1-P0)
 
-                        dist(ielem,ibd) = minval((/tempnorm1, tempnorm2, tempnorm3/))
+                        dist(ielem,ibd) = minval((/tempnorm, tempnorm1, tempnorm2, tempnorm3/))
 
                 end if 
 

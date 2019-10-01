@@ -92,34 +92,6 @@ subroutine Simulation_initBlock(blockId)
   real :: rot_rect
   real :: zl,zr,dzl,dzr
 
-  xl = -2.00
-  xr =  2.00
-  yl =  2.00
-  yr =  3.00
-  zl = -2.00
-  zr =  2.00
-
-  !rot_rect = 3*acos(-1.0)/4;
-  rot_rect = 0.0*cos(-1.0)/4;
-
-  rect_x(1) = xl;
-  rect_x(2) = xl;
-  rect_x(3) = xr;
-  rect_x(4) = xr;
-  rect_x(5) = xl;
-
-  rect_y(1) = yl;
-  rect_y(2) = yr;
-  rect_y(3) = yr;
-  rect_y(4) = yl;
-  rect_y(5) = yl;
-
-  !x_temp = rect_x;
-  !y_temp = rect_y - 4;
-
-  !rect_x = x_temp*cos(rot_rect) - y_temp*sin(rot_rect);
-  !rect_y = y_temp*cos(rot_rect) + x_temp*sin(rot_rect) + 4;
-
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
