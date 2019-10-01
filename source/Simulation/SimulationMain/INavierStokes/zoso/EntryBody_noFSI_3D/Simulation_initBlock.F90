@@ -149,7 +149,7 @@ subroutine Simulation_initBlock(blockId)
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
            !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
-           solnData(DFUN_VAR,i,j,k) = ycell+1.0
+           solnData(DFUN_VAR,i,j,k) = ycell+2.0
 
         enddo
      enddo

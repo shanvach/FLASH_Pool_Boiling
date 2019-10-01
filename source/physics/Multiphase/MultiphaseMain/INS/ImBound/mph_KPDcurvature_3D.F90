@@ -4,7 +4,7 @@
 
 !#define LEVEL_SET_UNION
 #define THREE_PHASE_TREATMENT
-!#define FREE_SURFACE_TREATMENT
+#define FREE_SURFACE_TREATMENT
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
@@ -71,7 +71,7 @@
         sunion = s
         pfl = 0.0
 
-        free_surface_loc = 0.0
+        free_surface_loc = -2.0
 
 #ifdef LEVEL_SET_UNION
         do k=kz1-2,kz2+2

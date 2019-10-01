@@ -97,8 +97,8 @@ subroutine ib_advect (blockCount,blockList,dt)
         facexData(VELB_FACE_VAR,:,:,:) =   0.0
 
         !faceyData(VELB_FACE_VAR,:,:,:) =  0.0
-        !faceyData(VELB_FACE_VAR,:,:,:) = -1.0
-        faceyData(VELB_FACE_VAR,:,:,:) =  2*pi*omega*amp*sin(2*pi*omega*dr_simTime);
+        faceyData(VELB_FACE_VAR,:,:,:) = -1.0
+        !faceyData(VELB_FACE_VAR,:,:,:) =  2*pi*omega*amp*sin(2*pi*omega*dr_simTime);
 
 #if NDIM == 2
         call ib_advectWENO3(solnData(LMDA_VAR,:,:,:), &

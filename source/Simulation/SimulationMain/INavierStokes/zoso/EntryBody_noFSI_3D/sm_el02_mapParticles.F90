@@ -62,9 +62,9 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
 
         if(i == 2) then
 
-        body%qn(idx2)   = -0.5*dr_simTime + 0.5*ins_gravY*dr_simTime*dr_simTime
-        body%qdn(idx2)  = -0.5 + ins_gravY*dr_simTime        
-        body%qddn(idx2) = ins_gravY
+        body%qn(idx2)   = -1.0*dr_simTime !-0.5*dr_simTime + 0.5*ins_gravY*dr_simTime*dr_simTime
+        body%qdn(idx2)  = -1.0            !-0.5 + ins_gravY*dr_simTime        
+        body%qddn(idx2) =  0.0            !ins_gravY
 
         u(a,i)   = u(a,i) + body%qn(idx2)
         ud(a,i)  = body%qdn(idx2)
