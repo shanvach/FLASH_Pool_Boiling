@@ -143,9 +143,9 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
   ! MPI procedure to transfer body info from local to all procs
   do ibd=1,gr_sbNumBodies
      if(sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
-        xpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%xB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(1,:))
-        ypos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%yB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(2,:))
-        zpos(1:max_ptelem(ibd),ibd) = sm_bodyInfo(ibd)%zB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(3,:))
+        xpos(1:max_ptelem(ibd),ibd) = -sm_bodyInfo(ibd)%xB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(1,:))
+        ypos(1:max_ptelem(ibd),ibd) = -sm_bodyInfo(ibd)%yB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(2,:))
+        zpos(1:max_ptelem(ibd),ibd) = -sm_bodyInfo(ibd)%zB + sm_bodyInfo(ibd)%qn(sm_bodyInfo(ibd)%ID(3,:))
        elem(:,1:max_wsnel(ibd),ibd) = sm_bodyInfo(ibd)%ws_IEN
      end if
   end do

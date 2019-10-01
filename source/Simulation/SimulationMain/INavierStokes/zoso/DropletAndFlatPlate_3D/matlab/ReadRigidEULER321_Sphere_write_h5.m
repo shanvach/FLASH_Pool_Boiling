@@ -253,9 +253,9 @@ for ibd=1:NumBods
     hfile=[basedir_out hfilename(ibd,:)];
     fprintf(1,'     hdf5 file started...\n');
     hdf5write(hfile,'BodyType',int32(BODYTYPE_RIGID))
-    hdf5write(hfile,'mesh/x',x,'WriteMode','append')
-    hdf5write(hfile,'mesh/y',y,'WriteMode','append')
-    hdf5write(hfile,'mesh/z',z,'WriteMode','append')
+    hdf5write(hfile,'mesh/x',-x,'WriteMode','append')
+    hdf5write(hfile,'mesh/y',-y,'WriteMode','append')
+    hdf5write(hfile,'mesh/z',-z,'WriteMode','append')
     %hdf5write(hfile,'mesh/nrm',normal,'WriteMode','append')
     hdf5write(hfile,'mesh/nnp',int32(nnp),'WriteMode','append')
     hdf5write(hfile,'mesh/ned',int32(ned),'WriteMode','append')
