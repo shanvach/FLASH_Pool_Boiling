@@ -87,7 +87,7 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
   real, allocatable, dimension(:,:,:) :: normal
   integer, allocatable, dimension(:,:,:) :: elem
   real, dimension(3) :: PA, PB, P1, P0, PC, nrm, lx, ln 
-  real, dimension(3) :: min_vec, max_vec, tempvec, PP, vec, PN
+  real, dimension(3) :: tempvec, PP, vec, PN
   real, dimension(3) :: vecA, vecB, vecW
   real :: dotD, da, db
   real :: tempnorm, tempnorm1, tempnorm2, tempnorm3
@@ -158,17 +158,22 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
   end do
   ! End MPI procedure
 
+  ! Loop to get cell centers and normal vectors
   do ibd=1,gr_sbNumBodies
      do ielem=1,max_wsnel(ibd)
 
+        ! Cell centers
         xcenter(ielem,ibd) = (xpos(elem(1,ielem,ibd),ibd) + xpos(elem(2,ielem,ibd),ibd) + xpos(elem(3,ielem,ibd),ibd))/3
         ycenter(ielem,ibd) = (ypos(elem(1,ielem,ibd),ibd) + ypos(elem(2,ielem,ibd),ibd) + ypos(elem(3,ielem,ibd),ibd))/3
         zcenter(ielem,ibd) = (zpos(elem(1,ielem,ibd),ibd) + zpos(elem(2,ielem,ibd),ibd) + zpos(elem(3,ielem,ibd),ibd))/3
 
+
+        ! Triangular node vertices
         PA = (/xpos(elem(1,ielem,ibd),ibd), ypos(elem(1,ielem,ibd),ibd), zpos(elem(1,ielem,ibd),ibd)/) 
         PB = (/xpos(elem(2,ielem,ibd),ibd), ypos(elem(2,ielem,ibd),ibd), zpos(elem(2,ielem,ibd),ibd)/) 
         PC = (/xpos(elem(3,ielem,ibd),ibd), ypos(elem(3,ielem,ibd),ibd), zpos(elem(3,ielem,ibd),ibd)/)
 
+        ! Calculate normal
         call cross_product(tempvec,PB-PA,PC-PA)
         call norm(tempnorm,tempvec)
 
@@ -235,21 +240,25 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
 
            do ielem=1,max_wsnel(ibd) ! Loop through elements on each body
 
+                ! Grid point
                 P1 = (/xcell, ycell, zcell/)
 
+                ! Triangular plane points - center, vertex1, vertex2, vertex3
                 P0 = (/xcenter(ielem,ibd), ycenter(ielem,ibd), zcenter(ielem,ibd)/)
                 PA = (/xpos(elem(1,ielem,ibd),ibd), ypos(elem(1,ielem,ibd),ibd), zpos(elem(1,ielem,ibd),ibd)/)
                 PB = (/xpos(elem(2,ielem,ibd),ibd), ypos(elem(2,ielem,ibd),ibd), zpos(elem(2,ielem,ibd),ibd)/)
                 PC = (/xpos(elem(3,ielem,ibd),ibd), ypos(elem(3,ielem,ibd),ibd), zpos(elem(3,ielem,ibd),ibd)/)
 
+                ! Normal to plane
                 nrm = (/normal(1,ielem,ibd), normal(2,ielem,ibd), normal(3,ielem,ibd)/)
 
-                min_vec = (/minval((/PA(1), PB(1), PC(1)/)), minval((/PA(2), PB(2), PC(2)/)), minval((/PA(3), PB(3), PC(3)/))/)
-                max_vec = (/maxval((/PA(1), PB(1), PC(1)/)), maxval((/PA(2), PB(2), PC(2)/)), maxval((/PA(3), PB(3), PC(3)/))/)
-
+                ! Direction vector for rays
+                ! lx - to find intersections in x-dir
+                ! ln - to find intersections in normal-dir
                 lx = (/1.0, 0.0, 0.0/)
                 ln = nrm
 
+                ! Procedure to calculate intersection for lx
                 vec  = PA-P1
                 vecA = PB-PA;
                 vecB = PC-PA;
@@ -272,12 +281,16 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
                 if(da .ge. 0.0 .and. da .le. 1.0 .and. db .ge. 0.0 .and. (da+db) .le. 1.0 .and. du .gt. 0.0) &
                    countit = countit + 1
 
+                ! Procedure to calculate intersection for ln
                 dn = dot_product(vec,nrm)/dot_product(ln,nrm)
                 PN = P1 + dn*ln
                 vecW = PN-PA;                 
                 da = (dot_product(vecA,vecB)*dot_product(vecW,vecB) - dot_product(vecB,vecB)*dot_product(vecW,vecA))/dotD
                 db = (dot_product(vecA,vecB)*dot_product(vecW,vecA) - dot_product(vecA,vecA)*dot_product(vecW,vecB))/dotD;
 
+
+                ! Use normal distance if intersection point within plane else
+                ! use shortest distance to vertices or center
                 if(da .ge. 0.0 .and. da .le. 1.0 .and. db .ge. 0.0 .and. (da+db) .le. 1.0) then
 
                         call norm(tempnorm,P1-PN)
@@ -294,7 +307,7 @@ subroutine ib_lset_3D(blockCount,blockList,dt)
 
                 end if 
 
-           end do
+           end do ! End loop over elements
        
            ! Get minimum absoulte distance
            mvd = minval(dist(:,ibd))
