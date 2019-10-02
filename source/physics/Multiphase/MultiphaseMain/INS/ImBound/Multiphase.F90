@@ -21,7 +21,7 @@ subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,mph_fl
       if(mph_flag == 1 .and. dr_nstep == 1) then
         call ib_lset(blockCount,blockList,dt)
 
-      else if (mph_flag == 1 .and. mod(dr_nstep,5000) == 0) then
+      else if (mph_flag == 1 .and. mod(dr_nstep,1000) == 0) then
         if(mph_meshMe .eq. 0) print *,"Doing IB Level Set Reconstruction" 
         call ib_lset(blockCount,blockList,dt)
 
@@ -35,7 +35,7 @@ subroutine Multiphase(blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder,mph_fl
       if(mph_flag == 1 .and. dr_nstep == 1) then
         call ib_lset_3D(blockCount,blockList,dt)
 
-      else if (mph_flag == 1 .and. mod(dr_nstep,5000) == 0) then
+      else if (mph_flag == 1 .and. mod(dr_nstep,1000) == 0) then
         if(mph_meshMe .eq. 0) print *,"Doing IB Level Set Reconstruction" 
         call ib_lset_3D(blockCount,blockList,dt)
 
