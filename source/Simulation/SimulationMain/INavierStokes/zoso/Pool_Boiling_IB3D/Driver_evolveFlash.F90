@@ -130,6 +130,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
   firstfileflag = 0
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
+
+  call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
   ! Write to Bodies to Tecplot:
   !call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
   !call sm_outputBeam('beam_', count)
