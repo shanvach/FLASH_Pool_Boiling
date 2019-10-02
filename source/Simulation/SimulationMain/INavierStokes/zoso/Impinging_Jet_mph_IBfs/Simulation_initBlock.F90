@@ -158,15 +158,15 @@ subroutine Simulation_initBlock(blockId)
            !R_init = 0.5
 #endif        
 
-           solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,-ycell+sim_jet_depth)
-           !solnData(DFUN_VAR,i,j,k) = -ycell+sim_jet_depth
+           !solnData(DFUN_VAR,i,j,k)  = min(sqrt((xcell-0.0)**2+(zcell-0.0)**2)-R_init,-ycell+sim_jet_depth)
+           solnData(DFUN_VAR,i,j,k) = -ycell+sim_jet_depth
 
            !dfun_rect = -min(R_init-sqrt((xcell-0.0)**2+(zcell-0.0)**2),ycell+0.0)
            !solnData(DFUN_VAR,i,j,k)  = min(dfun_rect,ycell+sim_jet_depth)
 
-           if(ycell .lt. sim_jet_depth .and. &
-           0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .lt. 0.0) &
-           faceyData(VELC_FACE_VAR,i,j+1,k) = 1.0
+           !if(ycell .lt. sim_jet_depth .and. &
+           !0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j+1,k)) .lt. 0.0) &
+           faceyData(VELC_FACE_VAR,i,j+1,k) = 0.0
 
         enddo
      enddo
