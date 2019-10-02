@@ -46,6 +46,12 @@
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: b1,b2
+        real :: rho3, vis3, thco3, cp3
+
+        rho3  = (rho1 + rho2)/2
+        vis3  = (vis1 + vis2)/2
+        thco3 = thco2
+        cp3   = cp2
 
         !*****************************************************************
 
@@ -150,11 +156,11 @@
 
               visc(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (smhv(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
-                             (pfl(i,j,k))*(vis2/vis2)
+                             (pfl(i,j,k))*(vis3/vis2)
 
               alph(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(thco2/cp2)/(thco2/cp2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(thco1/cp1)/(thco2/cp2) + &
-                             (pfl(i,j,k))*(thco2/cp2)/(thco2/cp2)
+                             (pfl(i,j,k))*(thco3/cp3)/(thco2/cp2)
 
           end do
         end do
@@ -220,13 +226,27 @@
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
+              if(0.5*(s(i,j,k)+s(i-1,j,k)) .ge. 0.0) then
+
+              b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.      
               b2 = (1. - pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
 
               rho1x(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho2/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho3/rho2)
+
+              else
+
+              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.      
+              b2 = (pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
+
+
+              rho1x(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + (b1*b2)/(rho3/rho2)
+
+              end if
 
               end do
            end do
@@ -243,12 +263,25 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
+              if(0.5*(s(i,j,k)+s(i,j-1,k)) .ge. 0.0) then
+
               b1 = 1. - (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
               b2 = (1. - pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
               rho1y(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho2/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho3/rho2)
+
+              else
+
+              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
+              b2 = (pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
+
+              rho1y(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + (b1*b2)/(rho3/rho2)
+
+              end if
 
               end do
            end do
@@ -265,12 +298,25 @@
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
+              if(0.5*(s(i,j,k)+s(i,j,k-1)) .ge. 0.0) then
+
               b1 = 1. - (pfl(i,j,k-1) + pfl(i,j,k)) / 2.
               b2 = (1. - pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps)) * &
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
               rho1z(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2z(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho2/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho3/rho2)
+
+              else
+ 
+              b1 = (pfl(i,j,k-1) + pfl(i,j,k)) / 2.
+              b2 = (pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps)) * &
+                   (pfl(i,j,k)/abs(pfl(i,j,k)+eps))
+
+              rho1z(i,j,k) = (a1*a2*(1. - b1*b2))/(rho1/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + (b1*b2)/(rho3/rho2)
+             
+              end if
 
               end do
            end do

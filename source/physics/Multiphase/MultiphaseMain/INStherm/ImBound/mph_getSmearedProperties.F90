@@ -22,6 +22,9 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,1)
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: rho3
+
+         rho3 = (rho2 + rho1)/2.0
 
          pi = acos(-1.0)
 
@@ -70,7 +73,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
 
               smrh(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(rho2/rho2) + &
                               (smhv(i,j,k))*(1-pfl(i,j,k))*(rho1/rho2) + &
-                             (pfl(i,j,k))*(rho2/rho2)
+                             (pfl(i,j,k))*(rho3/rho2)
 
           end do
          end do
@@ -102,7 +105,9 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: rho3
 
+       rho3 = (rho2 + rho1)/2.0
 
        pi = acos(-1.0)
 
@@ -155,7 +160,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
 
               smrh(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(rho2/rho2) + &
                               (smhv(i,j,k))*(1-pfl(i,j,k))*(rho1/rho2) + &
-                             (pfl(i,j,k))*(rho2/rho2)
+                             (pfl(i,j,k))*(rho3/rho2)
 
           end do
          end do

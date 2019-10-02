@@ -4,7 +4,6 @@
 
 !#define LEVEL_SET_UNION
 #define THREE_PHASE_TREATMENT
-#define FREE_SURFACE_TREATMENT
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
@@ -180,15 +179,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then
-                vis3 = vis1
-             else
-                vis3 = vis2
-             end if
-#else
-              vis3 = vis1
-#endif
+              vis3 = (vis1 + vis2)/2.
 
               visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
@@ -223,15 +214,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then
-                rho3 = rho1
-             else
-                rho3 = rho2
-             end if
-#else
-              rho3 = rho1
-#endif
+              rho3 = (rho1 + rho2)/2.
 
               rho1x(i,j,k) = 0.
               rho2x(i,j,k) = 0.
@@ -240,7 +223,7 @@
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if(abs(rho3-rho1) .lt. 1E-13) then
+              if(0.5*(s(i,j,k)+s(i-1,j,k)) .lt. 0.0) then
               b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.               
               b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
@@ -281,15 +264,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then
-                rho3 = rho1
-             else
-                rho3 = rho2
-             end if
-#else
-              rho3 = rho1
-#endif
+              rho3 = (rho1 + rho2)/2.
 
               rho1y(i,j,k) = 0.
               rho2y(i,j,k) = 0.
@@ -298,7 +273,7 @@
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if(abs(rho3-rho1) .lt. 1E-13) then
+              if(0.5*(s(i,j,k)+s(i,j-1,k)) .lt. 0.0) then
               b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.           
               b2 = pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps) * &
                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
@@ -338,15 +313,7 @@
               zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
                       real(k - NGUARD - 1)*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then
-                rho3 = rho1
-             else
-                rho3 = rho2
-             end if
-#else
-              rho3 = rho1
-#endif
+              rho3 = (rho1 + rho2)/2.
 
               rho1z(i,j,k) = 0.
               rho2z(i,j,k) = 0.
@@ -355,7 +322,7 @@
               a2 = pf(i,j,k-1)  /abs(pf(i,j,k-1)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
         
-              if(abs(rho3-rho1) .lt. 1E-13) then
+              if(0.5*(s(i,j,k)+s(i,j,k-1)) .lt. 0.0) then
               b1 = (pfl(i,j,k-1) + pfl(i,j,k)) / 2.           
               b2 = pfl(i,j,k-1)  /abs(pfl(i,j,k-1)  +eps) * &
                    pfl(i,j,k)/abs(pfl(i,j,k)+eps)
