@@ -46,6 +46,12 @@
         real :: sunion(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: b1,b2
+        real :: rho3, vis3, thco3, cp3
+
+        rho3  = rho2 !(rho1 + rho2)/2
+        vis3  = vis2 !(vis1 + vis2)/2
+        thco3 = thco2
+        cp3   = cp2
 
         !*****************************************************************
 
@@ -150,11 +156,11 @@
 
               visc(i,j,k) = (1-smhv(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (smhv(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
-                             (pfl(i,j,k))*(vis2/vis2)
+                             (pfl(i,j,k))*(vis3/vis2)
 
               alph(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(thco2/cp2)/(thco2/cp2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(thco1/cp1)/(thco2/cp2) + &
-                             (pfl(i,j,k))*(thco2/cp2)/(thco2/cp2)
+                             (pfl(i,j,k))*(thco3/cp3)/(thco2/cp2)
 
           end do
         end do
@@ -220,13 +226,13 @@
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.                      
+              b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.      
               b2 = (1. - pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
 
               rho1x(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho2/rho2)
+              rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho3/rho2)
 
               end do
            end do
@@ -248,7 +254,7 @@
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
               rho1y(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho2/rho2)
+              rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho3/rho2)
 
               end do
            end do
@@ -270,9 +276,9 @@
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
               rho1z(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
-              rho2z(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho2/rho2)
+              rho2z(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1.-b1*b2)/(rho3/rho2)
 
-              end do
+             end do
            end do
         end do
 
@@ -371,6 +377,8 @@
         real :: ycell
 
         real :: yit, cmi, mi
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
+        real :: rho3, rhof
 
         sigx = 0.
         sigy = 0.
@@ -388,6 +396,109 @@
         call Grid_getBlkBoundBox(blockId,boundBox)
 
         bsize(:) = boundBox(2,:) - boundBox(1,:)
+
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
+        (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
+        rho3 = rho2 !(rho1 + rho2)/2.0
+
+        do k = kz1-1,kz2
+         do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+                    th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i+1,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+                end if
+                !
+                ! 
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+                    th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j+1,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                end if 
+                !
+                ! 
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j,k+1) .eq. 1.0) then
+                    th = abs(lambda(i,j,k+1))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j,k+1) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k+1) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
+                end if 
+
+           end do
+         end do
+        end do
 
         do k = kz1-1,kz2
            do j = jy1-1,jy2

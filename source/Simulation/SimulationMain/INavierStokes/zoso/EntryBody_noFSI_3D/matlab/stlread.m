@@ -1,4 +1,4 @@
-function [XYZ,ELEM,nnod,nel] = stlread(file)
+function [XYZ,ELEM,nnod,nel,normal] = stlread(file)
 % STLREAD imports geometry from an STL file into MATLAB.
 %    FV = STLREAD(FILENAME) imports triangular faces from the ASCII or binary
 %    STL file idicated by FILENAME, and returns the patch struct FV, with fields
@@ -46,6 +46,7 @@ function [XYZ,ELEM,nnod,nel] = stlread(file)
     
     XYZ = v;
     ELEM = f;
-    nnod = length(v(:,1))-1;
-    nel = length(f(:,1));
+    normal = n;
+    nnod = length(v(:,1))-1
+    nel = length(f(:,1))
 end

@@ -1,17 +1,17 @@
-!=========================================================================
-!=========================================================================
-!=========================================================================
+! Directives for three phase treatment
 
 !#define LEVEL_SET_UNION
-!#define THREE_PHASE_TREATMENT
+#define THREE_PHASE_TREATMENT
+
 !#define FREE_SURFACE_TREATMENT
+!#define free_surface_loc -2.0
 
         subroutine mph_KPDcurvature2DAB(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,blockID)
 
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
-   
+  
         implicit none
 
 #include "Flash.h"
@@ -50,8 +50,10 @@
         real, dimension(2,MDIM) :: boundBox
 
         real :: xcell,ycell
-        real :: rho3,vis3
-        real :: free_surface_loc
+        real :: rho3,vis3,rhob,visb
+
+        rhob = rho1 !(rho1 + rho2)/2.
+        visb = vis1 !(vis1 + vis2)/2.
 
         call Grid_getDeltas(blockID,del)
         call Grid_getBlkCenterCoords(blockId,coord)
@@ -63,8 +65,6 @@
         crmn = 1E10
 
         pfl = 0.0
-
-        free_surface_loc = 20.0
 
         !*************************************************************************
 
@@ -144,16 +144,16 @@
                       0.5*del(JAXIS)
 
 #ifdef FREE_SURFACE_TREATMENT
-             if(ycell .lt. free_surface_loc) then
+             if(ycell .gt. free_surface_loc) then        
                 vis3 = vis1
              else
-                vis3 = vis2
-             end if
+                vis3 = vis2         
+             endif
 #else
-              vis3 = vis1
+                vis3 = visb
 #endif
 
-              visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+             visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
                              (pfl(i,j,k))*(vis3/vis2)
 
@@ -180,37 +180,26 @@
                       0.5*del(JAXIS)
 
 #ifdef FREE_SURFACE_TREATMENT
-             if(ycell .lt. free_surface_loc) then
+             if(ycell .gt. free_surface_loc) then        
                 rho3 = rho1
              else
-                rho3 = rho2
-             end if
+                rho3 = rho2         
+             endif
 #else
-              rho3 = rho1
+                rho3 = rhob
 #endif
 
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if(abs(rho3-rho1) .lt. 1E-13) then
-              b1 = (pfl(i-1,j,k) + pfl(i,j,k)) / 2.         
-              b2 = pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps) * &
-                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
-
-              rho1x(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2x(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho3/rho2)
-
-              else
-               b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.
-               b2 = (1. - pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
+              b1 = 1. - (pfl(i-1,j,k) + pfl(i,j,k)) / 2.
+              b2 = (1. - pfl(i-1,j,k)  /abs(pfl(i-1,j,k)  +eps)) * &
                     (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
 
               rho1x(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
               rho2x(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho3/rho2)
-
-              end if
 
            end do
         end do
@@ -230,35 +219,25 @@
                       real(j - NGUARD - 1)*del(JAXIS)
 
 #ifdef FREE_SURFACE_TREATMENT
-             if(ycell .lt. free_surface_loc) then
+             if(ycell .gt. free_surface_loc) then        
                 rho3 = rho1
              else
-                rho3 = rho2
-             end if
+                rho3 = rho2         
+             endif
 #else
-              rho3 = rho1
+                rho3 = rhob
 #endif
 
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
                    pf(i,j,k)/abs(pf(i,j,k)+eps)
 
-              if(abs(rho3-rho1) .lt. 1E-13) then
-              b1 = (pfl(i,j-1,k) + pfl(i,j,k)) / 2.           
-              b2 = pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps) * &
-                   pfl(i,j,k)/abs(pfl(i,j,k)+eps)
-
-              rho1y(i,j,k) = (a1*a2*(1-b1*b2))/(rho1/rho2)
-              rho2y(i,j,k) = ((1. - a1*a2)*(1. - b1*b2))/(rho2/rho2) + b1*b2/(rho3/rho2)
-
-              else
               b1 = 1. - (pfl(i,j-1,k) + pfl(i,j,k)) / 2.
               b2 = (1. - pfl(i,j-1,k)  /abs(pfl(i,j-1,k)  +eps)) * &
                    (1. - pfl(i,j,k)/abs(pfl(i,j,k)+eps))
 
               rho1y(i,j,k) = (a1*a2*(b1*b2))/(rho1/rho2)
               rho2y(i,j,k) = ((1. - a1*a2)*(b1*b2))/(rho2/rho2) + (1. - b1*b2)/(rho3/rho2)
-              end if
 
            end do
         end do
@@ -293,14 +272,17 @@
 !=========================================================================
 
         subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
-           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2)   
+           rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
 
+        use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         !implicit real*8(a-h,o-z)
         !common/param/re,xit,rho1,rho2,g,sp,ubc,uout,nint
@@ -311,6 +293,9 @@
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                rho2y,pf,w,sigx,sigy,lambda
+
+        integer, intent(in) :: blockID
+
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
 
         !- kpd - 
@@ -321,6 +306,15 @@
 
         integer :: iSmear
 
+        real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
+        real :: rho3, rhof
+
+        real :: del(MDIM),bsize(MDIM),coord(MDIM)
+        real, dimension(2,MDIM) :: boundBox
+
+        real :: xcell,ycell
+
+        real :: rhob
 !--------------------------------------------
 !----------------jump conditions ------------
 !--------------------------------------------
@@ -338,6 +332,12 @@
 !--------------------------------------------
 !--------------------------------------------
 
+        call Grid_getDeltas(blockID,del)
+        call Grid_getBlkCenterCoords(blockId,coord)
+        call Grid_getBlkBoundBox(blockId,boundBox)
+
+        bsize(:) = boundBox(2,:) - boundBox(1,:)
+
         iSmear  = 1
 
         crmx = -1E10
@@ -352,6 +352,150 @@
                     !do j = jy1,jy2
                     !   do i = ix1,ix2
         k=1
+
+        rhob = rho1 !(rho1 + rho2)/2.
+
+#ifdef THREE_PHASE_TREATMENT
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+
+        do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS)
+
+                    ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                            real(j - NGUARD - 1)*del(JAXIS)  +  &
+                            0.5*del(JAXIS)
+
+                    th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rhob
+#endif
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS)
+
+                    ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                            real(j - NGUARD - 1)*del(JAXIS)  +  &
+                            0.5*del(JAXIS)
+
+                    th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i+1,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rhob
+#endif
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                            real(j - NGUARD - 1)*del(JAXIS)
+
+                    th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rhob
+#endif
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                            real(j - NGUARD - 1)*del(JAXIS)
+
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j+1,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rhob
+#endif
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                end if 
+
+           end do
+        end do
+#endif
+
         do j = jy1-1,jy2
            do i = ix1-1,ix2
 

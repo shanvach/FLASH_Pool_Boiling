@@ -61,8 +61,8 @@ kinemflag=['    '];
 basedir='/Users/Akash/Desktop/matlab/matlab_3D/';
 
 % Input File name:
-readflg= 'stl'; %'gambit'; %'dat'; 
-filename='plate.stl';
+readflg= 'stl'; % 'gambit'; %'dat'; % 'gambit'; % 
+filename= 'sphere'; % 'sphere06.neu'; %
 
 % Read File
 if (strcmp(readflg,'dat')) % text file of nnodes, nelem and XYZ followed
@@ -83,7 +83,7 @@ if (strcmp(readflg,'dat')) % text file of nnodes, nelem and XYZ followed
 elseif(strcmp(readflg,'gambit'))
     [XYZ,ws_IEN,nnodes,nel]=readsurf_gambit([basedir filename]);
 elseif(strcmp(readflg,'stl'))
-    [XYZ,ws_IEN,nnodes,nel]=stlread([basedir filename]);
+    [XYZ,ws_IEN,nnodes,nel,normal]=stlread([basedir filename]);
 end
 
 % Plot figure:
@@ -256,6 +256,7 @@ for ibd=1:NumBods
     hdf5write(hfile,'mesh/x',-x,'WriteMode','append')
     hdf5write(hfile,'mesh/y',-y,'WriteMode','append')
     hdf5write(hfile,'mesh/z',-z,'WriteMode','append')
+    %hdf5write(hfile,'mesh/nrm',normal,'WriteMode','append')
     hdf5write(hfile,'mesh/nnp',int32(nnp),'WriteMode','append')
     hdf5write(hfile,'mesh/ned',int32(ned),'WriteMode','append')
     

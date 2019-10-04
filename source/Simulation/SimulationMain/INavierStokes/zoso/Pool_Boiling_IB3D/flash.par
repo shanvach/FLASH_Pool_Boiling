@@ -86,12 +86,12 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =   -5.00
-xmax =    5.00
-ymin =    0.00
-ymax =   10.00
-zmin =   -5.00
-zmax =    5.00
+xmin =   -4.00
+xmax =    4.00
+ymin =   -4.00
+ymax =    2.00
+zmin =   -4.00
+zmax =    4.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"
@@ -123,8 +123,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.1
 sigma		= 0.1
-dtspec          = 0.5d-4
-dtinit          = 0.5d-4
+dtspec          = 0.25d-4
+dtinit          = 0.25d-4
 tstep_change_factor=1.01
 
 
@@ -144,12 +144,12 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 10.0
 
 #plotFileIntervalTime = 0.1
-plotFileIntervalStep = 1000
+plotFileIntervalStep = 1
 
 ##	AMR parameters
-nblockx	= 5
-nblocky	= 5
-nblockz = 5
+nblockx	= 8
+nblocky	= 6
+nblockz = 8
 
 lrefine_min	= 1
 lrefine_max     = 1

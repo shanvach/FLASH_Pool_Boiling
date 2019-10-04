@@ -139,7 +139,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p T'//NULLCHR,  &
+             'x y z u v w p phi lambda'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -308,7 +308,7 @@
 
  
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             solnData(DUST_VAR,:,:,:),divpp)
+                             solnData(LMDA_VAR,:,:,:),divpp)
 
 
      ! Velocity derivatives:
@@ -451,6 +451,9 @@
      i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(tempp)
+     i = TecDat(ijk,arraylb,0)
+
+     arraylb = sngl(divpp)
      i = TecDat(ijk,arraylb,0)
 
   enddo

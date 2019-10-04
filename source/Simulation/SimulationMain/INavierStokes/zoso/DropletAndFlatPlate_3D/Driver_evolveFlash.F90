@@ -58,7 +58,7 @@ subroutine Driver_evolveFlash()
 
   use IncompNS_data, only : ins_cflflg
   use Multiphase_interface, only: Multiphase
-
+  use sm_iointerface, only: sm_iouttotecplot
   implicit none
 
 #include "constants.h"
@@ -122,6 +122,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
   firstfileflag = 0
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
+
+  call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
 
   firstfileflag = 1
   do dr_nstep = dr_nBegin, dr_nend
@@ -205,6 +207,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
         count = count + 1
         call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                           0.0,blockList,blockCount,firstfileflag)
+
+        call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
 
      if (count .gt. 0) firstfileflag = 1
      endif

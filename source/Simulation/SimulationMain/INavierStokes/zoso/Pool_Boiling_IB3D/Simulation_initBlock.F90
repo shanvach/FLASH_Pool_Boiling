@@ -92,34 +92,6 @@ subroutine Simulation_initBlock(blockId)
   real :: rot_rect
   real :: zl,zr,dzl,dzr
 
-  xl = -2.00
-  xr =  2.00
-  yl =  2.00
-  yr =  3.00
-  zl = -2.00
-  zr =  2.00
-
-  !rot_rect = 3*acos(-1.0)/4;
-  rot_rect = 0.0*cos(-1.0)/4;
-
-  rect_x(1) = xl;
-  rect_x(2) = xl;
-  rect_x(3) = xr;
-  rect_x(4) = xr;
-  rect_x(5) = xl;
-
-  rect_y(1) = yl;
-  rect_y(2) = yr;
-  rect_y(3) = yr;
-  rect_y(4) = yl;
-  rect_y(5) = yl;
-
-  !x_temp = rect_x;
-  !y_temp = rect_y - 4;
-
-  !rect_x = x_temp*cos(rot_rect) - y_temp*sin(rot_rect);
-  !rect_y = y_temp*cos(rot_rect) + x_temp*sin(rot_rect) + 4;
-
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -188,7 +160,7 @@ subroutine Simulation_initBlock(blockId)
   sim_nucSiteDens = 1
   sim_nuc_radii   = 0.3
   sim_nuc_site_x  = 0.0 !- (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
-  sim_nuc_site_y  = yr+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
+  sim_nuc_site_y  = -2.75+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
@@ -207,13 +179,6 @@ subroutine Simulation_initBlock(blockId)
            zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
                    real(k - NGUARD - 1)*del(KAXIS)  +  &
                    0.5*del(KAXIS)
-
-           dxl = xcell - xl;
-           dxr = xr - xcell;
-           dyl = ycell - yl;
-           dyr = yr - ycell;      
-           dzl = zcell - zl
-           dzr = zr - zcell
 
            do nuc_index=1,sim_nucSiteDens
 
@@ -235,29 +200,6 @@ subroutine Simulation_initBlock(blockId)
         enddo
      enddo
   enddo
-
- do k=2,blkLimitsGC(HIGH,KAXIS)-1
-  do j=2,blkLimitsGC(HIGH,JAXIS)-1
-   do i=2,blkLimitsGC(HIGH,IAXIS)-1
-
-           solnData(NMLX_VAR,i,j,k) = -((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-           solnData(NMLY_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-           solnData(NMLZ_VAR,i,j,k) = -((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))/&
-                                      sqrt(((solnData(LMDA_VAR,i+1,j,k) - solnData(LMDA_VAR,i-1,j,k))/2*del(IAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j+1,k) - solnData(LMDA_VAR,i,j-1,k))/2*del(JAXIS))**2+&
-                                           ((solnData(LMDA_VAR,i,j,k+1) - solnData(LMDA_VAR,i,j,k-1))/2*del(KAXIS))**2)
-
-     end do
-   end do
-  end do
 
   !sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
