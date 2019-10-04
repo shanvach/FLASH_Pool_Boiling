@@ -43,8 +43,8 @@
         real :: b1,b2
         real :: rho3, vis3, thco3, cp3
 
-        rho3  = (rho1 + rho2)/2
-        vis3  = (vis1 + vis2)/2
+        rho3  = rho2 !(rho1 + rho2)/2
+        vis3  = vis2 !(vis1 + vis2)/2
         thco3 = thco2
         cp3   = cp2
 
@@ -343,7 +343,7 @@
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
-        rho3 = (rho1 + rho2)/2.0
+        rho3 = rho2 !(rho1 + rho2)/2.0
 
         call Grid_getDeltas(blockID,del)
         call Grid_getBlkCenterCoords(blockId,coord)

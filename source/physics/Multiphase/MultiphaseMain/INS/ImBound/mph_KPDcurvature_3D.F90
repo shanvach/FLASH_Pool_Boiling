@@ -1,9 +1,10 @@
-!=========================================================================
-!=========================================================================
-!=========================================================================
+! Directives for three phase treatment
 
 !#define LEVEL_SET_UNION
 #define THREE_PHASE_TREATMENT
+
+!#define FREE_SURFACE_TREATMENT
+!#define free_surface_loc -2.0
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
@@ -53,7 +54,6 @@
 
         real :: xcell,ycell,zcell
         real :: rho3,vis3
-        real :: free_surface_loc
 
         call Grid_getDeltas(blockID,del)
         call Grid_getBlkCenterCoords(blockId,coord)
@@ -69,8 +69,6 @@
 
         sunion = s
         pfl = 0.0
-
-        free_surface_loc = -2.0
 
 #ifdef LEVEL_SET_UNION
         do k=kz1-2,kz2+2
@@ -179,7 +177,15 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-              vis3 = (vis1 + vis2)/2.
+#ifdef FREE_SURFACE_TREATMENT
+              if(ycell .gt. free_surface_loc) then        
+                 vis3 = vis1
+              else
+                 vis3 = vis2         
+              endif
+#else
+                 vis3 = vis1
+#endif
 
               visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
@@ -214,7 +220,15 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-              rho3 = (rho1 + rho2)/2.
+#ifdef FREE_SURFACE_TREATMENT
+              if(ycell .gt. free_surface_loc) then        
+                 rho3 = rho1
+              else
+                 rho3 = rho2         
+              endif
+#else
+                 rho3 = rho1
+#endif
 
               rho1x(i,j,k) = 0.
               rho2x(i,j,k) = 0.
@@ -253,7 +267,15 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-              rho3 = (rho1 + rho2)/2.
+#ifdef FREE_SURFACE_TREATMENT
+              if(ycell .gt. free_surface_loc) then        
+                 rho3 = rho1
+              else
+                 rho3 = rho2         
+              endif
+#else
+                 rho3 = rho1
+#endif
 
               rho1y(i,j,k) = 0.
               rho2y(i,j,k) = 0.
@@ -292,7 +314,15 @@
               zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
                       real(k - NGUARD - 1)*del(KAXIS)
 
-              rho3 = (rho1 + rho2)/2.
+#ifdef FREE_SURFACE_TREATMENT
+              if(ycell .gt. free_surface_loc) then        
+                 rho3 = rho1
+              else
+                 rho3 = rho2         
+              endif
+#else
+                 rho3 = rho1
+#endif
 
               rho1z(i,j,k) = 0.
               rho2z(i,j,k) = 0.
@@ -341,12 +371,14 @@
                                        pf,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
-                                       rho2z,sigz)
+                                       rho2z,sigz,blockID)
 
+        use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
 
         implicit none
 
 #include "Flash.h"
+#include "constants.h"
 
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         real, intent(in) :: dx, dy, dz, rho1, rho2, xit
@@ -354,6 +386,8 @@
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,lambda
+
+        integer, intent(in) :: blockID
 
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
@@ -367,6 +401,16 @@
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: rho3, rhof
 
+        real :: del(MDIM),bsize(MDIM),coord(MDIM)
+        real, dimension(2,MDIM) :: boundBox
+
+        real :: xcell,ycell,zcell
+
+        call Grid_getDeltas(blockID,del)
+        call Grid_getBlkCenterCoords(blockId,coord)
+        call Grid_getBlkBoundBox(blockId,boundBox)
+
+        bsize(:) = boundBox(2,:) - boundBox(1,:)
 
         sigx = 0.
         sigy = 0.
@@ -374,17 +418,28 @@
         w = 0.
         icrv = 0
 
+#ifdef THREE_PHASE_TREATMENT
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
         (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
-
-        rho3 = (rho1 + rho2)/2.0
 
         do k = kz1-1,kz2
          do j = jy1-1,jy2
            do i = ix1-1,ix2
 
                 if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)  +  &
+                             0.5*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)  +  &
+                            0.5*del(KAXIS)
+
                     th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
 
                     if(pf(i,j,k) .eq. 0.0) then
@@ -393,6 +448,16 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
@@ -400,6 +465,18 @@
                 !
                 !
                 if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)  +  &
+                             0.5*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)  +  &
+                            0.5*del(KAXIS)
+
                     th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
 
                     if(pf(i+1,j,k) .eq. 0.0) then
@@ -408,6 +485,16 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
@@ -415,6 +502,18 @@
                 !
                 !
                 if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)  +  &
+                            0.5*del(KAXIS)
+
                     th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
 
                     if(pf(i,j,k) .eq. 0.0) then
@@ -423,6 +522,16 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
@@ -430,6 +539,18 @@
                 !
                 !
                 if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)  +  &
+                            0.5*del(KAXIS)
+
                     th = abs(lambda(i,j,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
 
                     if(pf(i,j+1,k) .eq. 0.0) then
@@ -438,6 +559,15 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
@@ -445,6 +575,18 @@
                 !
                 !
                 if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j,k+1) .eq. 1.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)  +  &
+                             0.5*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)
+
                     th = abs(lambda(i,j,k+1))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
 
                     if(pf(i,j,k) .eq. 0.0) then
@@ -453,6 +595,16 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
@@ -460,6 +612,18 @@
                 !
                 !
                 if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j,k+1) .eq. 0.0) then
+
+                    xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                            real(i - NGUARD - 1)*del(IAXIS) +   &
+                            0.5*del(IAXIS)
+
+                    ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                             real(j - NGUARD - 1)*del(JAXIS)  +  &
+                             0.5*del(JAXIS)
+
+                    zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                            real(k - NGUARD - 1)*del(KAXIS)
+
                     th = abs(lambda(i,j,k))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
 
                     if(pf(i,j,k+1) .eq. 0.0) then
@@ -468,6 +632,15 @@
                         rhof = rho1
                     end if
 
+#ifdef FREE_SURFACE_TREATMENT
+                   if(ycell .gt. free_surface_loc) then
+                        rho3 = rho1
+                   else
+                        rho3 = rho2
+                   endif
+#else
+                        rho3 = rho1
+#endif
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
@@ -476,6 +649,7 @@
            end do
          end do
         end do
+#endif
 
         do k = kz1-1,kz2
            do j = jy1-1,jy2
