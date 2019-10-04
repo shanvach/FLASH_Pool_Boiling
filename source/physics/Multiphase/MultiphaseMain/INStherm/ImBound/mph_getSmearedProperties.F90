@@ -24,7 +24,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,1)
         real :: rho3
 
-         rho3 = (rho2 + rho1)/2.0
+         rho3 = rho2 !(rho2 + rho1)/2.0
 
          pi = acos(-1.0)
 
@@ -107,7 +107,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: rho3
 
-       rho3 = (rho2 + rho1)/2.0
+       rho3 = rho2 !(rho2 + rho1)/2.0
 
        pi = acos(-1.0)
 
