@@ -55,6 +55,8 @@
         real :: xcell,ycell,zcell
         real :: rho3,vis3,rhob,visb
 
+        ! rho1 is gas, rho2 is liquid
+        ! Also change this in mph_KPDcurvature3DC below
         rhob = rho1 !(rho1 + rho2)/2.
         visb = vis1 !(vis1 + vis2)/2.
 
