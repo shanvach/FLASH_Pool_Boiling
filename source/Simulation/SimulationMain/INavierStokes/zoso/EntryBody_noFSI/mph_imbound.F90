@@ -166,7 +166,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #ifdef CONTACT_LINE_PINNING          
-           if(solnData(LMDA_VAR,i,j,k) .ge. -1.5*del(IAXIS) .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 #endif
 
 #ifdef CONTACT_ANGLE
@@ -249,12 +249,25 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #ifdef CONTACT_LINE_PINNING
-           if(ybase-0.1 .ge. free_surface_loc) then
+           if(ybase-0.2 .ge. free_surface_loc) then
                 solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc 
 
            else
-                solnData(DFUN_VAR,i,j,k) = ycell - (ybase - 0.1)
-           end if
+                solnData(DFUN_VAR,i,j,k) = ycell - (ybase - 0.2)
+
+           endif
+
+           !if(ycell .ge. free_surface_loc) then
+
+           !  solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc
+
+           !else
+           !     if(ycell .ge. ybase-0.1) then
+           !             solnData(DFUN_VAR,i,j,k) = -(solnData(LMDA_VAR,i,j,k) - hnorm2)
+           !     else
+           !             solnData(DFUN_VAR,i,j,k) = -abs(solnData(LMDA_VAR,i,j,k) - hnorm2)
+           !     end if
+           !end if
 #endif
 
            end if
