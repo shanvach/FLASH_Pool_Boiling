@@ -55,6 +55,8 @@
         real :: xcell,ycell,zcell
         real :: rho3,vis3,rhob,visb
 
+        ! rho1 is gas, rho2 is liquid
+        ! Also change this in mph_KPDcurvature3DC below
         rhob = rho1 !(rho1 + rho2)/2.
         visb = vis1 !(vis1 + vis2)/2.
 
@@ -654,6 +656,38 @@
            end do
          end do
         end do
+
+#ifdef FREE_SURFACE_TREATMENT
+        do k = kz1-1,kz2
+         do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+             if(lambda(i,j,k) .ge. 0.0) then
+
+                if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
+
+                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
+                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
+                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
+                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
+
+                end if
+
+                if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
+
+                  th = abs(s(i,j,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
+                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
+                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
+                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
+
+                end if
+
+             end if
+
+           end do
+         end do
+        end do
+#endif
 #endif
 
         do k = kz1-1,kz2
