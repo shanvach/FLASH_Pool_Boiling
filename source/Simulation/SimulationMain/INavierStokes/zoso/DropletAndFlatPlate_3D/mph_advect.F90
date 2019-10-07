@@ -217,6 +217,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
 ! Get the diameter of wetted area on the plate
 #if NDIM==2
+        if(ii == 1) then
+        k = 1
         do j=blkLimitsGC(LOW,JAXIS)+1,blkLimits(HIGH,JAXIS)
            do i=blkLimitsGC(LOW,IAXIS)+1,blkLimits(HIGH,IAXIS)
 
@@ -261,7 +263,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
            end do
         end do
+        end if
 #else
+        if(ii == 1) then
         do k=blkLimitsGC(LOW,KAXIS)+1,blkLimitsGC(HIGH,KAXIS)
           do j=blkLimitsGC(LOW,JAXIS)+1,blkLimitsGC(HIGH,JAXIS)
             do i=blkLimitsGC(LOW,IAXIS)+1,blkLimitsGC(HIGH,IAXIS)
@@ -326,6 +330,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
             end do
           end do
         end do
+        end if
 #endif
 
      ! Release pointers:
