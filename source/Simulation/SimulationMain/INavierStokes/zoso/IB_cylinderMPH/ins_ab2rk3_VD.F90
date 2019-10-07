@@ -1077,6 +1077,13 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
   enddo ! End  of time substeps loop
   enddo
 
+  CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
+  ! Force Immersed Boundaries:
+  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
+  CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
+  ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
+  if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
+
   ! Restore Interpolation values for guardcell-filling:
   call ins_setInterpValsGcell(.false.)
 
