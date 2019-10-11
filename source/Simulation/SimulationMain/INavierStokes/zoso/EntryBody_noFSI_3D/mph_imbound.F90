@@ -1,7 +1,7 @@
 subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-#define CONTACT_LINE_PINNING
-!#define CONTACT_ANGLE
+!#define CONTACT_LINE_PINNING
+#define CONTACT_ANGLE
 
 #include "Flash.h"
 
