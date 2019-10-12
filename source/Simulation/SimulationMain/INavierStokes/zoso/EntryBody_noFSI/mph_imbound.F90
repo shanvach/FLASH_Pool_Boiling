@@ -265,7 +265,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
              solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc
 
            else
-                if(ycell .ge. ybase) then
+                if(ycell .ge. (ybase - hnorm2)) then
                         solnData(DFUN_VAR,i,j,k) = -solnData(LMDA_VAR,i,j,k) + hnorm2
                 else
                         solnData(DFUN_VAR,i,j,k) = -abs(solnData(LMDA_VAR,i,j,k) + hnorm2)
