@@ -554,7 +554,7 @@
            timer,blockList,blockCount,firstfileflag)
 
       use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
-        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, &
+        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, Grid_getCellCoords, &
         Grid_getBlkBoundBox, Grid_getBlkCenterCoords
 
 
@@ -573,7 +573,7 @@
   integer, intent(in) :: blockCount
   integer, intent(in) :: blockList(MAXBLOCKS)
   real, intent(in) :: time,dt,timer
-      
+  integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC    
  
   ! Local Variables
   integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc
@@ -713,11 +713,17 @@
      tpp = 0.
      tpt = 0. ! Akash
 
-     xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
-     xcell = xedge(:) + dx/2.0;
+     call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
+     call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)) 
+     call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)) 
+     call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS)+1) 
+     call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS)+1) 
+
+     !xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
+     !xcell = xedge(:) + dx/2.0;
     
-     yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
-     ycell = yedge(:) + dy/2.0;
+     !yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
+     !ycell = yedge(:) + dy/2.0;
     
      facevarxx = facexData(VELC_FACE_VAR,:,:,1)
      facevaryy = faceyData(VELC_FACE_VAR,:,:,1)

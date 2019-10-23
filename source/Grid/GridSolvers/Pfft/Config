@@ -1,5 +1,5 @@
 #Config file for Pfft implementation in the GridSolver subunit
-EXCLUSIVE DirectSolver SimplePeriodicSolver SimpleDirichletSolver HomBcTrigSolver
+EXCLUSIVE DirectSolver SimplePeriodicSolver SimpleDirichletSolver HomBcTrigSolver RegularGridSolver
 DEFAULT DirectSolver
 
 REQUIRES Grid/GridSolvers/Pfft/ProcessGrid

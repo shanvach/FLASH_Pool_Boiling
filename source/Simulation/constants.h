@@ -142,6 +142,17 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 
 
 #if 0
+  This group has definitions related to grid stretching methods. The first 
+  method imports a user defined grid from an hdf5 file. The subsequent 
+  enties are names of the predefined methods available for implementing 
+  a stretched regular grid in the uniform grid package. 
+#endif
+
+#define SG_USER   1
+#define SG_TANH   2
+
+
+#if 0
   The next two constants are used in connection of integer block boundaries
   LOW refers to the lowest index and HIGH refers to the highest index of the 
   block. These can be used interchangeably for either the whole block 
