@@ -62,7 +62,7 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
 
   use Grid_interface, ONLY : GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
                              Grid_pfftMapToInput, Grid_getGlobalIndexLimits,&
-                             Grid_getBlkIndexLimits, Grid_pfftInit, 
+                             Grid_getBlkIndexLimits, Grid_pfftInit,& 
                              Grid_pfft, Grid_pfftMapFromOutput, Grid_getBlkPtr, &
                              Grid_releaseBlkPtr, Grid_pfftFinalize
 

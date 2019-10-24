@@ -70,7 +70,7 @@ VARIABLE omgm                   # Vorticity module
 FLUX velc
 
 # Use GRIDVAR for temporary storages
-SCRATCHVAR divv
+SCRATCHCENTERVAR divv
 
 # Use FACEVAR for cell interface velocity fields
 FACEVAR velc     
@@ -78,4 +78,4 @@ FACEVAR rhds
 FACEVAR velo
 
 # Number of guardcells at each boundary
-GUARDCELLS 2
+GUARDCELLS 1 
