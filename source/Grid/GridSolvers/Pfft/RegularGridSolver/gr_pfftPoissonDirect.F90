@@ -74,7 +74,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
   use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, &
        			       gr_pfftTranspose, gr_pfftGetLocalLimitsAnytime
   
-  use Grid_data, ONLY : gr_iMetrics, gr_jMetrics, gr_kMetrics, &
+  use Grid_data, ONLY : gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb, &
                         gr_iguard, gr_jguard, gr_kguard
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
@@ -98,7 +98,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
   integer :: numVec , ierr
   real, save :: invScale
   integer, save, dimension(2,MDIM) :: pfftBlkLimits
-  real, save :: DELX,DELY,DELZ,DELXSQ,DELYSQ,DELZSQ
+  real, save :: DELXSQ,DELYSQ,DELZSQ
   integer, dimension(MDIM) :: gridOrientation, pfft_meorientation
   
   REAL,DIMENSION(:),ALLOCATABLE,SAVE :: AM, BM, CM
@@ -136,17 +136,6 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
      invScale = 1.0
 
 !-----------------------------------------------------------------------
-!     CELL SIZE
-!-----------------------------------------------------------------------
-     DELX = (gr_imax - gr_imin)/real(globalSize(1))
-     DELY = (gr_jmax - gr_jmin)/real(globalSize(2))
-     DELZ = (gr_kmax - gr_kmin)/real(globalSize(3))
-
-     DELXSQ = DELX**2.
-     DELYSQ = DELY**2.
-     DELZSQ = DELZ**2.
-
-!-----------------------------------------------------------------------
 !     DIMENSIONS
 !-----------------------------------------------------------------------
 
@@ -155,6 +144,14 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
      L = globalSize(1) !NX-2  ! Total Number of Points in X
     
 !     write(*,*) 'In dimensions',N,M,L,solveflag
+
+!-----------------------------------------------------------------------
+!     CELL SIZE
+!-----------------------------------------------------------------------
+
+     DELXSQ = gr_iMetricsGlb(CENTER,L/2,1)**2.
+     DELYSQ = gr_jMetricsGlb(CENTER,N/2,1)**2.
+     DELZSQ = gr_kMetricsGlb(CENTER,M/2,1)**2.
 
 !-----------------------------------------------------------------------
 !     DIMENSION OF ARRAY FOR WORK SPACE AND SAVED ARRAYS
@@ -193,8 +190,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
 !-----------------------------------------------------------------------
 !     CREATE MATRIX FOR BLKTRI 
 !-----------------------------------------------------------------------
-     AM(1:M) =  gr_kMetrics(CENTER,gr_kguard+1:M,1) * gr_kMetrics(FACEZ,gr_kguard:M-1,1) !AP(2:M+1)*AU(1:M  )
-     CM(1:M) = 1/DELZSQ !AP(2:M+1)*AU(2:M+1)
+     AM(1:M) = gr_kMetricsGlb(CENTER,1:M,1) * gr_kMetricsGlb(LEFT_EDGE,1:M,1)
+     CM(1:M) = gr_kMetricsGlb(CENTER,1:M,1) * gr_kMetricsGlb(RIGHT_EDGE,1:M,1)
 
      IF(MP==1) THEN  
         AM(1)=0.
@@ -212,8 +209,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, &
  
         ALLOCATE(AN(N),BN(N),CN(N))
 
-        AN(1:N) = 1/DELYSQ !CP(2:N+1)*CW(1:N  )
-        CN(1:N) = 1/DELYSQ !CP(2:N+1)*CW(2:N+1)
+        AN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(LEFT_EDGE,1:N,1)
+        CN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(RIGHT_EDGE,1:N,1)
 
         IF(NP==1) THEN 
            AN(1)=0.
