@@ -238,7 +238,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   enddo
 
 #ifdef FLASH_GRID_UG
-#ifdef NDIM==2
+#if NDIM==2
   bc_types(5) = bc_types(3)
   bc_types(6) = bc_types(4)
 #endif

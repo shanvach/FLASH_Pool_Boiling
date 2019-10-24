@@ -61,8 +61,9 @@ subroutine gr_createDomain()
        gr_iStr,gr_jStr,gr_kStr,&
        gr_iStrType,gr_jStrType,gr_kStrType,&
        gr_iStrPar,gr_jStrPar,gr_kStrPar,&
-       gr_iMetrics,gr_jMetrics,gr_kMetrics
-
+       gr_iMetrics,gr_jMetrics,gr_kMetrics,&
+       gr_iMetricsGlb,gr_jMetricsGlb,gr_kMetricsGlb,&
+       gr_iCoordsGlb, gr_jCoordsGlb, gr_kCoordsGlb
   
   implicit none
 
@@ -265,8 +266,8 @@ subroutine gr_createDomain()
   gr_iMetricsGlb(CENTER,1:gI,1)       = 1.0 / (gr_iCoordsGlb(RIGHT_EDGE,1:gI,1) - gr_iCoordsGlb(LEFT_EDGE,1:gI,1))
   gr_iMetricsGlb(RIGHT_EDGE,1:gI-1,1) = 1.0 / (gr_iCoordsGlb(CENTER,2:gI,1)     - gr_iCoordsGlb(CENTER,1:gI-1,1))
   gr_iMetricsGlb(RIGHT_EDGE,gI,1)     = 2.0 / (-3.0*gr_iCoordsGlb(RIGHT_EDGE,gI,1) + 4.0*gr_iCoordsGlb(RIGHT_EDGE,gI-1,1) - gr_iCoordsGlb(RIGHT_EDGE,gI-2,1))
-  gr_iMetricsGlb(LEFT_EDGE, 2:gI,1)   = 1.0 / (gr_iCoordsGbl(CENTER,2:gI,1)     - gr_iCoordsGbl(CENTER,1:gI-1,1))
-  gr_iMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_iCoordsGbl(LEFT_EDGE,1,1)   + 4.0*gr_iCoordsGbl(LEFT_EDGE,2,1)     - gr_iCoordsGbl(LEFT_EDGE,3,1))
+  gr_iMetricsGlb(LEFT_EDGE, 2:gI,1)   = 1.0 / (gr_iCoordsGlb(CENTER,2:gI,1)     - gr_iCoordsGlb(CENTER,1:gI-1,1))
+  gr_iMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_iCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_iCoordsGlb(LEFT_EDGE,2,1)     - gr_iCoordsGlb(LEFT_EDGE,3,1))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Create y grid coordinates and metrics
@@ -302,10 +303,10 @@ subroutine gr_createDomain()
         ! calculate global cell JAXIS coordinates
         j = 0
         do i = 1,gJ
-          gr_jCoordsGbl(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
-          gr_jCoordsGbl(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoordsGlb(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoordsGlb(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
           j = j+1
-          gr_jCoordsGbl(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoordsGlb(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
         end do
       
       case default
@@ -356,8 +357,8 @@ subroutine gr_createDomain()
     gr_jMetricsGlb(CENTER,1:gJ,1)       = 1.0 / (gr_jCoordsGlb(RIGHT_EDGE,1:gJ,1) - gr_jCoordsGlb(LEFT_EDGE,1:gJ,1))
     gr_jMetricsGlb(RIGHT_EDGE,1:gJ-1,1) = 1.0 / (gr_jCoordsGlb(CENTER,2:gJ,1)     - gr_jCoordsGlb(CENTER,1:gJ-1,1))
     gr_jMetricsGlb(RIGHT_EDGE,gJ,1)     = 2.0 / (-3.0*gr_jCoordsGlb(RIGHT_EDGE,gJ,1) + 4.0*gr_jCoordsGlb(RIGHT_EDGE,gJ-1,1) - gr_jCoordsGlb(RIGHT_EDGE,gJ-2,1))
-    gr_jMetricsGlb(LEFT_EDGE, 2:gJ,1)   = 1.0 / (gr_jCoordsGbl(CENTER,2:gJ,1)     - gr_jCoordsGbl(CENTER,1:gJ-1,1))
-    gr_jMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_jCoordsGbl(LEFT_EDGE,1,1)   + 4.0*gr_jCoordsGbl(LEFT_EDGE,2,1)     - gr_jCoordsGbl(LEFT_EDGE,3,1))
+    gr_jMetricsGlb(LEFT_EDGE, 2:gJ,1)   = 1.0 / (gr_jCoordsGlb(CENTER,2:gJ,1)     - gr_jCoordsGlb(CENTER,1:gJ-1,1))
+    gr_jMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_jCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_jCoordsGlb(LEFT_EDGE,2,1)     - gr_jCoordsGlb(LEFT_EDGE,3,1))
 
   else ! 1d simulation
 
@@ -403,7 +404,7 @@ subroutine gr_createDomain()
           gr_kCoordsGlb(LEFT_EDGE,i,1)  = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
           gr_kCoordsGlb(CENTER,i,1)     = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)+halfDelta)*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
           j = j+1
-          gr_kCoordsGbl(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
+          gr_kCoordsGlb(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
         end do
       
       case default
@@ -431,10 +432,10 @@ subroutine gr_createDomain()
      ! calculate global cell KAXIS coordinates
      j = 0
      do i = 1,gK
-       gr_kCoordsGbl(LEFT_EDGE,i,1) = gr_kmin+j*gr_delta(KAXIS)
-       gr_kCoordsGbl(CENTER,i,1) = gr_kmin+j*gr_delta(KAXIS)+halfDelta
+       gr_kCoordsGlb(LEFT_EDGE,i,1) = gr_kmin+j*gr_delta(KAXIS)
+       gr_kCoordsGlb(CENTER,i,1) = gr_kmin+j*gr_delta(KAXIS)+halfDelta
        j = j+1
-       gr_kCoordsGbl(RIGHT_EDGE,i,1) = gr_kmin+j*gr_delta(KAXIS)
+       gr_kCoordsGlb(RIGHT_EDGE,i,1) = gr_kmin+j*gr_delta(KAXIS)
      end do
 
     end if    
@@ -454,8 +455,8 @@ subroutine gr_createDomain()
     gr_kMetricsGlb(CENTER,1:gK,1)       = 1.0 / (gr_kCoordsGlb(RIGHT_EDGE,1:gK,1) - gr_kCoordsGlb(LEFT_EDGE,1:gK,1))
     gr_kMetricsGlb(RIGHT_EDGE,1:gK-1,1) = 1.0 / (gr_kCoordsGlb(CENTER,2:gK,1)     - gr_kCoordsGlb(CENTER,1:gK-1,1))
     gr_kMetricsGlb(RIGHT_EDGE,gK,1)     = 2.0 / (-3.0*gr_kCoordsGlb(RIGHT_EDGE,gK,1) + 4.0*gr_kCoordsGlb(RIGHT_EDGE,gK-1,1) - gr_kCoordsGlb(RIGHT_EDGE,gK-2,1))
-    gr_kMetricsGlb(LEFT_EDGE, 2:gK,1)   = 1.0 / (gr_kCoordsGbl(CENTER,2:gK,1)     - gr_kCoordsGbl(CENTER,1:gK-1,1))
-    gr_kMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_kCoordsGbl(LEFT_EDGE,1,1)   + 4.0*gr_kCoordsGbl(LEFT_EDGE,2,1)     - gr_kCoordsGbl(LEFT_EDGE,3,1))
+    gr_kMetricsGlb(LEFT_EDGE, 2:gK,1)   = 1.0 / (gr_kCoordsGlb(CENTER,2:gK,1)     - gr_kCoordsGlb(CENTER,1:gK-1,1))
+    gr_kMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_kCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_kCoordsGlb(LEFT_EDGE,2,1)     - gr_kCoordsGlb(LEFT_EDGE,3,1))
 
   else ! 2d simulation
 
