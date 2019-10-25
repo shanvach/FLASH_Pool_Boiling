@@ -1,5 +1,5 @@
-SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold,&
-        wold,p,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,gama,rhoa,alfa)
+SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
+                         wold,p,dt,dx,dy,dz,ix1,ix2,jy1,jy2,kz1,kz2,gama,rhoa,alfa)
 
       ! This routine computes the intermediate velocities based on
       ! the explicit second-order Adams-Bashforth scheme (gamma=1.5,
@@ -9,39 +9,45 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold,&
                                 ins_gravX,ins_gravY,ins_gravZ
 
       implicit none
+
 #include "Flash.h"
 #include "constants.h"
 
       INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
-      REAL, INTENT(IN) :: dt,dx,dy,dz
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: unew,vnew,wnew,&
-                                            uold,vold,wold,&
-                                            p
+      REAL, INTENT(IN) :: dt, gama,rhoa,alfa
+      REAL, DIMENSION(:), INTENT(IN) :: dx,dy,dz
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: unew,vnew,wnew,uold,vold,wold,p
       REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni
 
-      REAL :: gama,rhoa,alfa
+      INTEGER :: i,j,k
 
-      uni(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
-         dt*(gama*unew(ix1:ix2+1,jy1:jy2,kz1:kz2)                     + &
-             rhoa*uold(ix1:ix2+1,jy1:jy2,kz1:kz2)                     - &
-             ins_prescoeff*alfa*(( p(ix1:ix2+1,jy1:jy2,kz1:kz2) -       &
-                                   p(ix1-1:ix2,jy1:jy2,kz1:kz2) )/dx) - &
-                           alfa*ins_dpdx + alfa*ins_gravX)
+      do k = kz1,kz2
+        do j = jy1,jy2
+          uni(ix1:ix2+1,j,k) = uni(ix1:ix2+1,j,k) + dt*(                               &
+            gama*unew(ix1:ix2+1,j,k) + rhoa*uold(ix1:ix2+1,j,k) -                      &
+            ins_prescoeff*alfa*dx(ix1:ix2+1)*(p(ix1:ix2+1,j,k) - p(ix1-1:ix2,j:j,k)) - &
+            alfa*ins_dpdx + alfa*ins_gravX )
+        end do
+      end do
 
-      vni(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
-         dt*(gama*vnew(ix1:ix2,jy1:jy2+1,kz1:kz2)                     + &
-             rhoa*vold(ix1:ix2,jy1:jy2+1,kz1:kz2)                     - &
-             ins_prescoeff*alfa*(( p(ix1:ix2,jy1:jy2+1,kz1:kz2) -       &
-                                   p(ix1:ix2,jy1-1:jy2,kz1:kz2) )/dy) - &
-                           alfa*ins_dpdy + alfa*ins_gravY)    
+      do k = kz1,kz2
+        do i = ix1,ix2
+          vni(i,jy1:jy2+1,k) = vni(i,jy1:jy2+1,k) + dt*(                             &
+            gama*vnew(i,jy1:jy2+1,k) + rhoa*vold(i,jy1:jy2+1,k) -                    &
+            ins_prescoeff*alfa*dy(jy1:jy2+1)*(p(i,jy1:jy2+1,k) - p(i,jy1-1:jy2,k)) - &
+            alfa*ins_dpdy + alfa*ins_gravY )
+        end do
+      end do    
 
 #if NDIM == MDIM
-      wni(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
-         dt*(gama*wnew(ix1:ix2,jy1:jy2,kz1:kz2+1)                     + &
-             rhoa*wold(ix1:ix2,jy1:jy2,kz1:kz2+1)                     - &
-             ins_prescoeff*alfa*(( p(ix1:ix2,jy1:jy2,kz1:kz2+1) -       &
-                                   p(ix1:ix2,jy1:jy2,kz1-1:kz2) )/dz) - &
-                           alfa*ins_dpdz + alfa*ins_gravZ)
+      do j = jy1,jy2
+        do i = ix1,ix2
+          wni(i,j,kz1:kz2+1) = wni(i,j,kz1:kz2+1) + dt*(                             &
+            gama*wnew(i,j,kz1:kz2+1) + rhoa*wold(i,j,kz1:kz2+1) -                    &
+            ins_prescoeff*alfa*dz(kz1:kz2+1)*(p(i,j,kz1:kz2+1) - p(i,j,kz1-1:kz2)) - &
+            alfa*ins_dpdz + alfa*ins_gravZ )
+        end do
+      end do
 #endif
 
 END SUBROUTINE ins_predictor
@@ -49,33 +55,36 @@ END SUBROUTINE ins_predictor
 !########################################################################
 
 SUBROUTINE ins_divergence(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
-         dx,dy,dz,divv)
+                          dx,dy,dz,divv)
 
       ! This routine computes the divergence of the velocity field.
 
       implicit none
+
 #include "Flash.h"
 #include "constants.h"
 
       INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
-      REAL, INTENT(IN) :: dx,dy,dz
+      REAL, DIMENSION(:), INTENT(IN) :: dx,dy,dz
       REAL, DIMENSION(:,:,:), INTENT(IN) :: uni,vni,wni
       REAL, DIMENSION(:,:,:), INTENT(OUT) :: divv
+      
+      INTEGER :: i, j, k
 
-
-      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           & 
-         ( uni(ix1+1:ix2+1,jy1:jy2,kz1:kz2) -   &
-           uni(ix1:ix2,jy1:jy2,kz1:kz2) )/dx +  &       
-         ( vni(ix1:ix2,jy1+1:jy2+1,kz1:kz2) -   &
-           vni(ix1:ix2,jy1:jy2,kz1:kz2) )/dy
-
-
+      do k = kz1,kz2
+        do j = jy1,jy2
+          do i = ix1,ix2
 #if NDIM == MDIM
-      divv(ix1:ix2,jy1:jy2,kz1:kz2) =           & 
-           divv(ix1:ix2,jy1:jy2,kz1:kz2)     +  &
-         ( wni(ix1:ix2,jy1:jy2,kz1+1:kz2+1) -   &
-           wni(ix1:ix2,jy1:jy2,kz1:kz2) )/dz 
+            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
+                          dy(j) * (vni(i,j+1,k) - vni(i,j,k)) + &
+                          dz(k) * (wni(i,j,k+1) - wni(i,j,k))
+#else
+            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
+                          dy(j) * (vni(i,j+1,k) - vni(i,j,k))
 #endif
+          end do
+        end do
+      end do  
 
 END SUBROUTINE ins_divergence
 
@@ -92,29 +101,34 @@ SUBROUTINE ins_corrector(uni,vni,wni,p,ix1,ix2,jy1,jy2,kz1,kz2, &
 #include "constants.h"
 
       INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
-      REAL, INTENT(IN) :: dt,dx,dy,dz,alfa
+      REAL, INTENT(IN) :: dt,alfa
+      REAL, DIMENSION(:), INTENT(IN) :: dx,dy,dz
       REAL, DIMENSION(:,:,:), INTENT(IN) :: p
       REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni
 
-      REAL :: coef
+      INTEGER :: i,j,k
 
-      coef = dt*alfa
+      do k = kz1,kz2
+        do j = jy1,jy2
+          uni(ix1+1:ix2,j,k) = uni(ix1+1:ix2,j,k) - &
+            dt*alfa*dx(ix1+1:ix2)*( p(ix1+1:ix2,j,k) - p(ix1:ix2-1,j,k) )
+        end do
+      end do
 
-      uni(ix1+1:ix2,jy1:jy2,kz1:kz2) =             & 
-         uni(ix1+1:ix2,jy1:jy2,kz1:kz2) -          &
-         coef*( p(ix1+1:ix2,jy1:jy2,kz1:kz2) -     &
-                p(ix1:ix2-1,jy1:jy2,kz1:kz2) )/dx
-
-      vni(ix1:ix2,jy1+1:jy2,kz1:kz2) =             &
-         vni(ix1:ix2,jy1+1:jy2,kz1:kz2) -          &
-         coef*( p(ix1:ix2,jy1+1:jy2,kz1:kz2) -     &
-                p(ix1:ix2,jy1:jy2-1,kz1:kz2) )/dy
+      do k = kz1,kz2
+        do i = ix1,ix2
+          vni(i,jy1+1:jy2,k) = vni(i,jy1+1:jy2,k) - &
+            dt*alfa*dy(jy1+1:jy2)*( p(i,jy1+1:jy2,k) - p(i,jy1:jy2-1,k) )
+        end do
+      end do
 
 #if NDIM == MDIM
-      wni(ix1:ix2,jy1:jy2,kz1+1:kz2) =             &
-         wni(ix1:ix2,jy1:jy2,kz1+1:kz2) -          &
-         coef*( p(ix1:ix2,jy1:jy2,kz1+1:kz2) -     &
-                p(ix1:ix2,jy1:jy2,kz1:kz2-1) )/dz
+      do j = jy1,jy2
+        do i = ix1,ix2
+          wni(ix1:ix2,jy1:jy2,kz1+1:kz2) = wni(i,j,kz1+1:kz2) - &
+            dt*alfa*dz(kz1+1:kz2)*( p(i,j,kz1+1:kz2) - p(i,j,kz1:kz2-1) )
+        end do
+      end do
 #endif
 
 END SUBROUTINE ins_corrector

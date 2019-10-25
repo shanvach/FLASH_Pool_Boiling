@@ -54,7 +54,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                              Grid_conserveFluxes,    &
                              Grid_conserveField,     &
                              Grid_updateRefinement,  &
-                             Grid_solvePoisson, Grid_getBlkBoundBox, Grid_getBlkCenterCoords
+                             Grid_solvePoisson,      &
+                             Grid_getBlkBoundBox,    &
+                             Grid_getBlkCenterCoords,&
+                             Grid_getCellMetrics
 
   use gr_interface, ONLY : gr_findMean
 
@@ -116,6 +119,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   real, dimension(GRID_IHI_GC,GRID_JHI_GC+1,GRID_KHI_GC) :: newv
   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC+1) :: neww
 
+  real, dimension(3,GRID_IHI_GC,blockCount) :: iMetrics
+  real, dimension(3,GRID_JHI_GC,blockCount) :: jMetrics
+  real, dimension(3,GRID_KHI_GC,blockCount) :: kMetrics
+
   integer TA(2),count_rate
   real*8  ET
 
@@ -128,7 +135,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   integer datasize(MDIM)
 
   integer nxc, nyc, nzc
-  real del(MDIM)
 
   integer, dimension(6) :: bc_types
   integer :: idimn,ibound,eachBoundary
@@ -187,7 +193,24 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      ins_vardt(i) = ins_vardt(i+1)
   end do
   ins_vardt(0) = dt
- 
+
+  ! Get blk cell metrics by direction from Grid Unit 
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+     
+     call Grid_getCellMetrics(IAXIS,blockID,LEFT_EDGE, .true.,iMetrics(LEFT_EDGE,:,blockID), GRID_IHI_GC) 
+     call Grid_getCellMetrics(IAXIS,blockID,CENTER,    .true.,iMetrics(CENTER,:,blockID),    GRID_IHI_GC) 
+     call Grid_getCellMetrics(IAXIS,blockID,RIGHT_EDGE,.true.,iMetrics(RIGHT_EDGE,:,blockID),GRID_IHI_GC) 
+
+     call Grid_getCellMetrics(JAXIS,blockID,LEFT_EDGE, .true.,jMetrics(LEFT_EDGE,:,blockID), GRID_JHI_GC) 
+     call Grid_getCellMetrics(JAXIS,blockID,CENTER,    .true.,jMetrics(CENTER,:,blockID),    GRID_JHI_GC) 
+     call Grid_getCellMetrics(JAXIS,blockID,RIGHT_EDGE,.true.,jMetrics(RIGHT_EDGE,:,blockID),GRID_JHI_GC) 
+
+     call Grid_getCellMetrics(KAXIS,blockID,LEFT_EDGE, .true.,kMetrics(LEFT_EDGE,:,blockID), GRID_KHI_GC) 
+     call Grid_getCellMetrics(KAXIS,blockID,CENTER,    .true.,kMetrics(CENTER,:,blockID),    GRID_KHI_GC) 
+     call Grid_getCellMetrics(KAXIS,blockID,RIGHT_EDGE,.true.,kMetrics(RIGHT_EDGE,:,blockID),GRID_KHI_GC) 
+
+  end do
 
   ! Select Euler step (for starting) of Adams-Bashforth coefficients
   ! 2nd order Adams Bashforth coefficients (for constant timestep only):
@@ -240,7 +263,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   ins_alf = ins_gam + ins_rho
   ins_tlevel = timeEndAdv - dt
-  del = 1.0
 
   ! Timestep Loop:
   do ist = 1,itmx
@@ -262,48 +284,48 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   ! TURBULENT VISCOSITY COMPUTATION:
   ! --------- --------- -----------
-#if NDIM == 3
-  if (ins_isgs .NE. 0) then
-     do lb = 1,blockCount
-        blockID = blockList(lb)
-
-        ! Get blocks coord and bsize
-        ! Bounding box:
-        call Grid_getBlkBoundBox(blockId,boundBox)
-        bsize(1:NDIM) = boundBox(2,1:NDIM) - boundBox(1,1:NDIM)
-
-        call Grid_getBlkCenterCoords(blockId,coord)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-        ! calculate turbulent viscosity
-        call ins_vt(ins_isgs,NGUARD,nxc,nyc,nzc,                   &
-                    ins_invsqrtRa_Pr,                              &
-                    del(DIR_X),del(DIR_Y),del(DIR_Z),              &
-                    coord,bsize,                                   &
-                    facexData,&
-                    faceyData,&
-                    facezData,&
-                    solnData)            
-
-        ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-
-     enddo
-     ! apply BC and fill guardcells for turbulent viscosity
-     gcMask = .FALSE.
-     gcMask(TVIS_VAR) = .TRUE.                            ! only turbulent viscosity
-     call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)             
-  endif
-#endif
+!#if NDIM == 3
+!  if (ins_isgs .NE. 0) then
+!     do lb = 1,blockCount
+!        blockID = blockList(lb)
+!
+!        ! Get blocks coord and bsize
+!        ! Bounding box:
+!        call Grid_getBlkBoundBox(blockId,boundBox)
+!        bsize(1:NDIM) = boundBox(2,1:NDIM) - boundBox(1,1:NDIM)
+!
+!        call Grid_getBlkCenterCoords(blockId,coord)
+!
+!        ! Point to blocks center and face vars:
+!        call Grid_getBlkPtr(blockID,solnData,CENTER)
+!        call Grid_getBlkPtr(blockID,facexData,FACEX)
+!        call Grid_getBlkPtr(blockID,faceyData,FACEY)
+!        call Grid_getBlkPtr(blockID,facezData,FACEZ)
+!
+!        ! calculate turbulent viscosity
+!         call ins_vt(ins_isgs,NGUARD,nxc,nyc,nzc,                   &
+!                     ins_invsqrtRa_Pr,                              &
+!                     del(DIR_X),del(DIR_Y),del(DIR_Z),              &
+!                     coord,bsize,                                   &
+!                     facexData,&
+!                     faceyData,&
+!                     facezData,&
+!                     solnData)            
+!
+!        ! Release pointers:
+!        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+!        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+!        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+!        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+!
+!     enddo
+!     ! apply BC and fill guardcells for turbulent viscosity
+!     gcMask = .FALSE.
+!     gcMask(TVIS_VAR) = .TRUE.                            ! only turbulent viscosity
+!     call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)             
+!  endif
+!#endif
 
 !!$  CALL SYSTEM_CLOCK(TA(1),count_rate)  
 
@@ -339,17 +361,21 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z),newu,newv,neww )
+                       iMetrics(:,:,blockID),                     &
+                       jMetrics(:,:,blockID),                     &
+                       kMetrics(:,:,blockID),                     &
+                       newu,newv,neww )
 
 #elif NDIM ==2
      ! compute RHS of momentum equation
-     call ins_rhs2d(  facexData(VELC_FACE_VAR,:,:,:),            &
-                      faceyData(VELC_FACE_VAR,:,:,:),            &
-                      solnData(TEMP_VAR,:,:,:),                  &
-                      ins_invsqrtRa_Pr,                          &
-                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                      del(DIR_X),del(DIR_Y),newu,newv)
+     call ins_rhs2d(  facexData(VELC_FACE_VAR,:,:,:),             &
+                      faceyData(VELC_FACE_VAR,:,:,:),             &
+                      solnData(TEMP_VAR,:,:,:),                   &
+                      ins_invsqrtRa_Pr,                           &
+                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
+                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
+                      iMetrics(:,:,blockID),jMetrics(:,:,blockID),&
+                      newu,newv)
      
 #endif
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
@@ -361,8 +387,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                         facexData(RHDS_FACE_VAR,:,:,:),&
                         faceyData(RHDS_FACE_VAR,:,:,:),&
                         facezData(RHDS_FACE_VAR,:,:,:),&
-                        solnData(PRES_VAR,:,:,:),      &
-                        dt,del(DIR_X),del(DIR_Y),del(DIR_Z),      & 
+                        solnData(PRES_VAR,:,:,:),dt,   &
+                        iMetrics(LEFT_EDGE,:,blockID), &
+                        jMetrics(LEFT_EDGE,:,blockID), &
+                        kMetrics(LEFT_EDGE,:,blockID), &
             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -509,8 +537,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
-                       solnData(DUST_VAR,:,:,:) )
+                         iMetrics(CENTER,:,blockID),    &
+                         jMetrics(CENTER,:,blockID),    &
+                         kMetrics(CENTER,:,blockID),    &
+                         solnData(DUST_VAR,:,:,:) )
 
 
      ! Poisson RHS source vector
@@ -571,11 +601,15 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      call ins_corrector( facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
-                         solnData(DELP_VAR,:,:,:),& 
+                         solnData(DELP_VAR,:,:,:),      & 
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                         dt,del(DIR_X),del(DIR_Y),del(DIR_Z),ins_alfa)
+                         dt,                            & 
+                         iMetrics(LEFT_EDGE,:,blockID), &
+                         jMetrics(LEFT_EDGE,:,blockID), &
+                         kMetrics(LEFT_EDGE,:,blockID), &
+                         ins_alfa)
 
      ! update pressure
      solnData(PRES_VAR,:,:,:) = ins_prescoeff*solnData(PRES_VAR,:,:,:) + &
@@ -633,9 +667,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
      blockID = blockList(lb)
 
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,scratchData,SCRATCH_CTR)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
@@ -650,8 +681,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
-                       scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
+                         iMetrics(CENTER,:,blockID),    &
+                         jMetrics(CENTER,:,blockID),    &
+                         kMetrics(CENTER,:,blockID),    &
+             scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
 
   mxdivv = max( mxdivv, maxval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
   mndivv = min( mndivv, minval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 

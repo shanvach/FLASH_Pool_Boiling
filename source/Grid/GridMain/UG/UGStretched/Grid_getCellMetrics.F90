@@ -145,7 +145,7 @@ subroutine Grid_getCellMetrics(axis, blockId, edge, guardcell, metrics, size)
      print*,"Get Coords :invalid blockid "
      call Driver_abortFlash("Get Metrics :invalid blockid ")
   end if
-  if(.not.((edge==FACEX).or.(edge==FACEY).or.(edge==FACEZ).or.(edge==CENTER))) then
+  if(.not.((edge==LEFT_EDGE).or.(edge==CENTER).or.(edge==RIGHT_EDGE))) then
      print*,"Get Metrics : invalid edge specification"
      call Driver_abortFlash("Get Metrics : invalid edge specification")
   end if
