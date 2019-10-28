@@ -5,7 +5,7 @@
 REQUIRES physics/IncompNS
 REQUIRES physics/IncompNS/IncompNSMain/boussinesq_stretch
 REQUIRES physics/Heat_AD
-REQUIRES physics/Heat_AD/Heat_ADMain/boussinesq
+REQUIRES physics/Heat_AD/Heat_ADMain/boussinesq_stretch
 
 USESETUPVARS Grid
 
@@ -34,4 +34,4 @@ ENDIF
 # ----------------------------------------------
 
 # Number of guardcells at each boundary
-GUARDCELLS 2
+GUARDCELLS 1

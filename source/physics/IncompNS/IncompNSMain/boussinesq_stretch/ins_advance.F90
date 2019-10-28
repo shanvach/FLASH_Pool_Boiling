@@ -7,6 +7,9 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
 
       use IncompNS_data, ONLY : ins_prescoeff,ins_dpdx,ins_dpdy,ins_dpdz, &
                                 ins_gravX,ins_gravY,ins_gravZ
+      
+      use Simulation_data, ONLY : sim_xMin, sim_yMin, sim_zMin, &
+                                  sim_xMax, sim_yMax, sim_zMax
 
       implicit none
 
@@ -20,13 +23,19 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
       REAL, DIMENSION(:,:,:), INTENT(IN OUT) :: uni,vni,wni
 
       INTEGER :: i,j,k
+      REAL    :: dpx, dpy, dpz
+
+      ! calculate delta press to correct for stretched grid
+      dpx = ins_dpdx * (sim_xMax - sim_xMin)
+      dpy = ins_dpdy * (sim_yMax - sim_yMin)
+      dpz = ins_dpdz * (sim_zMax - sim_zMin)
 
       do k = kz1,kz2
         do j = jy1,jy2
-          uni(ix1:ix2+1,j,k) = uni(ix1:ix2+1,j,k) + dt*(                               &
-            gama*unew(ix1:ix2+1,j,k) + rhoa*uold(ix1:ix2+1,j,k) -                      &
-            ins_prescoeff*alfa*dx(ix1:ix2+1)*(p(ix1:ix2+1,j,k) - p(ix1-1:ix2,j:j,k)) - &
-            alfa*ins_dpdx + alfa*ins_gravX )
+          uni(ix1:ix2+1,j,k) = uni(ix1:ix2+1,j,k) + dt*(                             &
+            gama*unew(ix1:ix2+1,j,k) + rhoa*uold(ix1:ix2+1,j,k) -                    &
+            ins_prescoeff*alfa*dx(ix1:ix2+1)*(p(ix1:ix2+1,j,k) - p(ix1-1:ix2,j,k)) - &
+            alfa*dpx*dx(ix1:ix2+1) + alfa*ins_gravX )
         end do
       end do
 
@@ -35,7 +44,7 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
           vni(i,jy1:jy2+1,k) = vni(i,jy1:jy2+1,k) + dt*(                             &
             gama*vnew(i,jy1:jy2+1,k) + rhoa*vold(i,jy1:jy2+1,k) -                    &
             ins_prescoeff*alfa*dy(jy1:jy2+1)*(p(i,jy1:jy2+1,k) - p(i,jy1-1:jy2,k)) - &
-            alfa*ins_dpdy + alfa*ins_gravY )
+            alfa*dpy*dy(jy1:jy2+1) + alfa*ins_gravY )
         end do
       end do    
 
@@ -45,7 +54,7 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
           wni(i,j,kz1:kz2+1) = wni(i,j,kz1:kz2+1) + dt*(                             &
             gama*wnew(i,j,kz1:kz2+1) + rhoa*wold(i,j,kz1:kz2+1) -                    &
             ins_prescoeff*alfa*dz(kz1:kz2+1)*(p(i,j,kz1:kz2+1) - p(i,j,kz1-1:kz2)) - &
-            alfa*ins_dpdz + alfa*ins_gravZ )
+            alfa*dpz*dz(kz1:kz2+1) + alfa*ins_gravZ )
         end do
       end do
 #endif

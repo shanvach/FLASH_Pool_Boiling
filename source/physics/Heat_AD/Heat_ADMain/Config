@@ -1,4 +1,4 @@
 DEFAULT constdens
 
-CHILDORDER vardens constdens boussinesq
+CHILDORDER vardens constdens boussinesq boussinesq_stretch
 

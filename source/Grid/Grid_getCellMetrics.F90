@@ -107,7 +107,7 @@ subroutine Grid_getCellMetrics(axis, blockId, edge, guardcell, metrics, size)
   integer, intent(in) :: size
   logical, intent(in) :: guardcell
   real,    intent(out), dimension(size) :: metrics
-  metrics = 0.0
+  metrics = 1.0
   return
 end subroutine Grid_getCellMetrics
 

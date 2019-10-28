@@ -67,14 +67,12 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                        ins_predictor,&
                       ins_divergence,&
                        ins_corrector,&
-                         ins_fluxfix,&
-                       ins_fluxfix_p,&
-                   ins_computeQinout,&
-                   ins_rescaleVelout,&
-                   ins_convectVelout,&
-              ins_setInterpValsGcell,&
-                      ins_UstarStats,&
-                  ins_pressgradients
+                   !ins_computeQinout,&
+                   !ins_rescaleVelout,&
+                   !ins_convectVelout,&
+              !ins_setInterpValsGcell,&
+                      ins_UstarStats!,&
+                  !ins_pressgradients
 
   use IncompNS_data, ONLY : ins_isgs, ins_invsqrtRa_Pr,                                 &
                             ins_intschm, ins_prescoeff, ins_meshMe,                     &
@@ -119,9 +117,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   real, dimension(GRID_IHI_GC,GRID_JHI_GC+1,GRID_KHI_GC) :: newv
   real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC+1) :: neww
 
-  real, dimension(3,GRID_IHI_GC,blockCount) :: iMetrics
-  real, dimension(3,GRID_JHI_GC,blockCount) :: jMetrics
-  real, dimension(3,GRID_KHI_GC,blockCount) :: kMetrics
+  real, dimension(GRID_IHI_GC,3,blockCount) :: iMetrics
+  real, dimension(GRID_JHI_GC,3,blockCount) :: jMetrics
+  real, dimension(GRID_KHI_GC,3,blockCount) :: kMetrics
 
   integer TA(2),count_rate
   real*8  ET
@@ -198,17 +196,17 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   do lb = 1,blockCount
      blockID = blockList(lb)
      
-     call Grid_getCellMetrics(IAXIS,blockID,LEFT_EDGE, .true.,iMetrics(LEFT_EDGE,:,blockID), GRID_IHI_GC) 
-     call Grid_getCellMetrics(IAXIS,blockID,CENTER,    .true.,iMetrics(CENTER,:,blockID),    GRID_IHI_GC) 
-     call Grid_getCellMetrics(IAXIS,blockID,RIGHT_EDGE,.true.,iMetrics(RIGHT_EDGE,:,blockID),GRID_IHI_GC) 
+     call Grid_getCellMetrics(IAXIS,blockID,LEFT_EDGE, .true.,iMetrics(:,LEFT_EDGE,lb), GRID_IHI_GC) 
+     call Grid_getCellMetrics(IAXIS,blockID,CENTER,    .true.,iMetrics(:,CENTER,lb),    GRID_IHI_GC) 
+     call Grid_getCellMetrics(IAXIS,blockID,RIGHT_EDGE,.true.,iMetrics(:,RIGHT_EDGE,lb),GRID_IHI_GC) 
 
-     call Grid_getCellMetrics(JAXIS,blockID,LEFT_EDGE, .true.,jMetrics(LEFT_EDGE,:,blockID), GRID_JHI_GC) 
-     call Grid_getCellMetrics(JAXIS,blockID,CENTER,    .true.,jMetrics(CENTER,:,blockID),    GRID_JHI_GC) 
-     call Grid_getCellMetrics(JAXIS,blockID,RIGHT_EDGE,.true.,jMetrics(RIGHT_EDGE,:,blockID),GRID_JHI_GC) 
+     call Grid_getCellMetrics(JAXIS,blockID,LEFT_EDGE, .true.,jMetrics(:,LEFT_EDGE,lb), GRID_JHI_GC) 
+     call Grid_getCellMetrics(JAXIS,blockID,CENTER,    .true.,jMetrics(:,CENTER,lb),    GRID_JHI_GC) 
+     call Grid_getCellMetrics(JAXIS,blockID,RIGHT_EDGE,.true.,jMetrics(:,RIGHT_EDGE,lb),GRID_JHI_GC) 
 
-     call Grid_getCellMetrics(KAXIS,blockID,LEFT_EDGE, .true.,kMetrics(LEFT_EDGE,:,blockID), GRID_KHI_GC) 
-     call Grid_getCellMetrics(KAXIS,blockID,CENTER,    .true.,kMetrics(CENTER,:,blockID),    GRID_KHI_GC) 
-     call Grid_getCellMetrics(KAXIS,blockID,RIGHT_EDGE,.true.,kMetrics(RIGHT_EDGE,:,blockID),GRID_KHI_GC) 
+     call Grid_getCellMetrics(KAXIS,blockID,LEFT_EDGE, .true.,kMetrics(:,LEFT_EDGE,lb), GRID_KHI_GC) 
+     call Grid_getCellMetrics(KAXIS,blockID,CENTER,    .true.,kMetrics(:,CENTER,lb),    GRID_KHI_GC) 
+     call Grid_getCellMetrics(KAXIS,blockID,RIGHT_EDGE,.true.,kMetrics(:,RIGHT_EDGE,lb),GRID_KHI_GC) 
 
   end do
 
@@ -331,7 +329,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
 
   ! Compute forcing pressure gradients if required:
-  call ins_pressgradients(ins_tlevel,ins_alfa*dt)
+  !call ins_pressgradients(ins_tlevel,ins_alfa*dt)
 
 
   call Timers_start("RightHandSide_Predictor")
@@ -361,9 +359,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       iMetrics(:,:,blockID),                     &
-                       jMetrics(:,:,blockID),                     &
-                       kMetrics(:,:,blockID),                     &
+                       iMetrics(:,:,lb),                          &
+                       jMetrics(:,:,lb),                          &
+                       kMetrics(:,:,lb),                          &
                        newu,newv,neww )
 
 #elif NDIM ==2
@@ -374,7 +372,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                       ins_invsqrtRa_Pr,                           &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                      iMetrics(:,:,blockID),jMetrics(:,:,blockID),&
+                      iMetrics(:,:,lb),jMetrics(:,:,lb),          &
                       newu,newv)
      
 #endif
@@ -387,10 +385,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                         facexData(RHDS_FACE_VAR,:,:,:),&
                         faceyData(RHDS_FACE_VAR,:,:,:),&
                         facezData(RHDS_FACE_VAR,:,:,:),&
-                        solnData(PRES_VAR,:,:,:),dt,   &
-                        iMetrics(LEFT_EDGE,:,blockID), &
-                        jMetrics(LEFT_EDGE,:,blockID), &
-                        kMetrics(LEFT_EDGE,:,blockID), &
+                        solnData(PRES_VAR,:,:,:), dt,  &
+                        iMetrics(:,LEFT_EDGE,lb), &
+                        jMetrics(:,LEFT_EDGE,lb), &
+                        kMetrics(:,LEFT_EDGE,lb), &
             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -501,16 +499,16 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   call Timers_stop("Immersed Boundaries.")
 
   ! Compute inflow volume ratio: (Not computed on NOT_BOUNDARY, NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .true., ins_Qin)  ! Shizhao
+  !call ins_computeQinout( blockCount, blockList, .true., ins_Qin)  ! Shizhao
 
   ! Compute DivUstar - delta_mass and print to screen, add to ins_Qin:
   call ins_UstarStats( blockCount, blockList, .true., .true.)
 
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
+  !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
 
   ! Rescale Velocities at outflows for overall conservation: 
-  call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout)
+  !call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout)
 
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----
@@ -537,9 +535,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                         iMetrics(CENTER,:,blockID),    &
-                         jMetrics(CENTER,:,blockID),    &
-                         kMetrics(CENTER,:,blockID),    &
+                         iMetrics(:,CENTER,lb),         &
+                         jMetrics(:,CENTER,lb),         &
+                         kMetrics(:,CENTER,lb),         &
                          solnData(DUST_VAR,:,:,:) )
 
 
@@ -606,9 +604,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                          dt,                            & 
-                         iMetrics(LEFT_EDGE,:,blockID), &
-                         jMetrics(LEFT_EDGE,:,blockID), &
-                         kMetrics(LEFT_EDGE,:,blockID), &
+                         iMetrics(:,LEFT_EDGE,blockID), &
+                         jMetrics(:,LEFT_EDGE,blockID), &
+                         kMetrics(:,LEFT_EDGE,blockID), &
                          ins_alfa)
 
      ! update pressure
@@ -681,9 +679,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                         iMetrics(CENTER,:,blockID),    &
-                         jMetrics(CENTER,:,blockID),    &
-                         kMetrics(CENTER,:,blockID),    &
+                         iMetrics(:,CENTER,blockID),    &
+                         jMetrics(:,CENTER,blockID),    &
+                         kMetrics(:,CENTER,blockID),    &
              scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
 
   mxdivv = max( mxdivv, maxval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 

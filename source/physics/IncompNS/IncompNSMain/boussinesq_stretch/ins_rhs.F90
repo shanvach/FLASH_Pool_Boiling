@@ -18,13 +18,16 @@
       use IncompNS_data, ONLY : ins_isCoupled
 
       implicit none
-      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2
-      REAL, INTENT(IN):: ru1, dx, dy
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, tni
-      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv
+
+#include "constants.h"
+
+      INTEGER, INTENT(IN) :: ix1, ix2, jy1, jy2
+      REAL,    INTENT(IN) :: ru1
+      REAL, DIMENSION(:,:),   INTENT(IN)  :: dx, dy
+      REAL, DIMENSION(:,:,:), INTENT(IN)  :: uni, vni, tni
+      REAL, DIMENSION(:,:,:), INTENT(OUT) :: ru, rv
 
       INTEGER:: i, j
-      REAL:: dx1, dy1
       ! x-component variables
       REAL:: uxplus, uxminus, vxplus, vxminus, wxplus, wxminus, &
              uyplus, uyminus
@@ -38,10 +41,6 @@
       REAL:: dvdyp, dvdym
       REAL:: tvip, tvim, ty, ty_m
       INTEGER, parameter :: kz1 = 1
-
-      ! grid spacings
-      dx1 = 1.0/dx
-      dy1 = 1.0/dy
 
       ! coupled term multiplier
       if (ins_isCoupled) then
@@ -64,12 +63,12 @@
              uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
 
              ! get derivatives at 1/2 locations
-             dudxp = (uni(i+1,j,kz1) - uni(i,j,kz1))*dx1
-             dudxm = (uni(i,j,kz1) - uni(i-1,j,kz1))*dx1
-             dudyp = (uni(i,j+1,kz1) - uni(i,j,kz1))*dy1
-             dudym = (uni(i,j,kz1) - uni(i,j-1,kz1))*dy1
-             dvdxp = (vni(i,j+1,kz1) - vni(i-1,j+1,kz1))*dx1
-             dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))*dx1
+             dudxp = (uni(i+1,j,kz1) - uni(i,j,kz1)) * dx(i,   CENTER)
+             dudxm = (uni(i,j,kz1) - uni(i-1,j,kz1)) * dx(i-1, CENTER)
+             dudyp = (uni(i,j+1,kz1) - uni(i,j,kz1)) * dy(j,   RIGHT_EDGE)
+             dudym = (uni(i,j,kz1) - uni(i,j-1,kz1)) * dy(j,   LEFT_EDGE)
+             !dvdxp = (vni(i,j+1,kz1) - vni(i-1,j+1,kz1)) * dx(i,   LEFT_EDGE)
+             !dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))     * dx(i,   LEFT_EDGE)
 
              ! flux of normal total stresses
              txxp = ru1*dudxp
@@ -78,12 +77,12 @@
              tyym = ru1*dudym
 
              ! calculate RHS for u-momentum
-             ru(i,j,kz1) =                                              &
-                          - (uxplus*uxplus - uxminus*uxminus)*dx1       &! advection term
-                          - (vxplus*uyplus - vxminus*uyminus)*dy1       &                          
-                          + (txxp - txxm)*dx1                           &! diffusion - normal terms 
-                          + (tyyp - tyym)*dy1
-          enddo
+             ru(i,j,kz1) =                                                    &
+                          - (uxplus*uxplus - uxminus*uxminus)*dx(i,LEFT_EDGE) &! advection term
+                          - (vxplus*uyplus - vxminus*uyminus)*dy(j,CENTER)    &                          
+                          + (txxp - txxm)*dx(i,LEFT_EDGE)                     &! diffusion - normal terms 
+                          + (tyyp - tyym)*dy(j,CENTER)
+         enddo
        enddo
 
     !++++++++++  V-COMPONENT  ++++++++++
@@ -101,15 +100,15 @@
              uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
 
              ! get temperature at v locations
-             ty = (tni(i,j+1,kz1) + tni(i,j,kz1)) / 2.
+             ty = (tni(i,j+1,kz1) + tni(i,j,kz1))*0.5
              
              ! get derivatives at 1/2 locations
-             dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1))*dx1
-             dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1))*dx1
-             dvdyp = (vni(i,j+1,kz1) - vni(i,j,kz1))*dy1
-             dvdym = (vni(i,j,kz1) - vni(i,j-1,kz1))*dy1
-             dudyp = (uni(i+1,j,kz1) - uni(i+1,j-1,kz1))*dy1
-             dudym = (uni(i,j,kz1) - uni(i,j-1,kz1))*dy1
+             dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1)) * dx(i,   RIGHT_EDGE)
+             dvdxm = (vni(i,j,kz1) - vni(i-1,j,kz1)) * dx(i,   LEFT_EDGE)
+             dvdyp = (vni(i,j+1,kz1) - vni(i,j,kz1)) * dy(j,   CENTER)
+             dvdym = (vni(i,j,kz1) - vni(i,j-1,kz1)) * dy(j-1, CENTER)
+             !dudyp = (uni(i+1,j,kz1) - uni(i+1,j-1,kz1)) * dy(j, LEFT_EDGE)
+             !dudym = (uni(i,j,kz1) - uni(i,j-1,kz1))     * dy(j, LEFT_EDGE)  
 
              ! flux of normal total stresses
              txxp = ru1*dvdxp
@@ -118,12 +117,12 @@
              tyym = ru1*dvdym
 
              ! calculate RHS for v-momentum
-             rv(i,j,kz1) =                                              &
-                          - (uyplus*vxplus - uyminus*vxminus)*dx1       &! advection term
-                          - (vyplus*vyplus - vyminus*vyminus)*dy1       &
-                          + (txxp - txxm)*dx1                           &! diffusion - normal terms
-                          + (tyyp - tyym)*dy1                           &!
-                          + ty * ty_m                                    ! energy momentum coupling
+             rv(i,j,kz1) =                                                    &
+                          - (uyplus*vxplus - uyminus*vxminus)*dx(i,CENTER)    &! advection term
+                          - (vyplus*vyplus - vyminus*vyminus)*dy(j,LEFT_EDGE) &
+                          + (txxp - txxm)*dx(i,CENTER)                        &! diffusion - normal terms
+                          + (tyyp - tyym)*dy(j,LEFT_EDGE)                     &!
+                          + ty * ty_m                                          ! energy momentum coupling
           enddo
        enddo
 

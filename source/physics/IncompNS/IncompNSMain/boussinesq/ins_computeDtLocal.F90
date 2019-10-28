@@ -31,6 +31,8 @@ subroutine ins_computeDtLocal(blockID,   &
   
   use Grid_data, ONLY : gr_meshMe
 
+  use Heat_AD_data, only: ht_invsqrtRaPr ! Akash
+
   implicit none
 
 #include "Flash.h"
@@ -45,8 +47,7 @@ subroutine ins_computeDtLocal(blockID,   &
 
   ! Local variables:
   real, parameter :: eps = 1.e-12
-  real :: dtc,dtv,dtl,velcoeff
-
+  real :: dtc,dtv,dtl,velcoeff, dtv_h
 
   if (ins_cflflg .eq. 0) then
      dtlocal    = ins_dtspec
@@ -67,6 +68,9 @@ subroutine ins_computeDtLocal(blockID,   &
   endif
   
   dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 2./(dx*dx), 2./(dy*dy),2./(dz*dz) ))
+
+
+  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy), 1.0/(dz*dz))) ! Akash
          
 # elif NDIM == 2
 
@@ -81,9 +85,11 @@ subroutine ins_computeDtLocal(blockID,   &
   
   dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 1.0/(dx*dx), 1.0/(dy*dy)))
 
+  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
+
 # endif
 
-  dtl = MIN(dtc,dtv)
+  dtl = MIN(MIN(dtc,dtv),dtv_h)
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
