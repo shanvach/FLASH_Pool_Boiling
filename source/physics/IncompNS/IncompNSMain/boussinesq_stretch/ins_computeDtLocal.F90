@@ -1,4 +1,4 @@
-!!****if* source/physics/IncompNS/IncompNSMain/constdens/ins_computeDtLocal
+!!****if* source/physics/IncompNS/IncompNSMain/boussinesq_stretched/ins_computeDtLocal
 !!
 !! NAME
 !!
@@ -31,7 +31,7 @@ subroutine ins_computeDtLocal(blockID,   &
   
   use Grid_data, ONLY : gr_meshMe
 
-  use Heat_AD_data, only: ht_invsqrtRaPr ! Akash
+  use Heat_AD_data, only: ht_invsqrtRaPr
 
   implicit none
 
@@ -40,14 +40,15 @@ subroutine ins_computeDtLocal(blockID,   &
   integer, intent(IN) :: blockID
   integer,dimension(2,MDIM), intent(IN) :: blkLimits,blkLimitsGC
   integer, intent(IN) :: isize,jsize,ksize
-  real, intent(IN) :: dx, dy, dz
+  real, dimension(:,:),      intent(IN) :: dx, dy, dz
   real, pointer,dimension(:,:,:,:)  :: facexData,faceyData,facezData
   real, intent(INOUT) :: dtLocal
   integer, intent(INOUT) :: lminloc(5)
 
   ! Local variables:
   real, parameter :: eps = 1.e-12
-  real :: dtc,dtv,dtl,velcoeff, dtv_h
+  real :: dtc,dtv,dtl,velcoeff
+
 
   if (ins_cflflg .eq. 0) then
      dtlocal    = ins_dtspec
@@ -57,9 +58,12 @@ subroutine ins_computeDtLocal(blockID,   &
 
 # if NDIM == MDIM
 
-  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI))/dx), &
-                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI))/dy), &
-                   MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI+1))/dz) )
+  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) * &
+                                     dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE) ),                                         &
+                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI)) * &
+                                     dy(GRID_JLO:GRID_JHI+1,LEFT_EDGE) ),                                         &
+                   MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI+1)) * &
+                                     dz(GRID_KLO:GRID_KHI+1,LEFT_EDGE) )    )
 
   if (velcoeff .gt. eps) then
   dtc = ins_cfl / velcoeff
@@ -67,15 +71,16 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 2./(dx*dx), 2./(dy*dy),2./(dz*dz) ))
+  dtv = MIN( ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
+                                                                     2.*MAXVAL(dy(:,CENTER))**2.,  &
+                                                                     2.*MAXVAL(dz(:,CENTER))**2. ))) 
 
+# else
 
-  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy), 1.0/(dz*dz))) ! Akash
-         
-# elif NDIM == 2
-
-  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,:))/dx), &
-                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,:))/dy))
+  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,:)) * &
+                                     dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE) ),                         &
+                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,:)) * &
+                                     dy(GRID_JLO:GRID_JHI+1,LEFT_EDGE) )   )                         
 
   if (velcoeff .gt. eps) then
   dtc = ins_cfl / velcoeff
@@ -83,13 +88,12 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps  
   endif
   
-  dtv = ins_sigma / (ins_invsqrtRa_Pr*MAX( 1.0/(dx*dx), 1.0/(dy*dy)))
-
-  dtv_h = ins_sigma / (ht_invsqrtRaPr*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
+  dtv = MIN( ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
+                                                                     2.*MAXVAL(dy(:,CENTER))**2. ))) 
 
 # endif
 
-  dtl = MIN(MIN(dtc,dtv),dtv_h)
+  dtl = MIN(dtc,dtv)
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
