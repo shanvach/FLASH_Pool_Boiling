@@ -48,7 +48,7 @@ subroutine ins_computeDtLocal(blockID,   &
   ! Local variables:
   real, parameter :: eps = 1.e-12
   real :: dtc,dtv,dtl,velcoeff
-
+  integer :: j,k
 
   if (ins_cflflg .eq. 0) then
      dtlocal    = ins_dtspec
@@ -56,14 +56,24 @@ subroutine ins_computeDtLocal(blockID,   &
      return
   endif
 
-# if NDIM == MDIM
 
-  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) * &
-                                     dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE) ),                                         &
-                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI)) * &
-                                     dy(GRID_JLO:GRID_JHI+1,LEFT_EDGE) ),                                         &
-                   MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI+1)) * &
-                                     dz(GRID_KLO:GRID_KHI+1,LEFT_EDGE) )    )
+
+#if NDIM == MDIM
+  velcoeff = eps
+
+  do k = GRID_KLO, GRID_KHI
+    do j = GRID_JLO, GRID_KHI
+
+      velcoeff = MAX(velcoeff,                                                                                    &
+                 MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,k))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
+                 MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dy(j,LEFT_EDGE)),                   &
+                 MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dz(k,LEFT_EDGE)))
+    end do
+  end do
+
+  velcoeff = MAX(velcoeff,                                                                                                  &
+             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,GRID_KLO:GRID_KHI))*dy(GRID_JHI+1,LEFT_EDGE)), &
+             MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KHI+1))*dz(GRID_KHI+1,LEFT_EDGE)))
 
   if (velcoeff .gt. eps) then
   dtc = ins_cfl / velcoeff
@@ -71,27 +81,30 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = MIN( ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
-                                                                     2.*MAXVAL(dy(:,CENTER))**2.,  &
-                                                                     2.*MAXVAL(dz(:,CENTER))**2. ))) 
+  dtv = ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
+                                                                2.*MAXVAL(dy(:,CENTER))**2.,  &
+                                                                2.*MAXVAL(dz(:,CENTER))**2. ))
 
-# else
+#else
+  velcoeff = eps
 
-  velcoeff =  MAX( MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,:)) * &
-                                     dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE) ),                         &
-                   MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,:)) * &
-                                     dy(GRID_JLO:GRID_JHI+1,LEFT_EDGE) )   )                         
+  do j = GRID_JLO, GRID_KHI
+    velcoeff = MAX(velcoeff,                                                                                    &
+               MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,1))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
+               MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,j,1))*dy(j,LEFT_EDGE)))
+  end do
 
+  velcoeff = MAX(velcoeff,MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,1))*dy(GRID_JHI+1,LEFT_EDGE)))
+                  
   if (velcoeff .gt. eps) then
   dtc = ins_cfl / velcoeff
   else
   dtc = ins_cfl / eps  
   endif
   
-  dtv = MIN( ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
-                                                                     2.*MAXVAL(dy(:,CENTER))**2. ))) 
-
-# endif
+  dtv = ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
+                                                                2.*MAXVAL(dy(:,CENTER))**2. ))
+#endif
 
   dtl = MIN(dtc,dtv)
 

@@ -33,7 +33,7 @@ subroutine Simulation_initBlock(blockId)
 
   use Simulation_Data, Only : sim_xMin, sim_xMax, sim_yMin, sim_yMax, sim_init
 
-  use Grid_interface, only  : Grid_getCellMetrics, Grid_getBlkIndexLimits, &
+  use Grid_interface, only  : Grid_getDeltas, Grid_getBlkIndexLimits, &
                               Grid_getCellCoords, &
                               Grid_getBlkCenterCoords, Grid_getBlkBoundBox, &
                               Grid_getBlkPtr, Grid_releaseBlkPtr
@@ -52,13 +52,10 @@ subroutine Simulation_initBlock(blockId)
   integer :: i, j, k
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
   integer, dimension(MDIM)   :: blkIndSize, blkIndSizeGC
-  real, dimension(MDIM)      :: coord, bsize
+  real, dimension(MDIM)      :: coord, bsize, del
   real, dimension(2,MDIM)    :: boundBox
   real                       :: xcell, xedge, ycell, yedge, zcell, zedge
   real                       :: pi
-  real, dimension(GRID_IHI_GC) :: dx
-  real, dimension(GRID_IHI_GC) :: dy
-  real, dimension(GRID_IHI_GC) :: dz
 
   ! write out simulation time at initialization 
   ! write(*,*) 'BlockId =',blockId,' sim_init =',sim_init
@@ -79,10 +76,9 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getBlkBoundBox(blockId, boundBox)
   bsize(:) = boundBox(2,:) - boundBox(1,:)
   call Grid_getBlkCenterCoords(blockId, coord)
+  call Grid_getDeltas(blockId, del)
 
-  call Grid_getCellMetrics(IAXIS, blockId, CENTER, .true., dx, GRID_IHI_GC)  
-  call Grid_getCellMetrics(JAXIS, blockId, CENTER, .true., dy, GRID_JHI_GC)  
-  call Grid_getCellMetrics(KAXIS, blockId, CENTER, .true., dz, GRID_KHI_GC)  
+  
 
   ! Initialize Simulation Blocks
   select case (sim_init)
@@ -113,8 +109,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*dz(k) + 0.5*dz(k)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*del(KAXIS) + 0.5*del(KAXIS)
             if (zcell >= 0.5) then
               solnData(TEMP_VAR,i,j,k) = 0.0
             endif
@@ -127,8 +123,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             if (ycell >= 0.5) then
               solnData(TEMP_VAR,i,j,k) = 0.0
             endif
@@ -183,8 +179,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*dz(k) + 0.5*dz(k)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*del(KAXIS) + 0.5*del(KAXIS)
             solnData(TEMP_VAR,i,j,k) = (1.0 - zcell) 
           enddo
         enddo
@@ -195,8 +191,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             solnData(TEMP_VAR,i,j,k) = (1.0 - ycell) 
           enddo
         enddo
@@ -249,8 +245,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             solnData(TEMP_VAR,i,j,k) = (1.0 - xcell)
           enddo
         enddo
@@ -287,8 +283,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge)*SIN(ycell)
           enddo
         enddo
@@ -298,8 +294,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS)
             faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge)*SIN(xcell)
           enddo
         enddo
@@ -309,8 +305,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xcell)*COS(ycell)/2.0 + 0.5
           enddo
         enddo
@@ -339,8 +335,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge)*SIN(ycell)
           enddo
         enddo
@@ -350,8 +346,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS)
             faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge)*SIN(xcell)
           enddo
         enddo
@@ -361,8 +357,8 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
+            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*del(IAXIS) + 0.5*del(IAXIS)
+            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*del(JAXIS) + 0.5*del(JAXIS)
             solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*SIN(xcell/2.)*SIN(ycell/2.)/2.0 + 0.5
           enddo
         enddo
