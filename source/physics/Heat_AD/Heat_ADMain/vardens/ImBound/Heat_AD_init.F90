@@ -83,15 +83,15 @@ subroutine Heat_AD_init(blockCount,blockList)
 
      if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 1"
 
-     ht_psi          = (50.0/180.0)*acos(-1.0)
+     ht_psi          = (45.0/180.0)*acos(-1.0)
 
-     open(unit = 2,file = "sim_nucSites.dat")
-     do nuc_index=1,sim_nucSiteDens
-       read(2,*)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
-     end do
-     close(2)
+     !open(unit = 2,file = "sim_nucSites.dat")
+     !do nuc_index=1,sim_nucSiteDens
+     !  read(2,*)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+     !end do
+     !close(2)
 
-     sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+     !sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
    end if
 
