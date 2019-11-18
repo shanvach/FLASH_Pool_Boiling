@@ -79,7 +79,7 @@ subroutine Grid_getSingleCellVol(blockID, beginCount, point, cellvolume)
   
   del = 1.0
 
-  call Grid_getDeltas(blockID, del)
+  !call Grid_getDeltas(blockID, del)
 
   select case (gr_geometry)
 

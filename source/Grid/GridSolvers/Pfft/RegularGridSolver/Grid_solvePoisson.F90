@@ -106,8 +106,8 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
      solveflag = 1
 
   elseif(bcTypes(1) .eq. GRID_PDE_BND_PERIODIC .and.  & ! in x periodic
-         bcTypes(3) .eq. GRID_PDE_BND_PERIODIC .and. &  ! in y periodic
-         bcTypes(5) .eq. GRID_PDE_BND_NEUMANN ) then    ! in z Neumann
+         bcTypes(5) .eq. GRID_PDE_BND_PERIODIC .and. &  ! in y periodic
+         bcTypes(3) .eq. GRID_PDE_BND_NEUMANN ) then    ! in z Neumann
 
      solveflag = 2
  

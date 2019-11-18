@@ -182,8 +182,8 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   enddo
 
 #if NDIM==2
-  bc_types(5) = bc_types(3)
-  bc_types(6) = bc_types(4)
+  bc_types(5) = bc_types(1)
+  bc_types(6) = bc_types(2)
 #endif
 
   ! shift timesteps
