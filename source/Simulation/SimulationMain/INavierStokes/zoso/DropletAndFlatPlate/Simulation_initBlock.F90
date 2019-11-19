@@ -192,7 +192,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(PFUN_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
-  faceyData(VELC_FACE_VAR,:,:,:) =-1.0 ! set inital velocity
+  faceyData(VELC_FACE_VAR,:,:,:) =-6.808251908 ! set inital velocity
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
 
