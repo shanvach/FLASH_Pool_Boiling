@@ -9,9 +9,9 @@ PE_ENV =GNU
 #PE_ENV =INTEL
 
 
-LIB_BASE   =/groups/balarasgrp/flash-lib/$(PE_ENV)
+LIB_BASE   =/groups/balarasgrp/flash-lib/openmpi
 
-MPI_PATH   =/c1/apps/intel/parallel_studio_xe/2019.3/compilers_and_libraries_2019.3.199/linux/mpi/intel64
+MPI_PATH = /c1/apps/openmpi/4.0.1rc
 
 HDF4_PATH  =
 HDF5_PATH  =$(LIB_BASE)/hdf5
@@ -91,7 +91,7 @@ else
 # GNU Flags:
 FFLAGS_OPT =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none -Wuninitialized
-FFLAGS_OPT = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
+FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none -pedantic -Wall -Wextra -Waliasing \
 -Wsurprising -Wconversion -Wunderflow \
 -ffpe-trap=invalid,zero,overflow -fbounds-check \
@@ -101,7 +101,7 @@ FFLAGS_TEST =  -c -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none
 
 CFLAGS_OPT   = -c -O3
-CFLAGS_OPT = -c -g -fbacktrace
+CFLAGS_DEBUG = -c -g -fbacktrace
 CFLAGS_TEST  = -c
 
 endif
@@ -173,23 +173,23 @@ LIB_MATH  = -limf -lm
 else
 LIB_MATH  = -lm
 endif
-LIB_MPI   = -L${MPI_PATH}/lib/libmpicxx.a 
+LIB_MPI   = ${MPI_PATH}/lib/libmpi.so
 LIB_NCMPI = -L${NCMPI_PATH}/lib -lpnetcdf
 LIB_MPE   =
 
 LIB_BLAS  = ${BLAS_PATH}/lib64/libblas.a
 LIB_LAPACK= ${BLAS_PATH}/lib64/libblas.a
 LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3 ${BLAS_PATH}/lib64/libblas.a
-LIB_HYPRE = -L${HYPRE_PATH}/lib -lHYPRE  
+LIB_HYPRE = ${HYPRE_PATH}/lib/libHYPRE.a
 LIB_STDCXX = -lstdc++
 
 
 
 #Specify TEC_PLOT=YES in order to link the tec plot library.
 TEC_PLOT=YES
-TEC_DIR=/groups/balarasgrp/flash-lib/TecioLib
+TEC_DIR=/groups/balarasgrp/flash-lib/openmpi/TecioLib
 ifeq ($(TEC_PLOT), YES)
-  CONFIG_LIB = -I${TEC_DIR} -L${TEC_DIR}  -ltecio 
+  CONFIG_LIB = -I${TEC_DIR} -L${TEC_DIR}  -lstdc++ -ltecio 
 endif
 
 #----------------------------------------------------------------------------
