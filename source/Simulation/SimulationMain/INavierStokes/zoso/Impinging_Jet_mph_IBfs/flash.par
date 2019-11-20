@@ -6,7 +6,7 @@ gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
 # Particles
-pt_maxPerProc=3500
+pt_maxPerProc=100000
 
 # Inverse of Reynolds Number
 invRe = 0.00006
@@ -37,8 +37,8 @@ inls = 2
 lsit = 2
 
 # Bodies
-#sm_NumBodies   =  1
-#gr_sbNumBodies =  1
+sm_NumBodies   =  1
+gr_sbNumBodies =  1
 
 # # SolidMechanics
 #sm_solidinteg = 2
@@ -115,7 +115,7 @@ nblocky	= 5
 nblockz = 5
 
 lrefine_min	= 1
-lrefine_max     = 4
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 

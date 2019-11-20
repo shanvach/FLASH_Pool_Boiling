@@ -118,10 +118,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   real :: xa_two, xb_two, ya_two, yb_two
   real :: phi_one, phi_two, phi_thr, phi_fur, this_phi
 
-  amp = 0.5
-  omega = 0.1
+  amp = 0.1
+  omega = 0.2614
   pi = acos(-1.0)
-  offset = 0.5
+  offset = 0.1
   phase = pi
 
   ya_one = 20.0 + amp*cos(2*pi*omega*dr_simTime + phase) + offset 
