@@ -6,7 +6,7 @@ gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
 # Particles
-pt_maxPerProc=100000
+pt_maxPerProc=200000
 
 # Inverse of Reynolds Number
 invRe = 0.00006
@@ -83,8 +83,8 @@ nend = 100000000
 #nend = 3
 tmax            = 2500.0
 cflflg          = 1
-cfl             = 0.01
-sigma		= 0.01
+cfl             = 0.002
+sigma		= 0.002
 dtspec          = 1.0d-2
 dtinit          = 1.0d-2
 tstep_change_factor=1.01
