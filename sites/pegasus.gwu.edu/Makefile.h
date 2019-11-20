@@ -24,7 +24,7 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-BLAS_PATH = /c1/apps/blas/gcc/3.8.0
+BLAS_PATH = /c1/apps/openblas/0.2.20
 #BLAS_PATH  = 
 
 #LAPACK_PATH = $(BLAS_PATH)
@@ -114,11 +114,11 @@ CFLAGS_HDF5 = -I${HDF5_PATH}/include -DH5_USE_16_API
 
 FLAGS_MPI   = -I$(MPI_PATH)/include
 
-CFLAGS_BLAS = -I${BLAS_PATH}/include 
-FFLAGS_BLAS = -I${BLAS_PATH}/include 
+CFLAGS_BLAS = -I${BLAS_PATH}/include/openblas 
+FFLAGS_BLAS = -I${BLAS_PATH}/include/openblas
 
-CFLAGS_LAPACK = -I${LAPACK_PATH}/include
-FFLAGS_LAPACK = -I${LAPACK_PATH}/include
+CFLAGS_LAPACK = -I${LAPACK_PATH}/include/openblas
+FFLAGS_LAPACK = -I${LAPACK_PATH}/include/openblas
 
 CFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
 FFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
@@ -177,9 +177,9 @@ LIB_MPI   = ${MPI_PATH}/lib/libmpi.so
 LIB_NCMPI = -L${NCMPI_PATH}/lib -lpnetcdf
 LIB_MPE   =
 
-LIB_BLAS  = ${BLAS_PATH}/lib64/libblas.a
-LIB_LAPACK= ${BLAS_PATH}/lib64/libblas.a
-LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3 ${BLAS_PATH}/lib64/libblas.a
+LIB_BLAS  = ${BLAS_PATH}/lib/libopenblas.a
+LIB_LAPACK= ${BLAS_PATH}/lib/libopenblas.a
+LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3 ${BLAS_PATH}/lib/libopenblas.a
 LIB_HYPRE = ${HYPRE_PATH}/lib/libHYPRE.a
 LIB_STDCXX = -lstdc++
 
