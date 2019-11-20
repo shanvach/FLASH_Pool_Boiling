@@ -32,7 +32,7 @@ BLAS_PATH = /c1/apps/openblas/0.2.20
 
 HYPRE_PATH   = $(LIB_BASE)/hypre
 
-SUPERLU_PATH = $(LIB_BASE)/SuperLU_4.3
+SUPERLU_PATH = $(LIB_BASE)/SuperLU
 #SUPERLU_PATH  = 
 
 # Current directory:
