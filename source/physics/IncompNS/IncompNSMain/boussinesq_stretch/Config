@@ -1,1 +1,13 @@
 REQUIRES physics/IncompNS/IncompNSMain/boussinesq
+
+PARAMETER x_stretch		BOOLEAN		false
+PARAMETER y_stretch		BOOLEAN		false
+PARAMETER z_stretch		BOOLEAN		false
+
+PARAMETER x_stretch_type	STRING		"sg_user"
+PARAMETER y_stretch_type	STRING		"sg_user"
+PARAMETER z_stretch_type	STRING		"sg_user"
+
+PARAMETER x_stretch_value	REAL		0.00
+PARAMETER y_stretch_value	REAL		0.70
+PARAMETER z_stretch_value	REAL		0.70

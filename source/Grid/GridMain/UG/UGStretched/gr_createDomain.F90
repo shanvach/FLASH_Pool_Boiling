@@ -320,15 +320,15 @@ subroutine gr_createDomain()
     else ! uniform grid
 
       ! calculate block cell JAXIS coordinates
-      gr_delta(IAXIS) = (gr_imax-gr_imin)/gr_gIndexSize(IAXIS)
-      halfDelta = gr_delta(IAXIS)/2.0
-      j = gr_blkCornerID(IAXIS)-gr_guard(IAXIS)-1
+      gr_delta(JAXIS) = (gr_jmax-gr_jmin)/gr_gIndexSize(JAXIS)
+      halfDelta = gr_delta(JAXIS)/2.0
+      j = gr_blkCornerID(JAXIS)-gr_guard(JAXIS)-1
   
-      do i = gr_iloGc,gr_ihiGc
-         gr_iCoords(LEFT_EDGE,i,1) = gr_imin+j*gr_delta(IAXIS)
-         gr_iCoords(CENTER,i,1) = gr_imin+j*gr_delta(IAXIS)+halfDelta
+      do i = gr_jloGc,gr_jhiGc
+         gr_jCoords(LEFT_EDGE,i,1) = gr_jmin+j*gr_delta(JAXIS)
+         gr_jCoords(CENTER,i,1) = gr_jmin+j*gr_delta(JAXIS)+halfDelta
          j = j+1
-         gr_iCoords(RIGHT_EDGE,i,1) = gr_imin+j*gr_delta(IAXIS)
+         gr_jCoords(RIGHT_EDGE,i,1) = gr_jmin+j*gr_delta(JAXIS)
       end do
 
       ! calculate global cell JAXIS coordinates

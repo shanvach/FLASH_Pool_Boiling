@@ -671,7 +671,7 @@
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t wz div'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -687,13 +687,6 @@
 
 
      blockID =  blockList(lb)      
-
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-     dx = del(IAXIS)
-     dy = del(JAXIS)
-  
 
      ! Get Coord and Bsize for the block:
      ! Bounding box:
@@ -711,7 +704,7 @@
      tpu = 0.
      tpv = 0.
      tpp = 0.
-     tpt = 0. ! Akash
+     tpt = 0. 
 
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
      call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)) 
@@ -719,11 +712,6 @@
      call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS)+1) 
      call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS)+1) 
 
-     !xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
-     !xcell = xedge(:) + dx/2.0;
-    
-     !yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
-     !ycell = yedge(:) + dy/2.0;
     
      facevarxx = facexData(VELC_FACE_VAR,:,:,1)
      facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
@@ -748,37 +736,6 @@
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(TEMP_VAR,:,:,1),tpt)
-
-     ! Divergence: 
-     ! ----------
-     solnData(DUST_VAR,:,:,:) = 0.
-     solnData(DUST_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1) =      &
-             (facevarxx(NGUARD+2:nxc,NGUARD+1:nyc-1) - &
-              facevarxx(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dx + &
-             (facevaryy(NGUARD+1:nxc-1,NGUARD+2:nyc) - &
-              facevaryy(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dy
-     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                             solnData(DUST_VAR,:,:,1),divpp)
-
-
-            ! Velocity derivatives:
-            ! -------- -----------            
-!            tpdudxc(ng:nxc,ng:nyc) = (facevarxx(ng+1:nxc+1,ng:nyc) -
-!&                                     facevarxx(ng:nxc,ng:nyc))/dx
-
-!            tpdvdyc(ng:nxc,ng:nyc) =  (facevaryy(ng:nxc,ng+1:nyc+1) -
-!&                                      facevaryy(ng:nxc,ng:nyc))/dy 
-
-      tpdudycorn(1:NXB+1,1:NYB+1)=(facevarxx(NGUARD+1:nxc,NGUARD+1:nyc)-  &
-                                   facevarxx(NGUARD+1:nxc,NGUARD:nyc-1))/dy
-
-      tpdvdxcorn(1:NXB+1,1:NYB+1)=(facevaryy(NGUARD+1:nxc,NGUARD+1:nyc)-  &
-                                   facevaryy(NGUARD:nxc-1,NGUARD+1:nyc))/dx 
-         
-      ! VORTICITY:
-      ! ---------
-      ! Corner values of vorticity:
-      vortz = tpdvdxcorn - tpdudycorn
 
 
       ! Write Block Results into data file:
@@ -820,14 +777,6 @@
 
       ! Write t: ! Akash
       arraylb(:,:,1) = sngl(tpt)
-      i = TecDat(ijk,arraylb,0)
-
-      ! Write omgZ:
-      arraylb(:,:,1) = sngl(vortz)
-      i = TecDat(ijk,arraylb,0)
-
-      ! Write Div:
-      arraylb(:,:,1) = sngl(divpp)
       i = TecDat(ijk,arraylb,0)
 
    enddo

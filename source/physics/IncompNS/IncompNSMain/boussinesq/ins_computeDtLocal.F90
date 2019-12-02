@@ -31,7 +31,7 @@ subroutine ins_computeDtLocal(blockID,   &
   
   use Grid_data, ONLY : gr_meshMe
 
-  use Head_AD_data, only: ht_invsqrtRaPr
+  use Heat_AD_data, only: ht_invsqrtRaPr
 
   implicit none
 

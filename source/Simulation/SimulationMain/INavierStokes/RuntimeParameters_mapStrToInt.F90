@@ -54,6 +54,16 @@ implicit none
 
   select case (inputString)
      
+  case ("sg_tanh", "SG_TANH")
+#ifdef SG_TANH
+     constKey = SG_TANH
+#endif
+
+  case ("sg_user", "SG_USER")
+#ifdef SG_USER
+     constKey = SG_USER
+#endif
+
   case ("periodic", "PERIODIC")
 #ifdef PERIODIC
      constKey = PERIODIC

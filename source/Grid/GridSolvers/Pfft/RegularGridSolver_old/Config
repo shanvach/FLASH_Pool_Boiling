@@ -1,0 +1,2 @@
+#Config file for Pfft/RegularGridSolver implementation in the GridSolver subunit
+REQUIRES Grid/GridMain/UG/UGStretched

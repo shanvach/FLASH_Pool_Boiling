@@ -1,3 +1,5 @@
+#ifdef NDIM==3 
+
 ! Subroutine outtotecplot
 !
 ! Subroutine to write out to Tecplot data in binary form.
@@ -7,8 +9,6 @@
 #include "constants.h"
 #include "Flash.h"
 
-
-#if NDIM == 3
   subroutine outtotecplot(mype,time,dt,istep,count,&
            timer,blockList,blockCount,firstfileflag)
 
@@ -44,6 +44,7 @@
   real zedge(NZB+1),zcell(NZB+1)
   real intsx(NXB+1),intsy(NYB+1),intsz(NZB+1)
 
+
   real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData,facezData
 
   real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD,NZB+2*NGUARD), &
@@ -55,14 +56,16 @@
            tpdvdxcorn, tpdvdycorn, tpdvdzcorn, &
            tpdwdxcorn, tpdwdycorn, tpdwdzcorn, &
            vortx, vorty, vortz, divpp, nxp, nyp, nzp
+
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
+ 
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD, NZB+2*NGUARD) :: tpdudxc, &
         tpdudyc,tpdudzc,tpdvdxc,tpdvdyc,tpdvdzc,tpdwdxc,&
         tpdwdyc,tpdwdzc
 
   integer blockID
 
-  real del(MDIM),dx,dy,dz
+  real del(3),dx,dy,dz
   real, dimension(MDIM)  :: coord,bsize
   real ::  boundBox(2,MDIM)
 
@@ -119,7 +122,6 @@
   nyc = NYB + NGUARD + 1
   nzc = NZB + NGUARD + 1
 
-  write(*,*) "Write 3D Tecplot Data"
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &
         count, mype
@@ -175,7 +177,7 @@
     
      yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
      ycell = yedge(:) + dy/2.0;
-
+    
      zedge = coord(KAXIS) - bsize(KAXIS)/2.0 + dz*intsz;
      zcell = zedge(:) + dz/2.0;
 
@@ -289,7 +291,7 @@
                 'BLOCK'//NULLCHR,                                     &
                  CHAR(0))
 
-
+            
       ! Write x:
       do k=1,NZB+1
          do j=1,NYB+1
@@ -311,12 +313,12 @@
       enddo
       i = TecDat(ijk,arraylb,0)
 
-
+      
       ! Write z:
       do k=1,NZB+1
          do j=1,NYB+1
             do i=1,NXB+1
-               arraylb(i,j,k) = sngl(zedge(k))
+               arraylb(i,j,k) = sngl(zedge(k))        
             enddo
          enddo
       enddo
@@ -333,7 +335,7 @@
       ! Write w:
       arraylb(:,:,:) = sngl(tpw)
       i = TecDat(ijk,arraylb,0)
-
+ 
       ! Write p:
       arraylb(:,:,:) = sngl(tpp)
       i = TecDat(ijk,arraylb,0)
@@ -371,6 +373,7 @@
 
    i = TecEnd()
 
+
    if (mype .eq. 0) then
      write(*,*) ''
      write(filename,'("./IOData/data.",i4.4,".**.plt")') &
@@ -379,7 +382,6 @@
    endif
 
   End subroutine outtotecplot
-
 
 ! Subroutine centervals2corners:
 ! Subroutine to obtain corver values of a variable given the center 
@@ -537,7 +539,11 @@
 
   End subroutine centervals2corners
 
-#endif
+
+
+#else
+
+
 
 ! Subroutine outtotecplot
 !
@@ -545,16 +551,14 @@
 !
 ! ---------------------------------------------------------------------------
 
-!#include "constants.h"
-!#include "Flash.h"
-
-#if NDIM == 2
+#include "constants.h"
+#include "Flash.h"
 
   subroutine outtotecplot(mype,time,dt,istep,count,&
            timer,blockList,blockCount,firstfileflag)
 
       use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
-        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, Grid_getCellCoords, &
+        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, &
         Grid_getBlkBoundBox, Grid_getBlkCenterCoords
 
 
@@ -573,7 +577,7 @@
   integer, intent(in) :: blockCount
   integer, intent(in) :: blockList(MAXBLOCKS)
   real, intent(in) :: time,dt,timer
-  integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC    
+      
  
   ! Local Variables
   integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc
@@ -664,14 +668,13 @@
   nxc = NXB + NGUARD + 1
   nyc = NYB + NGUARD + 1
 
-  write(*,*) "Write 2D TecPlot Data"
   ! write solution data to data.XXXX.XX
   !write(filename,'("./IOData/data.",i4.4,".",i2.2,".plt")') &
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t wz div'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -690,9 +693,9 @@
 
 
      ! Get blocks dx, dy ,dz:
-     !call Grid_getDeltas(blockID,del)
-     !dx = del(IAXIS)
-     !dy = del(JAXIS)
+     call Grid_getDeltas(blockID,del)
+     dx = del(IAXIS)
+     dy = del(JAXIS)
   
 
      ! Get Coord and Bsize for the block:
@@ -713,17 +716,11 @@
      tpp = 0.
      tpt = 0. ! Akash
 
-     call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
-     call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)) 
-     call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)) 
-     call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS)+1) 
-     call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS)+1) 
-
-     !xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
-     !xcell = xedge(:) + dx/2.0;
+     xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
+     xcell = xedge(:) + dx/2.0;
     
-     !yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
-     !ycell = yedge(:) + dy/2.0;
+     yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
+     ycell = yedge(:) + dy/2.0;
     
      facevarxx = facexData(VELC_FACE_VAR,:,:,1)
      facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
@@ -751,14 +748,14 @@
 
      ! Divergence: 
      ! ----------
-     !solnData(DUST_VAR,:,:,:) = 0.
-     !solnData(DUST_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1) =      &
-     !        (facevarxx(NGUARD+2:nxc,NGUARD+1:nyc-1) - &
-     !         facevarxx(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dx + &
-     !        (facevaryy(NGUARD+1:nxc-1,NGUARD+2:nyc) - &
-     !         facevaryy(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dy
-     !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-     !                        solnData(DUST_VAR,:,:,1),divpp)
+     solnData(DUST_VAR,:,:,:) = 0.
+     solnData(DUST_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1) =      &
+             (facevarxx(NGUARD+2:nxc,NGUARD+1:nyc-1) - &
+              facevarxx(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dx + &
+             (facevaryy(NGUARD+1:nxc-1,NGUARD+2:nyc) - &
+              facevaryy(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dy
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                             solnData(DUST_VAR,:,:,1),divpp)
 
 
             ! Velocity derivatives:
@@ -769,16 +766,16 @@
 !            tpdvdyc(ng:nxc,ng:nyc) =  (facevaryy(ng:nxc,ng+1:nyc+1) -
 !&                                      facevaryy(ng:nxc,ng:nyc))/dy 
 
-      !tpdudycorn(1:NXB+1,1:NYB+1)=(facevarxx(NGUARD+1:nxc,NGUARD+1:nyc)-  &
-      !                             facevarxx(NGUARD+1:nxc,NGUARD:nyc-1))/dy
+      tpdudycorn(1:NXB+1,1:NYB+1)=(facevarxx(NGUARD+1:nxc,NGUARD+1:nyc)-  &
+                                   facevarxx(NGUARD+1:nxc,NGUARD:nyc-1))/dy
 
-      !tpdvdxcorn(1:NXB+1,1:NYB+1)=(facevaryy(NGUARD+1:nxc,NGUARD+1:nyc)-  &
-      !                             facevaryy(NGUARD:nxc-1,NGUARD+1:nyc))/dx 
+      tpdvdxcorn(1:NXB+1,1:NYB+1)=(facevaryy(NGUARD+1:nxc,NGUARD+1:nyc)-  &
+                                   facevaryy(NGUARD:nxc-1,NGUARD+1:nyc))/dx 
          
       ! VORTICITY:
       ! ---------
       ! Corner values of vorticity:
-      !vortz = tpdvdxcorn - tpdudycorn
+      vortz = tpdvdxcorn - tpdudycorn
 
 
       ! Write Block Results into data file:
@@ -823,12 +820,12 @@
       i = TecDat(ijk,arraylb,0)
 
       ! Write omgZ:
-      !arraylb(:,:,1) = sngl(vortz)
-      !i = TecDat(ijk,arraylb,0)
+      arraylb(:,:,1) = sngl(vortz)
+      i = TecDat(ijk,arraylb,0)
 
       ! Write Div:
-      !arraylb(:,:,1) = sngl(divpp)
-      !i = TecDat(ijk,arraylb,0)
+      arraylb(:,:,1) = sngl(divpp)
+      i = TecDat(ijk,arraylb,0)
 
    enddo
 
@@ -843,7 +840,6 @@
   endif
 
   End subroutine outtotecplot
-
 
 ! Subroutine centervals2corners:
 ! Subroutine to obtain corver values of a variable given the center 
@@ -886,7 +882,6 @@
 
 
      End subroutine centervals2corners
-
 
 
 #endif
