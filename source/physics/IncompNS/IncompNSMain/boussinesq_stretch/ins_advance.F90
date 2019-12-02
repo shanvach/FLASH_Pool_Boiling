@@ -35,7 +35,8 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
           uni(ix1:ix2+1,j,k) = uni(ix1:ix2+1,j,k) + dt*(                             &
             gama*unew(ix1:ix2+1,j,k) + rhoa*uold(ix1:ix2+1,j,k) -                    &
             ins_prescoeff*alfa*dx(ix1:ix2+1)*(p(ix1:ix2+1,j,k) - p(ix1-1:ix2,j,k)) - &
-            alfa*dpx*dx(ix1:ix2+1) + alfa*ins_gravX )
+            !alfa*dpx*dx(ix1:ix2+1) + alfa*ins_gravX )
+            alfa*ins_dpdx + alfa*ins_gravX )
         end do
       end do
 
@@ -44,7 +45,8 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
           vni(i,jy1:jy2+1,k) = vni(i,jy1:jy2+1,k) + dt*(                             &
             gama*vnew(i,jy1:jy2+1,k) + rhoa*vold(i,jy1:jy2+1,k) -                    &
             ins_prescoeff*alfa*dy(jy1:jy2+1)*(p(i,jy1:jy2+1,k) - p(i,jy1-1:jy2,k)) - &
-            alfa*dpy*dy(jy1:jy2+1) + alfa*ins_gravY )
+            !alfa*dpy*dy(jy1:jy2+1) + alfa*ins_gravY )
+            alfa*ins_dpdy + alfa*ins_gravY )
         end do
       end do    
 
@@ -54,7 +56,8 @@ SUBROUTINE ins_predictor(uni,vni,wni,unew,vnew,wnew,uold,vold, &
           wni(i,j,kz1:kz2+1) = wni(i,j,kz1:kz2+1) + dt*(                             &
             gama*wnew(i,j,kz1:kz2+1) + rhoa*wold(i,j,kz1:kz2+1) -                    &
             ins_prescoeff*alfa*dz(kz1:kz2+1)*(p(i,j,kz1:kz2+1) - p(i,j,kz1-1:kz2)) - &
-            alfa*dpz*dz(kz1:kz2+1) + alfa*ins_gravZ )
+            !alfa*dpz*dz(kz1:kz2+1) + alfa*ins_gravZ )
+            alfa*ins_dpdz + alfa*ins_gravZ )
         end do
       end do
 #endif

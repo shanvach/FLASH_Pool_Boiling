@@ -272,7 +272,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               call Grid_getCellMetrics(JAXIS,blockHandle,RIGHT_EDGE,.true.,dy,GRID_JHI_GC)
               k = 2*guard+1
               do i = 1,guard
-                regionData(i,1:je,1:ke,ivar) = dy(i)*ht_Tyl_value + regionData(k-i,1:je,1:ke,ivar)
+                regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/dy(i) + regionData(k-i,1:je,1:ke,ivar)
                 !regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/SUM(dy(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
               end do
               applied = .true.
@@ -344,7 +344,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                n = GRID_JHI_GC
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = dy(k-i)*ht_Tyr_value + regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/dy(k-i) + regionData(i,1:je,1:ke,ivar)
                  !regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/SUM(dy(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
                end do
                applied = .true.
