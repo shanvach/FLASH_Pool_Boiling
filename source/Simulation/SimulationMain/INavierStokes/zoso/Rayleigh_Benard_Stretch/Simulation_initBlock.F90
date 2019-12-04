@@ -347,9 +347,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i)
-!            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge)*SIN(ycell)
+             facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge(i))*SIN(ycell(j))
           enddo
         enddo
       enddo
@@ -358,9 +356,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-!            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j)
-!            faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge)*SIN(xcell)
+            faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge(j))*SIN(xcell(i))
           enddo
         enddo
       enddo
@@ -369,9 +365,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-!            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*SIN(xcell/2.)*SIN(ycell/2.)/2.0 + 0.5
+            solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*SIN(xcell(i)/2.)*SIN(ycell(j)/2.)/2.0 + 0.5
           enddo
         enddo
       enddo

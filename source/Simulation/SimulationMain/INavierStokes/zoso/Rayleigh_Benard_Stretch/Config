@@ -11,6 +11,8 @@ LIBRARY STDCXX
 # Stretched Grid Solver
 REQUESTS Grid/GridMain/UG/UGStretched
 REQUESTS Grid/GridSolvers/Pfft/RegularGridSolver
+#REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+#REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
 
 # Number of guardcells at each boundary
 GUARDCELLS 1

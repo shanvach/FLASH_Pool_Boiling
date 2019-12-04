@@ -227,6 +227,16 @@ module gr_pfftinterface
   end interface
 
   interface
+     subroutine gr_pfftPoissonPeriodic (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
+       integer, intent(in) :: iDirection, iSrc, inSize
+       integer, dimension(2*MDIM), intent(IN) :: bcTypes
+       real,    dimension(2*MDIM), intent(in) :: bcValues
+       real, dimension(inSize), intent(inout) :: inArray
+       real, dimension(inSize), intent(out)   :: outArray
+     end subroutine gr_pfftPoissonPeriodic
+  end interface
+
+  interface
      subroutine gr_pfftMapToInput(gridVar, pfftInputArray)
        implicit none
        integer, intent(IN) :: gridVar

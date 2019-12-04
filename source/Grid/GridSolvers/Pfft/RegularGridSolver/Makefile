@@ -1,1 +1,1 @@
-Grid += gr_pfftSpecifyTransform.o 
+Grid += gr_pfftSpecifyTransform.o gr_pfftPoissonPeriodic.o 

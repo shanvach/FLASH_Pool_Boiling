@@ -294,19 +294,19 @@ subroutine gr_createDomain()
         
         ! transform uniform to stretched using y(s) = Tanh((-1+2s) atan(a)) + 1 / 2a
         do i = gr_jloGc,gr_jhiGc
-          gr_jCoords(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
-          gr_jCoords(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoords(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
+          gr_jCoords(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
           j = j+1
-          gr_jCoords(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoords(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
         end do
 
         ! calculate global cell JAXIS coordinates
         j = 0
         do i = 1,gJ
-          gr_jCoordsGlb(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
-          gr_jCoordsGlb(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoordsGlb(LEFT_EDGE,i,1)  = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
+          gr_jCoordsGlb(CENTER,i,1)     = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)+halfDelta)*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
           j = j+1
-          gr_jCoordsGlb(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))+1.0)/(2.0*gr_jStrPar)+gr_jmin
+          gr_jCoordsGlb(RIGHT_EDGE,i,1) = (gr_jmax-gr_jmin)*(tanh((-1.0+2.0*j*gr_delta(JAXIS)          )*atanh(gr_jStrPar))/gr_jStrPar+1.0)/2.0+gr_jmin
         end do
       
       case default
@@ -392,19 +392,19 @@ subroutine gr_createDomain()
         
         ! transform uniform to stretched using z(s) = Tanh((-1+2s) atan(a)) + 1 / 2a
         do i = gr_kloGc,gr_khiGc
-          gr_kCoords(LEFT_EDGE,i,1)  = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
-          gr_kCoords(CENTER,i,1)     = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)+halfDelta)*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
+          gr_kCoords(LEFT_EDGE,i,1)  = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
+          gr_kCoords(CENTER,i,1)     = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)+halfDelta)*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
           j = j+1
-          gr_kCoords(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
+          gr_kCoords(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
         end do
 
         ! calculate global cell KAXIS coordinates
         j = 0
         do i = 1,gK
-          gr_kCoordsGlb(LEFT_EDGE,i,1)  = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
-          gr_kCoordsGlb(CENTER,i,1)     = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)+halfDelta)*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
+          gr_kCoordsGlb(LEFT_EDGE,i,1)  = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
+          gr_kCoordsGlb(CENTER,i,1)     = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)+halfDelta)*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
           j = j+1
-          gr_kCoordsGlb(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))+1.0)/(2.0*gr_kStrPar)+gr_kmin
+          gr_kCoordsGlb(RIGHT_EDGE,i,1) = (gr_kmax-gr_kmin)*(tanh((-1.0+2.0*j*gr_delta(KAXIS)          )*atanh(gr_kStrPar))/gr_kStrPar+1.0)/2.0+gr_kmin
         end do
       
       case default
