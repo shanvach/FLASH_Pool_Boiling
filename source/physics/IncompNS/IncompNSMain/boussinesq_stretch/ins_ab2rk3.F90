@@ -596,6 +596,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 #endif
 
      ! update divergence-free velocities (not on block boundary)
+     !write(*,*) 'ready for corrector on ', ins_meshME
      call ins_corrector( facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&

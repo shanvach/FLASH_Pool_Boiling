@@ -100,7 +100,7 @@
              uyminus = (uni(i,j,kz1) + uni(i,j-1,kz1))*0.5
 
              ! get temperature at v locations
-             ty = (tni(i,j+1,kz1) + tni(i,j,kz1))*0.5
+             ty = (tni(i,j,kz1) + tni(i,j-1,kz1))*0.5
              
              ! get derivatives at 1/2 locations
              dvdxp = (vni(i+1,j,kz1) - vni(i,j,kz1)) * dx(i,   RIGHT_EDGE)

@@ -50,7 +50,7 @@
 
 subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
 
-  use gr_pfftData, ONLY : pfft_inLen, pfft_usableProc
+  use gr_pfftData, ONLY : pfft_inLen, pfft_usableProc, pfft_globalLen, pfft_transformType, pfft_solver
 
   use Grid_interface, ONLY : Grid_pfftMapToInput, Grid_pfftMapFromOutput
   use gr_pfftInterface, ONLY : gr_pfftPoissonPeriodic
@@ -66,23 +66,31 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
   real, intent(in)       :: bcValues(2,2*MDIM)
   real, intent(inout)    :: poisfact 
   real, allocatable, dimension(:) :: inArray, outArray
+  integer, dimension(MDIM) :: localSize, globalSize, transformType
   integer :: inSize
 
   !Important.  Tests that this processor should be doing work
   if(.not.pfft_usableProc) return   
 
   inSize=pfft_inLen(IAXIS)*pfft_inLen(JAXIS)*pfft_inLen(KAXIS)
-
   allocate(inArray(inSize+2))
   allocate(outArray(inSize+2))
+
+  inArray(:) = 0.
+  outArray(:) = 0.
+
+  globalSize(:) = pfft_globalLen(:)
+  transformType(:) = pfft_transformType(:)
+  localSize(:) = pfft_inLen(:)
 
   !! Here's the real work of the fft
   ! Converts to uniform mesh (on output, inArray contains uniformly mapped density)
   call Grid_pfftMapToInput(iSrc,inArray) 
 
 
+  ! Homogenious boundary conditions w/o stretching in {x, y}
+  if (pfft_solver == 0) then
 
-  if (.true.) then
 
     ! Call gr_pfftPoisson Periodic Forward:
     call gr_pfftPoissonPeriodic (PFFT_FORWARD, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
@@ -93,6 +101,23 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
     ! Now multiply by the poisson factor
     outArray(1:inSize) = outArray(1:inSize)*poisfact
 
+
+  ! Homogenious boundary conditions w/o x-axis stretching in {x, y}
+  else
+
+
+    ! Call gr_pfftPoisson Periodic Forward:
+    call gr_pfftPoissonDirect (PFFT_FORWARD, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+  
+    ! Call gr_pfftPoisson Periodic Inverse:
+    call gr_pfftPoissonDirect (PFFT_INVERSE, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+  
+    ! Now multiply by the poisson factor
+    outArray(1:inSize) = outArray(1:inSize)*poisfact
+
+
+  ! need pdc2d(n) to do stretching in {x, y}
+  ! need {x, y, z}
   end if
 
 

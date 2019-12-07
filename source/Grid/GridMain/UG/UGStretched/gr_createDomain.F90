@@ -265,7 +265,7 @@ subroutine gr_createDomain()
   ! calculate global IAXIS direction metric coefficients
   gr_iMetricsGlb(CENTER,1:gI,1)       = 1.0 / (gr_iCoordsGlb(RIGHT_EDGE,1:gI,1) - gr_iCoordsGlb(LEFT_EDGE,1:gI,1))
   gr_iMetricsGlb(RIGHT_EDGE,1:gI-1,1) = 1.0 / (gr_iCoordsGlb(CENTER,2:gI,1)     - gr_iCoordsGlb(CENTER,1:gI-1,1))
-  gr_iMetricsGlb(RIGHT_EDGE,gI,1)     = 2.0 / (-3.0*gr_iCoordsGlb(RIGHT_EDGE,gI,1) + 4.0*gr_iCoordsGlb(RIGHT_EDGE,gI-1,1) - gr_iCoordsGlb(RIGHT_EDGE,gI-2,1))
+  gr_iMetricsGlb(RIGHT_EDGE,gI,1)     = 2.0 / ( 3.0*gr_iCoordsGlb(RIGHT_EDGE,gI,1) - 4.0*gr_iCoordsGlb(RIGHT_EDGE,gI-1,1) + gr_iCoordsGlb(RIGHT_EDGE,gI-2,1))
   gr_iMetricsGlb(LEFT_EDGE, 2:gI,1)   = 1.0 / (gr_iCoordsGlb(CENTER,2:gI,1)     - gr_iCoordsGlb(CENTER,1:gI-1,1))
   gr_iMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_iCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_iCoordsGlb(LEFT_EDGE,2,1)     - gr_iCoordsGlb(LEFT_EDGE,3,1))
 
@@ -356,7 +356,7 @@ subroutine gr_createDomain()
     ! calculate global JAXIS direction metric coefficients
     gr_jMetricsGlb(CENTER,1:gJ,1)       = 1.0 / (gr_jCoordsGlb(RIGHT_EDGE,1:gJ,1) - gr_jCoordsGlb(LEFT_EDGE,1:gJ,1))
     gr_jMetricsGlb(RIGHT_EDGE,1:gJ-1,1) = 1.0 / (gr_jCoordsGlb(CENTER,2:gJ,1)     - gr_jCoordsGlb(CENTER,1:gJ-1,1))
-    gr_jMetricsGlb(RIGHT_EDGE,gJ,1)     = 2.0 / (-3.0*gr_jCoordsGlb(RIGHT_EDGE,gJ,1) + 4.0*gr_jCoordsGlb(RIGHT_EDGE,gJ-1,1) - gr_jCoordsGlb(RIGHT_EDGE,gJ-2,1))
+    gr_jMetricsGlb(RIGHT_EDGE,gJ,1)     = 2.0 / ( 3.0*gr_jCoordsGlb(RIGHT_EDGE,gJ,1) - 4.0*gr_jCoordsGlb(RIGHT_EDGE,gJ-1,1) + gr_jCoordsGlb(RIGHT_EDGE,gJ-2,1))
     gr_jMetricsGlb(LEFT_EDGE, 2:gJ,1)   = 1.0 / (gr_jCoordsGlb(CENTER,2:gJ,1)     - gr_jCoordsGlb(CENTER,1:gJ-1,1))
     gr_jMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_jCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_jCoordsGlb(LEFT_EDGE,2,1)     - gr_jCoordsGlb(LEFT_EDGE,3,1))
 
@@ -454,7 +454,7 @@ subroutine gr_createDomain()
     ! calculate global KAXIS direction metric coefficients
     gr_kMetricsGlb(CENTER,1:gK,1)       = 1.0 / (gr_kCoordsGlb(RIGHT_EDGE,1:gK,1) - gr_kCoordsGlb(LEFT_EDGE,1:gK,1))
     gr_kMetricsGlb(RIGHT_EDGE,1:gK-1,1) = 1.0 / (gr_kCoordsGlb(CENTER,2:gK,1)     - gr_kCoordsGlb(CENTER,1:gK-1,1))
-    gr_kMetricsGlb(RIGHT_EDGE,gK,1)     = 2.0 / (-3.0*gr_kCoordsGlb(RIGHT_EDGE,gK,1) + 4.0*gr_kCoordsGlb(RIGHT_EDGE,gK-1,1) - gr_kCoordsGlb(RIGHT_EDGE,gK-2,1))
+    gr_kMetricsGlb(RIGHT_EDGE,gK,1)     = 2.0 / ( 3.0*gr_kCoordsGlb(RIGHT_EDGE,gK,1) - 4.0*gr_kCoordsGlb(RIGHT_EDGE,gK-1,1) + gr_kCoordsGlb(RIGHT_EDGE,gK-2,1))
     gr_kMetricsGlb(LEFT_EDGE, 2:gK,1)   = 1.0 / (gr_kCoordsGlb(CENTER,2:gK,1)     - gr_kCoordsGlb(CENTER,1:gK-1,1))
     gr_kMetricsGlb(LEFT_EDGE, 1,1)      = 2.0 / (-3.0*gr_kCoordsGlb(LEFT_EDGE,1,1)   + 4.0*gr_kCoordsGlb(LEFT_EDGE,2,1)     - gr_kCoordsGlb(LEFT_EDGE,3,1))
 

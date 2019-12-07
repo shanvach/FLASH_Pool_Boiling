@@ -39,7 +39,7 @@
   character(29), save :: filename
   character(6) :: index_lb,index_mype
 
-  real xedge(NXB+1),xcell(NXB+1)
+  real xedge(NXB+1),xcell(NXB)
   real yedge(NYB+1),ycell(NYB+1)
   real zedge(NZB+1),zcell(NZB+1)
   real intsx(NXB+1),intsy(NYB+1),intsz(NZB+1)
@@ -581,8 +581,8 @@
   character(29), save :: filename
   character(6) :: index_lb,index_mype
 
-  real xedge(NXB+1),xcell(NXB+1)
-  real yedge(NYB+1),ycell(NYB+1)
+  real xedge(NXB+1), xcell(NXB)
+  real yedge(NYB+1), ycell(NYB)
   real intsx(NXB+1), intsy(NYB+1)
 
 
@@ -707,10 +707,10 @@
      tpt = 0. 
 
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
-     call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)) 
-     call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)) 
-     call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS)+1) 
-     call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS)+1) 
+     call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1) 
+     call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)-1) 
+     call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS)) 
+     call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS)) 
 
     
      facevarxx = facexData(VELC_FACE_VAR,:,:,1)

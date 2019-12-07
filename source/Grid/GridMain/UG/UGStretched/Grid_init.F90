@@ -64,6 +64,8 @@ subroutine Grid_init()
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, Driver_getComm
   use Grid_data
   use gr_sbInterface, ONLY : gr_sbInit
+  
+  use gr_pfftData, ONLY : pfft_solver
 
   implicit none
 
@@ -118,8 +120,6 @@ subroutine Grid_init()
   !get the boundary conditions stored as strings in the flash.par file
   call RuntimeParameters_get("xl_boundary_type", xl_bcString)
   call RuntimeParameters_get("xr_boundary_type", xr_bcString)
-  !call RuntimeParameters_get("xl_new_boundary_type",xl_newbcString)
-  !call RuntimeParameters_get("xr_new_boundary_type",xr_newbcString)
   call RuntimeParameters_get("yl_boundary_type", yl_bcString)
   call RuntimeParameters_get("yr_boundary_type", yr_bcString)
   call RuntimeParameters_get("zl_boundary_type", zl_bcString)
@@ -147,6 +147,7 @@ subroutine Grid_init()
   gr_globalDomain(HIGH,JAXIS) = gr_jmax
   gr_globalDomain(HIGH,KAXIS) = gr_kmax
 
+  !get the stretching condition on each axis
   call RuntimeParameters_get('x_stretch', gr_iStr)
   call RuntimeParameters_get('y_stretch', gr_jStr)
   call RuntimeParameters_get('z_stretch', gr_kStr)
@@ -164,6 +165,9 @@ subroutine Grid_init()
   call RuntimeParameters_get('x_stretch_value', gr_iStrPar)
   call RuntimeParameters_get('y_stretch_value', gr_jStrPar)
   call RuntimeParameters_get('z_stretch_value', gr_kStrPar)
+
+  ! Idenitify the user provided solver
+  call RuntimeParameters_get('poisson_solver', pfft_solver) 
 
   call RuntimeParameters_get('smalle', gr_smalle)
   call RuntimeParameters_get('smallx', gr_smallx)
