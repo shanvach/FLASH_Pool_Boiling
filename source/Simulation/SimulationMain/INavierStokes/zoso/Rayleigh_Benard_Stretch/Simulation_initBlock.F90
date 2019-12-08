@@ -56,11 +56,11 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(2,MDIM)    :: boundBox
   real                       :: pi
   real, dimension(GRID_IHI_GC) :: dx
-  real, dimension(GRID_IHI_GC) :: dy
-  real, dimension(GRID_IHI_GC) :: dz
+  real, dimension(GRID_JHI_GC) :: dy
+  real, dimension(GRID_KHI_GC) :: dz
   real, dimension(GRID_IHI_GC) :: xcell, xedge
-  real, dimension(GRID_IHI_GC) :: ycell, yedge
-  real, dimension(GRID_IHI_GC) :: zcell, zedge
+  real, dimension(GRID_JHI_GC) :: ycell, yedge
+  real, dimension(GRID_KHI_GC) :: zcell, zedge
 
   ! write out simulation time at initialization 
   ! write(*,*) 'BlockId =',blockId,' sim_init =',sim_init
@@ -343,7 +343,7 @@ subroutine Simulation_initBlock(blockId)
     ! taylor-green flow (Modified Temp)
     case (21)
       
-      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, FACEX)
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, CENTER)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
@@ -352,7 +352,7 @@ subroutine Simulation_initBlock(blockId)
         enddo
       enddo
 
-      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, FACEY)
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, CENTER)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)

@@ -58,7 +58,8 @@ PP      = -D
 
 
 FFLAGS_OPT =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
--ffree-line-length-none -finit-local-zero 
+-ffree-line-length-none 
+#-finit-local-zero 
 
 FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none -pedantic -Wall -Wextra -Waliasing \
@@ -70,8 +71,10 @@ FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 FFLAGS_TEST =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none \
 -ffpe-trap=invalid,zero,overflow -fbounds-check \
--fbacktrace -fdump-core -finit-real=nan \
--finit-integer=-999999 -fimplicit-none
+-fbacktrace -fdump-core 
+
+#-finit-real=nan \
+#-finit-integer=-999999 -fimplicit-none
 
 F90FLAGS =
 

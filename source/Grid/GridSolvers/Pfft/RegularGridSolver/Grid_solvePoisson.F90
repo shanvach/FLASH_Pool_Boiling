@@ -52,8 +52,10 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
 
   use gr_pfftData, ONLY : pfft_inLen, pfft_usableProc, pfft_globalLen, pfft_transformType, pfft_solver
 
-  use Grid_interface, ONLY : Grid_pfftMapToInput, Grid_pfftMapFromOutput
+  use Grid_interface, ONLY : Grid_pfftMapToInput, Grid_pfftMapFromOutput, GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN
   use gr_pfftInterface, ONLY : gr_pfftPoissonPeriodic
+  use gr_interface, ONLY:  gr_findMean
+
 
   implicit none
 
@@ -68,6 +70,7 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
   real, allocatable, dimension(:) :: inArray, outArray
   integer, dimension(MDIM) :: localSize, globalSize, transformType
   integer :: inSize
+  real    :: meanDensity = 0.
 
   !Important.  Tests that this processor should be doing work
   if(.not.pfft_usableProc) return   
@@ -104,6 +107,10 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
 
   ! Homogenious boundary conditions w/o x-axis stretching in {x, y}
   else
+
+    ! Figure out the mean of the density and subtract
+    call gr_findMean(iSrc, 2, .false., meanDensity)
+    inArray(1:inSize) = inArray(1:inSize) - meanDensity
 
 
     ! Call gr_pfftPoisson Periodic Forward:

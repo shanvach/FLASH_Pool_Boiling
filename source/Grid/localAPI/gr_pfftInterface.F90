@@ -237,6 +237,23 @@ module gr_pfftinterface
   end interface
 
   interface
+    subroutine gr_pfftTridiag (lower, main, upper, rhs, x, length)
+      real, dimension(length), intent(in)  :: lower, main, upper, rhs
+      real, dimension(length), intent(out) :: x
+      integer, intent(in) :: length
+    end subroutine gr_pfftTriDiag
+  end interface
+
+  interface
+    subroutine gr_pfftCyclicTridiag (lower, main, upper, alpha, beta, rhs, x, length)
+      real, dimension(length), intent(in)  :: lower, main, upper, rhs
+      real, dimension(length), intent(out) :: x
+      real, intent(in)    :: alpha, beta
+      integer, intent(in) :: length
+    end subroutine gr_pfftCyclicTriDiag
+  end interface
+
+  interface
      subroutine gr_pfftMapToInput(gridVar, pfftInputArray)
        implicit none
        integer, intent(IN) :: gridVar

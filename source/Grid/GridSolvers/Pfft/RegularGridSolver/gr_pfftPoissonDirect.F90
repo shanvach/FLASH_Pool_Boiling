@@ -5,10 +5,11 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
   use Grid_interface,   ONLY : Grid_getCellMetrics
   use Grid_data,        ONLY : gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb
-  use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, gr_pfftGetLocalLimitsAnytime
+  use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, &
+                               gr_pfftGetLocalLimitsAnytime, gr_pfftTriDiag, gr_pfftCyclicTriDiag
   use gr_pfftData,      ONLY : pfft_inLen, pfft_midLen, pfft_work1, pfft_work2, pfft_procGrid, pfft_trigIaxis, &
                                pfft_globalLen, pfft_comm, pfft_transformType, pfft_scale, pfft_myPE
-                               
+  use gr_interface,     ONLY : gr_findMean                             
 
   implicit none
 
@@ -27,9 +28,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   integer, dimension(2,MDIM) :: pfftBlkLimits
   real, dimension(:), allocatable, save :: AM, BM, CM
   real, dimension(:), allocatable, save :: AK
-  real, dimension(:), allocatable :: BML, CML, RHS 
+  real, dimension(:), allocatable :: BML, RHS, X 
   real, dimension(:,:), allocatable :: temp2DArray
-
   logical, save :: firstCall = .true.
 
   if (firstCall) then
@@ -44,6 +44,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
      if (transformType(IAXIS) == PFFT_REAL) then
 
+       if (pfft_myPE == 0) write(*,*) '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!use periodic coefficents'
        ! transform coefficients for x-axis (periodic transform -- fourier)
        do K=1, L/2
           AK(K) =  2. * PI * real(K-1)
@@ -51,15 +52,16 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
        do K=L/2+1, L
           AK(K) = -2. * PI * real(L-K+1)
        end do
-       AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) / gr_iMetricsGlb(CENTER,1:L,1)
+       AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
 
      else
 
+       if (pfft_myPE == 0) write(*,*) '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!use neumann coefficents'
        ! transform coefficients for x-axis (neumann transform -- cos)
        do K=1, L
           AK(K) =  1. * PI * real(K-1)
        end do
-       AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) / gr_iMetricsGlb(CENTER,1:L,1)
+       AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
 
      endif
 
@@ -67,8 +69,9 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
      AM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(LEFT_EDGE, 1:M,1)
      CM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(RIGHT_EDGE,1:M,1)
      if (.true.) then
-       AM(1) = 0.
-       CM(M) = 0.
+       if (pfft_myPE == 0) write(*,*) '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!zero out AM(1) and CM(M)'
+       !AM(1) = 0.
+       !CM(M) = 0.
      endif
      BM = - AM - CM
 
@@ -79,9 +82,11 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
   if (iDirection .eq. PFFT_FORWARD) then
 
-     ! dimensions
-     L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
-     M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
+    !if (pfft_myPE == 0) write(*,*) 'begin forward solve'
+
+    ! dimensions
+    L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
+    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
 
     ! number of parallel transforms of x-direction
     numVec = pfft_inLen(JAXIS)
@@ -98,8 +103,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     allocate(temp2DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS)))
     temp2DArray = reshape(pfft_work2, pfft_midLen(1:2))
 
-     allocate(BML(M), CML(M))
-     allocate(RHS(M))
+    allocate(BML(M), RHS(M), X(M))
 
     call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits) 
     call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
@@ -110,20 +114,26 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     do JL = 1, LL
 
       ! identify the wave number or x-direction index
-      J = pfftBlkLimits(LOW,KAXIS) + JL
+      J = pfftBlkLimits(LOW,JAXIS) + JL
       if (J-1 > pfftBlkLimits(HIGH,JAXIS)) cycle
 
       ! center diagonal and rhs for a specific wave number in x-direction
       !                               (+ tridiag modifies upper diagonal)
       BML(1:M) = BM(1:M) - AK(J/2+1)
-      CML = CM
       RHS(:) = temp2DArray(:,JL)
-     
+      X(:) = 0.
+    
       ! solve the system
-      call tridiag(AM,BML,CML,RHS,RHS,M)
-
+      if (transformType(JAXIS) == PFFT_COS_CC) then
+        !if (pfft_myPE == 0) write(*,*) 'solve for ', JL
+        call gr_pfftTriDiag(AM, BML, CM, RHS, X, M)     
+      else 
+        !if (pfft_myPE == 0) write(*,*) 'solve - cycle for ', JL
+        call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M)
+      endif
+ 
       ! store the solution
-      temp2DArray(:,JL) = RHS(:)
+      temp2DArray(:,JL) = X(:)
 
     end do
 
@@ -131,10 +141,16 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     pfft_work2(1:product(pfft_midLen)) = reshape(temp2DArray, (/product(pfft_midLen)/))
     deallocate(temp2DArray)
     deallocate(BML)    
-    deallocate(CML)    
     deallocate(RHS)    
-    
+    deallocate(X)    
+
   else
+
+
+    !if (pfft_myPE == 0) write(*,*) 'begin inverse solve'
+
+    ! number of parallel transforms of x-direction
+    numVec = pfft_inLen(JAXIS)
 
     ! transpose the pencil grid about y-axis :: {y,x} -> {x,y}
     call gr_pfftTranspose(iDirection, PFFT_PCLDATA_REAL, pfft_work2, pfft_work1, &
@@ -150,25 +166,3 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
 end subroutine gr_pfftPoissonDirect
 
-
-      SUBROUTINE tridiag(a,b,c,r,u,n)
-      use Driver_interface, ONLY : Driver_abortFlash
-      INTEGER n,NMAX
-      REAL a(n),b(n),c(n),r(n),u(n)
-      PARAMETER (NMAX=3000)
-      INTEGER j
-      REAL bet,gam(NMAX)
-      if(b(1).eq.0.) call Driver_abortFlash('tridag: rewrite equations')
-      bet=b(1)
-      u(1)=r(1)/bet
-      do 11 j=2,n
-        gam(j)=c(j-1)/bet
-        bet=b(j)-a(j)*gam(j)
-        if(bet.eq.0.) call Driver_abortFlash('tridag failed')
-        u(j)=(r(j)-a(j)*u(j-1))/bet
-11    continue
-      do 12 j=n-1,1,-1
-        u(j)=u(j)-gam(j+1)*u(j+1)
-12    continue
-      return
-      END
