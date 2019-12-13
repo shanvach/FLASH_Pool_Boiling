@@ -22,9 +22,6 @@
 !!
 !!
 !!***
-
-!!REORDER(4):solnData
-
 subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
   
   use Driver_interface, ONLY: Driver_abortFlash
@@ -42,20 +39,16 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
   logical, intent(in) :: bGuardcell
   real, intent(out) :: mean
 
-  real :: localVolume, localSum, blockSum, bvol,  sum
-  !real :: numZonesInv
+  real :: localVolume, localSum, blockSum, sum
 
-  !real :: blockVolume, cellVolume, volume
   real :: blockVolume, volume
   integer :: blkCount, lb, blockID, i, j, k, ierr
   integer :: ili, iui, jli, jui, kli, kui
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
   integer, dimension(MAXBLOCKS) :: blkList
-  real, dimension(MDIM) :: blockSize
   real, dimension(:,:,:,:), pointer :: solnData
   real, dimension(GRID_IHI_GC) :: dx
   real, dimension(GRID_JHI_GC) :: dy
-!  integer :: nxbBlock, nybBlock, nzbBlock
 !!==============================================================================
 
   mean = 0.0
@@ -69,7 +62,6 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
      blockID = blkList(lb)
 
      call Grid_getBlkPtr(blockID, solnData)
-     call Grid_getBlkPhysicalSize(blockID, blockSize)
      call Grid_getBlkIndexLimits(blockID, blkLimits, blkLimitsGC)
 
      blockSum = 0.
@@ -101,8 +93,6 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
   call mpi_allreduce ( localVolume, volume, 1, FLASH_REAL, MPI_SUM, gr_meshComm, ierr )
 
   mean =  sum / volume
-
-  !write(*,*) 'Sum ', sum, '  volume ', volume, '  mean ', mean
 
   return
 
