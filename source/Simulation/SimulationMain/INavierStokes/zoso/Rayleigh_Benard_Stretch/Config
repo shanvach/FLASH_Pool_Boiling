@@ -9,8 +9,8 @@ USESETUPVARS Grid
 LIBRARY STDCXX
 
 # Stretched Grid Solver
-REQUESTS Grid/GridMain/RegularGrid
-REQUESTS Grid/GridSolvers/Pfft/RegularGridSolver
+#REQUESTS Grid/GridMain/RegularGrid
+#REQUESTS Grid/GridSolvers/Pfft/RegularGridSolver
 #REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
 #REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
 

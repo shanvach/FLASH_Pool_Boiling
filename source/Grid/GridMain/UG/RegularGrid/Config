@@ -1,0 +1,3 @@
+# Configuration File for Uniform Grid Package w/ Stretched Grid 
+#REQUIRES Grid/GridMain/UG
+REQUIRES Grid/GridSolvers/Pfft/RegularGridSolver
