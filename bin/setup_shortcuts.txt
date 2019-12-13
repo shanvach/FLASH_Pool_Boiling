@@ -39,6 +39,7 @@ nolog:-without-unit=monitors/Logfile:
 # Choice of Grid
 grid:-unit=Grid:
 ug:+grid:Grid=UG:
+rg:+grid:Grid=RegularGrid
 pm2:+grid:Grid=PM2:
 pm40:+grid:Grid=PM40:
 pm3:+pm40
