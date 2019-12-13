@@ -59,17 +59,8 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
 !!==============================================================================
 
   mean = 0.0
-
-  if (iType /= 2) then
-     call Driver_abortFlash("[gr_findMean] Can only do arithmetic mean with iType=1")
-  end if
-  if (bGuardCell) then
-     call Driver_abortFlash("[gr_findMean] Inclusion of guardcells not yet coded")
-  end if
-
   localVolume = 0.
   localSum = 0.
-
 
   call Grid_getListOfBlocks(LEAF,blkList,blkCount)
 
@@ -81,25 +72,6 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
      call Grid_getBlkPhysicalSize(blockID, blockSize)
      call Grid_getBlkIndexLimits(blockID, blkLimits, blkLimitsGC)
 
-     !blockVolume = blockSize(IAXIS)
-     !nxbBlock = blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) + 1
-     !numZonesInv = 1. / real(nxbBlock)
-
-     !if (NDIM >= 2) then
-        !blockVolume = blockVolume * blockSize(JAXIS)
-        !nybBlock = blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) + 1
-        !numZonesInv = numZonesInv / real(nybBlock)
-     !end if
-
-     !if (NDIM == 3) then
-        !blockVolume = blockVolume * blockSize(KAXIS)
-        !nzbBlock = blkLimits(HIGH,KAXIS) - blkLimits(LOW,KAXIS) + 1
-        !numZonesInv = numZonesInv / real(nzbBlock)
-     !end if
-
-
-     !cellVolume = blockVolume * numZonesInv
-     !localVolume = localVolume + blockVolume
      blockSum = 0.
      blockVolume = 0.
 
@@ -107,36 +79,30 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
      iui = blkLImits(HIGH,IAXIS)
      jli = blkLimits(LOW,JAXIS)
      jui = blkLImits(HIGH,JAXIS)
-     kli = blkLimits(LOW,KAXIS)
-     kui = blkLImits(HIGH,KAXIS)
 
      call Grid_getCellMetrics(IAXIS, lb, CENTER, .true., dx, GRID_IHI_GC)
      call Grid_getCellMetrics(JAXIS, lb, CENTER, .true., dy, GRID_JHI_GC) 
 
-     do k = kli, kui
-        do j = jli, jui
-           do i = ili, iui
-              blockSum = blockSum + solnData(iSrc,i,j,k) / ( dx(i) * dy(j) )
-              blockVolume = blockVolume + 1 / (dx(i) * dy(j))
-           enddo
-        enddo
+     do j = jli, jui
+       do i = ili, iui
+         blockSum = blockSum + solnData(iSrc,i,j,1) / ( dx(i) * dy(j) )
+         blockVolume = blockVolume + 1 / (dx(i) * dy(j))
+       enddo
      enddo
 
-     localSum = localSum + blockSum !* cellVolume
+     localSum = localSum + blockSum 
      localVolume = localVolume + blockVolume
 
      call Grid_releaseBlkPtr(blockID, solnData)
 
   enddo
 
-  call mpi_allreduce ( localSum, sum, 1, FLASH_REAL, & 
-       MPI_SUM, gr_meshComm, ierr )
-  call mpi_allreduce ( localVolume, volume, 1, FLASH_REAL, & 
-       MPI_SUM, gr_meshComm, ierr )
+  call mpi_allreduce ( localSum, sum, 1, FLASH_REAL, MPI_SUM, gr_meshComm, ierr )
+  call mpi_allreduce ( localVolume, volume, 1, FLASH_REAL, MPI_SUM, gr_meshComm, ierr )
 
-  mean = sum / volume
+  mean =  sum / volume
 
-  !write(*,*) 'mean ', mean, ' volume = ', volume, ' -- ', 1 / (dx(16) * dy(16))
+  !write(*,*) 'Sum ', sum, '  volume ', volume, '  mean ', mean
 
   return
 

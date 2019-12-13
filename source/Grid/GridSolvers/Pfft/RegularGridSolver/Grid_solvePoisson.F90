@@ -109,8 +109,8 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
   else
 
     ! Figure out the mean of the density and subtract
-    call gr_findMean(iSrc, 2, .false., meanDensity)
-    inArray(1:inSize) = inArray(1:inSize) - meanDensity
+    !call gr_findMean(iSrc, 2, .false., meanDensity)
+    !inArray(1:inSize) = inArray(1:inSize) - meanDensity
 
 
     ! Call gr_pfftPoisson Periodic Forward:

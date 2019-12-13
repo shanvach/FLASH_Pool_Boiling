@@ -3,6 +3,7 @@
 
 subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
 
+  use Driver_interface, ONLY : Driver_abortFlash
   use Grid_interface,   ONLY : Grid_getCellMetrics
   use Grid_data,        ONLY : gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb
   use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, &
@@ -31,6 +32,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   real, dimension(:), allocatable :: BML, RHS, X 
   real, dimension(:,:), allocatable :: temp2DArray
   logical, save :: firstCall = .true.
+  real :: mean
 
   if (firstCall) then
 
@@ -54,7 +56,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
        end do
        AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
 
-     else
+     else if (transformType(IAXIS) == PFFT_COS_CC) then
 
        if (pfft_myPE == 0) write(*,*) '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!use neumann coefficents'
        ! transform coefficients for x-axis (neumann transform -- cos)
@@ -63,15 +65,19 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
        end do
        AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
 
+     else 
+
+       call Driver_abortFlash("Unsupported x-direction transformation for RegularGridSolver!!")
+
      endif
 
      ! matrix coefficients for tdma
      AM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(LEFT_EDGE, 1:M,1)
      CM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(RIGHT_EDGE,1:M,1)
-     if (.true.) then
+     if (transformType(JAXIS) == PFFT_COS_CC) then
        if (pfft_myPE == 0) write(*,*) '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!zero out AM(1) and CM(M)'
-       !AM(1) = 0.
-       !CM(M) = 0.
+       AM(1) = 0.
+       CM(M) = 0.
      endif
      BM = - AM - CM
 
@@ -130,7 +136,14 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
       else 
         !if (pfft_myPE == 0) write(*,*) 'solve - cycle for ', JL
         call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M)
+        !call gr_pfftCyclicTriDiag(AM, BML, CM, -CM(M), -AM(1), RHS, X, M)
+        !call gr_pfftCyclicTriDiag(AM, BML, CM, 0., 0., RHS, X, M)
       endif
+      
+      if (j == 1) then
+        mean = sum(X) / M      
+        X(:) = X(:) - mean
+      endif     
  
       ! store the solution
       temp2DArray(:,JL) = X(:)

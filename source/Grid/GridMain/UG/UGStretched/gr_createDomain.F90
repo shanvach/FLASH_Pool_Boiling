@@ -44,6 +44,8 @@
 
 subroutine gr_createDomain()
 
+  use Driver_interface, ONLY : Driver_abortFlash
+
   use physicalData, ONLY : unk, facevarx,facevary,facevarz
 
   use Grid_data, ONLY : scratch,scratch_ctr,&
