@@ -54,6 +54,9 @@ pm4dev_clean:+grid:Grid=PM4DEV
 pm4dev:+pm4dev_clean:FlashAvoidOrrery=True
 pm4dev_fixed:+pm4dev:ParameshLibraryMode=False
 
+#choice of pfft Solver
+pfft:-unit=Grid/GridSolvers/Pfft
+
 # Choice of MHD solver
 # NOTE: The 8wave mhd solver only works with the native interpolation.
 8wave:--with-unit=physics/Hydro/HydroMain/split/MHD_8Wave:+grid:-gridinterpolation=native
