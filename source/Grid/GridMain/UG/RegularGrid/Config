@@ -3,7 +3,7 @@
 #REQUIRES Grid/GridSolvers/Pfft/RegularGridSolver
 
 # add pre-processor symbol for use of Regular Grids 
-PPDEFINE FLASH_GRID_UGREGULAR
+PPDEFINE FLASH_GRID_REGULAR
 
 PARAMETER x_stretch             BOOLEAN         false
 PARAMETER y_stretch             BOOLEAN         false
