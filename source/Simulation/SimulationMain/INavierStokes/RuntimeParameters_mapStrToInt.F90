@@ -65,17 +65,17 @@ implicit none
 #endif
 
   case ("auto", "AUTO")
-#ifdef SG_USER
+#ifdef AUTO 
      constKey = AUTO
 #endif
 
   case ("trig", "TRIG")
-#ifdef SG_USER
+#ifdef TRIG
      constKey = TRIG
 #endif
 
   case ("direct", "DIRECT", "matrix", "MATRIX")
-#ifdef SG_USER
+#ifdef MATRIX
      constKey = MATRIX
 #endif
 
