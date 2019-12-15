@@ -64,6 +64,21 @@ implicit none
      constKey = SG_USER
 #endif
 
+  case ("auto", "AUTO")
+#ifdef SG_USER
+     constKey = AUTO
+#endif
+
+  case ("trig", "TRIG")
+#ifdef SG_USER
+     constKey = TRIG
+#endif
+
+  case ("direct", "DIRECT", "matrix", "MATRIX")
+#ifdef SG_USER
+     constKey = MATRIX
+#endif
+
   case ("periodic", "PERIODIC")
 #ifdef PERIODIC
      constKey = PERIODIC

@@ -64,8 +64,6 @@ subroutine Grid_init()
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, Driver_getComm
   use Grid_data
   use gr_sbInterface, ONLY : gr_sbInit
-  
-  use gr_pfftData, ONLY : pfft_solver
 
   implicit none
 
@@ -78,6 +76,7 @@ subroutine Grid_init()
   character(len=MAX_STRING_LENGTH) :: yl_bcString,yr_bcString
   character(len=MAX_STRING_LENGTH) :: zl_bcString,zr_bcString
   character(len=MAX_STRING_LENGTH) :: x_strString,y_strString,z_strString
+  character(len=MAX_STRING_LENGTH) :: solver_string,x_solveString,y_solveString,z_solveString
   character(len=MAX_STRING_LENGTH) :: eosModeString, grav_boundary_type
 
   integer :: i, localnxb, localnyb, localnzb
@@ -167,7 +166,16 @@ subroutine Grid_init()
   call RuntimeParameters_get('z_stretch_value', gr_kStrPar)
 
   ! Idenitify the user provided solver
-  call RuntimeParameters_get('poisson_solver', pfft_solver) 
+  call RuntimeParameters_get('poisson_solver',  solver_string) 
+  call RuntimeParameters_get("x_poisson_solve", x_solveString)
+  call RuntimeParameters_get("y_poisson_solve", y_solveString)
+  call RuntimeParameters_get("z_poisson_solve", z_solveString)
+  
+  !map the string solver conditions to integer constants defined in constants.h
+  call RuntimeParameters_mapStrToInt(pfft_solver,   gr_solverType)
+  call RuntimeParameters_mapStrToInt(x_solveString, gr_iSolveType)
+  call RuntimeParameters_mapStrToInt(y_solveString, gr_jSolveType)
+  call RuntimeParameters_mapStrToInt(z_solveString, gr_kSolveType)
 
   call RuntimeParameters_get('smalle', gr_smalle)
   call RuntimeParameters_get('smallx', gr_smallx)

@@ -1,12 +1,12 @@
-!!****if* source/Grid/GridSolvers/Pfft/RegularGridSolver/gr_pfftPoissonPeriodic
+!!****if* source/Grid/GridSolvers/Pfft/RegularGridSolver/gr_pfftPoissonHomBcTrig
 !!
 !! NAME
 !!
-!!  gr_pfftPoissonPeriodic
+!!  gr_pfftPoissonPoissonHomBcTrig
 !!
 !! SYNOPSIS
 !!
-!!  call gr_pfftPoissonPeriodic(integer(IN) :: iDirection,
+!!  call gr_pfftPoissonHomBcTrig(integer(IN) :: iDirection,
 !!                              integer(IN) :: iSrc, 
 !!                              integer(IN) :: inSize,
 !!                              integer(IN) :: bcTypes(6),
@@ -41,7 +41,7 @@
 !!
 !!***
 
-subroutine gr_pfftPoissonPeriodic (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
+subroutine gr_pfftPoissonHomBcTrig (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
 
   use gr_pfftData, ONLY : pfft_outLen
   use Grid_interface, ONLY : Grid_pfft, GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN

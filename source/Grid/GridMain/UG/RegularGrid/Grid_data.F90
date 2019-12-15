@@ -138,6 +138,8 @@ Module Grid_data
   logical, save :: gr_iStr, gr_jStr, gr_kStr
   integer, save :: gr_iStrType, gr_jStrType, gr_kStrType
   real, save :: gr_iStrPar, gr_jStrPar, gr_kStrPar
+  integer, save :: gr_solverType
+  integer, save :: gr_iSolveType, gr_jSolveType, gr_kSolveType
   real, save,target, allocatable, dimension(:,:,:) ::  gr_iMetrics,    gr_jMetrics,    gr_kMetrics
   real, save,target, allocatable, dimension(:,:,:) ::  gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb
   real, save,target, allocatable, dimension(:,:,:) ::  gr_iCoordsGlb,  gr_jCoordsGlb,  gr_kCoordsGlb

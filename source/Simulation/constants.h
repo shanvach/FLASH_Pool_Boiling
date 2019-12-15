@@ -148,8 +148,18 @@ MAX_PROCS value is needed for some allocation, keeping it in a
   a stretched regular grid in the uniform grid package. 
 #endif
 
-#define SG_USER   1
-#define SG_TANH   2
+#define SG_USER 1
+#define SG_TANH 2
+#define AUTO    0
+#define TRIG   -1
+#define MATRIX -2
+#define TRIG_TRIG 20
+#define TRIG_DRCT 21
+#define DRCT_DRCT 22
+#define TRIG_TRIG_TRIG 30
+#define TRIG_TRIG_DRCT 31
+#define TRIG_DRCT_DRCT 32
+#define DRCT_DRCT_DRCT 33
 
 
 #if 0

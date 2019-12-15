@@ -1,26 +1,26 @@
-!!****if* source/Grid/GridSolvers/Pfft/RegularGridSolver/gr_pfftPoissonDirect
+!!****if* source/Grid/GridSolvers/Pfft/RegularGridSolver/gr_pfftPoissonTrigDirect
 !!
 !! NAME
 !!
-!!  gr_pfftPoissonDirect
+!!  gr_pfftPoissonTrigDirect
 !!
 !!
 !! SYNOPSIS
 !!
-!!  call gr_pfftPoissonDirect(integer(IN)                :: iDirection,
-!!                            integer(IN)                :: solveflag,
-!!                            integer(IN)                :: inSize,
-!!                            integer(IN)                :: localSize(MDIM),
-!!                            integer(IN)                :: globalSize(MDIM),
-!!                            integer(IN)                :: transformType(MDIM),
-!!                            real(IN) ,dimension(inSize):: inArray(:),
-!!                            real(OUT),dimension(inSize):: outArray(:))
+!!  call gr_pfftPoissonTrigDirect(integer(IN)                :: iDirection,
+!!                                integer(IN)                :: solveflag,
+!!                                integer(IN)                :: inSize,
+!!                                integer(IN)                :: localSize(MDIM),
+!!                                integer(IN)                :: globalSize(MDIM),
+!!                                integer(IN)                :: transformType(MDIM),
+!!                                real(IN) ,dimension(inSize):: inArray(:),
+!!                                real(OUT),dimension(inSize):: outArray(:))
 !!
 !! DESCRIPTION
 !!
-!!   Poisson solver routine.  This module implements the direct based method 
-!!   for periodic, neumann, and dirichlet problems on a regular grid. 
-!!   Mixed boundaries for a given axis are not supported.
+!!   Poisson solver routine.  This module implements the mixed fft
+!!   and direct based method for periodic, neumann, and dirichlet problems
+!!   on a regular grid. Mixed boundaries for a given axis are not supported.
 !!
 !!
 !! ARGUMENTS
@@ -40,7 +40,7 @@
 !!  
 !!***
 
-subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
+subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
 
   use Driver_interface, ONLY : Driver_abortFlash
   use Grid_interface,   ONLY : Grid_getCellMetrics
@@ -272,5 +272,5 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
   return
 
-end subroutine gr_pfftPoissonDirect
+end subroutine gr_pfftPoissonTrigDirect
 

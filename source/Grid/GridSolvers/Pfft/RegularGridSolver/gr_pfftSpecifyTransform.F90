@@ -25,8 +25,11 @@
 
 subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
 
-  use Grid_interface, ONLY : GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
-                             GRID_PDE_BND_DIRICHLET
+  use Grid_interface,   ONLY : GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
+                               GRID_PDE_BND_DIRICHLET
+  use Grid_data,        ONLY : gr_solverType, gr_iSolveType, gr_jSolveType, gr_kSolveType, &
+                               gr_iStr, gr_jStr, gr_kStr
+  use gr_pfftData,      ONLY : pfft_solver
   use Driver_interface, ONLY : Driver_abortFlash
 
   implicit none
@@ -39,9 +42,60 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
   integer, dimension(0:MDIM), intent(OUT), OPTIONAL :: baseDatType
   integer, dimension(2*MDIM), intent(IN),  OPTIONAL :: bcTypes
   integer :: i
+
+  if (.true.) then
+  
+    ! specify poisson solver combination
+    select case (gr_solverType)
+
+    ! automatic selection based on stretching
+    case (AUTO)
+      pfft_solver = TRIG_TRIG 
+      if (gr_iStr) pfft_solver += 1
+      if (gr_jStr) pfft_solver += 1
+      if (NDIM .eq. 3) then
+        pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
+        if (gr_kStr) pfft_solver += 1
+      endif
+
+    ! user specified selection
+    case (USER_DEFINED)
+      pfft_solver = TRIG_TRIG
+      if (gr_iSolveType .eq. MATRIX) pfft_solver += 1
+      if (gr_jSolveType .eq. MATRIX) pfft_solver += 1
+      if (NDIM .eq. 3) then
+        pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
+        if (gr_kSolveType .eq. MATRIX) pfft_solver += 1
+      endif
+    
+    ! fully trignometric poisson solver 
+    case (TRIG)
+      pfft_solver = TRIG_TRIG
+      if (NDIM .eq. 3) pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
+
+    ! either pentadiagonal or septadiagonal poisson solver
+    case (MATRIX)
+      pfft_solver = DRCT_DRCT
+      if (NDIM .eq. 3) pfft_solver = DRCT_DRCT_DRCT
+
+    ! unsupported method of specifying poisson solver
+    case default
+      pfft_solver = 0
+      call Driver_abortFlash("This Poisson Solver requires poisson_solver == &
+                             &auto, user, trig, or direct!")  
+    end select
+
+    ! verify supported poisson solver combination
+    if (.not. (                                                                    &
+       ((pfft_solver .ge. TRIG_TRIG)      .and. (pfft_solver .le. DRCT_DRCT)) .or. & 
+       ((pfft_solver .ge. TRIG_TRIG_TRIG) .and. (pfft_solver .le. DRCT_DRCT_DRCT)) &
+       )) then
+      call Driver_abortFlash("Specification of Poisson Solver options not supported!")  
+    endif
+ 
+ endif
   
   if (.true.) then
-
 
     !! In this implementation we are only working with matching boundary conditions
     if (present(bcTypes)) then
@@ -72,7 +126,7 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
           call Driver_abortFlash("This Poisson solver requires the same type of boundaries front and back!")
       end if
       if (bcTypes(5) /= GRID_PDE_BND_PERIODIC .AND. bcTypes(5) /= GRID_PDE_BND_NEUMANN &
-                                              .AND. bcTypes(5) /= GRID_PDE_BND_DIRICHLET) &
+                                            .AND. bcTypes(5) /= GRID_PDE_BND_DIRICHLET) &
           call Driver_abortFlash(&
           "This Poisson solver requires periodic or homogeneous Dirichlet or Neumann boundaries in the Z direction!")
 #endif
@@ -102,13 +156,8 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
       transformType(JAXIS:KAXIS) = PFFT_REAL
     end if
     if (present(baseDatType)) then
-       baseDatType(0:MDIM) = PFFT_PCLDATA_REAL
-    end if
-
-
-
+      baseDatType(0:MDIM) = PFFT_PCLDATA_REAL
+    endif
   end if
-
-
 
 end subroutine gr_pfftSpecifyTransform

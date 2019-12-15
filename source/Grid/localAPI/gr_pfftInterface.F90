@@ -217,8 +217,7 @@ module gr_pfftinterface
   end interface
 
   interface
-     subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, &
-          localSize, globalSize, transformType, inArray, outArray)
+     subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
        integer, intent(in)    :: iDirection, solveflag, inSize  
        integer, dimension(MDIM),intent(in) :: localSize,globalSize,transformType
        real,  dimension(inSize),intent(in) :: inArray
@@ -227,7 +226,16 @@ module gr_pfftinterface
   end interface
 
   interface
-     subroutine gr_pfftPoissonPeriodic (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
+     subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
+       integer, intent(in)    :: iDirection, solveflag, inSize  
+       integer, dimension(MDIM),intent(in) :: localSize,globalSize,transformType
+       real,  dimension(inSize),intent(in) :: inArray
+       real,dimension(inSize), intent(out) :: outArray
+     end subroutine gr_pfftPoissonDirect
+  end interface
+
+  interface
+     subroutine gr_pfftPoissonHomBcTrig (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
        integer, intent(in) :: iDirection, iSrc, inSize
        integer, dimension(2*MDIM), intent(IN) :: bcTypes
        real,    dimension(2*MDIM), intent(in) :: bcValues

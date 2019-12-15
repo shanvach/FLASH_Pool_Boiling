@@ -39,7 +39,7 @@ nolog:-without-unit=monitors/Logfile:
 # Choice of Grid
 grid:-unit=Grid:
 ug:+grid:Grid=UG:
-rg:+grid:Grid=UG: -unit=Grid/GridMain/UG/RegularGrid:
+rg:+grid:Grid=UG:-unit=Grid/GridMain/UG/RegularGrid:-unit=Grid/GridSolvers/Pfft/RegularGridSolver:
 pm2:+grid:Grid=PM2:
 pm40:+grid:Grid=PM40:
 pm3:+pm40
@@ -53,9 +53,6 @@ chombo_amr:-unit=Grid/GridMain/Chombo/AMR:-index-reorder:Grid=Chombo:-nofbs:-mak
 pm4dev_clean:+grid:Grid=PM4DEV
 pm4dev:+pm4dev_clean:FlashAvoidOrrery=True
 pm4dev_fixed:+pm4dev:ParameshLibraryMode=False
-
-#choice of pfft Solver
-pfft:-unit=Grid/GridSolvers/Pfft
 
 # Choice of MHD solver
 # NOTE: The 8wave mhd solver only works with the native interpolation.
