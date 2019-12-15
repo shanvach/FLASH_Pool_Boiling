@@ -172,7 +172,7 @@ subroutine Grid_init()
   call RuntimeParameters_get("z_poisson_solve", z_solveString)
   
   !map the string solver conditions to integer constants defined in constants.h
-  call RuntimeParameters_mapStrToInt(pfft_solver,   gr_solverType)
+  call RuntimeParameters_mapStrToInt(solver_string, gr_solverType)
   call RuntimeParameters_mapStrToInt(x_solveString, gr_iSolveType)
   call RuntimeParameters_mapStrToInt(y_solveString, gr_jSolveType)
   call RuntimeParameters_mapStrToInt(z_solveString, gr_kSolveType)

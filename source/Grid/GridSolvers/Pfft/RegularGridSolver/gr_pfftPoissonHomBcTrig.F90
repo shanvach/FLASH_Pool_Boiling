@@ -97,4 +97,4 @@ subroutine gr_pfftPoissonHomBcTrig (iDirection, iSrc, inSize, bcTypes, bcValues,
 
   end if
   
-end subroutine gr_pfftPoissonPeriodic
+end subroutine gr_pfftPoissonHomBcTrig

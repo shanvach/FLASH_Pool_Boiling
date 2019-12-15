@@ -52,8 +52,7 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
 
   use gr_pfftData, ONLY : pfft_inLen, pfft_usableProc, pfft_globalLen, pfft_transformType, pfft_solver
   use Grid_interface, ONLY : Grid_pfftMapToInput, Grid_pfftMapFromOutput, GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN
-  use gr_pfftInterface, ONLY : gr_pfftPoissonPeriodic
-  use gr_interface, ONLY:  gr_findMean
+  use gr_pfftInterface, ONLY : gr_pfftPoissonHomBcTrig, gr_pfftPoissonTrigDirect, gr_pfftPoissonDirect
 
 
   implicit none

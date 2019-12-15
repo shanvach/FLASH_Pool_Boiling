@@ -43,6 +43,14 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
   integer, dimension(2*MDIM), intent(IN),  OPTIONAL :: bcTypes
   integer :: i
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                                                 !
+!          Determine the appropriate poisson solver for the desired stretching conditions         !  
+!                                                                                                 ! 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   if (.true.) then
   
     ! specify poisson solver combination
@@ -51,27 +59,27 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
     ! automatic selection based on stretching
     case (AUTO)
       pfft_solver = TRIG_TRIG 
-      if (gr_iStr) pfft_solver += 1
-      if (gr_jStr) pfft_solver += 1
+      if (gr_iStr) pfft_solver = pfft_solver + 1
+      if (gr_jStr) pfft_solver = pfft_solver + 1
       if (NDIM .eq. 3) then
-        pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
-        if (gr_kStr) pfft_solver += 1
+        pfft_solver = pfft_solver + (TRIG_TRIG_TRIG - TRIG_TRIG)
+        if (gr_kStr) pfft_solver = pfft_solver + 1
       endif
 
     ! user specified selection
     case (USER_DEFINED)
       pfft_solver = TRIG_TRIG
-      if (gr_iSolveType .eq. MATRIX) pfft_solver += 1
-      if (gr_jSolveType .eq. MATRIX) pfft_solver += 1
+      if (gr_iSolveType .eq. MATRIX) pfft_solver = pfft_solver + 1
+      if (gr_jSolveType .eq. MATRIX) pfft_solver = pfft_solver + 1
       if (NDIM .eq. 3) then
-        pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
-        if (gr_kSolveType .eq. MATRIX) pfft_solver += 1
+        pfft_solver = pfft_solver + (TRIG_TRIG_TRIG - TRIG_TRIG)
+        if (gr_kSolveType .eq. MATRIX) pfft_solver = pfft_solver + 1
       endif
     
     ! fully trignometric poisson solver 
     case (TRIG)
       pfft_solver = TRIG_TRIG
-      if (NDIM .eq. 3) pfft_solver += (TRIG_TRIG_TRIG - TRIG_TRIG)
+      if (NDIM .eq. 3) pfft_solver = pfft_solver + (TRIG_TRIG_TRIG - TRIG_TRIG)
 
     ! either pentadiagonal or septadiagonal poisson solver
     case (MATRIX)
@@ -92,9 +100,28 @@ subroutine gr_pfftSpecifyTransform (transformType, baseDatType, bcTypes)
        )) then
       call Driver_abortFlash("Specification of Poisson Solver options not supported!")  
     endif
- 
+    if (gr_iStr .and. ((pfft_solver .eq. TRIG_TRIG) .or. (pfft_solver .eq. TRIG_TRIG_TRIG) .or. &
+                       (pfft_solver .eq. TRIG_DRCT) .or. (pfft_solver .eq. TRIG_TRIG_DRCT) .or. &
+                                                         (pfft_solver .eq. TRIG_DRCT_DRCT))) &
+      call Driver_abortFlash("Specified Poisson Solver Not Compatible with Stretching in X-Direction!")  
+
+    if (gr_jStr .and. ((pfft_solver .eq. TRIG_TRIG) .or. (pfft_solver .eq. TRIG_TRIG_TRIG) .or. &
+                                                         (pfft_solver .eq. TRIG_TRIG_DRCT)))    & 
+      call Driver_abortFlash("Specified Poisson Solver Not Compatible with Stretching in Y-Direction!")  
+
+    if (gr_kStr .and. (pfft_solver .eq. TRIG_TRIG_TRIG)) &
+      call Driver_abortFlash("Specified Poisson Solver Not Compatible with Stretching in Z-Direction!")  
+
  endif
+
   
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                                                 !
+!          Determine the appropriate discrete transform for the desired boundary conditions       !  
+!                                                                                                 ! 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   if (.true.) then
 
     !! In this implementation we are only working with matching boundary conditions

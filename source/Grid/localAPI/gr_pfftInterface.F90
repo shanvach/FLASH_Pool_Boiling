@@ -231,7 +231,7 @@ module gr_pfftinterface
        integer, dimension(MDIM),intent(in) :: localSize,globalSize,transformType
        real,  dimension(inSize),intent(in) :: inArray
        real,dimension(inSize), intent(out) :: outArray
-     end subroutine gr_pfftPoissonDirect
+     end subroutine gr_pfftPoissonTrigDirect
   end interface
 
   interface
@@ -241,7 +241,7 @@ module gr_pfftinterface
        real,    dimension(2*MDIM), intent(in) :: bcValues
        real, dimension(inSize), intent(inout) :: inArray
        real, dimension(inSize), intent(out)   :: outArray
-     end subroutine gr_pfftPoissonPeriodic
+     end subroutine gr_pfftPoissonHomBcTrig
   end interface
 
   interface
