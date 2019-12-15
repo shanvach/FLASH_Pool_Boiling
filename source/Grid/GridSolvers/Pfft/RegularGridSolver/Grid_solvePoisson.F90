@@ -84,14 +84,14 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
   transformType(:) = pfft_transformType(:)
   localSize(:) = pfft_inLen(:)
 
-  ! map to uniform mesh 
-  call Grid_pfftMapToInput(iSrc,inArray) 
-
   ! use the appropriate poisson solver
   select case (pfft_solver)
 
-  ! Homogenious boundary conditions w/o stretching in {x, y}
+  ! Homogenious boundary conditions w/o stretching in {x,y(,z)}
   case (TRIG_TRIG, TRIG_TRIG_TRIG)
+
+    ! map to uniform mesh 
+    call Grid_pfftMapToInput(iSrc,inArray) 
 
     ! Call gr_pfftPoisson Periodic Forward:
     call gr_pfftPoissonHomBcTrig (PFFT_FORWARD, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
@@ -102,8 +102,14 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
     ! Now multiply by the poisson factor
     outArray(1:inSize) = outArray(1:inSize)*poisfact
 
-  ! Homogenious boundary conditions w/o x-axis stretching in {x, y}
+    ! Map back to the non-uniform mesh
+    call Grid_pfftMapFromOutput(iSoln,outArray)
+
+  ! Homogenious boundary conditions w/o x(y)-axis stretching in {x,y(,z)}
   case (TRIG_DRCT, TRIG_TRIG_DRCT, TRIG_DRCT_DRCT)
+
+    ! map to uniform mesh 
+    call Grid_pfftMapToInput(iSrc,inArray) 
 
     ! Call gr_pfftPoisson Periodic Forward:
     call gr_pfftPoissonTrigDirect (PFFT_FORWARD, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
@@ -114,26 +120,26 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
     ! Now multiply by the poisson factor
     outArray(1:inSize) = outArray(1:inSize)*poisfact
 
-  ! Homogenious boundary conditions w/ stretching in {x, y}
-  case (DRCT_DRCT, DRCT_DRCT_DRCT)
+    ! Map back to the non-uniform mesh
+    call Grid_pfftMapFromOutput(iSoln,outArray)
+
+  ! Homogenious boundary conditions w/ stretching in {x, y(,z)}
+  !case (DRCT_DRCT, DRCT_DRCT_DRCT)
 
     ! Call gr_pfftPoisson Periodic Forward:
-    call gr_pfftPoissonDirect (PFFT_FORWARD, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+    !call gr_pfftPoissonDirect (PFFT_FORWARD, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
   
     ! Call gr_pfftPoisson Periodic Inverse:
-    call gr_pfftPoissonDirect (PFFT_INVERSE, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+    !call gr_pfftPoissonDirect (PFFT_INVERSE, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
   
     ! Now multiply by the poisson factor
-    outArray(1:inSize) = outArray(1:inSize)*poisfact
+    !outArray(1:inSize) = outArray(1:inSize)*poisfact
 
 
   case default
     call Driver_abortFlash("Specification of Poisson Solver options not supported!")
  
   end select
-
-  ! Map back to the non-uniform mesh
-  call Grid_pfftMapFromOutput(iSoln,outArray)
 
   deallocate(inArray)
   deallocate(outArray)

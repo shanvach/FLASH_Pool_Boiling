@@ -59,7 +59,6 @@ PP      = -D
 
 FFLAGS_OPT =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none 
-#-finit-local-zero 
 
 FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none -pedantic -Wall -Wextra -Waliasing \
@@ -72,21 +71,20 @@ FFLAGS_TEST =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none \
 -ffpe-trap=invalid,zero,overflow -fbounds-check \
 -fbacktrace -fdump-core 
-
 #-finit-real=nan \
 #-finit-integer=-999999 -fimplicit-none
 
 F90FLAGS =
 
 
-CFLAGS_OPT =  -c -O3 -Wuninitialized
+CFLAGS_OPT =  -c -O3 
 
 CFLAGS_DEBUG =  -ggdb -c -Wno-div-by-zero -Wundef  \
 -Wconversion -Wstrict-prototypes -Wunreachable-code \
 -pedantic -Wall -Wextra -Winit-self -ftree-vrp -Wfloat-equal \
 -Wunsafe-loop-optimizations -Wpadded -fstack-check -fstack-protector-all
 
-CFLAGS_TEST = -c
+CFLAGS_TEST = -c -O3 -Wuninitialized
 
 # if we are using HDF5, we need to specify the path to the include files
 CFLAGS_HDF5 = -I${HDF5_PATH}/include -DH5_USE_16_API

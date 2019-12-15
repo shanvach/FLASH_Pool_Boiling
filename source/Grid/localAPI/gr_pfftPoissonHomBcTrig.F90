@@ -1,24 +1,24 @@
-!!****if* source/Grid/localAPI/gr_pfftPoissonPeriodic
+!!****if* source/Grid/localAPI/gr_pfftPoissonHomBcTrig
 !!
 !! NAME
 !!
-!!  gr_pfftPoissonPeriodic
+!!  gr_pfftPoissonHomBcTrig
 !!
 !!
 !! SYNOPSIS
 !!
-!!  call gr_pfftPoissonPeriodic(integer(IN) :: iDirection,
-!!                              integer(IN) :: iSrc, 
-!!                              integer(IN) :: inSize,
-!!                              integer(IN) :: bcTypes(6),
-!!                              integer(IN) :: bcValues(2,6),
-!!                              real(IN), dimension(inSize)  :: inArray(:)
-!!                              real(OUT), dimension(inSize) :: outArray(:)
+!!  call gr_pfftPoissonHomBcTrig(integer(IN) :: iDirection,
+!!                               integer(IN) :: iSrc, 
+!!                               integer(IN) :: inSize,
+!!                               integer(IN) :: bcTypes(6),
+!!                               integer(IN) :: bcValues(2,6),
+!!                               real(IN), dimension(inSize)  :: inArray(:)
+!!                               real(OUT), dimension(inSize) :: outArray(:)
 !!
 !! DESCRIPTION
 !!
 !!   Poisson solver routine.  This routine implements the simple
-!!   FFT based method for periodic on a uniform grid.
+!!   FFT based method for periodic, diriclet, and neumann on a uniform grid.
 !!   
 !!   Isolated problems are not supported.
 !!
@@ -42,7 +42,7 @@
 !!
 !!***
 
-subroutine gr_pfftPoissonPeriodic (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
+subroutine gr_pfftPoissonHomBcTrig (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
 
   implicit none
 
@@ -57,6 +57,6 @@ subroutine gr_pfftPoissonPeriodic (iDirection, iSrc, inSize, bcTypes, bcValues, 
   outArray = 0.0
   return
 
-end subroutine gr_pfftPoissonPeriodic
+end subroutine gr_pfftPoissonHomBcTrig
 
 

@@ -43,12 +43,10 @@
 subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
 
   use Driver_interface, ONLY : Driver_abortFlash
-  use Grid_interface,   ONLY : Grid_getCellMetrics
   use Grid_data,        ONLY : gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb
-  use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, &
-                               gr_pfftGetLocalLimitsAnytime, gr_pfftTriDiag, gr_pfftCyclicTriDiag
   use gr_pfftData,      ONLY : pfft_inLen, pfft_midLen, pfft_work1, pfft_work2, pfft_procGrid, pfft_trigIaxis, &
                                pfft_globalLen, pfft_comm, pfft_transformType, pfft_scale, pfft_myPE
+!  use fish
 
   implicit none
 
@@ -63,11 +61,10 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   real, dimension(inSize), intent(OUT) :: outArray
 
   integer :: numVec
-  integer :: J, JL, K, L, LL, M
-  integer, dimension(2,MDIM) :: pfftBlkLimits
-  real, dimension(:), allocatable, save :: AM, BM, CM
-  real, dimension(:), allocatable, save :: AK
-  real, dimension(:), allocatable :: BML, RHS, X 
+  integer :: M, N, MP, NP
+  real, dimension(:), allocatable, save :: AM, BM, CM, AN, BN, CN
+!  TYPE (fishworkspace), save :: W
+  real, dimension(:), allocatable :: RHS 
   real, dimension(:,:), allocatable :: temp2DArray
   logical, save :: firstCall = .true.
   real :: mean
@@ -76,7 +73,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
-!          CONSTRUCT COEFFICIENT MATRICIES AND DIAGONAL WAVE NUMBER COEFFICIENTS                  !  
+!                                CONSTRUCT COEFFICIENT MATRICIES                                  !  
 !                                                                                                 ! 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -87,48 +84,39 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 #if NDIM == 2
 
     ! dimensions
-    L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
-    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
+    M = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
+    N = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
 
     ! allocate coefficient arrays
-    allocate(AK(L))
-    allocate(AM(M), BM(M), CM(M))
+    allocate(AM(M), BM(M), CM(M), AN(N), BN(N), CN(N))
 
-    ! transform coefficients for x-axis (periodic transform -- fourier)
-    if (transformType(IAXIS) == PFFT_REAL) then
-      if (pfft_myPE == 0) write(*,*) '2d pfft solver using IAXIS periodic coefficents'
-      do K=1, L/2
-        AK(K) =  2. * PI * real(K-1)
-      end do
-      do K=L/2+1, L
-        AK(K) = -2. * PI * real(L-K+1)
-      end do
-      AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
-
-    ! transform coefficients for x-axis (neumann transform -- cos)
-    else if (transformType(IAXIS) == PFFT_COS_CC) then
-      if (pfft_myPE == 0) write(*,*) '2d pfft solver using IAXIS neumann coefficents'
-      do K=1, L
-        AK(K) =  1. * PI * real(K-1)
-      end do
-      AK(1:L) = 2. * ( 1. - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
-
-    ! unsupported transform type (e.g., SIN not currently supported)
-    else 
-      call Driver_abortFlash("Unsupported x-direction transformation for RegularGridSolver!")
-
-    endif
-
-    ! matrix coefficients for tdma solve
-    AM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(LEFT_EDGE, 1:M,1)
-    CM(1:M) = gr_jMetricsGlb(CENTER,1:M,1) * gr_jMetricsGlb(RIGHT_EDGE,1:M,1)
-    if (transformType(JAXIS) == PFFT_COS_CC) then
-      if (pfft_myPE == 0) write(*,*) '2d pfft solver using JAXIS neumann coefficients'
+    ! matrix coefficients for blktri solve -- IAXIS
+    AM(1:M) = gr_iMetricsGlb(CENTER,1:M,1) * gr_iMetricsGlb(LEFT_EDGE, 1:M,1)
+    CM(1:M) = gr_iMetricsGlb(CENTER,1:M,1) * gr_iMetricsGlb(RIGHT_EDGE,1:M,1)
+    MP = 0
+    if (transformType(IAXIS) == PFFT_COS_CC) then
+      if (pfft_myPE == 0) write(*,*) '2d pfft solver using IAXIS neumann coefficients'
+      MP = 1
       AM(1) = 0.
       CM(M) = 0.
     endif
     BM = - AM - CM
 
+    ! matrix coefficients for blktri solve -- JAXIS
+    AN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(LEFT_EDGE, 1:N,1)
+    CN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(RIGHT_EDGE,1:N,1)
+    NP = 0
+    if (transformType(JAXIS) == PFFT_COS_CC) then
+      if (pfft_myPE == 0) write(*,*) '2d pfft solver using JAXIS neumann coefficients'
+      NP = 1
+      AN(1) = 0.
+      CN(M) = 0.
+    endif
+    BN = - AN - CN
+
+   ! allocate RHS array and blktri workspace
+ 
+    
 
 ! Three Dimensional Solver 
 #else
@@ -157,70 +145,6 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 ! Two Dimensional Solver
 #if NDIM == 2
 
-    ! dimensions
-    L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
-    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
-
-    ! number of parallel transforms of x-direction
-    numVec = pfft_inLen(JAXIS)
-
-    ! forward transform the x-direction
-    call gr_pfftDcftForward(inArray, pfft_work1, pfft_trigIaxis, pfft_globalLen(IAXIS), &
-                            pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), pfft_scale(IAXIS))
-
-    ! transpose the pencil grid about y-axis :: {x,y} -> {y,x}
-    call gr_pfftTranspose(iDirection, PFFT_PCLDATA_REAL, pfft_work1, pfft_work2, &
-                          pfft_inLen, pfft_midLen, pfft_procGrid(JAXIS), pfft_comm(JAXIS))
- 
-    ! lets work with the data as a 2d array {y,x} vice a 1d vector {y*x}
-    allocate(temp2DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS)))
-    temp2DArray = reshape(pfft_work2, pfft_midLen(1:2))
-
-    allocate(BML(M), RHS(M), X(M))
-
-    call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits) 
-    call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-
-    ! for each x-direction wave number lets solve the tridiagonal system in y
-    LL = pfft_midLen(JAXIS)
-    do JL = 1, LL
-
-      ! identify the wave number or x-direction index
-      J = pfftBlkLimits(LOW,JAXIS) + JL
-      if (J-1 > pfftBlkLimits(HIGH,JAXIS)) cycle
-
-      ! center diagonal and rhs for a specific wave number in x-direction
-      !                               (+ tridiag modifies upper diagonal)
-      BML(1:M) = BM(1:M) - AK(J/2+1)
-      RHS(:) = temp2DArray(:,JL)
-      X(:) = 0.
-    
-      ! solve the system
-      if (transformType(JAXIS) == PFFT_COS_CC) then
-        call gr_pfftTriDiag(AM, BML, CM, RHS, X, M)     
-      else 
-        call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M)
-      endif
-     
-      ! remove mean from zeroth wave component 
-      if (j == 1) then
-        mean = sum(X) / M      
-        X(:) = X(:) - mean
-      endif     
- 
-      ! store the solution
-      temp2DArray(:,JL) = X(:)
-
-    end do
-
-    ! put the solution back into the pfft working array
-    pfft_work2(1:product(pfft_midLen)) = reshape(temp2DArray, (/product(pfft_midLen)/))
-
-    deallocate(temp2DArray)
-    deallocate(BML)    
-    deallocate(RHS)    
-    deallocate(X)    
 
 
 ! Three Dimensional Solver
@@ -244,18 +168,6 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
 ! Two Dimensional Solver
 #if NDIM == 2
-
-    ! number of parallel transforms of x-direction
-    numVec = pfft_inLen(JAXIS)
-
-    ! transpose the pencil grid about y-axis :: {y,x} -> {x,y}
-    call gr_pfftTranspose(iDirection, PFFT_PCLDATA_REAL, pfft_work2, pfft_work1, &
-                          pfft_midLen, pfft_inLen, pfft_procGrid(JAXIS), pfft_comm(JAXIS))
-
-    ! inverse transform the x-direction
-    call gr_pfftDcftInverse(pfft_work1, outArray, pfft_trigIaxis, pfft_globalLen(IAXIS), &
-                            pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), 1.0)
-
 
 ! Three Dimensional Solver
 #else
