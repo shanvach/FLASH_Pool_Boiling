@@ -1,0 +1,190 @@
+Index: physics/SolidMechanics/SolidMechanicsMain/Assembly/FluidVolInt/sm_assemble_FluidVolInt_rigid.F90
+===================================================================
+--- physics/SolidMechanics/SolidMechanicsMain/Assembly/FluidVolInt/sm_assemble_FluidVolInt_rigid.F90	(revision 23647)
++++ physics/SolidMechanics/SolidMechanicsMain/Assembly/FluidVolInt/sm_assemble_FluidVolInt_rigid.F90	(working copy)
+@@ -104,10 +104,10 @@
+ 
+         r_bod(IAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + &
+                          sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(IAXIS,imaster))
+-        r_bod(JAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + &
++        r_bod(JAXIS,ibd)=sm_BodyInfo(ibd)%y(imaster) + &
+                          sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(JAXIS,imaster))
+ #if NDIM == MDIM
+-        r_bod(KAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + &
++        r_bod(KAXIS,ibd)=sm_BodyInfo(ibd)%z(imaster) + &
+                          sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(KAXIS,imaster))
+ #else
+         r_bod(KAXIS,ibd)=0.0
+Index: physics/SolidMechanics/SolidMechanicsMain/Solvers/sm_integ_checkconverg.F90
+===================================================================
+--- physics/SolidMechanics/SolidMechanicsMain/Solvers/sm_integ_checkconverg.F90	(revision 23647)
++++ physics/SolidMechanics/SolidMechanicsMain/Solvers/sm_integ_checkconverg.F90	(working copy)
+@@ -142,7 +142,31 @@
+ 
+   endif
+ 
++  if (sm_integ_subiter > 50) then
++     do ibd=1,sm_NumBodies
++        if (sm_MeshMe .eq. sm_BodyInfo(ibd)%BodyMaster) then
+ 
++           select case(sm_BodyInfo(ibd)%IntegMethod)
++
++           ! Adams Predictor-Corrector method    
++           case(SOLIDINTEG_PREDCORR)
++            ! Here convflag_pc_loc,errmax_pc_loc are not used.
++              call sm_PredCorr_checkconverg(SM_SETCONVERGED,ibd,convflag_pc_loc,errmax_pc_loc)
++                                                                                            
++           case default
++               pause 'not defined maximum sub-iteration'
++           end select
++
++        endif
++
++     enddo ! end looping over ibd
++
++     sm_integ_subiter_old = sm_integ_subiter
++     sm_integ_subiter = 0
++     if(sm_MeshMe .eq. MASTER_PE) write(*,*) 'Warning: Reached maximum step. ErrMax=',sm_errmax_all, &
++                                      & sm_integ_subiter_old 
++  endif
++
+   convflag_all = sm_convflag_all
+ 
+   return
+Index: physics/SolidMechanics/SolidMechanicsMain/Solvers/PredCorr/sm_PredCorr_checkconverg.F90
+===================================================================
+--- physics/SolidMechanics/SolidMechanicsMain/Solvers/PredCorr/sm_PredCorr_checkconverg.F90	(revision 23647)
++++ physics/SolidMechanics/SolidMechanicsMain/Solvers/PredCorr/sm_PredCorr_checkconverg.F90	(working copy)
+@@ -46,6 +46,11 @@
+  
+     ! IF at start up we might need to lower the method in pcmethod !
+ 
++  case(SM_SETCONVERGED) ! Case reaches the maximum sub-iteration.
++
++    sm_PredCorr_info(ibd)%pcconvflag = SM_PCCONVERGED
++    sm_PredCorr_info(ibd)%pcflag     = SM_PCPREDICTOR
++
+   case default
+ 
+      call Driver_abortFlash('sm_PredCorr_checkconverg: Unknown test flag.')
+Index: physics/SolidMechanics/SolidMechanics.h
+===================================================================
+--- physics/SolidMechanics/SolidMechanics.h	(revision 23647)
++++ physics/SolidMechanics/SolidMechanics.h	(working copy)
+@@ -9,6 +9,9 @@
+ 
+ #define TRIANG_MAPPING_A
+ 
++! Forcing method
++!#define FORCES_FROM_VOL_INTEGRALS
++
+ !! Element Definitions from Gmsh Meshing software
+ !! standard. Look in http://geuz.org/gmsh/doc/texinfo/gmsh.html#Node-ordering
+ !! If you have another input ordering translate to this!
+@@ -119,6 +122,7 @@
+ #define SM_CONVERGED    1
+ #define SM_TESTCONVERGE    121
+ #define SM_SETNOTCONVERGED 122
++#define SM_SETCONVERGED 123
+  
+ #define MAXNODERBC 4
+ 
+Index: physics/IncompNS/IncompNSMain/constdens/ins_ab2rk3.F90
+===================================================================
+--- physics/IncompNS/IncompNSMain/constdens/ins_ab2rk3.F90	(revision 23647)
++++ physics/IncompNS/IncompNSMain/constdens/ins_ab2rk3.F90	(working copy)
+@@ -570,6 +570,17 @@
+   call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+   call Timers_stop("Immersed Boundaries.")
+ 
++
++!  call Timers_start("ImmBoundaries_Forces")
++  ! Compute forces on immersed bodies:
++!  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
++!  call Timers_stop("ImmBoundaries_Forces")
++
++!  write(*,*)  'output normal points info', ins_meshMe
++!  call MPI_Barrier(MPI_COMM_WORLD, ierr)
++
++!  stop
++
+ !  CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
+ !  ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
+ !  if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
+Index: physics/IncompNS/IncompNSMain/constdens/IncompNS_init.F90
+===================================================================
+--- physics/IncompNS/IncompNSMain/constdens/IncompNS_init.F90	(revision 23647)
++++ physics/IncompNS/IncompNSMain/constdens/IncompNS_init.F90	(working copy)
+@@ -83,7 +83,13 @@
+   call RuntimeParameters_get("gravX",ins_gravX)
+   call RuntimeParameters_get("gravY",ins_gravY)
+   call RuntimeParameters_get("gravZ",ins_gravZ)
+-  
++  ins_gravX = 0.0
++  ins_gravY = 0.0
++  ins_gravZ = 0.0
++  write(*,*) 'NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE'
++  write(*,*) 'Gravity is forced to be zero for iso-tropic turbulence'
++  write(*,*) 
++
+   ! Read pressure gradients if necessary, constant mass simulation data:
+   call RuntimeParameters_get("dpdx",ins_dpdx)
+   call RuntimeParameters_get("dpdy",ins_dpdy)
+Index: physics/ImBound/ImBoundMain/LagForce/Extras/gr_sbUpdateForces.F90
+===================================================================
+--- physics/ImBound/ImBoundMain/LagForce/Extras/gr_sbUpdateForces.F90	(revision 23647)
++++ physics/ImBound/ImBoundMain/LagForce/Extras/gr_sbUpdateForces.F90	(working copy)
+@@ -14,7 +14,7 @@
+ !!***
+ 
+ #define DO_MARKER_FORCING /* If commented, no IB forcing from Markers */
+-#define ITER_FORCING /* Iterative procedure in Kermpe and Frohlich 2005, JCP */
++!#define ITER_FORCING /* Iterative procedure in Kermpe and Frohlich 2005, JCP */
+ 
+ #include "constants.h"
+ #include "Flash.h"
+Index: physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical/ib_forceInsideBody.F90
+===================================================================
+--- physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical/ib_forceInsideBody.F90	(revision 23647)
++++ physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical/ib_forceInsideBody.F90	(working copy)
+@@ -132,9 +132,9 @@
+         imaster = sm_BodyInfo(ibd) % borigin_node
+ 
+         r_bod(IAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(IAXIS,imaster))
+-        r_bod(JAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(JAXIS,imaster))
++        r_bod(JAXIS,ibd)=sm_BodyInfo(ibd)%y(imaster) + sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(JAXIS,imaster))
+ #if NDIM == MDIM
+-        r_bod(KAXIS,ibd)=sm_BodyInfo(ibd)%x(imaster) + sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(KAXIS,imaster))
++        r_bod(KAXIS,ibd)=sm_BodyInfo(ibd)%z(imaster) + sm_BodyInfo(ibd)%qn(sm_BodyInfo(ibd)%ID(KAXIS,imaster))
+ #else
+         r_bod(KAXIS,ibd)=0.0
+ #endif
+Index: Simulation/SimulationMain/INavierStokes/2D/OscCylinder/Config
+===================================================================
+--- Simulation/SimulationMain/INavierStokes/2D/OscCylinder/Config	(revision 23647)
++++ Simulation/SimulationMain/INavierStokes/2D/OscCylinder/Config	(working copy)
+@@ -28,8 +28,8 @@
+    REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+ ELSE
+    REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines
+-#   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
+-   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
++   REQUESTS Grid/GridSolvers/MultigridMC/poisson/PfftTopLevelSolve/HomBcTrig
++#   REQUESTS Grid/GridSolvers/BiPCGStab/poisson/PrecondMultigrid
+ ENDIF
+ 
+ 
+Index: Simulation/SimulationMain/INavierStokes/3D/IsoTurb/Config
+===================================================================
+--- Simulation/SimulationMain/INavierStokes/3D/IsoTurb/Config	(revision 23647)
++++ Simulation/SimulationMain/INavierStokes/3D/IsoTurb/Config	(working copy)
+@@ -7,8 +7,7 @@
+ #REQUIRES physics/IncompNS/IncompNSMain/stats
+ 
+ # Tecplot output:
+-REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D 
+-#/Slices
++REQUIRES Simulation/SimulationMain/INavierStokes/3D/Tecplot3D/Slices
+ 
+ # Poisson Solver
+ IF Grid=='UG'

@@ -1,0 +1,1 @@
+./setup INavierStokes/2D/IB_cly_stationary/  -2d -auto -opt +ug -nxb=1440 -nyb=60 -maxblocks=1 -gridinterpolation=native PfftSolver=HomBcTrigSolver  -objdir=CYL_2D_STATIONARY -site=splash.seas.gwu.edu
