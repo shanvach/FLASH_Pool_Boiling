@@ -390,12 +390,12 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
         LL = pfft_outLen(JAXIS)
         do IL = 1, LL
 
-          ! identify the wave number or y-direction index
+          ! identify the wave number or x-direction index
           I = pfftBlkLimits(LOW,JAXIS) + IL
           if (I-1 > pfftBlkLimits(HIGH,JAXIS)) cycle
 
           ! center diagonal for a specific wave number in x-direction  
-          BMM(1:M) = BML(1:M) - AK(J/2+1)
+          BMM(1:M) = BML(1:M) - AK(I/2+1)
           RHS(:) = temp3DArray(:,IL,JL)
           X(:) = 0.
 
@@ -500,6 +500,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       ! calculate mean from zeroth wave component 
       if (pfftBlkLimits(LOW,KAXIS) .eq. 0) then
         mean = sum(temp3DArray(:,:,1)) / real(N * M)
+      else
+        mean = 0.
       endif
 
       meanAux = mean

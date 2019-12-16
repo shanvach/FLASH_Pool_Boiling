@@ -112,10 +112,10 @@ subroutine Grid_solvePoisson (iSoln, iSrc, bcTypes, bcValues, poisfact)
     call Grid_pfftMapToInput(iSrc,inArray) 
 
     ! Call gr_pfftPoisson Periodic Forward:
-    call gr_pfftPoissonTrigDirect (PFFT_FORWARD, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+    call gr_pfftPoissonTrigDirect (PFFT_FORWARD, pfft_solver, inSize, localSize, globalSize, transformType, inArray, outArray)
   
     ! Call gr_pfftPoisson Periodic Inverse:
-    call gr_pfftPoissonTrigDirect (PFFT_INVERSE, 1, inSize, localSize, globalSize, transformType, inArray, outArray)
+    call gr_pfftPoissonTrigDirect (PFFT_INVERSE, pfft_solver, inSize, localSize, globalSize, transformType, inArray, outArray)
   
     ! Now multiply by the poisson factor
     outArray(1:inSize) = outArray(1:inSize)*poisfact
