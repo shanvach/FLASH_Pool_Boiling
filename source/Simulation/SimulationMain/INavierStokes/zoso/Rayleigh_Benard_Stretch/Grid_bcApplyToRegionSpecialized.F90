@@ -221,8 +221,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   integer :: i,k,ivar,je,ke,n,varCount,bcTypeActual
   real, dimension(GRID_IHI_GC) :: dx
-  real, dimension(GRID_IHI_GC) :: dy
-  real, dimension(GRID_IHI_GC) :: dz
+  real, dimension(GRID_JHI_GC) :: dy
+  real, dimension(GRID_KHI_GC) :: dz
 
   je=regionSize(SECOND_DIR)
   ke=regionSize(THIRD_DIR)
@@ -250,7 +250,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 	      call Grid_getCellMetrics(IAXIS,blockHandle,RIGHT_EDGE,.true.,dx,GRID_IHI_GC) 
               k = 2*guard+1
               do i = 1,guard
-                regionData(i,1:je,1:ke,ivar) = ht_Txl_value/SUM(dx(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
+                regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/dx(i) + regionData(k-i,1:je,1:ke,ivar)
+                !regionData(i,1:je,1:ke,ivar) = ht_Txl_value/SUM(dx(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
               end do
               applied = .true.
 
@@ -292,10 +293,11 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                applied = .true.
 
              case (NEUMANN_HT)
-              call Grid_getCellMetrics(KAXIS,blockHandle,RIGHT_EDGE,.true.,dz,GRID_JHI_GC)
+              call Grid_getCellMetrics(KAXIS,blockHandle,RIGHT_EDGE,.true.,dz,GRID_KHI_GC)
                k = 2*guard+1
                do i = 1,guard
-                 regionData(i,1:je,1:ke,ivar) = ht_Tzl_value/SUM(dz(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
+                 regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/dz(i) + regionData(k-i,1:je,1:ke,ivar)
+                 !regionData(i,1:je,1:ke,ivar) = ht_Tzl_value/SUM(dz(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
                end do
                applied = .true.               
 
@@ -321,7 +323,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                n = GRID_IHI_GC
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = ht_Txr_value/SUM(dx(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/dx(k-i) + regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = ht_Txr_value/SUM(dx(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
                end do
                applied = .true.
 
@@ -368,7 +371,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                n = GRID_KHI_GC
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = ht_Tzr_value/SUM(dz(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/dz(k-i) + regionData(i,1:je,1:ke,ivar)
+                 !regionData(k-i,1:je,1:ke,ivar) = ht_Tzr_value/SUM(dz(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
                end do
                applied = .true.
 

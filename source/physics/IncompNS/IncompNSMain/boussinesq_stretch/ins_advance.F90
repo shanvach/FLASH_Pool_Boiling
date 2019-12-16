@@ -137,7 +137,7 @@ SUBROUTINE ins_corrector(uni,vni,wni,p,ix1,ix2,jy1,jy2,kz1,kz2, &
 #if NDIM == MDIM
       do j = jy1,jy2
         do i = ix1,ix2
-          wni(ix1:ix2,jy1:jy2,kz1+1:kz2) = wni(i,j,kz1+1:kz2) - &
+          wni(i,j,kz1+1:kz2) = wni(i,j,kz1+1:kz2) - &
             dt*alfa*dz(kz1+1:kz2)*( p(i,j,kz1+1:kz2) - p(i,j,kz1:kz2-1) )
         end do
       end do

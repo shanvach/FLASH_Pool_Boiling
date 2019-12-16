@@ -131,9 +131,7 @@
 
 
 
-      SUBROUTINE ins_rhs3d(uni,vni,wni,tni,tv,ru1,  &
-                           ix1,ix2,jy1,jy2,kz1,kz2, &
-                           dx,dy,dz,ru,rv,rw)
+  SUBROUTINE ins_rhs3d(uni,vni,wni,tni,tv,ru1,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz,ru,rv,rw)
 
   !*****************************************************************
   ! This subroutine computes the centered discretization of the RHS 
@@ -152,284 +150,275 @@
   !
   ! E. Balaras   July 1999
   ! P. Rabenold  August 2006
+  ! A. Lentner   December 2019
   !**************************************************************
     
-      use IncompNS_data, ONLY : ins_isCoupled
+  use IncompNS_data, ONLY : ins_isCoupled
 
-      implicit none
-      INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
-      REAL, INTENT(IN):: ru1, dx, dy, dz
-      REAL, DIMENSION(:,:,:), INTENT(IN):: uni, vni, wni, tni, tv
-      REAL, DIMENSION(:,:,:), INTENT(OUT):: ru, rv, rw
+  implicit none
+  
+  INTEGER, INTENT(IN):: ix1, ix2, jy1, jy2, kz1, kz2
+  REAL, INTENT(IN):: ru1
+  REAL, DIMENSION(:,:),   INTENT(IN)  :: dx, dy, dz
+  REAL, DIMENSION(:,:,:), INTENT(IN)  :: uni, vni, wni, tni, tv
+  REAL, DIMENSION(:,:,:), INTENT(OUT) :: ru, rv, rw
 
-!!$      REAL, DIMENSION(nx+1,ny,nz), INTENT(IN):: uni
-!!$      REAL, DIMENSION(nx,ny+1,nz), INTENT(IN):: vni
-!!$      REAL, DIMENSION(nx,ny,nz+1), INTENT(IN):: wni
-!!$      REAL, DIMENSION(nx,ny,nz)  , INTENT(IN):: tv
-!!$
-!!$      REAL, DIMENSION(nx+1,ny,nz), INTENT(OUT):: ru
-!!$      REAL, DIMENSION(nx,ny+1,nz), INTENT(OUT):: rv
-!!$      REAL, DIMENSION(nx,ny,nz+1), INTENT(OUT):: rw
+  INTEGER:: i, j, k
 
-      INTEGER:: i, j, k
-      REAL:: dx1, dy1, dz1
-      ! x-component variables
-      REAL:: uxplus, uxminus, vxplus, vxminus, wxplus, wxminus, &
-             uyplus, uyminus, uzplus, uzminus
-      REAL:: dudxp, dudxm, dudyp, dudym, dudzp, dudzm, dvdxp, dvdxm, &
-             dwdxp, dwdxm
-      REAL:: tvjp, tvjm, tvkp, tvkm
-      REAL:: txxp, txxm, tyyp, tyym, tzzp, tzzm
-      REAL:: txyp, txym, txzp, txzm
-      ! additional y-component variables
-      REAL:: vyplus, vyminus, vzplus, vzminus, wyplus, wyminus
-      REAL:: dvdyp, dvdym, dvdzp, dvdzm, dwdyp, dwdym
-      REAL:: tvip, tvim
-      REAL:: tyzp, tyzm
-      ! additional z-component variables
-      REAL:: wzplus, wzminus
-      REAL:: dwdzp, dwdzm
-      REAL:: tz, tz_m
+  ! x-component variables
+  REAL :: uxplus, uxminus, vxplus, vxminus, wxplus, wxminus, &
+          uyplus, uyminus, uzplus, uzminus
+  REAL :: dudxp, dudxm, dudyp, dudym, dudzp, dudzm, dvdxp, dvdxm, &
+          dwdxp, dwdxm
+  REAL :: tvjp, tvjm, tvkp, tvkm
+  REAL :: txxp, txxm, tyyp, tyym, tzzp, tzzm
+  REAL :: txyp, txym, txzp, txzm
 
-      ! grid spacings
-      dx1 = 1.0/dx
-      dy1 = 1.0/dy
-      dz1 = 1.0/dz
+  ! additional y-component variables
+  REAL :: vyplus, vyminus, vzplus, vzminus, wyplus, wyminus
+  REAL :: dvdyp, dvdym, dvdzp, dvdzm, dwdyp, dwdym
+  REAL :: tvip, tvim
+  REAL :: tyzp, tyzm
 
-      ! coupled term multiplier
-      if (ins_isCoupled) then
-        tz_m = 1.
-      else
-        tz_m = 0.
-      endif
+  ! additional z-component variables
+  REAL :: wzplus, wzminus
+  REAL :: dwdzp, dwdzm
+  REAL :: tz, tz_m
 
-      !++++++++++  U-COMPONENT  ++++++++++
-      do k = kz1,kz2
-         do j = jy1,jy2
-            do i = ix1,ix2+1
+  ! coupled term multiplier
+  if (ins_isCoupled) then
+    tz_m = 1.
+  else
+    tz_m = 0.
+  endif
 
-               ! get velocities at 1/2 locations
-               uxplus  = (uni(i+1,j  ,k  ) + uni(i  ,j  ,k  ))*0.5
-               uxminus = (uni(i  ,j  ,k  ) + uni(i-1,j  ,k  ))*0.5
+  !++++++++++  U-COMPONENT  ++++++++++
+  do k = kz1,kz2
+    do j = jy1,jy2
+      do i = ix1,ix2+1
 
-               uyplus  = (uni(i  ,j+1,k  ) + uni(i  ,j  ,k  ))*0.5
-               uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
+        ! get velocities at 1/2 locations
+        uxplus  = (uni(i+1,j  ,k  ) + uni(i  ,j  ,k  ))*0.5
+        uxminus = (uni(i  ,j  ,k  ) + uni(i-1,j  ,k  ))*0.5
 
-               uzplus  = (uni(i  ,j  ,k+1) + uni(i  ,j  ,k  ))*0.5
-               uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
+        uyplus  = (uni(i  ,j+1,k  ) + uni(i  ,j  ,k  ))*0.5
+        uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
 
-               vxplus  = (vni(i  ,j+1,k  ) + vni(i-1,j+1,k  ))*0.5
-               vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
+        uzplus  = (uni(i  ,j  ,k+1) + uni(i  ,j  ,k  ))*0.5
+        uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
 
-               wxplus  = (wni(i  ,j  ,k+1) + wni(i-1,j  ,k+1))*0.5
-               wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
+        vxplus  = (vni(i  ,j+1,k  ) + vni(i-1,j+1,k  ))*0.5
+        vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
 
-               ! get derivatives at 1/2 locations
-               dudxp = (uni(i+1,j  ,k  ) - uni(i  ,j  ,k  ))*dx1
-               dudxm = (uni(i  ,j  ,k  ) - uni(i-1,j  ,k  ))*dx1
-               dudyp = (uni(i  ,j+1,k  ) - uni(i  ,j  ,k  ))*dy1
-               dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  ))*dy1
-               dudzp = (uni(i  ,j  ,k+1) - uni(i  ,j  ,k  ))*dz1
-               dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1))*dz1
-               dvdxp = (vni(i  ,j+1,k  ) - vni(i-1,j+1,k  ))*dx1
-               dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  ))*dx1
-               dwdxp = (wni(i  ,j  ,k+1) - wni(i-1,j  ,k+1))*dx1
-               dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  ))*dx1
+        wxplus  = (wni(i  ,j  ,k+1) + wni(i-1,j  ,k+1))*0.5
+        wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
 
-               ! get nu_t
+        ! get derivatives at 1/2 locations
+        dudxp = (uni(i+1,j  ,k  ) - uni(i  ,j  ,k  )) * dx(i  , CENTER    )
+        dudxm = (uni(i  ,j  ,k  ) - uni(i-1,j  ,k  )) * dx(i-1, CENTER    )
+        dudyp = (uni(i  ,j+1,k  ) - uni(i  ,j  ,k  )) * dy(j  , RIGHT_EDGE)
+        dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  )) * dy(j  , LEFT_EDGE )
+        dudzp = (uni(i  ,j  ,k+1) - uni(i  ,j  ,k  )) * dz(k  , RIGHT_EDGE)
+        dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1)) * dz(k  , LEFT_EDGE )
+        dvdxp = (vni(i  ,j+1,k  ) - vni(i-1,j+1,k  )) * dx(i  , LEFT_EDGE )
+        dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  )) * dx(i  , LEFT_EDGE )
+        dwdxp = (wni(i  ,j  ,k+1) - wni(i-1,j  ,k+1)) * dx(i  , LEFT_EDGE )
+        dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  )) * dx(i  , LEFT_EDGE )
 
-               !****** requires DIAGONALS for corner ghost cells ******
+        ! get nu_t
 
-               tvjp = 0.25*(tv(i-1,j  ,k  ) + tv(i  ,j  ,k  ) + &
-                            tv(i  ,j+1,k  ) + tv(i-1,j+1,k  ))
-               tvjm = 0.25*(tv(i-1,j-1,k  ) + tv(i  ,j-1,k  ) + &
-                            tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
-               tvkp = 0.25*(tv(i-1,j  ,k  ) + tv(i  ,j  ,k  ) + &
-                            tv(i  ,j  ,k+1) + tv(i-1,j  ,k+1))
-               tvkm = 0.25*(tv(i-1,j  ,k-1) + tv(i  ,j,  k-1) + &
-                            tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
+        !****** requires DIAGONALS for corner ghost cells ******
 
-               ! flux of normal total stresses
-               txxp = (ru1 + 2.0*tv(i,j,k))*dudxp
-               txxm = (ru1 + 2.0*tv(i-1,j,k))*dudxm
-               tyyp = (ru1 + tvjp)*dudyp
-               tyym = (ru1 + tvjm)*dudym
-               tzzp = (ru1 + tvkp)*dudzp
-               tzzm = (ru1 + tvkm)*dudzm
+        tvjp = 0.25*(tv(i-1,j  ,k  ) + tv(i  ,j  ,k  ) + &
+                     tv(i  ,j+1,k  ) + tv(i-1,j+1,k  ))
+        tvjm = 0.25*(tv(i-1,j-1,k  ) + tv(i  ,j-1,k  ) + &
+                     tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
+        tvkp = 0.25*(tv(i-1,j  ,k  ) + tv(i  ,j  ,k  ) + &
+                     tv(i  ,j  ,k+1) + tv(i-1,j  ,k+1))
+        tvkm = 0.25*(tv(i-1,j  ,k-1) + tv(i  ,j,  k-1) + &
+                     tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
 
-               ! flux of cross SGS stresses
-               txyp = tvjp*dvdxp
-               txym = tvjm*dvdxm
-               txzp = tvkp*dwdxp
-               txzm = tvkm*dwdxm
+        ! flux of normal total stresses
+        txxp = (ru1 + 2.0*tv(i,j,k))*dudxp
+        txxm = (ru1 + 2.0*tv(i-1,j,k))*dudxm
+        tyyp = (ru1 + tvjp)*dudyp
+        tyym = (ru1 + tvjm)*dudym
+        tzzp = (ru1 + tvkp)*dudzp
+        tzzm = (ru1 + tvkm)*dudzm
 
-               ! calculate RHS for u-momentum
-               ru(i,j,k) =                                          &                              
-                           - (uxplus*uxplus - uxminus*uxminus)*dx1  &! advection term
-                           - (vxplus*uyplus - vxminus*uyminus)*dy1  &
-                           - (wxplus*uzplus - wxminus*uzminus)*dz1  &             
-                           + (txxp - txxm)*dx1                      &! diffusion - normal terms
-                           + (tyyp - tyym)*dy1                      &
-                           + (tzzp - tzzm)*dz1                      &
-                           + (txyp - txym)*dy1                      &! diffusion - cross terms
-                           + (txzp - txzm)*dz1   
-            enddo
-         enddo
+        ! flux of cross SGS stresses
+        txyp = tvjp*dvdxp
+        txym = tvjm*dvdxm
+        txzp = tvkp*dwdxp
+        txzm = tvkm*dwdxm
+
+        ! calculate RHS for u-momentum
+        ru(i,j,k) =                                                     &                              
+                   - (uxplus*uxplus - uxminus*uxminus)*dx(i,LEFT_EDGE)  &! advection term
+                   - (vxplus*uyplus - vxminus*uyminus)*dy(j,CENTER)     &
+                   - (wxplus*uzplus - wxminus*uzminus)*dz(k,CENTER)     &             
+                   + (txxp - txxm)*dx(i,LEFT_EDGE)                      &! diffusion - normal terms
+                   + (tyyp - tyym)*dy(j,CENTER)                         &
+                   + (tzzp - tzzm)*dz(k,CENTER)                         &
+                   + (txyp - txym)*dy(j,CENTER)                         &! diffusion - cross terms
+                   + (txzp - txzm)*dz(k,CENTER)   
       enddo
+    enddo
+  enddo
 
       !++++++++++  V-COMPONENT  ++++++++++
 
-      do k = kz1,kz2
-         do j = jy1,jy2+1
-            do i = ix1,ix2
+  do k = kz1,kz2
+    do j = jy1,jy2+1
+      do i = ix1,ix2
+ 
+        ! get velocities at 1/2 locations
+        vxplus  = (vni(i+1,j  ,k  ) + vni(i  ,j  ,k  ))*0.5
+        vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
 
-               ! get velocities at 1/2 locations
-               vxplus  = (vni(i+1,j  ,k  ) + vni(i  ,j  ,k  ))*0.5
-               vxminus = (vni(i  ,j  ,k  ) + vni(i-1,j  ,k  ))*0.5
+        vyplus  = (vni(i  ,j+1,k  ) + vni(i  ,j  ,k  ))*0.5
+        vyminus = (vni(i  ,j  ,k  ) + vni(i  ,j-1,k  ))*0.5
 
-               vyplus  = (vni(i  ,j+1,k  ) + vni(i  ,j  ,k  ))*0.5
-               vyminus = (vni(i  ,j  ,k  ) + vni(i  ,j-1,k  ))*0.5
+        vzplus  = (vni(i  ,j  ,k+1) + vni(i  ,j  ,k  ))*0.5
+        vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
 
-               vzplus  = (vni(i  ,j  ,k+1) + vni(i  ,j  ,k  ))*0.5
-               vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
+        uyplus  = (uni(i+1,j  ,k  ) + uni(i+1,j-1,k  ))*0.5
+        uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
 
-               uyplus  = (uni(i+1,j  ,k  ) + uni(i+1,j-1,k  ))*0.5
-               uyminus = (uni(i  ,j  ,k  ) + uni(i  ,j-1,k  ))*0.5
+        wyplus  = (wni(i  ,j  ,k+1) + wni(i  ,j-1,k+1))*0.5
+        wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
 
-               wyplus  = (wni(i  ,j  ,k+1) + wni(i  ,j-1,k+1))*0.5
-               wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
+        ! get derivatives at 1/2 locations
+        dvdxp = (vni(i+1,j  ,k  ) - vni(i  ,j  ,k  )) * dx(i  , RIGHT_EDGE)
+        dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  )) * dx(i  , LEFT_EDGE )
+        dvdyp = (vni(i  ,j+1,k  ) - vni(i  ,j  ,k  )) * dy(j  , CENTER    )
+        dvdym = (vni(i  ,j  ,k  ) - vni(i  ,j-1,k  )) * dy(j-1, CENTER    )
+        dvdzp = (vni(i  ,j  ,k+1) - vni(i  ,j  ,k  )) * dz(k  , RIGHT_EDGE)
+        dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1)) * dz(k  , LEFT_EDGE )
+        dudyp = (uni(i+1,j  ,k  ) - uni(i+1,j-1,k  )) * dy(j  , LEFT_EDGE )
+        dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  )) * dy(j  , LEFT_EDGE )
+        dwdyp = (wni(i  ,j  ,k+1) - wni(i  ,j-1,k+1)) * dy(j  , LEFT_EDGE )
+        dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  )) * dy(j  , LEFT_EDGE )
 
-               ! get derivatives at 1/2 locations
-               dvdxp = (vni(i+1,j  ,k  ) - vni(i  ,j  ,k  ))*dx1
-               dvdxm = (vni(i  ,j  ,k  ) - vni(i-1,j  ,k  ))*dx1
-               dvdyp = (vni(i  ,j+1,k  ) - vni(i  ,j  ,k  ))*dy1
-               dvdym = (vni(i  ,j  ,k  ) - vni(i  ,j-1,k  ))*dy1
-               dvdzp = (vni(i  ,j  ,k+1) - vni(i  ,j  ,k  ))*dz1
-               dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1))*dz1
-               dudyp = (uni(i+1,j  ,k  ) - uni(i+1,j-1,k  ))*dy1
-               dudym = (uni(i  ,j  ,k  ) - uni(i  ,j-1,k  ))*dy1
-               dwdyp = (wni(i  ,j  ,k+1) - wni(i  ,j-1,k+1))*dy1
-               dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  ))*dy1
+        ! get nu_t
 
-               ! get nu_t
+        !****** requires DIAGONALS for corner ghost cells ******
 
-               !****** requires DIAGONALS for corner ghost cells ******
+        tvip = 0.25*(tv(i  ,j-1,k  ) + tv(i+1,j-1,k  ) + &
+                     tv(i+1,j  ,k  ) + tv(i  ,j  ,k  ))
+        tvim = 0.25*(tv(i-1,j-1,k  ) + tv(i  ,j-1,k  ) + &
+                     tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
+        tvkp = 0.25*(tv(i  ,j-1,k  ) + tv(i  ,j-1,k+1) + &
+                     tv(i  ,j  ,k+1) + tv(i  ,j  ,k  ))
+        tvkm = 0.25*(tv(i  ,j-1,k-1) + tv(i  ,j-1,k  ) + &
+                     tv(i  ,j  ,k  ) + tv(i  ,j  ,k-1))
 
-               tvip = 0.25*(tv(i  ,j-1,k  ) + tv(i+1,j-1,k  ) + &
-                            tv(i+1,j  ,k  ) + tv(i  ,j  ,k  ))
-               tvim = 0.25*(tv(i-1,j-1,k  ) + tv(i  ,j-1,k  ) + &
-                            tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
-               tvkp = 0.25*(tv(i  ,j-1,k  ) + tv(i  ,j-1,k+1) + &
-                            tv(i  ,j  ,k+1) + tv(i  ,j  ,k  ))
-               tvkm = 0.25*(tv(i  ,j-1,k-1) + tv(i  ,j-1,k  ) + &
-                            tv(i  ,j  ,k  ) + tv(i  ,j  ,k-1))
+        ! flux of normal total stresses
+        txxp = (ru1 + tvip)*dvdxp
+        txxm = (ru1 + tvim)*dvdxm
+        tyyp = (ru1 + 2.0*tv(i,j,k))*dvdyp
+        tyym = (ru1 + 2.0*tv(i,j-1,k))*dvdym
+        tzzp = (ru1 + tvkp)*dvdzp
+        tzzm = (ru1 + tvkm)*dvdzm
 
-               ! flux of normal total stresses
-               txxp = (ru1 + tvip)*dvdxp
-               txxm = (ru1 + tvim)*dvdxm
-               tyyp = (ru1 + 2.0*tv(i,j,k))*dvdyp
-               tyym = (ru1 + 2.0*tv(i,j-1,k))*dvdym
-               tzzp = (ru1 + tvkp)*dvdzp
-               tzzm = (ru1 + tvkm)*dvdzm
+        ! flux of cross SGS stresses
+        txyp = tvip*dudyp
+        txym = tvim*dudym
+        tyzp = tvkp*dwdyp
+        tyzm = tvkm*dwdym
 
-               ! flux of cross SGS stresses
-               txyp = tvip*dudyp
-               txym = tvim*dudym
-               tyzp = tvkp*dwdyp
-               tyzm = tvkm*dwdym
-
-               ! calculate RHS for v-momentum
-               rv(i,j,k) =                                           &
-                           - (uyplus*vxplus - uyminus*vxminus)*dx1   &! advection term
-                           - (vyplus*vyplus - vyminus*vyminus)*dy1   &
-                           - (wyplus*vzplus - wyminus*vzminus)*dz1   &
-                           + (txxp - txxm)*dx1                       &! diffusion - normal terms
-                           + (tyyp - tyym)*dy1                       &
-                           + (tzzp - tzzm)*dz1                       &
-                           + (txyp - txym)*dx1                       &! diffusion - cross terms
-                           + (tyzp - tyzm)*dz1
-            enddo
-         enddo
+        ! calculate RHS for v-momentum
+        rv(i,j,k) =                                                     &
+                   - (uyplus*vxplus - uyminus*vxminus)*dx(i,CENTER)     &! advection term
+                   - (vyplus*vyplus - vyminus*vyminus)*dy(j,LEFT_EDGE)  &
+                   - (wyplus*vzplus - wyminus*vzminus)*dz(k,CENTER)     &
+                   + (txxp - txxm)*dx(i,CENTER)                         &! diffusion - normal terms
+                   + (tyyp - tyym)*dy(j,LEFT_EDGE)                      &
+                   + (tzzp - tzzm)*dz(k,CENTER)                         &
+                   + (txyp - txym)*dx(i,CENTER)                         &! diffusion - cross terms
+                   + (tyzp - tyzm)*dz(k,CENTER)  
       enddo
+    enddo
+  enddo
 
-      !++++++++++  W-COMPONENT  ++++++++++
+  !++++++++++  W-COMPONENT  ++++++++++
       
-      do k = kz1,kz2+1
-         do j = jy1,jy2
-            do i = ix1,ix2
+  do k = kz1,kz2+1
+    do j = jy1,jy2
+      do i = ix1,ix2
 
-               ! get velocities at 1/2 locations
-               wxplus  = (wni(i+1,j  ,k  ) + wni(i  ,j  ,k  ))*0.5
-               wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
+        ! get velocities at 1/2 locations
+        wxplus  = (wni(i+1,j  ,k  ) + wni(i  ,j  ,k  ))*0.5
+        wxminus = (wni(i  ,j  ,k  ) + wni(i-1,j  ,k  ))*0.5
                
-               wyplus  = (wni(i  ,j+1,k  ) + wni(i  ,j  ,k  ))*0.5
-               wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
+        wyplus  = (wni(i  ,j+1,k  ) + wni(i  ,j  ,k  ))*0.5
+        wyminus = (wni(i  ,j  ,k  ) + wni(i  ,j-1,k  ))*0.5
                
-               wzplus  = (wni(i  ,j  ,k+1) + wni(i  ,j  ,k  ))*0.5
-               wzminus = (wni(i  ,j  ,k  ) + wni(i  ,j  ,k-1))*0.5
+        wzplus  = (wni(i  ,j  ,k+1) + wni(i  ,j  ,k  ))*0.5
+        wzminus = (wni(i  ,j  ,k  ) + wni(i  ,j  ,k-1))*0.5
 
-               uzplus  = (uni(i+1,j  ,k  ) + uni(i+1,j  ,k-1))*0.5
-               uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
+        uzplus  = (uni(i+1,j  ,k  ) + uni(i+1,j  ,k-1))*0.5
+        uzminus = (uni(i  ,j  ,k  ) + uni(i  ,j  ,k-1))*0.5
 
-               vzplus  = (vni(i  ,j+1,k  ) + vni(i  ,j+1,k-1))*0.5
-               vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
+        vzplus  = (vni(i  ,j+1,k  ) + vni(i  ,j+1,k-1))*0.5
+        vzminus = (vni(i  ,j  ,k  ) + vni(i  ,j  ,k-1))*0.5
 
-               ! get temperature at z locations
-               tz = (tni(i,j,k+1) + tni(i,j,k)) / 2.
+        ! get temperature at z locations
+        tz = (tni(i,j,k) + tni(i,j,k-1))*0.5
                
-               ! get derivatives at 1/2 locations
-               dwdxp = (wni(i+1,j  ,k  ) - wni(i  ,j  ,k  ))*dx1
-               dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  ))*dx1
-               dwdyp = (wni(i  ,j+1,k  ) - wni(i  ,j  ,k  ))*dy1
-               dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  ))*dy1
-               dwdzp = (wni(i  ,j  ,k+1) - wni(i  ,j  ,k  ))*dz1
-               dwdzm = (wni(i  ,j  ,k  ) - wni(i  ,j  ,k-1))*dz1
-               dudzp = (uni(i+1,j  ,k  ) - uni(i+1,j  ,k-1))*dz1
-               dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1))*dz1
-               dvdzp = (vni(i  ,j+1,k  ) - vni(i  ,j+1,k-1))*dz1
-               dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1))*dz1
+        ! get derivatives at 1/2 locations
+        dwdxp = (wni(i+1,j  ,k  ) - wni(i  ,j  ,k  )) * dx(i  , RIGHT_EDGE)
+        dwdxm = (wni(i  ,j  ,k  ) - wni(i-1,j  ,k  )) * dx(i  , LEFT_EDGE )
+        dwdyp = (wni(i  ,j+1,k  ) - wni(i  ,j  ,k  )) * dy(j  , RIGHT_EDGE)
+        dwdym = (wni(i  ,j  ,k  ) - wni(i  ,j-1,k  )) * dy(j  , LEFT_EDGE )
+        dwdzp = (wni(i  ,j  ,k+1) - wni(i  ,j  ,k  )) * dz(i  , CENTER    )
+        dwdzm = (wni(i  ,j  ,k  ) - wni(i  ,j  ,k-1)) * dz(i-1, CENTER    )
+        dudzp = (uni(i+1,j  ,k  ) - uni(i+1,j  ,k-1)) * dz(k  , LEFT_EDGE )
+        dudzm = (uni(i  ,j  ,k  ) - uni(i  ,j  ,k-1)) * dz(k  , LEFT_EDGE )
+        dvdzp = (vni(i  ,j+1,k  ) - vni(i  ,j+1,k-1)) * dz(k  , LEFT_EDGE )
+        dvdzm = (vni(i  ,j  ,k  ) - vni(i  ,j  ,k-1)) * dz(k  , LEFT_EDGE )
 
-               ! get nu_t
+        ! get nu_t
 
-               !****** requires DIAGONALS for corner ghost cells ******
+        !****** requires DIAGONALS for corner ghost cells ******
 
-               tvip = 0.25*(tv(i  ,j  ,k-1) + tv(i+1,j  ,k-1) + &
-                            tv(i+1,j  ,k  ) + tv(i  ,j  ,k  ))
-               tvim = 0.25*(tv(i-1,j  ,k-1) + tv(i  ,j  ,k-1) + &
-                            tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
-               tvjp = 0.25*(tv(i  ,j  ,k-1) + tv(i  ,j  ,k  ) + &
-                            tv(i  ,j+1,k  ) + tv(i  ,j+1,k-1))
-               tvjm = 0.25*(tv(i  ,j-1,k-1) + tv(i  ,j-1,k  ) + & 
-                            tv(i  ,j  ,k  ) + tv(i  ,j  ,k-1))
+        tvip = 0.25*(tv(i  ,j  ,k-1) + tv(i+1,j  ,k-1) + &
+                     tv(i+1,j  ,k  ) + tv(i  ,j  ,k  ))
+        tvim = 0.25*(tv(i-1,j  ,k-1) + tv(i  ,j  ,k-1) + &
+                     tv(i  ,j  ,k  ) + tv(i-1,j  ,k  ))
+        tvjp = 0.25*(tv(i  ,j  ,k-1) + tv(i  ,j  ,k  ) + &
+                     tv(i  ,j+1,k  ) + tv(i  ,j+1,k-1))
+        tvjm = 0.25*(tv(i  ,j-1,k-1) + tv(i  ,j-1,k  ) + & 
+                     tv(i  ,j  ,k  ) + tv(i  ,j  ,k-1))
 
-               ! flux of normal total stresses
-               txxp = (ru1 + tvip)*dwdxp
-               txxm = (ru1 + tvim)*dwdxm
-               tyyp = (ru1 + tvjp)*dwdyp
-               tyym = (ru1 + tvjm)*dwdym
-               tzzp = (ru1 + 2.0*tv(i,j,k))*dwdzp
-               tzzm = (ru1 + 2.0*tv(i,j,k-1))*dwdzm
+        ! flux of normal total stresses
+        txxp = (ru1 + tvip)*dwdxp
+        txxm = (ru1 + tvim)*dwdxm
+        tyyp = (ru1 + tvjp)*dwdyp
+        tyym = (ru1 + tvjm)*dwdym
+        tzzp = (ru1 + 2.0*tv(i,j,k))*dwdzp
+        tzzm = (ru1 + 2.0*tv(i,j,k-1))*dwdzm
 
-               ! flux of cross SGS stresses
-               txzp = tvip*dudzp
-               txzm = tvim*dudzm
-               tyzp = tvjp*dvdzp
-               tyzm = tvjm*dvdzm
+        ! flux of cross SGS stresses
+        txzp = tvip*dudzp
+        txzm = tvim*dudzm
+        tyzp = tvjp*dvdzp
+        tyzm = tvjm*dvdzm
 
-               ! calculate RHS for w-momentum
-               rw(i,j,k) =                                          &
-                          - (uzplus*wxplus - uzminus*wxminus)*dx1   &! advection term
-                          - (vzplus*wyplus - vzminus*wyminus)*dy1   &
-                          - (wzplus*wzplus - wzminus*wzminus)*dz1   &
-                          + (txxp - txxm)*dx1                       &! diffusion - normal terms
-                          + (tyyp - tyym)*dy1                       &
-                          + (tzzp - tzzm)*dz1                       &
-                          + (txzp - txzm)*dx1                       &! diffusion - cross terms
-                          + (tyzp - tyzm)*dy1                       & 
-                          + tz * tz_m                                ! energy momentum coupling
-            enddo
-         enddo
+        ! calculate RHS for w-momentum
+        rw(i,j,k) =                                                     &
+                   - (uzplus*wxplus - uzminus*wxminus)*dx(i,CENTER)     &! advection term
+                   - (vzplus*wyplus - vzminus*wyminus)*dy(j,CENTER)     &
+                   - (wzplus*wzplus - wzminus*wzminus)*dz(k,LEFT_EDGE)  &
+                   + (txxp - txxm)*dx(i,CENTER)                         &! diffusion - normal terms
+                   + (tyyp - tyym)*dy(j,CENTER)                         &
+                   + (tzzp - tzzm)*dz(k,LEFT_EDGE)                      &
+                   + (txzp - txzm)*dx(i,CENTER)                         &! diffusion - cross terms
+                   + (tyzp - tyzm)*dy(j,CENTER)                         & 
+                   + tz * tz_m                                           ! energy momentum coupling
       enddo
+    enddo
+  enddo
 
-      END SUBROUTINE ins_rhs3d
+  END SUBROUTINE ins_rhs3d
 

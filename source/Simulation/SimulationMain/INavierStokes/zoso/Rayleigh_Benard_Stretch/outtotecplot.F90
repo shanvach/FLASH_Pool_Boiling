@@ -12,10 +12,10 @@
   subroutine outtotecplot(mype,time,dt,istep,count,&
            timer,blockList,blockCount,firstfileflag)
 
-      use Grid_interface, ONLY : Grid_getDeltas, Grid_getBlkPtr, &
-        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, &
+      use Grid_interface, ONLY : Grid_getCellMetrics, Grid_getBlkPtr,   &
+        Grid_releaseBlkPtr, Grid_getBlkIndexLimits, Grid_getCellCoords, &
         Grid_getBlkBoundBox, Grid_getBlkCenterCoords
-
+      use ins_interface,  ONLY : ins_divergence
 
 #ifdef FLASH_GRID_UG
 #else
@@ -32,7 +32,7 @@
   integer, intent(in) :: blockCount
   integer, intent(in) :: blockList(MAXBLOCKS)
   real, intent(in) :: time,dt,timer
-      
+  integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
  
   ! Local Variables
   integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc
@@ -40,11 +40,15 @@
   character(6) :: index_lb,index_mype
 
   real xedge(NXB+1),xcell(NXB)
-  real yedge(NYB+1),ycell(NYB+1)
-  real zedge(NZB+1),zcell(NZB+1)
+  real yedge(NYB+1),ycell(NYB)
+  real zedge(NZB+1),zcell(NZB)
   real intsx(NXB+1),intsy(NYB+1),intsz(NZB+1)
 
-  real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData,facezData
+  real, pointer, dimension(:,:,:,:) :: solnData,scratchData,facexData,faceyData,facezData
+
+  real, dimension(GRID_IHI_GC,3,blockCount) :: iMetrics
+  real, dimension(GRID_JHI_GC,3,blockCount) :: jMetrics
+  real, dimension(GRID_KHI_GC,3,blockCount) :: kMetrics
 
   real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD,NZB+2*NGUARD), &
        facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD), &
@@ -55,14 +59,15 @@
            tpdvdxcorn, tpdvdycorn, tpdvdzcorn, &
            tpdwdxcorn, tpdwdycorn, tpdwdzcorn, &
            vortx, vorty, vortz, divpp, nxp, nyp, nzp
+
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
+
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD, NZB+2*NGUARD) :: tpdudxc, &
         tpdudyc,tpdudzc,tpdvdxc,tpdvdyc,tpdvdzc,tpdwdxc,&
         tpdwdyc,tpdwdzc
 
   integer blockID
 
-  real del(MDIM),dx,dy,dz
   real, dimension(MDIM)  :: coord,bsize
   real ::  boundBox(2,MDIM)
 
@@ -126,7 +131,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                                      &
-             'x y z u v w p t wx wy wz div nx ny nz'//NULLCHR,      &
+             'x y z u v w p t'//NULLCHR,      &
              filename//NULLCHR,                                     &
              './IOData/'//NULLCHR,                                  &
              Debug,VIsdouble)
@@ -145,13 +150,6 @@
 
      blockID =  blockList(lb)      
 
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-     dx = del(IAXIS)
-     dy = del(JAXIS)
-     dz = del(KAXIS)
-
      ! Get Coord and Bsize for the block:
      ! Bounding box:
      call Grid_getBlkBoundBox(blockId,boundBox)
@@ -169,15 +167,27 @@
      tpv = 0.
      tpw = 0.
      tpp = 0.
+     tpt = 0.
 
-     xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
-     xcell = xedge(:) + dx/2.0;
-    
-     yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + dy*intsy;
-     ycell = yedge(:) + dy/2.0;
+     call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
+     call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1)
+     call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)-1)
+     call Grid_getCellCoords(KAXIS, blockId, CENTER, .false., zcell, blkLimits(HIGH, KAXIS)-1)
+     call Grid_getCellCoords(IAXIS, blockId, FACES, .false., xedge, blkLimits(HIGH, IAXIS))
+     call Grid_getCellCoords(JAXIS, blockId, FACES, .false., yedge, blkLimits(HIGH, JAXIS))
+     call Grid_getCellCoords(KAXIS, blockId, FACES, .false., zedge, blkLimits(HIGH, KAXIS))
 
-     zedge = coord(KAXIS) - bsize(KAXIS)/2.0 + dz*intsz;
-     zcell = zedge(:) + dz/2.0;
+     !call Grid_getCellMetrics(IAXIS,blockID,LEFT_EDGE, .true.,iMetrics(:,LEFT_EDGE,lb), GRID_IHI_GC)
+     !call Grid_getCellMetrics(IAXIS,blockID,CENTER,    .true.,iMetrics(:,CENTER,lb),    GRID_IHI_GC)
+     !call Grid_getCellMetrics(IAXIS,blockID,RIGHT_EDGE,.true.,iMetrics(:,RIGHT_EDGE,lb),GRID_IHI_GC)
+
+     !call Grid_getCellMetrics(JAXIS,blockID,LEFT_EDGE, .true.,jMetrics(:,LEFT_EDGE,lb), GRID_JHI_GC)
+     !call Grid_getCellMetrics(JAXIS,blockID,CENTER,    .true.,jMetrics(:,CENTER,lb),    GRID_JHI_GC)
+     !call Grid_getCellMetrics(JAXIS,blockID,RIGHT_EDGE,.true.,jMetrics(:,RIGHT_EDGE,lb),GRID_JHI_GC)
+
+     !call Grid_getCellMetrics(KAXIS,blockID,LEFT_EDGE, .true.,kMetrics(:,LEFT_EDGE,lb), GRID_KHI_GC)
+     !call Grid_getCellMetrics(KAXIS,blockID,CENTER,    .true.,kMetrics(:,CENTER,lb),    GRID_KHI_GC)
+     !call Grid_getCellMetrics(KAXIS,blockID,RIGHT_EDGE,.true.,kMetrics(:,RIGHT_EDGE,lb),GRID_KHI_GC)
 
      facevarxx = facexData(VELC_FACE_VAR,:,:,:)
      facevaryy = faceyData(VELC_FACE_VAR,:,:,:)
@@ -219,21 +229,24 @@
 
      ! Divergence: 
      ! ----------
-     solnData(DUST_VAR,:,:,:) = 0.
-     solnData(DUST_VAR,NGUARD:nxc,NGUARD:nyc,NGUARD:nzc) =      &
-             (facevarxx(NGUARD+1:nxc+1,NGUARD:nyc,NGUARD:nzc) - &
-              facevarxx(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dx + &
-             (facevaryy(NGUARD:nxc,NGUARD+1:nyc+1,NGUARD:nzc) - &
-              facevaryy(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dy + &
-             (facevarzz(NGUARD:nxc,NGUARD:nyc,NGUARD+1:nzc+1) - &
-              facevarzz(NGUARD:nxc,NGUARD:nyc,NGUARD:nzc))/dz
+     !call ins_divergence(facevarxx,&
+     !                    facevaryy,&
+     !                    facevarzz,&
+     !        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     !        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+     !        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+     !                    iMetrics(:,CENTER,blockID),    &
+     !                    jMetrics(:,CENTER,blockID),    &
+     !                    kMetrics(:,CENTER,blockID),    &
+     !        scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
+     !
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+     !                        scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:),divpp)
 
-     solnData(DUST_VAR,1:NGUARD,:,:)=0.
-     solnData(DUST_VAR,nxc:2*NGUARD+NXB,:,:)=0.
 
+     ! velocity derivatives:
+     ! --------------------
 
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
-                             solnData(DUST_VAR,:,:,:),divpp)
 
      ! Velocity derivatives:
      ! -------- -----------            
@@ -243,42 +256,42 @@
      ! to edge points.
 
      ! U derivatives:
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdudxc,tpdudxcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdudxc,tpdudxcorn)
             
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdudyc,tpdudycorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdudyc,tpdudycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdudzc,tpdudzcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdudzc,tpdudzcorn)
 
      ! V derivatives:
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdvdxc,tpdvdxcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdvdxc,tpdvdxcorn)
             
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdvdyc,tpdvdycorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdvdyc,tpdvdycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdvdzc,tpdvdzcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdvdzc,tpdvdzcorn)
 
 
      ! W derivatives:
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdwdxc,tpdwdxcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdwdxc,tpdwdxcorn)
             
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdwdyc,tpdwdycorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdwdyc,tpdwdycorn)
 
-     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
-                             tpdwdzc,tpdwdzcorn)
+     !call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+     !                        tpdwdzc,tpdwdzcorn)
          
      ! VORTICITY:
      ! ---------
      ! Corner values of vorticity:
-     vortx = tpdwdycorn - tpdvdzcorn
-     vorty = tpdudzcorn - tpdwdxcorn
-     vortz = tpdvdxcorn - tpdudycorn
+     !vortx = tpdwdycorn - tpdvdzcorn
+     !vorty = tpdudzcorn - tpdwdxcorn
+     !vortz = tpdvdxcorn - tpdudycorn
 
      ! Write Block Results into data file:
      call int2char(lb,index_lb)
@@ -343,29 +356,29 @@
       i = TecDat(ijk,arraylb,0)
 
       ! Write omgX:
-      arraylb(:,:,:) = sngl(vortx)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(vortx)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write omgY:
-      arraylb(:,:,:) = sngl(vorty)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(vorty)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write omgZ:
-      arraylb(:,:,:) = sngl(vortz)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(vortz)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write Div:
-      arraylb(:,:,:) = sngl(divpp)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(divpp)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,:) = sngl(nxp)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(nxp)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,:) = sngl(nyp)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(nyp)
+      !i = TecDat(ijk,arraylb,0)
 
-      arraylb(:,:,:) = sngl(nzp)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,:) = sngl(nzp)
+      !i = TecDat(ijk,arraylb,0)
 
    enddo
 

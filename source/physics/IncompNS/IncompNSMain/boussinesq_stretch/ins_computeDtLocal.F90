@@ -62,7 +62,7 @@ subroutine ins_computeDtLocal(blockID,   &
   velcoeff = eps
 
   do k = GRID_KLO, GRID_KHI
-    do j = GRID_JLO, GRID_KHI
+    do j = GRID_JLO, GRID_JHI 
 
       velcoeff = MAX(velcoeff,                                                                                    &
                  MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,k))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
@@ -88,7 +88,7 @@ subroutine ins_computeDtLocal(blockID,   &
 #else
   velcoeff = eps
 
-  do j = GRID_JLO, GRID_KHI
+  do j = GRID_JLO, GRID_JHI
     velcoeff = MAX(velcoeff,                                                                                    &
                MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,1))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
                MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,j,1))*dy(j,LEFT_EDGE)))
