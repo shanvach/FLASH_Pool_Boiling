@@ -250,7 +250,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 	      call Grid_getCellMetrics(IAXIS,blockHandle,RIGHT_EDGE,.true.,dx,GRID_IHI_GC) 
               k = 2*guard+1
               do i = 1,guard
-                regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/dx(i) + regionData(k-i,1:je,1:ke,ivar)
+                regionData(i,1:je,1:ke,ivar) = ht_Txl_value/dx(i) + regionData(k-i,1:je,1:ke,ivar)
                 !regionData(i,1:je,1:ke,ivar) = ht_Txl_value/SUM(dx(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
               end do
               applied = .true.
@@ -296,7 +296,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               call Grid_getCellMetrics(KAXIS,blockHandle,RIGHT_EDGE,.true.,dz,GRID_KHI_GC)
                k = 2*guard+1
                do i = 1,guard
-                 regionData(i,1:je,1:ke,ivar) = ht_Tyl_value/dz(i) + regionData(k-i,1:je,1:ke,ivar)
+                 regionData(i,1:je,1:ke,ivar) = ht_Tzl_value/dz(i) + regionData(k-i,1:je,1:ke,ivar)
                  !regionData(i,1:je,1:ke,ivar) = ht_Tzl_value/SUM(dz(i:k-i-1)) + regionData(k-i,1:je,1:ke,ivar)
                end do
                applied = .true.               
@@ -323,7 +323,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                n = GRID_IHI_GC
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/dx(k-i) + regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = ht_Txr_value/dx(k-i) + regionData(i,1:je,1:ke,ivar)
                  !regionData(k-i,1:je,1:ke,ivar) = ht_Txr_value/SUM(dx(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
                end do
                applied = .true.
@@ -371,7 +371,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                n = GRID_KHI_GC
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = ht_Tyr_value/dz(k-i) + regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = ht_Tzr_value/dz(k-i) + regionData(i,1:je,1:ke,ivar)
                  !regionData(k-i,1:je,1:ke,ivar) = ht_Tzr_value/SUM(dz(n-i+1:n-k+i+2)) + regionData(i,1:je,1:ke,ivar)
                end do
                applied = .true.
