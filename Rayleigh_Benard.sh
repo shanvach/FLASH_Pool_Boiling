@@ -85,7 +85,7 @@ while [ "$1" != '' ]; do
 done
 
 # Identify Simulation Directory
-if [ "${grd}" == "rg" ]; then
+if [ "${grd}" == "+rg" ]; then
     simdir="INavierStokes/zoso/Rayleigh_Benard_Stretch/"
 else
     simdir="INavierStokes/zoso/Rayleigh_Benard/"

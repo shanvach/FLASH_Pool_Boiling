@@ -17,7 +17,7 @@ MPE_PATH   =
 BLAS_PATH    = /usr
 HYPRE_PATH    = /usr/local/hypre
 SUPERLU_PATH = /usr/local/SuperLU_4.3
-
+LAPACK_PATH = 
 
 export cur-dir := $(shell pwd)
 
@@ -138,7 +138,7 @@ LIB_MPE   =
 
 #LIB_BLAS   = -L${BLAS_PATH}/lib -lopenblas
 LIB_BLAS    = -lblas
-LIB_LAPACK  = -llapack
+LIB_LAPACK  = 
 LIB_HYPRE   = -L${HYPRE_PATH}/lib -lHYPRE  
 LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3
 
@@ -147,7 +147,8 @@ LIB_STDCXX = -L/lib64 -lstdc++
 #Specify TEC_PLOT=YES in order to link the tec plot library.
 TEC_PLOT=YES
 #ifeq ($(TEC_PLOT), YES)
-CONFIG_LIB = -I${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -L${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -ltecio -lstdc++
+CONFIG_LIB = -I${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -L${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -ltecio -lstdc++ /apps/lapack/lapack-release/liblapack.a /apps/lapack/lapack-release/librefblas.a
+
 #endif
 
 

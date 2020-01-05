@@ -459,6 +459,10 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 ! Two Dimensional Solver
 #if NDIM == 2
 
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Solve 1d transform and 1d tridiagonal ------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
     ! number of parallel transforms of x-direction
     numVec = pfft_inLen(JAXIS)
 
@@ -470,10 +474,14 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     call gr_pfftDcftInverse(pfft_work1, outArray, pfft_trigIaxis, pfft_globalLen(IAXIS), &
                             pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), 1.0)
 
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 1d transform and 1d tridiagonal ---------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
 
 ! Three Dimensional Solver
 #else
 
+    ! --------------------------------------------------------------------------------------------------------!
     ! Solve 2d transform and 1d tridiagonal  !----------------------------------------------------------------! 
     if (solveflag .eq. TRIG_TRIG_DRCT) then  !----------------------------------------------------------------!
 
@@ -526,14 +534,17 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       call gr_pfftDcftForward(pfft_work1, outArray, pfft_trigIaxis, pfft_globalLen(IAXIS), &
                               pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), pfft_scale(IAXIS))
 
+    ! --------------------------------------------------------------------------------------------------------!
     ! Complete 2d transform and 1d tridiagonal  --------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
 
+    ! --------------------------------------------------------------------------------------------------------!
     ! Solve 1d transform and 2d blktri           !------------------------------------------------------------!
     else if (solveflag .eq. TRIG_DRCT_DRCT) then !------------------------------------------------------------!
 
     ! ////// NOT YET IMPLEMENTED ///////// !
 
+    ! --------------------------------------------------------------------------------------------------------!
     ! Complete 1d transform and 2d blktri  -------------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
 

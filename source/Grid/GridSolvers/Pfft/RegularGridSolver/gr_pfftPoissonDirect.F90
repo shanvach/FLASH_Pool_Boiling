@@ -43,10 +43,13 @@
 subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
 
   use Driver_interface, ONLY : Driver_abortFlash
+  use Grid_interface,   ONLY : Grid_getCellMetrics
   use Grid_data,        ONLY : gr_iMetricsGlb, gr_jMetricsGlb, gr_kMetricsGlb
-  use gr_pfftData,      ONLY : pfft_inLen, pfft_midLen, pfft_work1, pfft_work2, pfft_procGrid, pfft_trigIaxis, &
-                               pfft_globalLen, pfft_comm, pfft_transformType, pfft_scale, pfft_myPE
-!  use fish
+  use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, &
+                               gr_pfftGetLocalLimitsAnytime, gr_pfftTriDiag, gr_pfftCyclicTriDiag
+  use gr_pfftData,      ONLY : pfft_inLen, pfft_midLen, pfft_outLen, pfft_globalLen, pfft_transformType, &
+                               pfft_work1, pfft_work2, pfft_procGrid, pfft_comm, pfft_myPE, pfft_scale,  &
+                               pfft_trigIaxis, pfft_trigJaxis, pfft_trigKaxis
 
   implicit none
 
@@ -60,15 +63,20 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   real, dimension(inSize), intent(IN)  :: inArray
   real, dimension(inSize), intent(OUT) :: outArray
 
-  integer :: numVec
-  integer :: M, N, MP, NP
-  real, dimension(:), allocatable, save :: AM, BM, CM, AN, BN, CN
-!  TYPE (fishworkspace), save :: W
-  real, dimension(:), allocatable :: RHS 
-  real, dimension(:,:), allocatable :: temp2DArray
+  integer :: ierr
+  integer :: J, M, N, size, nl
+  integer, save :: ldw, liw, ilf, iuf
+  integer, dimension(2,MDIM) :: pfftBlkLimits
+  integer, dimension(:), allocatable, save :: iw
+  real, save :: ch
+  real, dimension(:), allocatable, save :: dw
+  real, dimension(:), allocatable, save :: AM, BM, CM
+  real, dimension(:), allocatable, save :: AN, BN, CN
+  real, dimension(:,:), allocatable   :: temp2DArray, RHS
+  real, dimension(:,:,:), allocatable :: temp3DArray
   logical, save :: firstCall = .true.
-  real :: mean
-
+  logical, dimension(3), save :: init
+  real :: mean, meanAux
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -83,46 +91,74 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 ! Two Dimensional Solver
 #if NDIM == 2
 
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Initialize 2d block tridiagonal (pdc2d) ----------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
     ! dimensions
-    M = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
-    N = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
+    N = globalSize(IAXIS) !NX-2  ! Total Number of Points in X 
+    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y 
 
     ! allocate coefficient arrays
-    allocate(AM(M), BM(M), CM(M), AN(N), BN(N), CN(N))
+    allocate(AN(N), BN(N), CN(N))
+    allocate(AM(M), BM(M), CM(M))
 
-    ! matrix coefficients for blktri solve -- IAXIS
-    AM(1:M) = gr_iMetricsGlb(CENTER,1:M,1) * gr_iMetricsGlb(LEFT_EDGE, 1:M,1)
-    CM(1:M) = gr_iMetricsGlb(CENTER,1:M,1) * gr_iMetricsGlb(RIGHT_EDGE,1:M,1)
-    MP = 0
-    if (transformType(IAXIS) == PFFT_COS_CC) then
-      if (pfft_myPE == 0) write(*,*) '2d pfft solver using IAXIS neumann coefficients'
-      MP = 1
-      AM(1) = 0.
-      CM(M) = 0.
-    endif
-    BM = - AM - CM
+    ! matrix coefficients for y-axis
+    AM(1:M) = -gr_jMetricsGlb(LEFT_EDGE,1:M,1)
+    BM(1:M) =  gr_jMetricsGlb(LEFT_EDGE,1:M,1) + gr_jMetricsGlb(RIGHT_EDGE,1:M,1)
+    CM(1:M) = 1.0 / gr_jMetricsGlb(CENTER,1:M,1)
+   
+    ! apply boundary conditions y-axis
+    BM(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
+    BM(M) = gr_jMetricsGlb(LEFT_EDGE, M,1)
 
-    ! matrix coefficients for blktri solve -- JAXIS
-    AN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(LEFT_EDGE, 1:N,1)
-    CN(1:N) = gr_jMetricsGlb(CENTER,1:N,1) * gr_jMetricsGlb(RIGHT_EDGE,1:N,1)
-    NP = 0
-    if (transformType(JAXIS) == PFFT_COS_CC) then
-      if (pfft_myPE == 0) write(*,*) '2d pfft solver using JAXIS neumann coefficients'
-      NP = 1
-      AN(1) = 0.
-      CN(M) = 0.
-    endif
-    BN = - AN - CN
+    ! matrix coefficients for x-axis
+    AN(1:N) = -gr_iMetricsGlb(LEFT_EDGE,1:N,1)
+    BN(1:N) =  gr_iMetricsGlb(LEFT_EDGE,1:N,1) + gr_iMetricsGlb(RIGHT_EDGE,1:N,1)
+    CN(1:N) = 1.0 / gr_iMetricsGlb(CENTER,1:N,1)
 
-   ! allocate RHS array and blktri workspace
+    ! apply boundary conditions x-axis
+    BN(1) = gr_iMetricsGlb(RIGHT_EDGE,1,1)
+    BN(N) = gr_iMetricsGlb(LEFT_EDGE, N,1)
  
-    
+    ! poisson coefficient
+    ch = 0.0
+
+    ! initialize solver
+    init(1) = .false.
+    init(2) = .true.
+    init(3) = .true.
+
+    ! initialize parameters for pdc2d
+    size = pfft_procGrid(JAXIS)
+    nl = 1 + max(int(log10(real(M))/log10(4.0)), 0)
+    ldw = 6*nl*min((M + 2*size - 1)/size, M) + max(9*M, 11*N)
+    liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
+    allocate(dw(ldw), iw(liw))
+
+    call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+    !write(*,*) 'ilf / iuf = ', ilf, '/', iuf, ' on process ', pfft_myPE
+
+    ! prepare solver
+    init(:) = .false.
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 2d block tridiagonal (pdc2d) ------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
 
 ! Three Dimensional Solver 
 #else
 
-    !! implement 2d transform + TDMA
-    !! implement 1d transform + BlkTri
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Initialize 3d block pentadiagonal (pdc3d) --------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
+    ! ////// NOT YET IMPLEMENTED ///////// !
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 3d block pentadiagonal (pdc3d) ----------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
 
 #endif
 
@@ -135,7 +171,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
-!          PERFORM FORWARD DIRECTION TRANSFORM AND MATRIX BASED LINEAR / PLANER SOLUTION          !  
+!          PERFORM FORWARD DIRECTION TRANSPOSE AND MATRIX BASED LINEAR / PLANER SOLUTION          !  
 !                                                                                                 ! 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -145,13 +181,53 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 ! Two Dimensional Solver
 #if NDIM == 2
 
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Solve 2d block tridiagonal (pdc2d) ---------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
+    ! dimensions
+    N = globalSize(IAXIS) !NX-2  ! Total Number of Points in X 
+    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y 
+
+    ! lets work with the data as a 2d array {x,y} vice a 1d vector {x*y}
+    allocate(RHS(pfft_inLen(IAXIS), pfft_inLen(JAXIS)))
+    RHS = reshape(inArray, pfft_inLen(1:2))
+    !write(*,*) 'pfft_inLen = ', pfft_inLen(IAXIS), '/', pfft_inLen(JAXIS), ' on process ', pfft_myPE
+
+    ! create solution array
+    do J=1, pfft_inLen(JAXIS)
+      RHS(:,J) = -(1.0/gr_iMetricsGlb(CENTER,1:N,1))*(1.0/gr_jMetricsGlb(CENTER,ilf+J-1,1))*RHS(:,J)
+    end do
+    
+    ! solve the system
+    call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+
+    ! remove mean from zeroth wave component 
+    mean = sum(RHS) / (M * N)
+    RHS(:,:) = RHS(:,:) - mean
+
+    ! put the solution into the output array
+    outArray(1:product(pfft_inLen)) = reshape(RHS, (/product(pfft_inLen)/))
+
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 2d block tridiagonal (pdc2d) ------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
 
 
 ! Three Dimensional Solver
 #else
 
-    !! implement 2d transform + TDMA
-    !! implement 1d transform + BlkTri
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Solve 3d block pentadiagonal (pdc3d) -------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
+    ! ////// NOT YET IMPLEMENTED ///////// !
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 2d block pentadiagonal (pdc3d)-----------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
 
 #endif
 
@@ -159,7 +235,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
-!                         PERFORM INVERSE DIRECTION TRANSFORM                                     !  
+!                         PERFORM INVERSE DIRECTION TRANSPOSE                                     !  
 !                                                                                                 ! 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -169,11 +245,28 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
 ! Two Dimensional Solver
 #if NDIM == 2
 
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Solve 2d block tridiagonal (pdc2d) ---------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
+    ! ////// NOT YET IMPLEMENTED ///////// !
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 2d block tridiagonal (pdc2d) ------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
 ! Three Dimensional Solver
 #else
 
-    !! implement 2d transform + TDMA
-    !! implement 1d transform + BlkTri
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Solve 3d block pentadiagonal (pdc3d) -------------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
+
+    ! ////// NOT YET IMPLEMENTED ///////// !
+
+    ! --------------------------------------------------------------------------------------------------------!
+    ! Complete 2d block pentadiagonal (pdc3d)-----------------------------------------------------------------!
+    ! --------------------------------------------------------------------------------------------------------!
 
 #endif
 
