@@ -89,6 +89,8 @@ subroutine ins_rescaleVelout( blockCount, blockList, Qin, Qout)
 
   Qindout = Qin/Qout
 
+  if(Qindout .lt. eps) Qindout = 1.0
+
   if(ins_meshMe .eq. MASTER_PE) write(*,*) 'Qin/Qout=',Qindout
 
   ! Rescale Velocities from boundaries:

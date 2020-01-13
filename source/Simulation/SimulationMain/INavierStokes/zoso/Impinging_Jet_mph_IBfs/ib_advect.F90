@@ -64,10 +64,10 @@ subroutine ib_advect (blockCount,blockList,dt)
 
       real :: amp, omega, pi, offset, phase
 
-      amp = 0.5
-      omega = 0.1
+      amp = 0.1
+      omega = 0.2614
       pi = acos(-1.0)
-      offset = 0.5
+      offset = 0.1
       phase = pi
 
       max_lsit = 3
