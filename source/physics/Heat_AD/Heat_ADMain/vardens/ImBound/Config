@@ -1,1 +1,4 @@
 REQUIRES physics/ImBound/ImBoundMain/LevelSet
+
+VARIABLE tgst TYPE: GENERIC
+VARIABLE dprb TYPE: GENERIC
