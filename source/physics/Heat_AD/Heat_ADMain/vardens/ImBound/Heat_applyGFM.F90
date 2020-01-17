@@ -124,7 +124,7 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
  
   real :: thco3, thcoE, thcoP, thcoC
 
-  thco3 = 20*mph_thco2
+  thco3 = 2*mph_thco2
 
   do lb = 1,blockCount
 
@@ -298,18 +298,18 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            if(solnData(LMDA_VAR,i,j,k) .lt. 0.0) then
 
-                thcoC = mph_thco1
-                if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) thcoC = mph_thco2
+                thcoC = mph_thco1/mph_thco2
+                if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) thcoC = mph_thco2/mph_thco2
 
-                thcoP = thco3
+                thcoP = thco3/mph_thco2
 
 
            else
 
-                thcoC = thco3
+                thcoC = thco3/mph_thco2
          
-                thcoP = mph_thco1
-                if(solnData(DPRB_VAR,i,j,k) .lt. 0.0) thcoP = mph_thco2
+                thcoP = mph_thco1/mph_thco2
+                if(solnData(DPRB_VAR,i,j,k) .lt. 0.0) thcoP = mph_thco2/mph_thco2
 
 
            end if
