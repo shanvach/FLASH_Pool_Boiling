@@ -45,8 +45,8 @@
 
         rho3  = rho2 !(rho1 + rho2)/2
         vis3  = vis2 !(vis1 + vis2)/2
-        thco3 = 20*thco2
-        cp3   = 4*cp2
+        thco3 = thco2
+        cp3   = cp2
 
         crmx = -1E10
         crmn = 1E10

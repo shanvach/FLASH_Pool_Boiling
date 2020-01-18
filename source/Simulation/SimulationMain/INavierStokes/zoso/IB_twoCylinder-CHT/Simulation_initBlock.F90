@@ -141,7 +141,7 @@ subroutine Simulation_initBlock(blockId)
            zcell = 0.0
 
            solnData(DFUN_VAR,i,j,k) = -sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)+0.2
-           solnData(LMDO_VAR,i,j,k) =  sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)-2.0
+           solnData(LMDO_VAR,i,j,k) =  sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)-1.0
 
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
 
@@ -171,7 +171,8 @@ subroutine Simulation_initBlock(blockId)
 
 
            if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
-           solnData(TEMP_VAR,i,j,k) = sin((ycell/0.2)*(acos(-1.0)/2))
+           !solnData(TEMP_VAR,i,j,k) = sin((ycell/0.2)*(acos(-1.0)/2))
+           solnData(TEMP_VAR,i,j,k) = sin(atan2(ycell,xcell))
            end if
 
         enddo
