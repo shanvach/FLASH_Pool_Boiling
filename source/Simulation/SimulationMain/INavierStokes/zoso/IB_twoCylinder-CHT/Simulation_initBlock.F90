@@ -155,6 +155,30 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+     do j=1,blkLimitsGC(HIGH,JAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS) +   &
+                   0.5*del(IAXIS)
+
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+                   0.5*del(JAXIS)
+
+           zcell = 0.0
+
+
+           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
+           solnData(TEMP_VAR,i,j,k) = sin((ycell/0.2)*(acos(-1.0)/2))
+           end if
+
+        enddo
+     enddo
+  enddo
+
+
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
   do k=1,1
@@ -187,7 +211,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(VISC_VAR,:,:,:) = 0.0
   solnData(PFUN_VAR,:,:,:) = 0.0
 
-  facexData(VELC_FACE_VAR,:,:,:) = 1.0
+  facexData(VELC_FACE_VAR,:,:,:) = 0.0
   faceyData(VELC_FACE_VAR,:,:,:) = 0.0
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0

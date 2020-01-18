@@ -363,7 +363,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
 
     if(s(i,j,k) .ge. 0.0) then
 
-     T_rhs(i,j,k) = (1.0 - Tij)/dr_dt
+     T_rhs(i,j,k) = 0.0
 
     else
 

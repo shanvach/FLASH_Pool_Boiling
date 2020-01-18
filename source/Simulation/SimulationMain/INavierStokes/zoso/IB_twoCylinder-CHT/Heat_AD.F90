@@ -90,7 +90,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
         do j=1,blkLimitsGC(HIGH,JAXIS)
            do i=1,blkLimitsGC(HIGH,IAXIS)
 
-           solnData(TEMP_VAR,i,j,k) = 0.0
+           !solnData(TEMP_VAR,i,j,k) = 0.0
 
            !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
 
