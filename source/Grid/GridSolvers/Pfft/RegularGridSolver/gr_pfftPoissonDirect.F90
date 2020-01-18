@@ -77,7 +77,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   logical, save :: firstCall = .true.
   logical, dimension(3), save :: init
   real :: mean, meanAux
-
+  integer :: II, JJ, KK, GG
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
@@ -139,6 +139,11 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
     !write(*,*) 'ilf / iuf = ', ilf, '/', iuf, ' on process ', pfft_myPE
 
+    call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
+    call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
+    call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
+    write(*,*) "on process ", pfft_myPE, " i/j/k ", II, JJ, KK
+   
     ! prepare solver
     init(:) = .false.
 
@@ -153,7 +158,20 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! --------------------------------------------------------------------------------------------------------!
     ! Initialize 3d block pentadiagonal (pdc3d) --------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
+    call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
+    call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
+    call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
+    write(*,*) "on process ", pfft_myPE, " i/j/k   ", II, JJ, KK
 
+    call  MPI_COMM_SIZE(pfft_comm(IAXIS), II, ierr)
+    call  MPI_COMM_SIZE(pfft_comm(JAXIS), JJ, ierr)
+    call  MPI_COMM_SIZE(pfft_comm(KAXIS), KK, ierr)
+    call  MPI_COMM_SIZE(MPI_COMM_WORLD,   GG, ierr)
+    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " i/j/k/g ", II, JJ, KK,GG
+
+    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " in      ",pfft_inLen(IAXIS),  pfft_inLen(JAXIS),  pfft_inLen(KAXIS) 
+    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " mid     ",pfft_midLen(IAXIS), pfft_midLen(JAXIS), pfft_midLen(KAXIS) 
+    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " out     ",pfft_outLen(IAXIS), pfft_outLen(JAXIS), pfft_outLen(KAXIS) 
     ! ////// NOT YET IMPLEMENTED ///////// !
 
     ! --------------------------------------------------------------------------------------------------------!

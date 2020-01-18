@@ -186,13 +186,11 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
   use Driver_data, ONLY : dr_simTime, dr_dt
 
 #if NDIM == 2
-  use IncompNS_data, ONLY : ins_invsqrtRa_Pr,ins_convvel,ins_predcorrflg,&
-                            ins_alfa,uvel_x,vvel_x,wvel_x, &
+  use IncompNS_data, ONLY : ins_invRe,ins_convvel,ins_predcorrflg,ins_alfa,uvel_x,vvel_x,wvel_x, &
                             uvel_y,vvel_y,wvel_y,ins_outflowgridChanged,ins_intschm, &
                             ins_tlevel
 #elif NDIM == 3
-  use IncompNS_data, ONLY : ins_invsqrtRa_Pr,ins_convvel,ins_predcorrflg,&
-                            ins_alfa,uvel_x,vvel_x,wvel_x, &
+  use IncompNS_data, ONLY : ins_invRe,ins_convvel,ins_predcorrflg,ins_alfa,uvel_x,vvel_x,wvel_x, &
                             uvel_y,vvel_y,wvel_y,uvel_z,vvel_z,wvel_z, ins_outflowgridChanged,   &
                             ins_rhoa, ins_intschm, ins_tlevel
 #endif
@@ -449,7 +447,13 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  k = 2*guard+1   
                  if(ivar == VELC_FACE_VAR) then                               
                  do i = 1,guard
-                 regionData(i,1:je,1:ke,ivar)= 2. - regionData(k-i,1:je,1:ke,ivar)
+                   if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
+                       ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
+                       ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
+                     regionData(i,1:je,1:ke,ivar)= 0. - regionData(k-i,1:je,1:ke,ivar)
+                   else
+                     regionData(i,1:je,1:ke,ivar)= 2. - regionData(k-i,1:je,1:ke,ivar)
+                   endif
                  end do
                  endif
               endif
@@ -755,7 +759,13 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
                  if(ivar == VELC_FACE_VAR) then       
                  do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar)= 2. - regionData(i,1:je,1:ke,ivar)
+                   if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
+                       ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
+                       ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
+                     regionData(k-i,1:je,1:ke,ivar)= 0. - regionData(i,1:je,1:ke,ivar) 
+                   else
+                     regionData(k-i,1:je,1:ke,ivar)= 2. - regionData(i,1:je,1:ke,ivar)
+                   endif
                  end do
                  endif
               endif

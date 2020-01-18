@@ -54,7 +54,7 @@
        facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD), &
        facevarzz(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD+1)
 
-  real, dimension(NXB+1,NYB+1,NZB+1) :: tpu,tpv,tpw,tpp,tpt, &
+  real, dimension(NXB+1,NYB+1,NZB+1) :: tpu,tpv,tpw,tpp,tpt,tps,tpq,&
            tpdudxcorn, tpdudycorn, tpdudzcorn, &
            tpdvdxcorn, tpdvdycorn, tpdvdzcorn, &
            tpdwdxcorn, tpdwdycorn, tpdwdzcorn, &
@@ -131,7 +131,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                                      &
-             'x y z u v w p t'//NULLCHR,      &
+             'x y z u v w p t s q'//NULLCHR,      &
              filename//NULLCHR,                                     &
              './IOData/'//NULLCHR,                                  &
              Debug,VIsdouble)
@@ -226,6 +226,12 @@
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
                              solnData(TEMP_VAR,:,:,:),tpt)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+                             solnData(TEST_VAR,:,:,:),tpq)
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+                             solnData(SRCE_VAR,:,:,:),tps)
+
 
      ! Divergence: 
      ! ----------
@@ -354,6 +360,12 @@
       ! Write t:
       arraylb(:,:,:) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,:) = sngl(tps)
+      i = TecDat(ijk,arraylb,0)
+      arraylb(:,:,:) = sngl(tpq)
+      i = TecDat(ijk,arraylb,0)
+
 
       ! Write omgX:
       !arraylb(:,:,:) = sngl(vortx)
@@ -604,7 +616,7 @@
   real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD), &
        facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1)
 
-  real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
+  real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp,tps,tpq, &
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp, tpt ! tpt declared by Akash
@@ -684,7 +696,7 @@
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t s q'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -751,6 +763,12 @@
                             solnData(TEMP_VAR,:,:,1),tpt)
 
 
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(TEST_VAR,:,:,1),tpq)
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(SRCE_VAR,:,:,1),tps)
+
+
       ! Write Block Results into data file:
       call int2char(lb,index_lb)
 
@@ -791,6 +809,12 @@
       ! Write t: ! Akash
       arraylb(:,:,1) = sngl(tpt)
       i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tps)
+      i = TecDat(ijk,arraylb,0)
+      arraylb(:,:,1) = sngl(tpq)
+      i = TecDat(ijk,arraylb,0)
+
 
    enddo
 

@@ -274,7 +274,7 @@ subroutine Simulation_initBlock(blockId)
       solnData(DELP_VAR,:,:,:) = 0.0
       solnData(DUST_VAR,:,:,:) = 0.0
       solnData(TVIS_VAR,:,:,:) = 0.0
-      solnData(TEMP_VAR,:,:,:) = 1.0
+      solnData(TEMP_VAR,:,:,:) = 8.0
 
       facexData(VELC_FACE_VAR,:,:,:) = 0.0
       faceyData(VELC_FACE_VAR,:,:,:) = 1.0
@@ -283,6 +283,27 @@ subroutine Simulation_initBlock(blockId)
 
 #if NDIM == 3
       facezData(VELC_FACE_VAR,:,:,:) = 0.0
+      facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+#endif      
+
+
+
+    ! channel flow (front to back w/ T=0)
+    case (13)
+
+      solnData(PRES_VAR,:,:,:) = 0.0
+      solnData(DELP_VAR,:,:,:) = 0.0
+      solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(TVIS_VAR,:,:,:) = 0.0
+      solnData(TEMP_VAR,:,:,:) = 0.0
+
+      facexData(VELC_FACE_VAR,:,:,:) = 0.0
+      faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+      facexData(RHDS_FACE_VAR,:,:,:) = 0.0
+      faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
+
+#if NDIM == 3
+      facezData(VELC_FACE_VAR,:,:,:) = 1.0
       facezData(RHDS_FACE_VAR,:,:,:) = 0.0
 #endif      
 

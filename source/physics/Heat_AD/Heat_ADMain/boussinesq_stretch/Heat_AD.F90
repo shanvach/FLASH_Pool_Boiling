@@ -7,6 +7,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                              Grid_releaseBlkPtr,     &
                              Grid_fillGuardCells
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   use Grid_interface, only: Grid_getCellCoords, Grid_solvePoisson, GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
    implicit none
 #include "constants.h"
 #include "Heat_AD.h"
@@ -28,6 +32,16 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real, dimension(GRID_IHI_GC,3,blockCount) :: iMetrics
    real, dimension(GRID_JHI_GC,3,blockCount) :: jMetrics
    real, dimension(GRID_KHI_GC,3,blockCount) :: kMetrics
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   real, dimension(GRID_IHI_GC) :: xcell, xedge
+   real, dimension(GRID_JHI_GC) :: ycell, yedge
+   real, dimension(GRID_KHI_GC) :: zcell, zedge
+   real :: pi, fact
+   integer, dimension(6) :: bc_types 
+   real, dimension(2,6)  :: bc_values = 0.
+   integer :: i,j,k
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    do lb = 1,blockCount
 
@@ -99,4 +113,39 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   pi = 3.141592654
+   fact = 1.0
+   bc_types(:) = GRID_PDE_BND_NEUMANN
+
+   do lb = 1,blockCount
+
+     blockID = blockList(lb)
+
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     
+     call Grid_getCellCoords(IAXIS, blockId, CENTER, .true., xcell, GRID_IHI_GC)
+     call Grid_getCellCoords(JAXIS, blockId, CENTER, .true., ycell, GRID_JHI_GC)
+     call Grid_getCellCoords(KAXIS, blockId, CENTER, .true., zcell, GRID_KHI_GC)
+
+     call Grid_getCellCoords(IAXIS, blockId, LEFT_EDGE, .true., xedge, GRID_IHI_GC)
+     call Grid_getCellCoords(JAXIS, blockId, LEFT_EDGE, .true., yedge, GRID_JHI_GC)
+     call Grid_getCellCoords(KAXIS, blockId, LEFT_EDGE, .true., zedge, GRID_KHI_GC)
+
+     solnData(TEST_VAR,:,:,:) = 0.0
+     solnData(SRCE_VAR,:,:,:) = 0.0
+
+     do k=1, blkLimitsGC(HIGH,KAXIS)
+       do j=1, blkLimitsGC(HIGH,JAXIS)
+         do i=1, blkLimitsGC(HIGH,IAXIS)
+           solnData(SRCE_VAR,i,j,k) = -8.0 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
+         enddo
+       enddo
+     enddo
+
+     call Grid_solvePoisson(TEST_VAR, SRCE_VAR, bc_types, bc_values, fact)
+
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+   end do
 end subroutine Heat_AD

@@ -222,10 +222,46 @@ subroutine gr_createDomain()
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if(gr_iStr) then !stretched grid in x
-    
-     ! grid stretching in x axis not currently supported
-     print*,"Create Domain : invalid stretching axis "
-     call Driver_abortFlash("Create Domain : invalid stretching axis ")
+    select case (gr_iStrType)
+
+    case(SG_USER)
+
+      ! stretching method SG_USER not currently supported
+      print*,"Create Domain : invalid stretching method "
+      call Driver_abortFlash("Create Domain : invalid stretching method ")
+
+    case(SG_TANH)
+
+      ! calculate block cell IAXIS coordinates
+      ! start with a uniform distribution of points [0,1]
+      gr_delta(IAXIS) = 1.0/gr_gIndexSize(IAXIS)
+      halfDelta = gr_delta(IAXIS)/2.0
+      j = gr_blkCornerID(IAXIS)-gr_guard(IAXIS)-1
+
+      ! transform uniform to stretched using y(s) = Tanh((-1+2s) atan(a)) + 1 / 2a
+      do i = gr_iloGc,gr_ihiGc
+        gr_iCoords(LEFT_EDGE,i,1)  = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)          )*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+        gr_iCoords(CENTER,i,1)     = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)+halfDelta)*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+        j = j+1
+        gr_iCoords(RIGHT_EDGE,i,1) = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)          )*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+      end do
+
+      ! calculate global cell IAXIS coordinates
+      j = 0
+      do i = 1,gI
+        gr_iCoordsGlb(LEFT_EDGE,i,1)  = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)          )*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+        gr_iCoordsGlb(CENTER,i,1)     = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)+halfDelta)*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+        j = j+1
+        gr_iCoordsGlb(RIGHT_EDGE,i,1) = (gr_imax-gr_imin)*(tanh((-1.0+2.0*j*gr_delta(IAXIS)          )*atanh(gr_iStrPar))/gr_iStrPar+1.0)/2.0+gr_imin
+      end do
+
+    case default
+
+      ! stretching method unknown
+      print*,"Create Domain : invalid stretching method "
+      call Driver_abortFlash("Create Domain : invalid stretching method ")
+
+    end select
 
   else ! uniform grid
 
