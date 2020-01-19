@@ -65,8 +65,6 @@ VARIABLE delp            	# pressure correction
 VARIABLE dust                  	# divergence of ustar, poissons equation source term
 VARIABLE tvis               	# turbulent viscosity
 VARIABLE omgm                   # Vorticity module
-VARIABLE test			#test for poisson solver
-VARIABLE srce			#test for poisson solver
 
 # Fluxes
 FLUX velc

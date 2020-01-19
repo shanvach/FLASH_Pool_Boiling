@@ -137,7 +137,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     allocate(dw(ldw), iw(liw))
 
     call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
-    !write(*,*) 'ilf / iuf = ', ilf, '/', iuf, ' on process ', pfft_myPE
+    write(*,*) 'ilf / iuf = ', ilf, '/', iuf, ' on process ', pfft_myPE
 
     call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
     call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
@@ -167,12 +167,31 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     call  MPI_COMM_SIZE(pfft_comm(JAXIS), JJ, ierr)
     call  MPI_COMM_SIZE(pfft_comm(KAXIS), KK, ierr)
     call  MPI_COMM_SIZE(MPI_COMM_WORLD,   GG, ierr)
-    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " i/j/k/g ", II, JJ, KK,GG
+    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " i/j/k/g ", II, JJ, KK,GG
 
-    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " in      ",pfft_inLen(IAXIS),  pfft_inLen(JAXIS),  pfft_inLen(KAXIS) 
-    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " mid     ",pfft_midLen(IAXIS), pfft_midLen(JAXIS), pfft_midLen(KAXIS) 
-    if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " out     ",pfft_outLen(IAXIS), pfft_outLen(JAXIS), pfft_outLen(KAXIS) 
+    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " in      ",pfft_inLen(IAXIS),  pfft_inLen(JAXIS),  pfft_inLen(KAXIS) 
+    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " mid     ",pfft_midLen(IAXIS), pfft_midLen(JAXIS), pfft_midLen(KAXIS) 
+    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " out     ",pfft_outLen(IAXIS), pfft_outLen(JAXIS), pfft_outLen(KAXIS) 
     ! ////// NOT YET IMPLEMENTED ///////// !
+
+
+    call gr_pfftGetLocalLimitsAnytime(IAXIS, IAXIS, 1, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(JAXIS, JAXIS, 2, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    write(*,*) "on process -in", pfft_myPE, pfftBlkLimits
+
+    call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    write(*,*) "on process -mid", pfft_myPE, pfftBlkLimits
+
+    call gr_pfftGetLocalLimitsAnytime(IAXIS, KAXIS, 1, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, 3, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    write(*,*) "on process -out", pfft_myPE, pfftBlkLimits
+
+
+
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 3d block pentadiagonal (pdc3d) ----------------------------------------------------------------!
@@ -210,7 +229,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! lets work with the data as a 2d array {x,y} vice a 1d vector {x*y}
     allocate(RHS(pfft_inLen(IAXIS), pfft_inLen(JAXIS)))
     RHS = reshape(inArray, pfft_inLen(1:2))
-    !write(*,*) 'pfft_inLen = ', pfft_inLen(IAXIS), '/', pfft_inLen(JAXIS), ' on process ', pfft_myPE
+    write(*,*) 'pfft_inLen = ', pfft_inLen(IAXIS), '/', pfft_inLen(JAXIS), ' on process ', pfft_myPE
 
     ! create solution array
     do J=1, pfft_inLen(JAXIS)
@@ -221,7 +240,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
 
     ! remove mean from zeroth wave component 
-    mean = sum(RHS) / (M * N)
+    meanAux = sum(RHS) / (M * N)
+    call MPI_ALLreduce(meanAux, mean, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)
     RHS(:,:) = RHS(:,:) - mean
 
     ! put the solution into the output array
