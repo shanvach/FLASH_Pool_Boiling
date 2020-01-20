@@ -1,9 +1,26 @@
 # Uniform Grid Binaries
---advanced --compile 4 --block_xyz 24 --dimension 2 --grid ug 
---advanced --compile 4 --block_xyz 32 --dimension 2 --grid ug 
---advanced --compile 4 --overwrite --block_xyz 50 --dimension 2 --grid ug 
+#--advanced --compile 4 --block_xyz 24 --dimension 2 --grid ug 
+#--advanced --compile 4 --block_xyz 32 --dimension 2 --grid ug 
+#--advanced --compile 4 --overwrite --block_xyz 50 --dimension 2 --grid ug 
 
 # Regular Grid Binaries
+# 2d simulations
+--advanced --compile 4 --block_xyz 12 --dimension 2 --grid rg 
 --advanced --compile 4 --block_xyz 24 --dimension 2 --grid rg 
---advanced --compile 4 --block_xyz 32 --dimension 2 --grid rg 
---advanced --compile 4 --block_xyz 50 --dimension 2 --grid rg 
+--advanced --compile 4 --block_xyz 48 --dimension 2 --grid rg 
+
+# 3d simulations
+# 2x2x1 => 128 points w/ 4 cores	-- 524,288 ppb
+--advanced --compile 4 --block_x 64 --block_y 64 --block_z 128 --dimension 3 --grid rg 
+
+# 4x4x1 => 256 points w/ 16 cores	-- 1,048,476 ppb
+--advanced --compile 4 --block_x 64 --block_y 64 --block_z 256 --dimension 3 --grid rg 
+
+# 4x4x2 => 384 points w/ 32 cores	-- 1,769,472 ppb
+--advanced --compile 4 --block_x 96 --block_y 96 --block_z 192 --dimension 3 --grid rg 
+
+# 4x4x3 => 512 points w/ 48 cores	-- 2,785,280 ppb
+--advanced --compile 4 --block_x 128 --block_y 128 --block_z 170 --dimension 3 --grid rg 
+
+# 5x5x2 => 600 points w/ 50 cores	-- 4,320,000 ppb
+--advanced --compile 4 --block_x 120 --block_y 120 --block_z 300 --dimension 3 --grid rg 
