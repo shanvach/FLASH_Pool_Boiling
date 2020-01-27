@@ -1,14 +1,18 @@
-subroutine gr_pfftTriDiag (lower, main, upper, rhs, x, length)
+subroutine gr_pfftTriDiag (lower, main, upper, rhs, x, length, ierr)
 
   implicit none
 
   real, dimension(length), intent(in)  :: lower, main, upper, rhs
   real, dimension(length), intent(out) :: x
   integer, intent(in)     :: length
+  integer, intent(out)    :: ierr
   real, dimension(length) :: work
-  real    :: const
+  real :: const
+  real, parameter :: eps = 1.0e-16
   integer :: i
 
+  ! is the matrix singular
+  ierr = 0
 
   ! forward elimination
   const = main(1)
@@ -16,6 +20,13 @@ subroutine gr_pfftTriDiag (lower, main, upper, rhs, x, length)
   do i = 2, length
     work(i) = upper(i-1) / const
     const = main(i) - lower(i) * work(i)
+
+    ! if singular prevent div-by-zero
+    if (const == 0.0 ) then
+      const = const + eps
+      ierr = 1
+    endif
+
     x(i) = (rhs(i) - lower(i) * x(i-1)) / const
   end do
 

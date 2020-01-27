@@ -70,8 +70,7 @@ FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 FFLAGS_TEST =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
 -ffree-line-length-none \
 -ffpe-trap=invalid,zero,overflow -fbounds-check \
--fbacktrace -fdump-core 
--finit-real=nan \
+-fbacktrace -fdump-core -finit-real=nan \
 -finit-integer=-999999 -fimplicit-none
 
 F90FLAGS =

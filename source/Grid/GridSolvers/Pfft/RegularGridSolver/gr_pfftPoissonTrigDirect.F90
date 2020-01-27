@@ -64,7 +64,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
   real, dimension(inSize), intent(IN)  :: inArray
   real, dimension(inSize), intent(OUT) :: outArray
 
-  integer :: numVec, ierr
+  integer :: numVec, ierr, error, errorAux
   integer :: I, IL, J, JL, K, KL, ML, L, LL, M, N, NL, size
   integer, save :: ldw, liw, ilf, iuf
   integer, dimension(2,MDIM) :: pfftBlkLimits
@@ -80,7 +80,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
   logical, save :: firstCall = .true.
   logical, dimension(3), save :: init
   real :: mean, meanAux
-  integer :: II, JJ, KK
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
@@ -322,8 +321,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
     allocate(dw(ldw), iw(liw))
 
-    call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
-    !write(*,*) "on process ", pfft_myPE, " ilf/iuf", ilf," ", iuf," span", pfft_midLen(JAXIS), "size", size    
+    !call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
+    call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
 
     ! prepare solver
     init(:) = .false.
@@ -387,6 +386,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
 
     ! for each x-direction wave number lets solve the tridiagonal system in y
+    errorAux = 0
     LL = pfft_midLen(JAXIS)
     do JL = 1, LL
 
@@ -395,23 +395,23 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       if (J-1 > pfftBlkLimits(HIGH,JAXIS)) cycle
 
       ! center diagonal and rhs for a specific wave number in x-direction
-      !                               (+ tridiag modifies upper diagonal)
-      BML(1:M) = BM(1:M) - AK(J/2+1)
+      select case (transformType(IAXIS))
+      case (PFFT_COS_CC, PFFT_SIN_CC)
+        BML(1:M) = BM(1:M) - AK(J)
+      case (PFFT_REAL)
+        BML(1:M) = BM(1:M) - AK(J/2+1)
+      end select
       RHS(:) = temp2DArray(:,JL)
       X(:) = 0.
-              
+
       ! solve the system
       if (transformType(JAXIS) == PFFT_COS_CC .or. transformType(JAXIS) == PFFT_SIN_CC) then
-        call gr_pfftTriDiag(AM, BML, CM, RHS, X, M)     
+        call gr_pfftTriDiag(AM, BML, CM, RHS, X, M, ierr)     
       else 
         call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M)
       endif
-     
-      ! remove mean from zeroth wave component 
-      if (J == 1) then
-        mean = sum(X) / M      
-        X(:) = X(:) - mean
-      endif     
+ 
+      errorAux = errorAux + ierr   
  
       ! store the solution
       temp2DArray(:,JL) = X(:)
@@ -423,6 +423,10 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
     deallocate(temp2DArray)
     deallocate(BML, RHS, X)    
+
+    ! identify if there was a need to prevent a div-by-zero floating point error
+    call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
+    if (error >= 1) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 1d transform and 1d tridiagonal ---------------------------------------------------------------!
@@ -473,6 +477,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, 3, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
       
       ! for each y-direction wave number 
+      errorAux = 0
       NL = pfft_outLen(KAXIS)
       do JL = 1, NL
 
@@ -510,10 +515,12 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
           ! solve the system
           if (transformType(KAXIS) == PFFT_COS_CC .or. transformType(KAXIS) == PFFT_SIN_CC) then
-            call gr_pfftTriDiag(AM, BMM, CM, RHS, X, M)
+            call gr_pfftTriDiag(AM, BMM, CM, RHS, X, M, ierr)
           else
             call gr_pfftCyclicTriDiag(AM, BMM, CM, CM(M), AM(1), RHS, X, M)
           endif
+
+          errorAux = errorAux + ierr   
 
           ! store the solution
           temp3DArray(:,IL,JL) = X(:)
@@ -525,6 +532,10 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       pfft_work2(1:product(pfft_outLen)) = reshape(temp3DArray, (/product(pfft_outLen)/))
       deallocate(temp3DArray)
       deallocate(BMM, BML, RHS, X)
+
+      ! identify if there was a need to prevent a div-by-zero floating point error
+      call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
+      if (error >= 1) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 2d transform and 1d tridiagonal  --------------------------------------------------------------!
@@ -564,15 +575,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       allocate(temp2DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS)))
       temp2DArray(:,:) = 0.0 
 
-    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " in      ",pfft_inLen(IAXIS),  pfft_inLen(JAXIS),  pfft_inLen(KAXIS)
-    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " mid     ",pfft_midLen(IAXIS), pfft_midLen(JAXIS), pfft_midLen(KAXIS)
-    !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " out     ",pfft_outLen(IAXIS), pfft_outLen(JAXIS), pfft_outLen(KAXIS)
-    !call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
-    !call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
-    !call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
-    !write(*,*) "on process ", pfft_myPE, " i/j/k   ", II, JJ, KK, "shape of 3dA", shape(temp3DArray), temp3DArray(1,1,1)
-
-
       ! for each x-direction wave number lets solve the block tridiagonal system in {y,z}
       LL = pfft_midLen(KAXIS)
       do JL = 1, LL
@@ -589,16 +591,14 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
           ch = AK(J/2+1) 
         end select
 
-        !if(pfft_myPE == 3) write(*,*) JL, J, ch
-        !if(JL == 1) write(*,*) "on process ", pfft_myPE, ch
-        
         ! create solution array
         do K=1, pfft_midLen(JAXIS)
           temp2DArray(:,K) = -(1.0/gr_jMetricsGlb(CENTER,1:N,1))*(1.0/gr_kMetricsGlb(CENTER,ilf+K-1,1))*temp3DArray(:,K,JL)
         end do
 
         ! solve the system
-        call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
+        !call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
+        call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
 
         ! store the solution
         temp3DArray(:,:,JL) = temp2DArray(:,:)
@@ -640,6 +640,10 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! Solve 1d transform and 1d tridiagonal ------------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
 
+    ! dimensions
+    L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
+    M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
+
     ! number of parallel transforms of x-direction
     numVec = pfft_inLen(JAXIS)
 
@@ -650,6 +654,19 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! inverse transform the x-direction
     call gr_pfftDcftInverse(pfft_work1, outArray, pfft_trigIaxis, pfft_globalLen(IAXIS), &
                             pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), 1.0)
+
+    ! lets work with the data as a 2d array {y,x} vice a 1d vector {y*x}
+    allocate(temp2DArray(pfft_inLen(IAXIS), pfft_inLen(JAXIS)))
+    temp2DArray = reshape(outArray, pfft_inLen(1:2))
+      
+    ! calculate mean from zeroth wave component 
+    meanAux = sum(temp2DArray) / (L * M)
+    call MPI_ALLreduce(meanAux, mean, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)
+      
+    ! remove mean from zeroth wave component 
+    temp2DArray(:,:) = temp2DArray(:,:) - mean
+    outArray(1:product(pfft_inLen)) = reshape(temp2DArray, (/product(pfft_inLen)/))
+    deallocate(temp2DArray)
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 1d transform and 1d tridiagonal ---------------------------------------------------------------!
@@ -726,8 +743,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     allocate(temp3DArray(pfft_inLen(IAXIS), pfft_inLen(JAXIS), pfft_inLen(KAXIS)))
     temp3DArray = reshape(pfft_work1, pfft_inLen)
 
-    
-
     ! calculate mean from zeroth wave component 
     meanAux = sum(temp3DArray(1,:,:)) / (M * N)
     call MPI_ALLreduce(meanAux, mean, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)
@@ -737,9 +752,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     pfft_work1(1:product(pfft_inLen)) = reshape(temp3DArray, (/product(pfft_inLen)/))
     deallocate(temp3DArray)
     
-    !write(*,*) "meanAux on", pfft_myPE, " is", meanAux     
-    !write(*,*) "mean on", pfft_myPE, " is", mean     
-
     ! inverse transform the x-direction
     call gr_pfftDcftInverse(pfft_work1, outArray, pfft_trigIaxis, pfft_globalLen(IAXIS), &
                             pfft_inLen(IAXIS), numVec, pfft_transformType(IAXIS), 1.0)

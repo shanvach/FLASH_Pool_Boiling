@@ -1,6 +1,6 @@
 c************************************************************************
 c
-c Subroutine: pdc2d
+c Subroutine: pdc2dn
 c
 c Purpose:
 c   A fast direct method for solving the block tridiagonal
@@ -17,8 +17,14 @@ c   The notation "(x)" denotes the tensor product of the matrices,
 c   that is, A(x)B = {a_ij*B}.
 c   A1 and A2 are symmetric tridiagonal matrices of dimension
 c   n1 and n2, respectively. M1 and M2 are diagonal matrices of the
-c   same dimension. Restriction: the matrix M1 must be positive
-c   definite and the matrix A must be nonsingular.
+c   same dimension.
+c
+c   Restrictions: the matrix M1 must be positive definite.
+c   In the case that A is singular, the parameter ch must be zero
+c   and the kernel of A must be spanned by a vector having all
+c   components equal. In this case, the solution u is f multiplied
+c   by a generalized inverse of A which usually is not equal to
+c   the pseudo-inverse (Moore-Penrose inverse) of A.
 c
 c   The above system can be written in a block form
 c
@@ -175,12 +181,15 @@ c
 c Copyright: Tuomo Rossi and Jari Toivanen, 2009
 c
 c************************************************************************
-      subroutine pdc2d(n1,n2,f,ldf,ilf,iuf,a1,b1,d1,a2,b2,d2,ch,
-     &                 dw,ldw,iw,liw,inicom,init,ierr)
+      subroutine pdc2dn(n1,n2,f,ldf,ilf,iuf,a1,b1,d1,a2,b2,d2,ch,
+     &                  dw,ldw,iw,liw,inicom,init,ierr)
       integer n1, n2, ldf, ilf, iuf, ldw, liw, iw(liw), inicom, ierr
       double precision f(ldf*n1), a1(n1), b1(n1), d1(n1)
       double precision a2(n2), b2(n2), d2(n2), ch, dw(ldw)
       logical init(3)
+c
+      double precision eps
+      parameter (eps = 1.d-12)
 c
       integer icomm, ieig, iwev, iv1, iv3, ivr, ig, ir, ix, itri
       integer ip4, iiwev, isplit
@@ -309,6 +318,12 @@ c
      &                        d1(ilb+1),dw(iep),dw(iwev),iw(iiwev),
      &                        rank,np,size,ierr)
                   if (ierr.ne.0) return
+c
+c Setting the smallest eigenvalue to be exactly zero
+c if it's less than eps times largest eigenvalue and ch is zero
+c
+                  if (level.eq.1.and.ch.eq.0.d0.and.
+     &                dw(iep).lt.eps*dw(iep+6*(ilen-1))) dw(iep) = 0.d0
                   call eigvec(ilen,ife,ile,a1(ilb+1),b1(ilb+1),
      &                        d1(ilb+1),dw(iep),iw(isp),dw(iwev),
      &                        iw(iiwev),ierr)
@@ -869,6 +884,9 @@ c
       integer n
       double precision a(n), b(n), s, c(n), x(n), w(n)
 c
+      double precision eps
+      parameter (eps = 1.d-12)
+c
       integer i
       double precision d, ai, an, xp, wp
 c
@@ -888,13 +906,34 @@ c
          wp = an*d
          w(i) = wp
       end do
-      d = -1.d0/(b(n) + s*c(n) + an*wp)
-      xp = (an*xp - x(n))*d
-      x(n) = xp
-      do i=n-1,1,-1
-         xp = x(i) + w(i)*xp
-         x(i) = xp
-      end do
+      d = b(n) + s*c(n) + an*wp
+      if (abs(d).ge.eps*abs(b(n) + s*c(n))) then
+         xp = (x(n) - an*xp)/d
+         x(n) = xp
+         do i=n-1,1,-1
+            xp = x(i) + w(i)*xp
+            x(i) = xp
+         end do
+      else
+c
+c Singular linear system
+c
+         xp = 0.d0
+         x(n) = xp
+         d = 0.d0
+         do i=n-1,1,-1
+            xp = x(i) + w(i)*xp
+            x(i) = xp
+            d = d + xp
+         end do
+c
+c Normalizing the average to be zero
+c
+c         d = d/n
+c         do i=1,n
+c            x(i) = x(i) - d
+c         end do
+      end if
 c
       return
       end
@@ -1292,3 +1331,4 @@ c
 c
       return
       end
+

@@ -77,7 +77,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   logical, save :: firstCall = .true.
   logical, dimension(3), save :: init
   real :: mean, meanAux
-  integer :: II, JJ, KK, GG
+  !integer :: I, II, JJ, KK, GG
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                                                 !
@@ -136,14 +136,9 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
     allocate(dw(ldw), iw(liw))
 
-    call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
-    write(*,*) 'ilf / iuf = ', ilf, '/', iuf, ' on process ', pfft_myPE
+    !call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+    call pdc2dn(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
 
-    call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
-    call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
-    call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
-    write(*,*) "on process ", pfft_myPE, " i/j/k ", II, JJ, KK
-   
     ! prepare solver
     init(:) = .false.
 
@@ -158,15 +153,15 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! --------------------------------------------------------------------------------------------------------!
     ! Initialize 3d block pentadiagonal (pdc3d) --------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
-    call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
-    call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
-    call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
-    write(*,*) "on process ", pfft_myPE, " i/j/k   ", II, JJ, KK
+    !call  MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
+    !call  MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
+    !call  MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
+    !write(*,*) "on process ", pfft_myPE, " i/j/k   ", II, JJ, KK
 
-    call  MPI_COMM_SIZE(pfft_comm(IAXIS), II, ierr)
-    call  MPI_COMM_SIZE(pfft_comm(JAXIS), JJ, ierr)
-    call  MPI_COMM_SIZE(pfft_comm(KAXIS), KK, ierr)
-    call  MPI_COMM_SIZE(MPI_COMM_WORLD,   GG, ierr)
+    !call  MPI_COMM_SIZE(pfft_comm(IAXIS), II, ierr)
+    !call  MPI_COMM_SIZE(pfft_comm(JAXIS), JJ, ierr)
+    !call  MPI_COMM_SIZE(pfft_comm(KAXIS), KK, ierr)
+    !call  MPI_COMM_SIZE(MPI_COMM_WORLD,   GG, ierr)
     !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " i/j/k/g ", II, JJ, KK,GG
 
     !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, " in      ",pfft_inLen(IAXIS),  pfft_inLen(JAXIS),  pfft_inLen(KAXIS) 
@@ -175,20 +170,20 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! ////// NOT YET IMPLEMENTED ///////// !
 
 
-    call gr_pfftGetLocalLimitsAnytime(IAXIS, IAXIS, 1, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(JAXIS, JAXIS, 2, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    write(*,*) "on process -in", pfft_myPE, pfftBlkLimits
+    !call gr_pfftGetLocalLimitsAnytime(IAXIS, IAXIS, 1, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(JAXIS, JAXIS, 2, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_inLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !write(*,*) "on process -in", pfft_myPE, pfftBlkLimits
 
-    call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    write(*,*) "on process -mid", pfft_myPE, pfftBlkLimits
+    !call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !write(*,*) "on process -mid", pfft_myPE, pfftBlkLimits
 
-    call gr_pfftGetLocalLimitsAnytime(IAXIS, KAXIS, 1, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, 3, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    write(*,*) "on process -out", pfft_myPE, pfftBlkLimits
+    !call gr_pfftGetLocalLimitsAnytime(IAXIS, KAXIS, 1, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, 3, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    !write(*,*) "on process -out", pfft_myPE, pfftBlkLimits
 
 
 
@@ -229,7 +224,6 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! lets work with the data as a 2d array {x,y} vice a 1d vector {x*y}
     allocate(RHS(pfft_inLen(IAXIS), pfft_inLen(JAXIS)))
     RHS = reshape(inArray, pfft_inLen(1:2))
-    write(*,*) 'pfft_inLen = ', pfft_inLen(IAXIS), '/', pfft_inLen(JAXIS), ' on process ', pfft_myPE
 
     ! create solution array
     do J=1, pfft_inLen(JAXIS)
@@ -237,7 +231,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     end do
     
     ! solve the system
-    call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+    !call pdc2d(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+    call pdc2dn(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
 
     ! remove mean from zeroth wave component 
     meanAux = sum(RHS) / (M * N)

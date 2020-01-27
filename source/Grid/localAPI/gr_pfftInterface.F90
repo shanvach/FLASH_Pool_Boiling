@@ -245,10 +245,11 @@ module gr_pfftinterface
   end interface
 
   interface
-    subroutine gr_pfftTridiag (lower, main, upper, rhs, x, length)
+    subroutine gr_pfftTridiag (lower, main, upper, rhs, x, length, ierr)
       real, dimension(length), intent(in)  :: lower, main, upper, rhs
       real, dimension(length), intent(out) :: x
       integer, intent(in) :: length
+      integer, intent(out) :: ierr
     end subroutine gr_pfftTriDiag
   end interface
 
