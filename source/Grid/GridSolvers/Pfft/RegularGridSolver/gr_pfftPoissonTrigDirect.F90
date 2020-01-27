@@ -321,7 +321,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
     allocate(dw(ldw), iw(liw))
 
-    !call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
     call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
 
     ! prepare solver
@@ -426,7 +425,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
     ! identify if there was a need to prevent a div-by-zero floating point error
     call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
-    if (error >= 1) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
+    if (error >= 1 .and. pfft_myPE == 0) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 1d transform and 1d tridiagonal ---------------------------------------------------------------!
@@ -597,7 +596,6 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
         end do
 
         ! solve the system
-        !call pdc2d(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
         call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
 
         ! store the solution
