@@ -49,6 +49,7 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
   real, dimension(:,:,:,:), pointer :: solnData
   real, dimension(GRID_IHI_GC) :: dx
   real, dimension(GRID_JHI_GC) :: dy
+  real, dimension(GRID_KHI_GC) :: dz
 !!==============================================================================
 
   mean = 0.0
@@ -75,12 +76,30 @@ subroutine gr_findMean(iSrc, iType, bGuardcell, mean)
      call Grid_getCellMetrics(IAXIS, lb, CENTER, .true., dx, GRID_IHI_GC)
      call Grid_getCellMetrics(JAXIS, lb, CENTER, .true., dy, GRID_JHI_GC) 
 
+#if NDIM == 3
+     kli = blkLimits(LOW,KAXIS)
+     kui = blkLimits(HIGH,KAXIS)
+
+     call Grid_getCellMetrics(KAXIS, lb, CENTER, .true., dz, GRID_KHI_GC)
+#endif
+
+#if NDIM == 2
      do j = jli, jui
        do i = ili, iui
          blockSum = blockSum + solnData(iSrc,i,j,1) / ( dx(i) * dy(j) )
          blockVolume = blockVolume + 1 / (dx(i) * dy(j))
        enddo
      enddo
+#else
+     do k = kli, kui
+       do j = jli, jui
+         do i = ili, iui
+           blockSum = blockSum + solnData(iSrc,i,j,k) / ( dx(i) * dy(j) * dz(k) )
+           blockVolume = blockVolume + 1 / ( dx(i) * dy(j) * dz(k) )
+         end do
+       enddo
+     enddo
+#endif
 
      localSum = localSum + blockSum 
      localVolume = localVolume + blockVolume

@@ -105,7 +105,7 @@
   nyc = NYB + NGUARD + 1
   nzc = NZB + NGUARD + 1
 
-  write(*,*) "Write 3D Tecplot Data"
+  ! write(*,*) "Write 3D Tecplot Data"
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &
         count, mype
@@ -472,7 +472,7 @@
   nxc = NXB + NGUARD + 1
   nyc = NYB + NGUARD + 1
 
-  write(*,*) "Write 2D TecPlot Data"
+  ! write(*,*) "Write 2D TecPlot Data"
   ! write solution data to data.XXXX.XX
   !write(filename,'("./IOData/data.",i4.4,".",i2.2,".plt")') &
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') &

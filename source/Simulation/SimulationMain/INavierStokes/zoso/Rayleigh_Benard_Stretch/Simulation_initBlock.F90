@@ -123,11 +123,9 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*dz(k) + 0.5*dz(k)
-!            if (zcell >= 0.5) then
-!              solnData(TEMP_VAR,i,j,k) = 0.0
-!            endif
+            if (zcell(k) >= 0.5) then
+              solnData(TEMP_VAR,i,j,k) = 0.0
+            endif
           enddo
         enddo
       enddo
@@ -137,11 +135,9 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            if (ycell >= 0.5) then
-!              solnData(TEMP_VAR,i,j,k) = 0.0
-!            endif
+            if (ycell(j) >= 0.5) then
+              solnData(TEMP_VAR,i,j,k) = 0.0
+            endif
           enddo
         enddo
       enddo
