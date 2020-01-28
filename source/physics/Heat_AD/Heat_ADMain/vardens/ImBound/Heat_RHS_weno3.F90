@@ -93,25 +93,29 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
      !______________________IB Terms_______________________!
 
      ! Case 1 !
-     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) &
+     if((lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i+1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Tx_plus = T_g(i+1,j,k)
      ! End of Case 1 !
 
      ! Case 2 !
-     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) &
+     if((lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i-1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Tx_mins = T_g(i-1,j,k)
      ! End of Case 2 !
 
      ! Case 3 !
-     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) &
+     if((lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j+1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Ty_plus = T_g(i,j+1,k)
      ! End of Case 3 !
 
      ! Case 4 !
-     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) &
+     if((lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j-1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Ty_mins = T_g(i,j-1,k)
-     ! End of Case 4 ! 
-    
+     ! End of Case 4 !
+
      !______________________Advection Terms_______________________!
 
      !----------------- WENO3 X-Direction ------------!
