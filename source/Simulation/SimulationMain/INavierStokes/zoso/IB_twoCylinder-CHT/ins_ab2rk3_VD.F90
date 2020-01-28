@@ -516,7 +516,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      end if
 
      ! ML - GFM for velocity jump condition
-     call ins_rhs2d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs2d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -686,6 +686,9 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+     facexData(VELC_FACE_VAR,:,:,:) = facexData(VELC_FACE_VAR,:,:,:) + dt*facexData(VFRC_FACE_VAR,:,:,:)
+     faceyData(VELC_FACE_VAR,:,:,:) = faceyData(VELC_FACE_VAR,:,:,:) + dt*faceyData(VFRC_FACE_VAR,:,:,:)
 
 #if NDIM ==3
      !call Grid_getBlkPtr(blockID,facezData,FACEZ)

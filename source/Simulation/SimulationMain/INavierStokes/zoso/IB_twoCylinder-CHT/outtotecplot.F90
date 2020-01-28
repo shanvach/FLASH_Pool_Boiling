@@ -270,7 +270,7 @@
                             solnData(DFUN_VAR,:,:,1),tpdfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(LMDO_VAR,:,:,1),tppfun)
+                            solnData(DPRB_VAR,:,:,1),tppfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(TEMP_VAR,:,:,1),tsigp)

@@ -46,6 +46,11 @@ VARIABLE aaJunk  # kpd  for IfactorB
 VARIABLE preo    # Shizhao for fsi
 FACEVAR  velo
 
+FACEVAR  vfrc
+
+VARIABLE  tfrx
+VARIABLE  tfry
+
 PARAMETER quadrant       BOOLEAN  FALSE
 
 PARAMETER waveA          REAL  0.0

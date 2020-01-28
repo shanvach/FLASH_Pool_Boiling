@@ -36,7 +36,7 @@ subroutine Simulation_initBlock(blockId)
                               sim_gCell, sim_waveA, &
                               sim_nuc_site_x, sim_nuc_site_y,&
                               sim_nuc_site_z, sim_nuc_radii,&
-                              sim_nucSiteDens, sim_Tbulk
+                              sim_nucSiteDens, sim_Tbulk, sim_invRe
 
   use Grid_interface, ONLY : Grid_getDeltas,         &
                              Grid_getBlkIndexLimits, &
@@ -85,7 +85,7 @@ subroutine Simulation_initBlock(blockId)
   real :: th_radii
   real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
 
-  real :: xdrop, ydrop, xbubble, ybubble, dfunbub
+  real :: xdrop, ydrop, xbubble, ybubble, dfunbub, rtest
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -170,15 +170,72 @@ subroutine Simulation_initBlock(blockId)
            zcell = 0.0
 
 
-           if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
-           !solnData(TEMP_VAR,i,j,k) = sin((ycell/0.2)*(acos(-1.0)/2))
-           solnData(TEMP_VAR,i,j,k) = sin(atan2(ycell,xcell))
-           end if
+           solnData(TEMP_VAR,i,j,k) = 0.0
+
+           !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) then
+           !!solnData(TEMP_VAR,i,j,k) = sin(atan2(ycell,xcell))
+           !solnData(TEMP_VAR,i,j,k) = 1.0        
+           !end if
+                
+           solnData(TFRX_VAR,i,j,k) = 0.0
+           solnData(TFRY_VAR,i,j,k) = 0.0
+
+           rtest = sqrt(xcell**2 + ycell**2)
+           if(rtest .ge. 0.5 .and. rtest .le. 1.0) then
+           solnData(TFRX_VAR,i,j,k) = -1.0*-sin(atan2(ycell,xcell))
+           solnData(TFRY_VAR,i,j,k) = -1.0*cos(atan2(ycell,xcell))
+           endif
 
         enddo
      enddo
   enddo
 
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+     do j=1,blkLimitsGC(HIGH,JAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)+1
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS)
+
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+                   0.5*del(JAXIS)
+
+           zcell = 0.0
+
+
+          rtest = sqrt(xcell**2 + ycell**2)
+          facexData(VFRC_FACE_VAR,i,j,k) = 0.0
+
+          if(rtest .ge. 0.5 .and. rtest .le. 1.0) &
+          facexData(VFRC_FACE_VAR,i,j,k) = 1.0*-sin(atan2(ycell,xcell))
+
+        enddo
+     enddo
+  enddo
+
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+     do j=1,blkLimitsGC(HIGH,JAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)+1
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS) +   &
+                   0.5*del(IAXIS)
+
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)
+
+           zcell = 0.0
+
+          rtest = sqrt(xcell**2 + ycell**2)
+          faceyData(VFRC_FACE_VAR,i,j,k) = 0.0
+
+          if(rtest .ge. 0.5 .and. rtest .le. 1.0) &
+          faceyData(VFRC_FACE_VAR,i,j,k) = 1.0*cos(atan2(ycell,xcell))
+
+        enddo
+     enddo
+  enddo
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

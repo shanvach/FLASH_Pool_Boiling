@@ -180,7 +180,7 @@ subroutine ib_lset(blockCount,blockList,dt)
 
            zcell  = 0.0 
 
-           do ibd=1,1 !gr_sbNumBodies ! Loop through bodies
+           do ibd=1,gr_sbNumBodies ! Loop through bodies
 
                countit = 0         ! Counter to check no. of intersections with 
                                    ! the body
@@ -287,9 +287,9 @@ subroutine ib_lset(blockCount,blockList,dt)
           else
 
                if(mod(countit,2) == 0) then
-                  solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),-mvd)
-               else
                   solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),mvd)
+               else
+                  solnData(LMDA_VAR,i,j,k) = max(solnData(LMDA_VAR,i,j,k),-mvd)
                endif
 
           end if

@@ -1,5 +1,5 @@
 subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv,lambda,phip)
+                    rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv,lambda,phip,tfrx,tfry)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -10,7 +10,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_rhs
-  real, dimension(:,:,:), intent(in) :: T_o, T_g
+  real, dimension(:,:,:), intent(in) :: T_o, T_g, tfrx, tfry
   real, dimension(:,:,:), intent(in) :: u,v
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2
@@ -22,7 +22,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
   integer :: i,j,k
 
   real :: Tx_plus, Tx_mins, Ty_plus, Ty_mins, Tij
-  real :: ul, ur, vl, vr
+  real :: ul, ur, vl, vr, uc, vc
   real :: Txx, Tyy
   real :: coeff
   real :: tol
@@ -52,6 +52,9 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
      ur = u(i+1,j,k)
      vl = v(i,j,k)
      vr = v(i,j+1,k)
+
+     uc = (ul + ur)/2.0
+     vc = (vl + vr)/2.0
 
      coeff = inRe/ht_Pr
 
@@ -92,25 +95,29 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
  
      !______________________IB Terms_______________________!
 
-     ! Case 1 !
-     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) &
+     !! Case 1 !
+     if((lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i+1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Tx_plus = T_g(i+1,j,k)
-     ! End of Case 1 !
+     !! End of Case 1 !
 
-     ! Case 2 !
-     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) &
+     !! Case 2 !
+     if((lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i-1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Tx_mins = T_g(i-1,j,k)
-     ! End of Case 2 !
+     !! End of Case 2 !
 
-     ! Case 3 !
-     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) &
+     !! Case 3 !
+     if((lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j+1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Ty_plus = T_g(i,j+1,k)
-     ! End of Case 3 !
+     !! End of Case 3 !
 
-     ! Case 4 !
-     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) &
+     !! Case 4 !
+     if((lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j-1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
      Ty_mins = T_g(i,j-1,k)
-     ! End of Case 4 ! 
+     !! End of Case 4 ! 
     
      !______________________Advection Terms_______________________!
 
@@ -370,8 +377,9 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
         if(lambda(i,j,k) .lt. 0.0) then
 
         T_rhs(i,j,k) = - (frx*ur - flx*ul)/dx &
-                           - (fry*vr - fly*vl)/dy &
-                           + Txx + Tyy
+                       - (fry*vr - fly*vl)/dy &
+                       - uc*tfrx(i,j,k) - vc*tfry(i,j,k) &
+                       + Txx + Tyy
 
         else
 

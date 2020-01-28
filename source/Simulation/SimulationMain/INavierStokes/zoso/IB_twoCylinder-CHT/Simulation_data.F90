@@ -39,5 +39,7 @@ module Simulation_data
   real, save :: sim_Tbulk
 
   real, save :: sim_sinkB
+
+  real, save :: sim_invRe
  
 end module Simulation_data

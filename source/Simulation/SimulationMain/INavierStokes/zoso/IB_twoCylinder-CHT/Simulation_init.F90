@@ -31,7 +31,7 @@ subroutine Simulation_init()
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
-                              sim_sinkB
+                              sim_sinkB, sim_invRe, sim_meshMe
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
@@ -41,6 +41,7 @@ subroutine Simulation_init()
 
   implicit none
 
+  include 'Flash_mpi.h'
 #include "constants.h"
 #include "Flash.h"
 
@@ -58,5 +59,7 @@ subroutine Simulation_init()
   call RuntimeParameters_get('ymax',    sim_yMax)
   
   call RuntimeParameters_get('waveA',    sim_waveA)
+
+  call RuntimeParameters_get('invRe',    sim_invRe)
 
 end subroutine Simulation_init
