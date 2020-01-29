@@ -17,7 +17,7 @@ iConvU = 0
 isgs            = 0
 
 # Prandtl number
-Pr = 4.0
+Pr = 10.0
 
 # Densities
 rho1 = 1.0
