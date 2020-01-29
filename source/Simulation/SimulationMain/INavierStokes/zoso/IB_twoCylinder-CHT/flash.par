@@ -17,7 +17,7 @@ iConvU = 0
 isgs            = 0
 
 # Prandtl number
-Pr = 1.0
+Pr = 10.0
 
 # Densities
 rho1 = 1.0
@@ -112,8 +112,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 0.25d-4
-dtinit          = 0.25d-4
+dtspec          = 1.0d-3
+dtinit          = 1.0d-3
 tstep_change_factor=1.00
 
 
@@ -137,8 +137,8 @@ checkpointFileIntervalStep = 5000
 plotFileIntervalStep = 4000
 
 ##	AMR parameters
-nblockx	= 20 #12 #16
-nblocky	= 20 #9  #12
+nblockx	= 8 #12 #16
+nblocky	= 8 #9  #12
 
 lrefine_min	= 1
 lrefine_max     = 1
