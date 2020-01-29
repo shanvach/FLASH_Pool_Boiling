@@ -327,11 +327,8 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !hratio = (solnData(LMDA_VAR,i,j,k)+hnorm)/hnorm 
            !solnData(TGST_VAR,i,j,k) = zp(1) - hratio*(zp(1) - 0.5)
 
-           !hratio = (solnData(LMDA_VAR,i,j,k)+hnorm)
-           !solnData(TGST_VAR,i,j,k) = zp(1) - hratio*sign(8.4,solnData(LMDA_VAR,i,j,k))/thcoP
-
            !------Neumann----------------------------------------------------!
-           hratio = thcoE/thcoP
+           hratio = thcoC/thcoP
            solnData(TGST_VAR,i,j,k) = zp(1) - hratio*(zp(1) - solnData(TEMP_VAR,i,j,k))
 
            end if
