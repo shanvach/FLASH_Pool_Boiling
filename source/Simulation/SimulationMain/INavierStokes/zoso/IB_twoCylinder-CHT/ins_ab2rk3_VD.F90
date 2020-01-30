@@ -516,7 +516,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      end if
 
      ! ML - GFM for velocity jump condition
-     call ins_rhs2d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
+     call ins_rhs2d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&

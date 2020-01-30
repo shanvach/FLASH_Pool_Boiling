@@ -182,8 +182,8 @@ subroutine Simulation_initBlock(blockId)
 
            rtest = sqrt(xcell**2 + ycell**2)
            if(rtest .ge. 0.5 .and. rtest .le. 1.0) then
-           solnData(TFRX_VAR,i,j,k) = -0.1*-sin(atan2(ycell,xcell))
-           solnData(TFRY_VAR,i,j,k) = -0.1*cos(atan2(ycell,xcell))
+           solnData(TFRX_VAR,i,j,k) = -0.025*-sin(atan2(ycell,xcell))
+           solnData(TFRY_VAR,i,j,k) = -0.025*cos(atan2(ycell,xcell))
            endif
 
         enddo

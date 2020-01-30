@@ -224,8 +224,9 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
            ! Get probe in fluid
-           hnorm  = solnData(LMDA_VAR,i,j,k)
-           !hnorm = sign(1.5*del(IAXIS),solnData(LMDA_VAR,i,j,k))
+           !hnorm  = solnData(LMDA_VAR,i,j,k)
+           hnorm = sign(1.5*del(IAXIS),solnData(LMDA_VAR,i,j,k))
+           !hnorm = 0.0
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
@@ -328,7 +329,7 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !solnData(TGST_VAR,i,j,k) = zp(1) - hratio*(zp(1) - 0.5)
 
            !------Neumann----------------------------------------------------!
-           hratio = thcoC/thcoP
+           hratio = thcoE/thcoP
            solnData(TGST_VAR,i,j,k) = zp(1) - hratio*(zp(1) - solnData(TEMP_VAR,i,j,k))
 
            end if
