@@ -17,7 +17,7 @@ iConvU = 0
 isgs            = 0
 
 # Prandtl number
-Pr = 40.0
+Pr = 1.0
 
 # Densities
 rho1 = 1.0
@@ -112,8 +112,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 1.0d-3
-dtinit          = 1.0d-3
+dtspec          = 0.1d-3
+dtinit          = 0.1d-3
 tstep_change_factor=1.00
 
 
