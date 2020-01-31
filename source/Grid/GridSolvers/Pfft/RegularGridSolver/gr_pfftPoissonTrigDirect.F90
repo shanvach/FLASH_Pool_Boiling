@@ -356,6 +356,14 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
       call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
 
+      ! identify if there was a need to prevent a div-by-zero floating point error
+      errorAux = 0
+      if ( (iuf-ilf+1) .ne. pfft_midLen(JAXIS) ) errorAux = 1
+      call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
+      if (error >= 1 .and. pfft_myPE == 0) then 
+	call Driver_abortFlash("Unsupported conflict between PFFT and pdc2dn; span not equal to pfft_midLen(JAXIS)!")
+      endif
+
       ! prepare solver
       init(:) = .false.
 
@@ -635,6 +643,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
         !if(JL == 1) write(*,*) "on process ", pfft_myPE, "J / AK(J)", J, AK(J)
         ! create solution array
         do K=1, pfft_midLen(JAXIS)
+          !if (pfft_myPE == 3) write(*,*) "on process ", pfft_myPE, "K / ilf", K, ilf
+
           temp2DArray(:,K) = -(1.0/gr_jMetricsGlb(CENTER,1:N,1))*(1.0/gr_kMetricsGlb(CENTER,ilf+K-1,1))*temp3DArray(:,K,JL)
         end do
 
