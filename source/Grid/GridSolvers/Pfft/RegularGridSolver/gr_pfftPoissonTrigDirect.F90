@@ -64,7 +64,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
   real, dimension(inSize), intent(IN)  :: inArray
   real, dimension(inSize), intent(OUT) :: outArray
 
-  integer :: numVec, ierr, error, errorAux
+  integer :: numVec
+  integer :: ierr, error, errorAux, errorMsg
   integer :: I, IL, J, JL, K, KL, ML, L, LL, M, N, NL, size
   integer, save :: ldw, liw, ilf, iuf
   integer, dimension(2,MDIM) :: pfftBlkLimits
@@ -294,8 +295,14 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       CM(1:M) = 1.0 / gr_kMetricsGlb(CENTER,1:M,1)
 
       ! apply boundary conditions z-axis
-      BM(1) = gr_kMetricsGlb(RIGHT_EDGE,1,1)
-      BM(M) = gr_kMetricsGlb(LEFT_EDGE, M,1)
+      select case (transformType(KAXIS))
+      case (PFFT_COS_CC)
+        if (pfft_myPE == 0) write(*,*) '3d pfft solver using KAXIS neumann coefficents'
+        BM(1) = gr_kMetricsGlb(RIGHT_EDGE,1,1)
+        BM(M) = gr_kMetricsGlb(LEFT_EDGE, M,1)
+      case default
+        call Driver_abortFlash("Unsupported z-direction boundary condition for RegularGridSolver!")
+      end select
 
       ! matrix coefficients for y-axis
       AN(1:N) = -gr_jMetricsGlb(LEFT_EDGE,1:N,1)
@@ -303,8 +310,14 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       CN(1:N) = 1.0 / gr_jMetricsGlb(CENTER,1:N,1)
 
       ! apply boundary conditions y-axis
-      BN(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
-      BN(N) = gr_jMetricsGlb(LEFT_EDGE, N,1)
+      select case (transformType(KAXIS))
+      case (PFFT_COS_CC)
+        if (pfft_myPE == 0) write(*,*) '3d pfft solver using JAXIS neumann coefficents'
+        BN(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
+        BN(N) = gr_jMetricsGlb(LEFT_EDGE, N,1)
+      case default
+        call Driver_abortFlash("Unsupported y-direction boundary conditions for RegularGridSolver!")
+      end select
 
       ! poisson coefficient
       ch = 0.0
@@ -325,10 +338,12 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
       ! identify if pfft and pdc2dn are using different z-axis span sizes; currently unsupported 
       errorAux = 0
-      if ( (iuf-ilf+1) .ne. pfft_midLen(JAXIS) ) errorAux = 1
+      if ( ((iuf-ilf+1) .ne. pfft_midLen(JAXIS)) .or. (ierr .ne. 0) ) errorAux = 1
       call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
+      call MPI_ALLreduce(ierr, errorMsg, 1, FLASH_REAL, MPI_MAX, pfft_comm(IAXIS), ierr)   
       if (error >= 1 .and. pfft_myPE == 0) then 
-	call Driver_abortFlash("Unsupported conflict between PFFT and pdc2dn; span not equal to pfft_midLen(JAXIS)!")
+        write(*,*) "Largest pdc2Dn generated error code among communicators is ", errorMsg
+	call Driver_abortFlash("Error in pdc2Dn; either a conflict with PFFT span size, or internal solver error!")
       endif
 
       ! prepare solver

@@ -63,7 +63,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
   real, dimension(inSize), intent(IN)  :: inArray
   real, dimension(inSize), intent(OUT) :: outArray
 
-  integer :: ierr
+  integer :: ierr, error, errorAux, errorMsg
   integer :: J, M, N, size, nl
   integer, save :: ldw, liw, ilf, iuf
   integer, dimension(2,MDIM) :: pfftBlkLimits
@@ -108,8 +108,14 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     CM(1:M) = 1.0 / gr_jMetricsGlb(CENTER,1:M,1)
    
     ! apply boundary conditions y-axis
-    BM(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
-    BM(M) = gr_jMetricsGlb(LEFT_EDGE, M,1)
+    select case (transformType(JAXIS))
+    case (PFFT_COS_CC)
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver using JAXIS neumann coefficents'
+      BM(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
+      BM(M) = gr_jMetricsGlb(LEFT_EDGE, M,1)
+    case default
+      call Driver_abortFlash("Unsupported y-direction boundary condition for RegularGridSolver!")
+    end select
 
     ! matrix coefficients for x-axis
     AN(1:N) = -gr_iMetricsGlb(LEFT_EDGE,1:N,1)
@@ -117,8 +123,14 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     CN(1:N) = 1.0 / gr_iMetricsGlb(CENTER,1:N,1)
 
     ! apply boundary conditions x-axis
-    BN(1) = gr_iMetricsGlb(RIGHT_EDGE,1,1)
-    BN(N) = gr_iMetricsGlb(LEFT_EDGE, N,1)
+    select case (transformType(IAXIS))
+    case (PFFT_COS_CC)
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS neumann coefficents'
+      BN(1) = gr_iMetricsGlb(RIGHT_EDGE,1,1)
+      BN(N) = gr_iMetricsGlb(LEFT_EDGE, N,1)
+    case default
+      call Driver_abortFlash("Unsupported x-direction boundary condition for RegularGridSolver!")
+    end select
  
     ! poisson coefficient
     ch = 0.0
@@ -136,6 +148,17 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     allocate(dw(ldw), iw(liw))
 
     call pdc2dn(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
+
+    ! identify if pdc2dn throws an error code
+    errorAux = 0
+    if ( ierr .ne. 0 ) errorAux = 1
+    call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)
+    call MPI_ALLreduce(ierr, errorMsg, 1, FLASH_REAL, MPI_MAX, pfft_comm(IAXIS), ierr)
+    if (error >= 1 .and. pfft_myPE == 0) then
+      write(*,*) "Largest pdc2Dn generated error code among communicators is ", errorMsg
+      call Driver_abortFlash("Error in pdc2Dn; internal solver error generated!")
+    endif
+
     ! prepare solver
     init(:) = .false.
 
