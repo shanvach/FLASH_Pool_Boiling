@@ -129,14 +129,13 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     init(3) = .true.
 
     ! initialize parameters for pdc2d
-    size = pfft_procGrid(JAXIS)
+    call MPI_COMM_SIZE(pfft_comm(JAXIS), size, ierr)
     nl = 1 + max(int(log10(real(M))/log10(4.0)), 0)
     ldw = 6*nl*min((M + 2*size - 1)/size, M) + max(9*M, 11*N)
     liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
     allocate(dw(ldw), iw(liw))
 
     call pdc2dn(M, N, RHS, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(JAXIS), init, ierr)
-
     ! prepare solver
     init(:) = .false.
 
