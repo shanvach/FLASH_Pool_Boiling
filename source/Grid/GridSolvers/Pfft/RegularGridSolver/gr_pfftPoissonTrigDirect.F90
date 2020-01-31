@@ -48,7 +48,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
   use gr_pfftInterface, ONLY : gr_pfftDcftForward, gr_pfftDcftInverse, gr_pfftTranspose, &
                                gr_pfftGetLocalLimitsAnytime, gr_pfftTriDiag, gr_pfftCyclicTriDiag
   use gr_pfftData,      ONLY : pfft_inLen, pfft_midLen, pfft_outLen, pfft_globalLen, pfft_transformType, &
-                               pfft_work1, pfft_work2, pfft_procGrid, pfft_comm, pfft_myPE, pfft_scale,  & 
+                               pfft_work1, pfft_work2, pfft_procGrid, pfft_comm, pfft_me, pfft_myPE, pfft_scale,  & 
                                pfft_trigIaxis, pfft_trigJaxis, pfft_trigKaxis,                           &
                                pfft_pclBaseDatType, pfft_t1Len, pfft_t2Len
 
@@ -66,6 +66,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
   integer :: numVec, ierr, error, errorAux
   integer :: I, IL, J, JL, K, KL, ML, L, LL, M, N, NL, size
+!  integer :: II, JJ, KK
   integer, save :: ldw, liw, ilf, iuf
   integer, dimension(2,MDIM) :: pfftBlkLimits
   integer, dimension(:), allocatable, save :: iw
@@ -262,69 +263,101 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       allocate(AN(N), BN(N), CN(N))
       allocate(AM(M), BM(M), CM(M))
 
-    ! transform coefficients for x-axis
-    select case (transformType(IAXIS))
-    case (PFFT_REAL)
-      if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS periodic coefficents'
-      do K=1, L/2
-        AK(K) =  2.0 * PI * real(K-1)
-      end do
-      do K=L/2+1, L
-        AK(K) = -2.0 * PI * real(L-K+1)
-      end do
-      AK(1:L) =  2.0 * ( 1.0 - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
-    case (PFFT_COS_CC)
-      if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS neumann coefficents'
-      AK(1) = 0.0
-      do K=1, L-1
-        AK(K+1) = 2.0 * ( 1.0 - cos(PI * real(K)/real(L)) ) * gr_iMetricsGlb(CENTER,K+1,1)**2
-      end do
-    case (PFFT_SIN_CC)
-      if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS dirichlet coefficents'
-      do K=1, L
-        AK(K) = 2.0 * ( 1.0 - cos(PI*real(K)/real(L)) ) * gr_iMetricsGlb(CENTER,K,1)**2
-      end do
-    case default
-      call Driver_abortFlash("Unsupported x-direction transformation for RegularGridSolver!")
-    end select
+      !if (pfft_myPE == 0) then 
+      !  write(*,*) shape(gr_iMetricsGlb), L 
+      !  write(*,*) shape(gr_jMetricsGlb), N 
+      !  write(*,*) shape(gr_kMetricsGlb), M 
+      !endif
 
-    ! matrix coefficients for z-axis
-    AM(1:M) = -gr_kMetricsGlb(LEFT_EDGE,1:M,1)
-    BM(1:M) =  gr_kMetricsGlb(LEFT_EDGE,1:M,1) + gr_kMetricsGlb(RIGHT_EDGE,1:M,1)
-    CM(1:M) = 1.0 / gr_kMetricsGlb(CENTER,1:M,1)
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
+      !call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, KAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      !call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, IAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      !call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, JAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      !write(*,*) "on process ", pfft_myPE, "localLimits are", pfftBlkLimits !, "_me", pfft_me
+      !call flush()
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
 
-    ! apply boundary conditions z-axis
-    BM(1) = gr_kMetricsGlb(RIGHT_EDGE,1,1)
-    BM(M) = gr_kMetricsGlb(LEFT_EDGE, M,1)
+      !call MPI_COMM_RANK(pfft_comm(IAXIS), II, ierr)
+      !call MPI_COMM_RANK(pfft_comm(JAXIS), JJ, ierr)
+      !call MPI_COMM_RANK(pfft_comm(KAXIS), KK, ierr)
+      !write(*,*) "on process ", pfft_myPE, "RANK i/j/k", II, JJ, KK
+      !call flush()
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
 
-    ! matrix coefficients for y-axis
-    AN(1:N) = -gr_jMetricsGlb(LEFT_EDGE,1:N,1)
-    BN(1:N) =  gr_jMetricsGlb(LEFT_EDGE,1:N,1) + gr_jMetricsGlb(RIGHT_EDGE,1:N,1)
-    CN(1:N) = 1.0 / gr_jMetricsGlb(CENTER,1:N,1)
+      !call MPI_COMM_SIZE(pfft_comm(IAXIS), II, ierr)
+      !call MPI_COMM_SIZE(pfft_comm(JAXIS), JJ, ierr)
+      !call MPI_COMM_SIZE(pfft_comm(KAXIS), KK, ierr)
+      !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, "SIZE i/j/k", II, JJ, KK
+      !call flush()
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
 
-    ! apply boundary conditions y-axis
-    BN(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
-    BN(N) = gr_jMetricsGlb(LEFT_EDGE, N,1)
+      !if (pfft_myPE == 0) write(*,*) "on process ", pfft_myPE, "pfft_globalLen", pfft_globalLen
 
-    ! poisson coefficient
-    ch = 0.0
+      ! transform coefficients for x-axis
+      select case (transformType(IAXIS))
+      case (PFFT_REAL)
+        if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS periodic coefficents'
+        do K=1, L/2
+          AK(K) =  2.0 * PI * real(K-1)
+        end do
+        do K=L/2+1, L
+          AK(K) = -2.0 * PI * real(L-K+1)
+        end do
+        AK(1:L) =  2.0 * ( 1.0 - cos(AK(1:L) / REAL(L)) ) * gr_iMetricsGlb(CENTER,1:L,1)**2
+      case (PFFT_COS_CC)
+        if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS neumann coefficents'
+        AK(1) = 0.0
+       ! if(pfft_myPE == 0) write(*,*) "on process", pfft_myPE, "K / AK(K)", 1, AK(1)
+        do K=1, L-1
+          AK(K+1) = 2.0 * ( 1.0 - cos(PI * real(K)/real(L)) ) * gr_iMetricsGlb(CENTER,K+1,1)**2
+       !   if(pfft_myPE == 0) write(*,*) "on process", pfft_myPE, "K / AK(K)", K+1, AK(K+1)
+        end do
+      case (PFFT_SIN_CC)
+        if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS dirichlet coefficents'
+        do K=1, L
+          AK(K) = 2.0 * ( 1.0 - cos(PI*real(K)/real(L)) ) * gr_iMetricsGlb(CENTER,K,1)**2
+        end do
+      case default
+        call Driver_abortFlash("Unsupported x-direction transformation for RegularGridSolver!")
+      end select
 
-    ! initialize solver
-    init(1) = .false.
-    init(2) = .true.
-    init(3) = .true.
+      ! matrix coefficients for z-axis
+      AM(1:M) = -gr_kMetricsGlb(LEFT_EDGE,1:M,1)
+      BM(1:M) =  gr_kMetricsGlb(LEFT_EDGE,1:M,1) + gr_kMetricsGlb(RIGHT_EDGE,1:M,1)
+      CM(1:M) = 1.0 / gr_kMetricsGlb(CENTER,1:M,1)
 
-    ! initialize parameters for pdc2d
-    call MPI_COMM_SIZE(pfft_comm(KAXIS), size, ierr) 
-    nl = 1 + max(int(log10(real(M))/log10(4.0)), 0)
-    ldw = 6*nl*min((M + 2*size - 1)/size, M) + max(9*M, 11*N)
-    liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
-    allocate(dw(ldw), iw(liw))
+      ! apply boundary conditions z-axis
+      BM(1) = gr_kMetricsGlb(RIGHT_EDGE,1,1)
+      BM(M) = gr_kMetricsGlb(LEFT_EDGE, M,1)
 
-    call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
+      ! matrix coefficients for y-axis
+      AN(1:N) = -gr_jMetricsGlb(LEFT_EDGE,1:N,1)
+      BN(1:N) =  gr_jMetricsGlb(LEFT_EDGE,1:N,1) + gr_jMetricsGlb(RIGHT_EDGE,1:N,1)
+      CN(1:N) = 1.0 / gr_jMetricsGlb(CENTER,1:N,1)
 
-    ! prepare solver
-    init(:) = .false.
+      ! apply boundary conditions y-axis
+      BN(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
+      BN(N) = gr_jMetricsGlb(LEFT_EDGE, N,1)
+
+      ! poisson coefficient
+      ch = 0.0
+
+      ! initialize solver
+      init(1) = .false.
+      init(2) = .true.
+      init(3) = .true.
+
+      ! initialize parameters for pdc2d
+      call MPI_COMM_SIZE(pfft_comm(KAXIS), size, ierr) 
+      nl = 1 + max(int(log10(real(M))/log10(4.0)), 0)
+      ldw = 6*nl*min((M + 2*size - 1)/size, M) + max(9*M, 11*N)
+      liw = 6*M + (4**nl - 1)/3 + 2*nl + int(log10(real(2*size))/log10(4.0)) + 7
+      allocate(dw(ldw), iw(liw))
+
+      call pdc2dn(M, N, temp2DArray, N, ilf, iuf, AM, BM, CM, AN, BN, CN, ch, dw, ldw, iw, liw, pfft_comm(KAXIS), init, ierr)
+
+      ! prepare solver
+      init(:) = .false.
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 1d transform and 2d blktri  -------------------------------------------------------------------!
@@ -380,9 +413,10 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
     allocate(BML(M), RHS(M), X(M))
 
-    call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits) 
-    call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-    call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    ! get block limits pertaining to the tridiagonal solve
+    call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, IAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits) 
+    call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, JAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+    call gr_pfftGetLocalLimitsAnytime(KAXIS, KAXIS, KAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
 
     ! for each x-direction wave number lets solve the tridiagonal system in y
     errorAux = 0
@@ -471,9 +505,13 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       
       allocate(BML(M), BMM(M), RHS(M), X(M))
       
-      call gr_pfftGetLocalLimitsAnytime(IAXIS, KAXIS, 1, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-      call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, 2, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-      call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, 3, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      ! get block limits pertaining to the tridiagonal solve
+      call gr_pfftGetLocalLimitsAnytime(IAXIS, KAXIS, IAXIS, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      call gr_pfftGetLocalLimitsAnytime(JAXIS, IAXIS, JAXIS, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      call gr_pfftGetLocalLimitsAnytime(KAXIS, JAXIS, KAXIS, pfft_outLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      !write(*,*) "on process ", pfft_myPE, "localLimits are", pfftBlkLimits
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
+  
       
       ! for each y-direction wave number 
       errorAux = 0
@@ -566,10 +604,13 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       allocate(temp3DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS), pfft_midLen(KAXIS)))
       temp3DArray = reshape(pfft_work2, pfft_midLen(1:3))
 
-      call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, 1, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-      call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, 2, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-      call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, 3, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
-
+      ! get local block limits pertaining to the planer solve blocks
+      call gr_pfftGetLocalLimitsAnytime(IAXIS, JAXIS, KAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      call gr_pfftGetLocalLimitsAnytime(JAXIS, KAXIS, IAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      call gr_pfftGetLocalLimitsAnytime(KAXIS, IAXIS, JAXIS, pfft_midLen, PFFT_PCLDATA_REAL, pfftBlkLimits)
+      !write(*,*) "on process ", pfft_myPE, "localLimits are", pfftBlkLimits
+      !call MPI_BARRIER(pfft_comm(IAXIS), ierr)   
+  
       ! need to allocate a 2d right hand side for solver
       allocate(temp2DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS)))
       temp2DArray(:,:) = 0.0 
@@ -579,8 +620,9 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       do JL = 1, LL
 
         ! identify the wave number or x-direction index
-        J = pfftBlkLimits(LOW,JAXIS) + JL
-        if (J-1 > pfftBlkLimits(HIGH,JAXIS)) cycle
+        ! JAXIS has the correct limits -- need to figure out why
+        J = pfftBlkLimits(LOW,KAXIS) + JL
+        if (J-1 > pfftBlkLimits(HIGH,KAXIS)) cycle
         
         ! poisson coefficient
         select case (transformType(IAXIS))
@@ -590,6 +632,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
           ch = AK(J/2+1) 
         end select
 
+        !if(JL == 1) write(*,*) "on process ", pfft_myPE, "J / AK(J)", J, AK(J)
         ! create solution array
         do K=1, pfft_midLen(JAXIS)
           temp2DArray(:,K) = -(1.0/gr_jMetricsGlb(CENTER,1:N,1))*(1.0/gr_kMetricsGlb(CENTER,ilf+K-1,1))*temp3DArray(:,K,JL)
@@ -600,7 +643,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
         ! store the solution
         temp3DArray(:,:,JL) = temp2DArray(:,:)
-
+     
       end do
 
       ! put the solution back into the pfft working array
