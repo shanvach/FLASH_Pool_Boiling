@@ -59,29 +59,8 @@ subroutine Driver_evolveFlash()
   integer :: blockList(MAXBLOCKS)
   integer :: sweepDummy
   integer :: count, firstfileflag
-  real, pointer, dimension(:,:,:,:) :: solnData
-  real, dimension(GRID_IHI_GC) :: xcell, xedge
-  real, dimension(GRID_JHI_GC) :: ycell, yedge
-  real, dimension(GRID_KHI_GC) :: zcell, zedge
-  real :: pi, fact
-  integer, dimension(6) :: bc_types
-  real, dimension(2,6)  :: bc_values = 0.
-  integer :: i,j,k
-  integer ::  blockID,lb
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
   logical :: endrun
-
-
-
-  !write(*,*) "Begin Solution"
-  !call Grid_getListOfBlocks(LEAF,blockList,blockCount)
-  !blockID = blockList(1)
-  !call Grid_getBlkPtr(blockID, solnData, CENTER)
-  !solnData(NSRC_VAR,:,:,:) = 1.0
-  !write(*,*) blockID, solnData(NSRC_VAR,10,1,1)
-  !call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-
-
 
   call Logfile_stamp( 'Entering evolution loop' , '[Driver_evolveFlash]')
   call Timers_start("evolution")
@@ -94,63 +73,7 @@ subroutine Driver_evolveFlash()
   call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
                     0.0,blockList,blockCount,firstfileflag)
 
-
   call Heat_AD(blockCount, blockList, dr_simTime, dr_dt, dr_dtOld, sweepDummy)
-
-
-
-!   pi = 3.141592654
-!   fact = 1.0
-!   bc_types(:) = GRID_PDE_BND_NEUMANN
-!
-!   do lb = 1,blockCount
-!
-!     blockID = blockList(lb)
-!     write(*,*) "Begin Block", blockID
-!
-!
-!
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-!
-!     write(*,*) "Get Data Ptr", blockID
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!
-!     write(*,*) "Get Grid Data"
-!     call Grid_getCellCoords(IAXIS, blockId, CENTER, .true., xcell, GRID_IHI_GC)
-!     call Grid_getCellCoords(JAXIS, blockId, CENTER, .true., ycell, GRID_JHI_GC)
-!     call Grid_getCellCoords(KAXIS, blockId, CENTER, .true., zcell, GRID_KHI_GC)
-!
-!     call Grid_getCellCoords(IAXIS, blockId, LEFT_EDGE, .true., xedge, GRID_IHI_GC)
-!     call Grid_getCellCoords(JAXIS, blockId, LEFT_EDGE, .true., yedge, GRID_JHI_GC)
-!     call Grid_getCellCoords(KAXIS, blockId, LEFT_EDGE, .true., zedge, GRID_KHI_GC)
-!
-!     write(*,*) "Zero Solution Data"
-!     solnData(NSRC_VAR,:,:,:) = 0.0
-!     !solnData(NFLD_VAR,:,:,:) = 0.0
-!
-!     write(*,*) "Create Source Functions"
-!     do k=1, blkLimitsGC(HIGH,KAXIS)
-!       do j=1, blkLimitsGC(HIGH,JAXIS)
-!         do i=1, blkLimitsGC(HIGH,IAXIS)
-!           !fact = -8.0 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
-!           !solnData(NSRC_VAR,i,j,k) = fact
-!           write(*,*) i, j, k, solnData(NSRC_VAR,i,j,k)
-!         enddo
-!       enddo
-!     enddo
-!     fact = 1.0
-!
-!     write(*,*) "call the solver", solnData(NSRC_VAR, 10, 1, 1)
-!     call Grid_solvePoisson(NFLD_VAR, NSRC_VAR, bc_types, bc_values, fact)
-!
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!
-!   end do
-
-
-
 
   count = 1
   dr_dt = 1 
