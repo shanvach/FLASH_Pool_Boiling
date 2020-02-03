@@ -120,11 +120,11 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real :: Tboundary = 1.0
  
-  real :: tol = 0.01
+  real :: tol = 0.1
  
   real :: thco3, thcoE, thcoP, thcoC
 
-  thco3 = 2*mph_thco2
+  thco3 = 10*mph_thco2
 
   do lb = 1,blockCount
 
