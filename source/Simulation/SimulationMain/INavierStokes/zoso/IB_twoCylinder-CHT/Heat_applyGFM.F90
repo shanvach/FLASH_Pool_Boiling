@@ -120,7 +120,7 @@ subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real :: Tboundary = 0.0
  
-  real :: tol = 0.01
+  real :: tol = 0.1
  
   real :: thco3, thcoE, thcoP, thcoC
 

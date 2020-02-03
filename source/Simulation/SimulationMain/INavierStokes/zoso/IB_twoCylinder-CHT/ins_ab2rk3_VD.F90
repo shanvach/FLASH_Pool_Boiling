@@ -555,6 +555,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      facexData(RHDS_FACE_VAR,:,:,:) = newu(:,:,:)
      faceyData(RHDS_FACE_VAR,:,:,:) = newv(:,:,:)
 
+     facexData(VELC_FACE_VAR,:,:,:) = facexData(VELC_FACE_VAR,:,:,:) + dt*facexData(VFRC_FACE_VAR,:,:,:)
+     faceyData(VELC_FACE_VAR,:,:,:) = faceyData(VELC_FACE_VAR,:,:,:) + dt*faceyData(VFRC_FACE_VAR,:,:,:)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -686,9 +688,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-     facexData(VELC_FACE_VAR,:,:,:) = facexData(VELC_FACE_VAR,:,:,:) + dt*facexData(VFRC_FACE_VAR,:,:,:)
-     faceyData(VELC_FACE_VAR,:,:,:) = faceyData(VELC_FACE_VAR,:,:,:) + dt*faceyData(VFRC_FACE_VAR,:,:,:)
 
 #if NDIM ==3
      !call Grid_getBlkPtr(blockID,facezData,FACEZ)
