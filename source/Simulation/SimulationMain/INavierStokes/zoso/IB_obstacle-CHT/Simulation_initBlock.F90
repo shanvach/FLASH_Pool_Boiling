@@ -36,7 +36,7 @@ subroutine Simulation_initBlock(blockId)
                               sim_gCell, sim_waveA, &
                               sim_nuc_site_x, sim_nuc_site_y,&
                               sim_nuc_site_z, sim_nuc_radii,&
-                              sim_nucSiteDens, sim_Tbulk
+                              sim_nucSiteDens, sim_Tbulk, sim_temp, sim_vel
 
   use Grid_interface, ONLY : Grid_getDeltas,         &
                              Grid_getBlkIndexLimits, &
@@ -122,8 +122,8 @@ subroutine Simulation_initBlock(blockId)
   !xbubble = -2.15
   !ybubble = -3.0
 
-  xdrop = 0.0
-  ydrop = 0.0
+  xdrop = 2.125
+  ydrop = 0.125
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -140,7 +140,7 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           solnData(DFUN_VAR,i,j,k) = -sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)+0.4
+           solnData(DFUN_VAR,i,j,k) = -sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)+0.025
 
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
 
@@ -153,6 +153,39 @@ subroutine Simulation_initBlock(blockId)
         enddo
      enddo
   enddo
+
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                   real(i - NGUARD - 1)*del(IAXIS) +   &
+                   0.5*del(IAXIS)
+
+           zcell = 0.0
+           
+           sim_temp(i,k,blockID) = 0.0
+
+           if(xcell .ge. 2.0 .and. xcell .le. 2.25) sim_temp(i,k,blockID) = del(IAXIS)*(1.0/10.0)
+
+     enddo
+  enddo
+
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+        do j=1,blkLimitsGC(HIGH,JAXIS)
+
+           ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                   real(j - NGUARD - 1)*del(JAXIS)  +  &
+                   0.5*del(JAXIS)
+
+           zcell = 0.0
+
+           sim_vel(j,k,blockID) = 6*ycell*(1-ycell)
+        
+           facexData(VELC_FACE_VAR,:,j,k) = sim_vel(j,k,blockID)  
+         
+     enddo
+  enddo
+
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
@@ -185,8 +218,9 @@ subroutine Simulation_initBlock(blockId)
   solnData(SIGP_VAR,:,:,:) = 0.0
   solnData(VISC_VAR,:,:,:) = 0.0
   solnData(PFUN_VAR,:,:,:) = 0.0
+  solnData(TEMP_VAR,:,:,:) = 0.0
 
-  facexData(VELC_FACE_VAR,:,:,:) = 1.0
+  !facexData(VELC_FACE_VAR,:,:,:) = 0.0
   faceyData(VELC_FACE_VAR,:,:,:) = 0.0
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0

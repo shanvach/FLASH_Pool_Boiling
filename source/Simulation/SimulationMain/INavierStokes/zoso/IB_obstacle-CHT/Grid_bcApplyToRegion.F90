@@ -185,6 +185,8 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
+  use Simulation_data , only: sim_temp, sim_vel
+
 #if NDIM == 2
   use IncompNS_data, ONLY : ins_invRe,ins_convvel,ins_predcorrflg,ins_alfa,uvel_x,vvel_x,wvel_x, &
                             uvel_y,vvel_y,wvel_y,ins_outflowgridChanged,ins_intschm, &
@@ -346,7 +348,20 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               k = 2*guard+1 
               do i = 1,guard
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
-              end do                         
+              end do                        
+
+              case(TEMP_VAR)
+
+              ja = endPoints(LOW,IAXIS)
+              jb = endPoints(HIGH,IAXIS)
+              ka = endPoints(LOW,KAXIS)
+              kb = endPoints(HIGH,KAXIS)
+
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar) + sim_temp(ja:jb,ka:kb,blockHandle)
+              end do                        
+ 
               case default
               k = 2*guard+1
               do i = 1,guard
@@ -505,6 +520,13 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               do i = 1,guard
                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
               end do
+
+              case (TEMP_VAR)
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+              end do
+
               case(DFUN_VAR)
 
               ja = endPoints(LOW,IAXIS)
@@ -531,14 +553,14 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
                  if(ivar == VELC_FACE_VAR) then
 
-                 ja = endPoints(LOW,IAXIS)
-                 jb = endPoints(HIGH,IAXIS)
+                 ja = endPoints(LOW,JAXIS)
+                 jb = endPoints(HIGH,JAXIS)
                  ka = endPoints(LOW,KAXIS)
                  kb = endPoints(HIGH,KAXIS)
 
                  do i = 1,guard+1
                     !regionData(i,1:je/2,1:ke,ivar)= 0.
-                    regionData(i,1:je,1:ke,ivar)= 1.0
+                    regionData(i,1:je,1:ke,ivar)= sim_vel(ja:jb,ka:kb,blockHandle)
                  end do
                  else
                  k = 2*guard+2

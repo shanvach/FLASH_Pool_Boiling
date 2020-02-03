@@ -19,7 +19,7 @@ module Simulation_data
   implicit none
 
 #include "constants.h"
-
+#include "Flash.h"
   !! *** Runtime Parameters *** !!
   real, save    :: sim_xMin, sim_xMax, sim_yMin, sim_yMax
   real, save    :: sim_zMin, sim_zMax
@@ -39,5 +39,8 @@ module Simulation_data
   real, save :: sim_Tbulk
 
   real, save :: sim_sinkB
+
+  real, save :: sim_vel(NYB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
+  real, save :: sim_temp(NXB+2*NGUARD,NZB+2*NGUARD*K3D,MAXBLOCKS)
  
 end module Simulation_data
