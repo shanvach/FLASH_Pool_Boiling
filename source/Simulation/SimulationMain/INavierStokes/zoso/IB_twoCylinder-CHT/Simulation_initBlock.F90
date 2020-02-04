@@ -207,9 +207,13 @@ subroutine Simulation_initBlock(blockId)
           rtest = sqrt(xcell**2 + ycell**2)
           facexData(VFRC_FACE_VAR,i,j,k) = 0.0
 
-          if(rtest .ge. 0.5 .and. rtest .le. 1.0) &
+          if(rtest .ge. 0.5 .and. rtest .le. 1.0) then
           facexData(VFRC_FACE_VAR,i,j,k) = 1.0*-sin(atan2(ycell,xcell))
 
+          else
+          facexData(VFRC_FACE_VAR,i,j,k) = 1.0*sin(atan2(ycell,xcell))
+
+          endif
         enddo
      enddo
   enddo
@@ -230,8 +234,13 @@ subroutine Simulation_initBlock(blockId)
           rtest = sqrt(xcell**2 + ycell**2)
           faceyData(VFRC_FACE_VAR,i,j,k) = 0.0
 
-          if(rtest .ge. 0.5 .and. rtest .le. 1.0) &
+          if(rtest .ge. 0.5 .and. rtest .le. 1.0) then
           faceyData(VFRC_FACE_VAR,i,j,k) = 1.0*cos(atan2(ycell,xcell))
+
+          else
+          faceyData(VFRC_FACE_VAR,i,j,k) = 1.0*-cos(atan2(ycell,xcell))
+
+          end if
 
         enddo
      enddo
