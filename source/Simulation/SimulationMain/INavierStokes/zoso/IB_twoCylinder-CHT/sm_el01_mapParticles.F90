@@ -60,7 +60,12 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
         if (ibd == 2) then
         body%qn(idx2)  = 0.0*dr_simTime
-        body%qdn(idx2) = 0.0 !-sin(atan2(u(a,2),u(a,1)))
+        body%qdn(idx2) = -sin(atan2(u(a,2),u(a,1)))
+
+        else
+        body%qn(idx2)  = 0.0*dr_simTime
+        body%qdn(idx2) = 0.0 !sin(atan2(u(a,2),u(a,1)))
+
         endif
 
         u(a,i)   = u(a,i) + body%qn(idx2)
@@ -73,7 +78,12 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
         if (ibd == 2) then
         body%qn(idx2)  = 0.0*dr_simTime
-        body%qdn(idx2) = 0.0 !cos(atan2(u(a,2),u(a,1)))
+        body%qdn(idx2) = cos(atan2(u(a,2),u(a,1)))
+
+        else
+        body%qn(idx2)  = 0.0*dr_simTime
+        body%qdn(idx2) = 0.0 !-cos(atan2(u(a,2),u(a,1)))
+
         endif
 
         u(a,i)   = u(a,i) + body%qn(idx2)
