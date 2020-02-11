@@ -1,1 +1,1 @@
-Heat += Heat_applyGFM.o 
+Heat += Heat_applyGFM.o Heat_getIBFlux.o 

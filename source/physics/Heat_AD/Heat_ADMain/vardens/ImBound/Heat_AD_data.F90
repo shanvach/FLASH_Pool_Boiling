@@ -36,4 +36,10 @@ module Heat_AD_data
 
      logical, save :: ht_microFlg
 
+     real, allocatable, save :: ht_ibx(:), ht_iby(:), ht_ibz(:), ht_ibT(:), ht_ibNu(:)
+
+     integer, save :: ht_hflux_counter
+
+     logical, save :: ht_hflux_flag
+
 end module Heat_AD_data

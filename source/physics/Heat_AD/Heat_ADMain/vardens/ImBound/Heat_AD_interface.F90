@@ -245,4 +245,13 @@ module Heat_AD_interface
         end subroutine Heat_applyGFM
   end interface
 
+  interface
+        subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+        integer, intent(in) :: sweepOrder
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+        end subroutine Heat_getIBFlux
+  end interface
+
 end module Heat_AD_interface
