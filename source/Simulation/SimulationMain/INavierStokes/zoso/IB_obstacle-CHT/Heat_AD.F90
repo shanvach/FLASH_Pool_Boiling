@@ -14,7 +14,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
                                 Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro,&
-                                Heat_getWallflux,Heat_applyGFM
+                                Heat_getWallflux,Heat_applyGFM,Heat_getIBFlux
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -506,5 +506,12 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                       MPI_MIN, MPI_COMM_WORLD, ierr)
 
 !______End Mass Flux calculation___________________________________________________!
+
+!________IB Heat Flux calculation__________________________________________________!
+
+ if(mph_meshMe .eq. MASTER_PE) print *,"Calculating IB heat fluxes"
+ call Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
+!________End IB Heat Flux calculation______________________________________________!
 
 end subroutine Heat_AD

@@ -18,6 +18,8 @@
   use Driver_data,      ONLY : dr_nstep
 
   use IncompNS_data, ONLY: ins_convvel
+
+  use Heat_AD_data, only: ht_ibx, ht_iby, ht_ibz, ht_ibT, ht_ibNu, ht_hflux_counter
 #ifdef FLASH_GRID_UG
 #else
       use physicaldata, ONLY : interp_mask_unk,interp_mask_unk_res
@@ -40,6 +42,7 @@
   integer :: numblocks,var,i,j,k,lb,nxc,nyc,nzc,i1,i2
   !character(25) :: filename
   character(29) :: filename
+  character(40) :: hfilename
   character(6) :: index_lb,index_mype
 
   real xedge(NXB+1),xcell(NXB+1)
@@ -96,6 +99,8 @@
   integer*4 Debug,ijk,Npts,NElm,klm,pqr
   character*1 NULLCHR
 
+  integer :: ibii
+
 !-----------------------------------------------------------------------
 !                                                         TecPlot set-up
 !-----------------------------------------------------------------------
@@ -137,7 +142,18 @@
   write(33,66) count, time, dt, istep,blockcount,timer
   close(33)
 66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
-55    format(g23.15,g23.15,g23.15,g23.15)
+55    format(g23.15,g23.15,g23.15,g23.15,g23.15)
+
+
+   write(hfilename, '("./IOData/data_IBheatFlux.",i4.4,".",i6.6)') count, mype
+
+   open(unit=44, file=hfilename,status='replace')
+   if(ht_hflux_counter > 0) then
+        do ibii = 1,ht_hflux_counter
+        write(44,55)ht_ibx(ibii),ht_iby(ibii),ht_ibz(ibii),ht_ibT(ibii),ht_ibNu(ibii)
+        end do
+   endif
+   close(44)
 
   ! -- data.XXXX.XX --
   nxc = NXB + NGUARD + 1
