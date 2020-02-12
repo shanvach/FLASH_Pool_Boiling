@@ -522,8 +522,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 !________IB Heat Flux calculation__________________________________________________!
 
+ if(mod(dr_nstep,1000) .eq. 0) then
  if(mph_meshMe .eq. MASTER_PE) print *,"Calculating IB heat fluxes"
  call Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+ end if
 
 !________End IB Heat Flux calculation______________________________________________!
 

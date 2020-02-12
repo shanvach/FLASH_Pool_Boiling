@@ -93,9 +93,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
-  real    :: hnorm, xprobe(3), yprobe(3), zprobe(3), phiprobe(3)
-
-  real    :: hnorm2
+  real    :: hnorm(3), xprobe(3), yprobe(3), zprobe(3), phiprobe(3)
 
   real,parameter  :: htol = 0.0001
 
@@ -168,9 +166,15 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
 
+#if NDIM == 3
            if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .and. ycell .gt. sim_yMin .and. ycell .lt. sim_yMax .and. &
-              xcell .gt. sim_xMin .and. xcell .lt. sim_xMax) ht_hflux_counter = ht_hflux_counter + 1
+              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or. &
+              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0) ht_hflux_counter = ht_hflux_counter + 1
+
+#else
+           if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
+              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0) ht_hflux_counter = ht_hflux_counter + 1
+#endif
 
            end do
         end do
@@ -244,8 +248,10 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
            ! Get probe in fluid
-           hnorm = 1.5*del(IAXIS)
-
+           hnorm(1) = 0.0
+           hnorm(2) = 1.5*del(IAXIS)
+           hnorm(3) = 2.0*del(IAXIS)
+        
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
            zprobe(1) = 0.0
@@ -253,17 +259,21 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #if NDIM == 3
            zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
 #endif
+        
+           do probe_index = 2,3
 
-           xprobe(2) = xprobe(1) + solnData(NMLX_VAR,i,j,k)*hnorm
-           yprobe(2) = yprobe(1) + solnData(NMLY_VAR,i,j,k)*hnorm
-           zprobe(2) = 0.0
+           xprobe(probe_index) = xprobe(1) + solnData(NMLX_VAR,i,j,k)*hnorm(probe_index)
+           yprobe(probe_index) = yprobe(1) + solnData(NMLY_VAR,i,j,k)*hnorm(probe_index)
+           zprobe(probe_index) = 0.0
 
 #if NDIM == 3
-           zprobe(2) = zprobe(1) + solnData(NMLZ_VAR,i,j,k)*hnorm
+           zprobe(probe_index) = zprobe(1) + solnData(NMLZ_VAR,i,j,k)*hnorm(probe_index)
 #endif
 
+           end do
+
            ! Interpolate function at probe 
-           do probe_index = 1,2
+           do probe_index = 1,3
            externalPt(IAXIS) = xprobe(probe_index)
            externalPt(JAXIS) = yprobe(probe_index)
            externalPt(KAXIS) = zprobe(probe_index)
@@ -320,16 +330,21 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            enddo
 
-           if(yprobe(1) > sim_yMin .and. yprobe(1) < sim_yMax .and. xprobe(1) > sim_xMin .and. xprobe(1) < sim_xMax) then
            ht_ibx(hflux_counter) = xprobe(1)
            ht_iby(hflux_counter) = yprobe(1)
            ht_ibz(hflux_counter) = zprobe(1)
 
            ht_ibT(hflux_counter) = zp(1)
-           ht_ibNu(hflux_counter) = (zp(2)-zp(1))/hnorm
+
+           ! Using first  probe - first order
+           !ht_ibNu(hflux_counter) = (zp(2)-zp(1))/hnorm(2)
+
+           ! Using two probes - second order
+           ht_ibNu(hflux_counter) = (zp(3)*hnorm(2)*hnorm(2) - zp(2)*hnorm(3)*hnorm(3) - &
+                                     zp(1)*(hnorm(2)*hnorm(2) - hnorm(3)*hnorm(3))) / &
+                                    (hnorm(2)*hnorm(3)*(hnorm(2)-hnorm(3)))
 
            hflux_counter = hflux_counter+1
-           end if
 
            end if
            !---------------------------------------------------------------------!
