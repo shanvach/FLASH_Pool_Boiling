@@ -36,6 +36,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use InCompNS_data, only: ins_alfa
 
+   use Simulation_data, only: sim_temp
+
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
                             interp_mask_facex_res,    &
@@ -86,9 +88,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-      do k=1,blkLimitsGC(HIGH,KAXIS)
-        do j=1,blkLimitsGC(HIGH,JAXIS)
-           do i=1,blkLimitsGC(HIGH,IAXIS)
+      !do k=1,blkLimitsGC(HIGH,KAXIS)
+      !  do j=1,blkLimitsGC(HIGH,JAXIS)
+      !     do i=1,blkLimitsGC(HIGH,IAXIS)
 
            !solnData(TEMP_VAR,i,j,k) = 0.0
 
@@ -97,7 +99,18 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
            !if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k).ge. -0.15) &
            !   solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15
 
-           end do
+      !     end do
+      !  end do
+      !end do
+
+      do k=1,blkLimitsGC(HIGH,KAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)
+
+            sim_temp(i,k,blockID) = 0.0
+
+            if(solnData(LMDA_VAR,i,blkLimits(LOW,JAXIS),k) .ge. 0.0) &
+               sim_temp(i,k,blockID) = del(IAXIS)*(1.0/10.0)
+
         end do
       end do
  

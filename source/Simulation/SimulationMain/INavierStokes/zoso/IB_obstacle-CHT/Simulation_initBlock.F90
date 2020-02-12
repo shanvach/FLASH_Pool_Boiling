@@ -155,22 +155,6 @@ subroutine Simulation_initBlock(blockId)
   enddo
 
   do k=1,blkLimitsGC(HIGH,KAXIS)
-        do i=1,blkLimitsGC(HIGH,IAXIS)
-
-           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-                   real(i - NGUARD - 1)*del(IAXIS) +   &
-                   0.5*del(IAXIS)
-
-           zcell = 0.0
-           
-           sim_temp(i,k,blockID) = 0.0
-
-           if(xcell .ge. 2.0 .and. xcell .le. 2.25) sim_temp(i,k,blockID) = del(IAXIS)*(1.0/10.0)
-
-     enddo
-  enddo
-
-  do k=1,blkLimitsGC(HIGH,KAXIS)
         do j=1,blkLimitsGC(HIGH,JAXIS)
 
            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
