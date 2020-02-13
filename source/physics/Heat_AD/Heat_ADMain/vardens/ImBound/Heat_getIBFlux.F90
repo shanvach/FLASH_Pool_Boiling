@@ -371,15 +371,15 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            ht_ibT(hflux_counter)  = zp(1)
 
            ! First Order Approximation
-           !ht_ibNu(hflux_counter) = hratio*(zp(2)-solnData(TEMP_VAR,i,j,k))/(solnData(LMDA_VAR,i,j,k)+hnorm(2))
+           ht_ibNu(hflux_counter) = hratio*(zp(2)-solnData(TEMP_VAR,i,j,k))/(solnData(LMDA_VAR,i,j,k)+hnorm(2))
 
 
            ! Second Order Approximation
-           h2 = solnData(LMDA_VAR,i,j,k) + hnorm(2)
-           h3 = solnData(LMDA_VAR,i,j,k) + hnorm(3)
+           !h2 = solnData(LMDA_VAR,i,j,k) + hnorm(2)
+           !h3 = solnData(LMDA_VAR,i,j,k) + hnorm(3)
 
-           ht_ibNu(hflux_counter) = hratio*(zp(3)*h2*h2 - zp(2)*h3*h3 - &
-                                            solnData(TEMP_VAR,i,j,k)*(h2*h2 - h3*h3))/(h2*h3*(h2-h3))          
+           !ht_ibNu(hflux_counter) = hratio*(zp(3)*h2*h2 - zp(2)*h3*h3 - &
+           !                                 solnData(TEMP_VAR,i,j,k)*(h2*h2 - h3*h3))/(h2*h3*(h2-h3))          
 
            hflux_counter = hflux_counter+1
 
