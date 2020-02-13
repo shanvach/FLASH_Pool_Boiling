@@ -134,10 +134,10 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      ! Place function calls here - Below is sample function call
-     call ib_sample_function_call(facexData(VAR1_FACE_VAR,:,:,:),&
-                                  faceyData(VAR1_FACE_VAR,:,:,:),&
-                                  facezData(VAR1_FACE_VAR,:,:,:),&
-                                   solnData(VARO_FACE_VAR,:,:,:),&
+     call ib_sample_function_call(facexData(VARF_FACE_VAR,:,:,:),&
+                                  faceyData(VARF_FACE_VAR,:,:,:),&
+                                  facezData(VARF_FACE_VAR,:,:,:),&
+                                   solnData(VARC_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
