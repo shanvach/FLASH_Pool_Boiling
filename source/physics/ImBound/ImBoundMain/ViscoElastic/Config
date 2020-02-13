@@ -1,1 +1,13 @@
-This is the config file
+# Config file for Visco Elastic Unit
+
+# This file is used to declare field variables and run time parameters for constants declared in
+# ib_viscoElastic_data
+
+# To declare a cell centered variable
+VARIABLE varc TYPE:GENERIC
+
+# To declare a face centered variable
+FACEVAR varf
+
+# To declare a runtime parameter 
+PARAMETER varp  REAL 1.0

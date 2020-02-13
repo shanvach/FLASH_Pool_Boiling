@@ -1,11 +1,5 @@
 module ib_viscoElastic_interface
 
-        !implicit none
-
-!INCLUDE .h files here
-!#include "constants.h"
-!#include "Flash.h"
-
         interface
         subroutine ib_dynamic_grid_advection(sn,sd,stest,adf,adfx,adfy,&
                                            cpt,dx,dy,dz,ix1,ix2,jy1,jy2)
@@ -49,6 +43,15 @@ module ib_viscoElastic_interface
         real, intent(in)    :: dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2
         end subroutine ib_solid_stress
+        end interface
+
+        interface
+        subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
+        implicit none
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+        real,    INTENT(IN) :: timeEndAdv,dt
+        end subroutine
         end interface
 
 end module ib_viscoElastic_interface
