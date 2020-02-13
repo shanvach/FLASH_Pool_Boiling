@@ -129,6 +129,8 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   integer :: hflux_counter
 
+  real :: h2,h3
+
   thco3 = 10*mph_thco2 
 
    if(ht_hflux_flag) then
@@ -147,8 +149,11 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      k = 1
 
-        do j=blkLimits(LOW,JAXIS)-1,blkLimits(HIGH,JAXIS)
-           do i=blkLimits(LOW,IAXIS)-1,blkLimits(HIGH,IAXIS)
+#if NDIM == 3
+       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+#endif
+        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+           do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -166,18 +171,28 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
 
-#if NDIM == 3
-           if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0) ht_hflux_counter = ht_hflux_counter + 1
+#if NDIM == 2
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0) ht_hflux_counter = ht_hflux_counter + 1
 
 #else
-           if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0) ht_hflux_counter = ht_hflux_counter + 1
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0) ht_hflux_counter = ht_hflux_counter + 1
 #endif
 
            end do
         end do
+#if NDIM == 3
+        end do
+#endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
@@ -215,10 +230,10 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
         k = 1
 #if NDIM == 3
-       do k=blkLimits(LOW,KAXIS)-1,blkLimits(HIGH,KAXIS)
+       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
 #endif
-        do j=blkLimits(LOW,JAXIS)-1,blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS)-1,blkLimits(HIGH,IAXIS)
+        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
                          
            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                    real(i - NGUARD - 1)*del(IAXIS) +   &
@@ -236,38 +251,36 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                    0.5*del(KAXIS)
 #endif
          
-
 #if NDIM == 2
-           if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0) then
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0) then
 
 #else
-           if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or. &
-              solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0) then
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0) then
 #endif
 
            ! Get probe in fluid
            hnorm(1) = 0.0
-           hnorm(2) = 1.5*del(IAXIS)
-           hnorm(3) = 2.0*del(IAXIS)
-        
-           xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
-           yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
-           zprobe(1) = 0.0
+           hnorm(2) = sign(1.5*del(IAXIS),solnData(LMDA_VAR,i,j,k))
+           hnorm(3) = sign(2.0*del(IAXIS),solnData(LMDA_VAR,i,j,k))
+               
+           do probe_index = 1,3
 
-#if NDIM == 3
-           zprobe(1) = zcell + solnData(NMLZ_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k)
-#endif
-        
-           do probe_index = 2,3
-
-           xprobe(probe_index) = xprobe(1) + solnData(NMLX_VAR,i,j,k)*hnorm(probe_index)
-           yprobe(probe_index) = yprobe(1) + solnData(NMLY_VAR,i,j,k)*hnorm(probe_index)
+           xprobe(probe_index) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm(probe_index))
+           yprobe(probe_index) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm(probe_index))
            zprobe(probe_index) = 0.0
 
 #if NDIM == 3
-           zprobe(probe_index) = zprobe(1) + solnData(NMLZ_VAR,i,j,k)*hnorm(probe_index)
+           zprobe(probe_index) = zcell + solnData(NMLZ_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm(probe_index))
 #endif
 
            end do
@@ -329,20 +342,44 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
            enddo
+        
+           if(solnData(LMDA_VAR,i,j,k) .lt. 0.0) then
 
-           ht_ibx(hflux_counter) = xprobe(1)
-           ht_iby(hflux_counter) = yprobe(1)
-           ht_ibz(hflux_counter) = zprobe(1)
+                thcoC = mph_thco1/mph_thco2
+                if(solnData(DFUN_VAR,i,j,k) .lt. 0.0) thcoC = mph_thco2/mph_thco2
 
-           ht_ibT(hflux_counter) = zp(1)
+                thcoP = thco3/mph_thco2
+        
+           else
 
-           ! Using first  probe - first order
-           ht_ibNu(hflux_counter) = (zp(2)-zp(1))/hnorm(2)
+                thcoC = thco3/mph_thco2
 
-           ! Using two probes - second order
-           !ht_ibNu(hflux_counter) = (zp(3)*hnorm(2)*hnorm(2) - zp(2)*hnorm(3)*hnorm(3) - &
-           !                          zp(1)*(hnorm(2)*hnorm(2) - hnorm(3)*hnorm(3))) / &
-           !                         (hnorm(2)*hnorm(3)*(hnorm(2)-hnorm(3)))
+                thcoP = mph_thco1/mph_thco2
+                if(phiprobe(2) .lt. 0.0) thcoP = mph_thco2/mph_thco2
+
+
+           end if
+        
+           thcoE = ((solnData(LMDA_VAR,i,j,k)+hnorm(2))*thcoC*thcoP)/(thcoP*solnData(LMDA_VAR,i,j,k) + thcoC*hnorm(2))
+
+           hratio = thcoE/thcoP
+
+           ht_ibx(hflux_counter)  = xprobe(1)
+           ht_iby(hflux_counter)  = yprobe(1)
+           ht_ibz(hflux_counter)  = zprobe(1)
+
+           ht_ibT(hflux_counter)  = zp(1)
+
+           ! First Order Approximation
+           !ht_ibNu(hflux_counter) = hratio*(zp(2)-solnData(TEMP_VAR,i,j,k))/(solnData(LMDA_VAR,i,j,k)+hnorm(2))
+
+
+           ! Second Order Approximation
+           h2 = solnData(LMDA_VAR,i,j,k) + hnorm(2)
+           h3 = solnData(LMDA_VAR,i,j,k) + hnorm(3)
+
+           ht_ibNu(hflux_counter) = hratio*(zp(3)*h2*h2 - zp(2)*h3*h3 - &
+                                            solnData(TEMP_VAR,i,j,k)*(h2*h2 - h3*h3))/(h2*h3*(h2-h3))          
 
            hflux_counter = hflux_counter+1
 
