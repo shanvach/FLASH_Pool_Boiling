@@ -337,12 +337,12 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            ht_ibT(hflux_counter) = zp(1)
 
            ! Using first  probe - first order
-           !ht_ibNu(hflux_counter) = (zp(2)-zp(1))/hnorm(2)
+           ht_ibNu(hflux_counter) = (zp(2)-zp(1))/hnorm(2)
 
            ! Using two probes - second order
-           ht_ibNu(hflux_counter) = (zp(3)*hnorm(2)*hnorm(2) - zp(2)*hnorm(3)*hnorm(3) - &
-                                     zp(1)*(hnorm(2)*hnorm(2) - hnorm(3)*hnorm(3))) / &
-                                    (hnorm(2)*hnorm(3)*(hnorm(2)-hnorm(3)))
+           !ht_ibNu(hflux_counter) = (zp(3)*hnorm(2)*hnorm(2) - zp(2)*hnorm(3)*hnorm(3) - &
+           !                          zp(1)*(hnorm(2)*hnorm(2) - hnorm(3)*hnorm(3))) / &
+           !                         (hnorm(2)*hnorm(3)*(hnorm(2)-hnorm(3)))
 
            hflux_counter = hflux_counter+1
 
