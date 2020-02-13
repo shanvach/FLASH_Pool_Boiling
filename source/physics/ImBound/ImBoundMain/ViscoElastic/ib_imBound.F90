@@ -156,13 +156,13 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  gcMask(VARO_VAR) = .TRUE.
+  gcMask(VARC_VAR) = .TRUE.
 
   ! BC fill for face center variables
-  gcMask(NUNK_VARS+VAR1_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VAR1_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
 #if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VAR1_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
 #endif
 
   ! Fill guard cells
