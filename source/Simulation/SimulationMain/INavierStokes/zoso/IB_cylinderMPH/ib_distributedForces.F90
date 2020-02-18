@@ -148,8 +148,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   np(IAXIS) = nxp
   np(JAXIS) = nyp
 ! Added for multiphase -- EG -- ??
-!  ndf(IAXIS) = nxdf
-!  ndf(JAXIS) = nydf
+  ndf(IAXIS) = nxdf
+  ndf(JAXIS) = nydf
 
 #if NDIM == 3
   zp  = particleData(POSZ_PART_PROP)
@@ -157,18 +157,18 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   wbdd= particleData(ACCZ_PART_PROP)
   nzp = particleData(NMLZ_PART_PROP)
 ! Added for multiphase -- EG -- ??
-!  nzdf = particleData(DFUN_PART_PROP)
+  nzdf = particleData(DFUN_PART_PROP)
 #else
   zp  = 0.
   wbd = 0.
   wbdd= 0.
   nzp = 0.
 ! Added for multiphase -- EG -- ??
-!  nzdf = 0.
+  nzdf = 0.
 #endif
   np(KAXIS) = nzp
 ! Added for multiphase -- EG -- ??
-!  ndf(KAXIS) = nzdf
+  ndf(KAXIS) = nzdf
 
 
   ! Function Gimme h:
@@ -253,95 +253,109 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   xdf(KAXIS) = 0.
 #endif
 
+! Added for multiphase -- EG --
+        ! Point to cell centered Variables:
+        call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+        gridfl(:) = CENTER
+
+        call ib_stencils(xdf,ndf,gridfl,del,coord,bsize,   & 
+                         ielem(:,:,1),hl,COMPUTE_FORCES)
+
+        ! Compute shape functions
+        ! Positions of points on the stencil:
+
+        xyz_stencil(1:ib_stencil,1:MDIM) = 0. 
+
+        do idim = 1,NDIM
+           xyz_stencil(1:ib_stencil,idim) = coord(idim) - 0.5*bsize(idim) + &
+                real(ielem(1:ib_stencil,idim,1) - NGUARD - 1)*del(idim) + delaux(idim) 
+        enddo
+
+        ! Get interpolation functions:
+        call ib_getInterpFunc(xdf,xyz_stencil,del,derivflag,dfunle)
+
+        ! Interpolate function at probe 
+        do i = 1 , ib_stencil      
+              imp(2,2,2) = solnData(DFUN_VAR,ielem(i,IAXIS,1), &
+                                      ielem(i,JAXIS,1), &
+                                      ielem(i,KAXIS,1));
+
+              zdfun = zdfun + dfunle(i,1)*imp(2,2,2)
+        end do
+
+        zdfun = zdfun / ib_stencil
+
+        if ( zdfun >= 0 ) then
+               c_rho = mph_rho1 / mph_rho2
+        else
+               c_rho = mph_rho2 / mph_rho2
+        end if 
+
+        ! Release Pointer
+        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+! Added for multiphase -- EG --
+!           ! Point to cell centered Variables:
+!          call Grid_getBlkPtr(blockID,solnData,CENTER)
+! 
+!     do i = 1 , ib_stencil
+!           part_Nml(IAXIS) = solnData(NMLX_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
+!           part_Nml(JAXIS) = solnData(NMLY_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
+!           part_Nml(KAXIS) = 0.0
+!#if NDIM == 3
+!           part_Nml(KAXIS) = solnData(NMLZ_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
+!#endif
+!     end do
+!           ! Cell centered stencil for DFUN interpolation at probe
+!           gridfl(:) = CENTER
+!
+!           call ib_stencils(xdf,part_Nml,gridfl,del,coord,bsize, &
+!                            ielem(:,:,1),dfe,FORCE_FLOW)
+!
+!           delaux = 0.5*del
+!
+!           xyz_stencil(:,:) = 0.
+!        
+!           do idim = 1,NDIM
+!                xyz_stencil(1:ib_stencil,idim) = coord(idim) - 0.5*bsize(idim) + &
+!                        real(ielem(1:ib_stencil,idim,1) - NGUARD - 1)*del(idim) + delaux(idim) 
+!           enddo
+!
+!           ! Get shape function ib_external_phile  for points on stencil
+!           call ib_getInterpFunc(xdf,xyz_stencil,del,derivflag,dfunle)
+!
+!           zdfun = 0.      ! zp = DFUN at probe point
+!
+!#if NDIM == 2
+!           do i = 1 , ib_stencil
+!                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
+!                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),1);
+!           enddo
+!#endif
+!
+!#if NDIM == 3
+!           do i = 1 , ib_stencil
+!                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
+!                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1));
+!           enddo
+!#endif
+!           if ( zdfun >= 0 ) then
+!                  c_rho = mph_rho1 / mph_rho2
+!           else
+!                  c_rho = mph_rho2 / mph_rho2
+!           end if 
+!
+!           ! Release Pointer
+!           call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+!
+
+! End of Added for multiphase -- EG --
+
   zpres = 0.
   zv(1:MDIM) = 0.
   zL= 0.
   do presflag = CONSTANT_ZERO,CONSTANT_ONE
-
-! Added for multiphase -- EG --
-
-!        gridfl(:) = CENTER
-!
-!        call ib_stencils(xdf,ndf,gridfl,del,coord,bsize,   & 
-!                         ielem(:,:,1),hl,COMPUTE_FORCES)
-!
-!        ! Compute shape functions
-!        ! Positions of points on the stencil:
-!        xyz_stencil(1:ib_stencil,1:MDIM) = 0. 
-!        do idim = 1,NDIM
-!           xyz_stencil(1:ib_stencil,idim) = coord(idim) - 0.5*bsize(idim) + &
-!                real(ielem(1:ib_stencil,idim,1) - NGUARD - 1)*del(idim) + delaux(idim) 
-!        enddo
-!
-!        ! Get interpolation functions:
-!        call ib_getInterpFunc(xdf,xyz_stencil,del,derivflag,dfunle)
-!
-!        do i = 1 , ib_stencil      
-!              imp(2,2,2) = solnData(DFUN_VAR,ielem(i,IAXIS,1), &
-!                                      ielem(i,JAXIS,1), &
-!                                      ielem(i,KAXIS,1));
-!
-!              zdfun = zdfun + dfunle(i,1)*imp(2,2,2)
-!
-!              if ( zdfun >= 0 ) then
-!                     c_rho = mph_rho1 / mph_rho2
-!              else
-!                     c_rho = mph_rho2 / mph_rho2
-!              end if 
-!        end do
-!
-!           ! Interpolate function at probe 
-
-! Added for multiphase -- EG --
-    
-     do i = 1 , ib_stencil
-           part_Nml(IAXIS) = solnData(NMLX_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-           part_Nml(JAXIS) = solnData(NMLY_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-           part_Nml(KAXIS) = 0.0
-#if NDIM == 3
-           part_Nml(KAXIS) = solnData(NMLZ_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-#endif
-     end do
-           ! Cell centered stencil for DFUN interpolation at probe
-           gridfl(:) = CENTER
-
-           call ib_stencils(xdf,part_Nml,gridfl,del,coord,bsize, &
-                            ielem(:,:,1),dfe,FORCE_FLOW)
-
-           delaux = 0.5*del
-
-           xyz_stencil(:,:) = 0.
-        
-           do idim = 1,NDIM
-                xyz_stencil(1:ib_stencil,idim) = coord(idim) - 0.5*bsize(idim) + &
-                        real(ielem(1:ib_stencil,idim,1) - NGUARD - 1)*del(idim) + delaux(idim) 
-           enddo
-
-           ! Get shape function ib_external_phile  for points on stencil
-           call ib_getInterpFunc(xdf,xyz_stencil,del,derivflag,dfunle)
-
-           zdfun = 0.      ! zp = DFUN at probe point
-
-#if NDIM == 2
-           do i = 1 , ib_stencil
-                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),1);
-           enddo
-#endif
-
-#if NDIM == 3
-           do i = 1 , ib_stencil
-                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
-                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1));
-           enddo
-#endif
-           if ( zdfun >= 0 ) then
-                  c_rho = mph_rho1 / mph_rho2
-           else
-                  c_rho = mph_rho2 / mph_rho2
-           end if 
-
-! End of Added for multiphase -- EG --
 
      ! N kij
 #ifdef TANGENT_WITH_VORTICITY
