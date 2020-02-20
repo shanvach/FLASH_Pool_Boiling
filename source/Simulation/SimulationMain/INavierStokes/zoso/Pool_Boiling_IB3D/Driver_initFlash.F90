@@ -215,7 +215,7 @@ subroutine Driver_initFlash()
      call Particles_initForces
   end if
 
-  !call IO_outputInitial(  dr_nbegin, dr_initialSimTime)
+  call IO_outputInitial(  dr_nbegin, dr_initialSimTime)
   if(dr_globalMe==MASTER_PE)print*,'Initial plotfile written'
 
   if(dr_globalMe==MASTER_PE)print*,'Driver init all done'

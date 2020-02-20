@@ -523,7 +523,7 @@ else if(mph_flag == 0) then
 
      sim_jet_z = 0.0
  
-     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+     do i=blkLimitsGC(LOW,IAXIS),blkLimitsGC(HIGH,IAXIS)
 
        xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
                real(i - NGUARD - 1)*del(IAXIS) +   &

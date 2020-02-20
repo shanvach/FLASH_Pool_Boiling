@@ -1,5 +1,5 @@
-subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
-                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda)
+subroutine Heat_RHS_3D_weno3(T_rhs, T_o, T_g, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,jy2,&
+                       kz1,kz2,rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda,phip)
 
   use Heat_AD_data
   use Multiphase_data, only: mph_cp2,mph_thco2, mph_rho2,mph_rho1
@@ -10,12 +10,12 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
   implicit none
   real, dimension(:,:,:), intent(inout) :: T_rhs
-  real, dimension(:,:,:), intent(in) :: T_o
+  real, dimension(:,:,:), intent(in) :: T_o, T_g
   real, dimension(:,:,:), intent(in) :: u,v,w
   real, intent(in) :: dx, dy, dz, inRe
   integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
   real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph,rho1z,rho2z
-  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda
+  real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda,phip
 
   real :: T_res
 
@@ -76,75 +76,74 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
      thzp1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k+1)))
      thzm1 = abs(s(i,j,k))/(abs(s(i,j,k))+abs(s(i,j,k-1)))
 
-     thxp2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i+1,j,k)))
-     thxm2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i-1,j,k)))
-     thyp2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i,j+1,k)))
-     thym2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i,j-1,k)))
-     thzp2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i,j,k+1)))
-     thzm2 = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i,j,k-1)))
- 
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) &
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i+1,j,k))) &
      call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
      ! End of Case 1 !
 
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i-1,j,k) .lt. 0.0) &
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i-1,j,k))) &
      call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
      ! End of Case 2 !
 
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) &
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j+1,k))) &
      call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
      ! End of Case 3 !
 
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j-1,k) .lt. 0.0) &
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j-1,k))) &
      call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
      ! End of Case 4 ! 
  
      ! Case 5 !
-     if(s(i,j,k)*s(i,j,k+1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j,k+1) .lt. 0.0) &
+     if(s(i,j,k)*s(i,j,k+1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j,k+1))) &
      call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Tsat,max(tol,thzp1))
      ! End of Case 5 !
 
      ! Case 6 !
-     if(s(i,j,k)*s(i,j,k-1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j,k-1) .lt. 0.0) &
+     if(s(i,j,k)*s(i,j,k-1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j,k-1))) &
      call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Tsat,max(tol,thzm1))
      ! End of Case 6 ! 
 
      !______________________IB Terms_______________________!
 
      ! Case 1 !
-     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Twall_high,max(tol,thxp2))
+     if((lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i+1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
+     Tx_plus = T_g(i+1,j,k)
      ! End of Case 1 !
 
      ! Case 2 !
-     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Twall_high,max(tol,thxm2))
+     if((lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) .or. &
+        (lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i-1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
+     Tx_mins = T_g(i-1,j,k)
      ! End of Case 2 !
 
      ! Case 3 !
-     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Twall_high,max(tol,thyp2))
+     if((lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j+1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
+     Ty_plus = T_g(i,j+1,k)
      ! End of Case 3 !
 
      ! Case 4 !
-     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Twall_high,max(tol,thym2))
+     if((lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) .or. &
+        (lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j-1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
+     Ty_mins = T_g(i,j-1,k)
      ! End of Case 4 ! 
- 
+
      ! Case 5 !
-     if(lambda(i,j,k)*lambda(i,j,k+1) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Tz_plus,Tij,ht_Twall_high,max(tol,thzp2))
+     if((lambda(i,j,k)*lambda(i,j,k+1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j,k+1))) .or. &
+        (lambda(i,j,k)*lambda(i,j,k+1) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j,k+1)) .eq. sign(1.,phip(i,j,k)))  ) &
+     Tz_plus = T_g(i,j,k+1)
      ! End of Case 5 ! 
  
      ! Case 6 !
-     if(lambda(i,j,k)*lambda(i,j,k-1) .le. 0.d0) &
-     call Heat_GFMstencil_o1(Tz_mins,Tij,ht_Twall_high,max(tol,thzm2))
+     if((lambda(i,j,k)*lambda(i,j,k-1) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j,k-1))) .or. &
+        (lambda(i,j,k)*lambda(i,j,k-1) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j,k-1)) .eq. sign(1.,phip(i,j,k)))  )   &
+     Tz_mins = T_g(i,j,k-1)
      ! End of Case 6 ! 
  
      !______________________Advection Terms_______________________!
@@ -526,7 +525,7 @@ subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w,dx, dy, dz,inRe, ix1,ix2, jy1,j
 
     else
 
-    T_rhs(i,j,k) = (1.0-Tij)/dr_dt
+    T_rhs(i,j,k) = Txx + Tyy + Tzz
 
     end if
 

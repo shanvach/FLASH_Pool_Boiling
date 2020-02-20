@@ -14,7 +14,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
                                 Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro,&
-                                Heat_getWallflux
+                                Heat_getWallflux,Heat_applyGFM
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -26,7 +26,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Heat_AD_data, only: ht_hfit,ht_Tsat,ht_microFlg,ht_fmic,ht_qmic
 
-   use Driver_data,  only: dr_nstep,dr_simTime
+   use Driver_data,  only: dr_nstep,dr_simTime,dr_restart
 
    use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu_l, ht_Nu_t
 
@@ -104,8 +104,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
     end do
- 
+
    end if
+
+   call Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    do step = 1,1 ! RK-2 Loop
     do lb = 1,blockCount
@@ -128,7 +130,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
-     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),solnData(TGST_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      del(DIR_X),del(DIR_Y),del(DIR_Z),&
@@ -141,11 +143,11 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
-                     solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
+                     solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:),solnData(DPRB_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
-     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),solnData(TGST_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      facezData(VELC_FACE_VAR,:,:,:),&
@@ -162,7 +164,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
                      solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
-                     solnData(LMDA_VAR,:,:,:))
+                     solnData(LMDA_VAR,:,:,:),solnData(DPRB_VAR,:,:,:))
 #endif
 
      if (step == 1) then

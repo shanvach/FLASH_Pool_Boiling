@@ -1,7 +1,7 @@
 subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-!#define CONTACT_LINE_PINNING
-#define CONTACT_ANGLE
+#define CONTACT_LINE_PINNING
+!#define CONTACT_ANGLE
 
 #include "Flash.h"
 
@@ -116,9 +116,10 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real :: dphidn
 
-  real :: ybase, free_surface_loc
+  real :: ybase, free_surface_loc, base_radius, this_radius
 
   ybase = 0.0 - 1.0*dr_simTime
+  base_radius = 0.5
   free_surface_loc = -2.0
 
   do lb = 1,blockCount
@@ -166,7 +167,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #ifdef CONTACT_LINE_PINNING          
-           if(solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
+           if(solnData(LMDA_VAR,i,j,k) .ge. -1.5*del(IAXIS) .and. solnData(LMDA_VAR,i,j,k) .le. 1.5*del(IAXIS)) then
 #endif
 
 #ifdef CONTACT_ANGLE
@@ -175,7 +176,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
            ! Get probe in fluid
            hnorm  = 1.0*del(JAXIS)
-           hnorm2 = 0.25*del(JAXIS)
+           hnorm2 = 0.5*del(JAXIS)
 
            xprobe(1) = xcell + solnData(NMLX_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
            yprobe(1) = ycell + solnData(NMLY_VAR,i,j,k)*(solnData(LMDA_VAR,i,j,k)+hnorm)
@@ -249,25 +250,27 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #ifdef CONTACT_LINE_PINNING
-           if(ybase-0.2 .ge. free_surface_loc) then
-                solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc 
+           !if(ybase-0.25 .ge. free_surface_loc) then
+           !     solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc 
+           !
+           !else
+           !     solnData(DFUN_VAR,i,j,k) = ycell - (ybase - 0.25)
+           !
+           !endif
+
+           this_radius = sqrt(xcell**2 + zcell**2)
+
+           if(ybase .ge. free_surface_loc) then
+
+             solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc
 
            else
-                solnData(DFUN_VAR,i,j,k) = ycell - (ybase - 0.2)
-
-           endif
-
-           !if(ycell .ge. free_surface_loc) then
-
-           !  solnData(DFUN_VAR,i,j,k) = ycell - free_surface_loc
-
-           !else
-           !     if(ycell .ge. ybase-0.1) then
-           !             solnData(DFUN_VAR,i,j,k) = -(solnData(LMDA_VAR,i,j,k) - hnorm2)
-           !     else
-           !             solnData(DFUN_VAR,i,j,k) = -abs(solnData(LMDA_VAR,i,j,k) - hnorm2)
-           !     end if
-           !end if
+                if(ycell .ge. (ybase - hnorm2)) then
+                        solnData(DFUN_VAR,i,j,k) = -solnData(LMDA_VAR,i,j,k) + hnorm2
+                else
+                        solnData(DFUN_VAR,i,j,k) = -abs(solnData(LMDA_VAR,i,j,k) + hnorm2)
+                end if
+           end if
 #endif
 
            end if

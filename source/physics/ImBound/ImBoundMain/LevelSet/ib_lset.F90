@@ -249,15 +249,15 @@ subroutine ib_lset(blockCount,blockList,dt)
                  ! Method #1 use ratios to divide the current panel using
                  ! y intersection and find x
 
-                 !mratio = PA(2) - ycell
-                 !nratio = ycell - PB(2)
-                 !xit = (mratio*PB(1) + nratio*PA(1))/(mratio + nratio)
+                 mratio = PA(2) - ycell
+                 nratio = ycell - PB(2)
+                 xit = (mratio*PB(1) + nratio*PA(1))/(mratio + nratio)
 
 
                  ! Method #2 use the equation of line instead
 
-                 mratio = (PB(2)-PA(2))/(PB(1)-PA(1))          
-                 xit = PA(1) + (ycell - PA(2))/mratio
+                 !mratio = (PB(2)-PA(2))/(PB(1)-PA(1))          
+                 !xit = PA(1) + (ycell - PA(2))/mratio
 
                  ! Check to make sure that the intersection is on the right
 

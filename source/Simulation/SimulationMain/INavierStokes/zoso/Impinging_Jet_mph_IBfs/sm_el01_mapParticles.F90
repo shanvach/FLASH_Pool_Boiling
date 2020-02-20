@@ -45,10 +45,10 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
   real :: ei,N1,N2
   real :: amp, omega, pi, offset, phase
 
-  amp = 0.5
-  omega = 0.1
+  amp = 0.1
+  omega = 0.2614
   pi = acos(-1.0)
-  offset = 0.5
+  offset = 0.1
   phase = pi
 
   !

@@ -6,12 +6,12 @@ gr_pmRpConsvFluxes = .TRUE.
 gr_pmRpConsvFluxDensities = .FALSE.
 
 # Particles
-pt_maxPerProc=3500
+pt_maxPerProc=200000
 
 # Inverse of Reynolds Number
-invRe = 0.0002
+invRe = 0.00006
 
-iConvU = 1
+iConvU = 2
 
 # Subgrid Scale model flag (0 no sgs model, 1 sgs model)
 isgs            = 0
@@ -30,7 +30,7 @@ gravY =  0.04
 gravZ =  0.0
 
 # sten is the inverse of the Weber number
-sten = 0.016
+sten = 0.005
 
 # Number of level-set redistancing iterations
 inls = 2
@@ -82,11 +82,11 @@ restart         = .false.
 nend = 100000000
 #nend = 3
 tmax            = 2500.0
-cflflg          = 0
-cfl             = 0.01
-sigma		= 0.01
-dtspec          = 1.0d-3
-dtinit          = 1.0d-3
+cflflg          = 1
+cfl             = 0.005
+sigma		= 0.005
+dtspec          = 5.0d-4
+dtinit          = 5.0d-4
 tstep_change_factor=1.01
 
 
@@ -103,23 +103,23 @@ plot_var_5      = "dust" #divergence
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-#checkpointFileIntervalTime = 2.5
-checkpointFileIntervalStep = 100000
+checkpointFileIntervalTime = 10.0
+#checkpointFileIntervalStep = 40000
 
-#plotFileIntervalTime = 2.5
-plotFileIntervalStep = 500
+plotFileIntervalTime = 2.5
+#plotFileIntervalStep = 2500
 
 ##	AMR parameters
-nblockx	= 10
-nblocky	= 10
-nblockz = 10
+nblockx	= 5
+nblocky	= 5
+nblockz = 5
 
 lrefine_min	= 1
-lrefine_max     = 1
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
-nrefs           = 1000000
+nrefs           = 100000
 #refine_var_1    = "dfun"
 #refine_cutoff_1 = .1
 #derefine_cutoff_1 = -.1
