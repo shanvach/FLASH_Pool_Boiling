@@ -83,10 +83,10 @@ nend = 100000000
 #nend = 3
 tmax            = 2500.0
 cflflg          = 1
-cfl             = 0.002
-sigma		= 0.002
-dtspec          = 1.0d-2
-dtinit          = 1.0d-2
+cfl             = 0.005
+sigma		= 0.005
+dtspec          = 5.0d-4
+dtinit          = 5.0d-4
 tstep_change_factor=1.01
 
 
@@ -104,10 +104,10 @@ pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
 checkpointFileIntervalTime = 10.0
-#checkpointFileIntervalStep = 100000
+#checkpointFileIntervalStep = 40000
 
 plotFileIntervalTime = 2.5
-#plotFileIntervalStep = 1
+#plotFileIntervalStep = 5000
 
 ##	AMR parameters
 nblockx	= 5
@@ -115,7 +115,7 @@ nblocky	= 5
 nblockz = 5
 
 lrefine_min	= 1
-lrefine_max     = 4
+lrefine_max     = 3
 mgrid_solveLevelKPD = 1
 lrefine_min_init = 1
 
