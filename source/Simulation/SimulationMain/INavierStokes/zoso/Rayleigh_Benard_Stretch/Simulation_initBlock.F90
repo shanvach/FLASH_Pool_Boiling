@@ -62,8 +62,12 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(GRID_JHI_GC) :: ycell, yedge
   real, dimension(GRID_KHI_GC) :: zcell, zedge
 
-  ! write out simulation time at initialization 
-  ! write(*,*) 'BlockId =',blockId,' sim_init =',sim_init
+  real :: xMag, xPwr, xSgn, xAmp, xFrq,             &
+          yMag, yPwr, ySgn, yAmp, yFrq, rMag,       &
+          xFMag, xFPwr, xFSgn, yFMag, yFPwr, yFSgn, &
+          xCnt, xWth, yCnt, yWth,                   &
+          xSrcPol, xSrcSin, ySrcPol, ySrcSin
+  integer, parameter :: seed = 86456
 
   ! Point to Blocks centered variables:
   call Grid_getBlkPtr(blockID, solnData, CENTER)
@@ -75,12 +79,6 @@ subroutine Simulation_initBlock(blockId)
 #if NDIM == 3
   call Grid_getBlkPtr(blockID, facezData, FACEZ)
 #endif
-
-
-  !Get Coord and Bsize for the block
-  call Grid_getBlkBoundBox(blockId, boundBox)
-  bsize(:) = boundBox(2,:) - boundBox(1,:)
-  call Grid_getBlkCenterCoords(blockId, coord)
 
   call Grid_getCellMetrics(IAXIS, blockId, CENTER, .true., dx, GRID_IHI_GC)  
   call Grid_getCellMetrics(JAXIS, blockId, CENTER, .true., dy, GRID_JHI_GC)  
@@ -168,7 +166,7 @@ subroutine Simulation_initBlock(blockId)
 
 
 
-    ! Rayleigh Benard flow (cond)
+    ! Rayleigh Benard flow (conv)
     case (2)
 
       solnData(PRES_VAR,:,:,:) = 0.0
@@ -189,9 +187,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            zcell = coord(KAXIS) - bsize(KAXIS)/2.0 + real(k-NGUARD-1)*dz(k) + 0.5*dz(k)
-!            solnData(TEMP_VAR,i,j,k) = (1.0 - zcell) 
+            solnData(TEMP_VAR,i,j,k) = -(sim_zMax/2.0)*( 2.0*(zcell(k) - 0.5) )**13.0 + sim_zMax/2.0 
           enddo
         enddo
       enddo
@@ -201,14 +197,74 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            solnData(TEMP_VAR,i,j,k) = (1.0 - ycell) 
+            solnData(TEMP_VAR,i,j,k) = -(sim_yMax/2.0)*( 2.0*(ycell(j) - 0.5) )**13.0 + sim_yMax/2.0
           enddo
         enddo
       enddo
 #endif
 
+
+
+    ! Rayleigh Benard flow (w/ Plum init)
+    case (3)
+      
+      xMag = 1.0000
+      xPwr = 0.0000
+      xSgn = 0.0000
+      xAmp = 0.2000
+      xFrq = 2.0000
+
+      yMag = 1.0000
+      yPwr = 4.0000
+      ySgn = 1.0000
+      yAmp = 0.0000
+      yFrq = 0.0000
+
+      rMag = 0.0025
+
+      xFMag = 1.000
+      xFPwr = 3.000
+      xFSgn = 1.000
+      yFMag = 1.000
+      yFPwr = 2.000
+      yFSgn = 0.000 
+
+      xWth =  sim_xMax - sim_xMin
+      xCnt = (sim_xMax + sim_xMin) / 2.0
+      yWth =  sim_yMax - sim_yMin
+      yCnt = (sim_yMax + sim_yMin) / 2.0
+      call srand(seed)
+
+      solnData(PRES_VAR,:,:,:) = 0.0
+      solnData(DELP_VAR,:,:,:) = 0.0
+      solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(TVIS_VAR,:,:,:) = 0.0
+
+      facexData(VELC_FACE_VAR,:,:,:) = 0.0
+      faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+      facexData(RHDS_FACE_VAR,:,:,:) = 0.0
+      faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
+
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, CENTER)
+      do k=1, blkLimitsGC(HIGH,KAXIS)
+        do j=1, blkLimitsGC(HIGH,JAXIS)
+          do i=1, blkLimitsGC(HIGH,IAXIS)
+            
+            xSrcPol = ((-1)**xSgn * (2.0 * (xcell(i) - xCnt) / xWth)**max(0.0, 2.0 * xPwr - 1) + 1) * xMag / 2.0
+            xSrcSin = xMag * xAmp * sin(2 * (2.0 * xFrq - xSgn) * 3.14 * (xcell(i) - xCnt) / xWth) *    &
+                      (((-1)**xFSgn * (2.0 * (xcell(i) - xCnt) / xWth)**(2 * xFPwr) + xFSgn) * xFMag) * &
+                      (((-1)**yFSgn * (2.0 * (ycell(j) - yCnt) / yWth)**(2 * yFPwr) + yFSgn) * yFMag)
+            
+            ySrcPol = ((-1)**ySgn * (2.0 * (ycell(j) - yCnt) / yWth)**max(0.0, 2.0 * yPwr - 1) + 1) * yMag / 2.0
+            ySrcSin = yMag * yAmp * sin(2 * (2.0 * yFrq - ySgn) * 3.14 * (ycell(j) - yCnt) / yWth) *    &
+                      (((-1)**xFSgn * (2.0 * (xcell(i) - xCnt) / xWth)**(2 * xFPwr) + xFSgn) * xFMag) * &
+                      (((-1)**yFSgn * (2.0 * (ycell(j) - yCnt) / yWth)**(2 * yFPwr) + yFSgn) * yFMag)
+            
+            solnData(TEMP_VAR,i,j,k) = min(1.0, max(0.0, (xSrcPol + xSrcSin) * (ySrcPol + ySrcSin) + rMag * (2.0 * rand() - 1)))
+          enddo
+        enddo
+      enddo
+    
 
 
 
@@ -312,9 +368,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i)
-!            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge)*SIN(ycell)
+            facexData(VELC_FACE_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xedge(i))*SIN(ycell(j))
           enddo
         enddo
       enddo
@@ -323,9 +377,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-!            yedge = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j)
-!            faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge)*SIN(xcell)
+            faceyData(VELC_FACE_VAR,i,j,k) = EXP(-2.0*dr_simTime)*COS(yedge(j))*SIN(xcell(i))
           enddo
         enddo
       enddo
@@ -334,9 +386,7 @@ subroutine Simulation_initBlock(blockId)
       do k=1, blkLimitsGC(HIGH,KAXIS)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
-!            xcell = coord(IAXIS) - bsize(IAXIS)/2.0 + real(i-NGUARD-1)*dx(i) + 0.5*dx(i)
-!            ycell = coord(JAXIS) - bsize(JAXIS)/2.0 + real(j-NGUARD-1)*dy(j) + 0.5*dy(j)
-!            solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xcell)*COS(ycell)/2.0 + 0.5
+            solnData(TEMP_VAR,i,j,k) = -EXP(-2.0*dr_simTime)*COS(xcell(i))*COS(ycell(j))/2.0 + 0.5
           enddo
         enddo
       enddo
