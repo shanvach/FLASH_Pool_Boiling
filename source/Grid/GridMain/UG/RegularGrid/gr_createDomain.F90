@@ -107,6 +107,7 @@ subroutine gr_createDomain()
      gr_jhi = 1
      gr_jhiGc = 1
      gr_jguard = 0
+     gJ = 1
   end if
 
 
@@ -124,6 +125,7 @@ subroutine gr_createDomain()
      gr_khi = 1
      gr_khiGc = 1
      gr_kguard = 0
+     gK = 1
   endif
   
   !! Now create the grid and coordinates etc
@@ -402,6 +404,8 @@ subroutine gr_createDomain()
 
     gr_jCoords(LEFT_EDGE:RIGHT_EDGE,1,1)=gr_jmin
     gr_delta(JAXIS)=0.0
+    gr_jMetrics(LEFT_EDGE:RIGHT_EDGE,1,1) = 1.0 
+    gr_jMetricsGlb(LEFT_EDGE:RIGHT_EDGE,1,1) = 1.0 
 
   end if
 
@@ -500,6 +504,8 @@ subroutine gr_createDomain()
 
     gr_kCoords(LEFT_EDGE:RIGHT_EDGE,1,1) = gr_kmin
     gr_delta(KAXIS)=0.0
+    gr_kMetrics(LEFT_EDGE:RIGHT_EDGE,1,1) = 1.0 
+    gr_kMetricsGlb(LEFT_EDGE:RIGHT_EDGE,1,1) = 1.0 
 
   end if
  

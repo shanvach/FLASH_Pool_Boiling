@@ -82,7 +82,7 @@ subroutine ins_UstarStats( blockCount, blockList, print_flg, qin_flg)
      do k = blkLimits(LOW,KAXIS), blkLimits(HIGH,KAXIS)
        do j = blkLimits(LOW,JAXIS), blkLimits(HIGH,JAXIS)
          do i = blkLimits(LOW,IAXIS), blkLimits(HIGH,IAXIS)
-           delta_massi = delta_massi - dx(i)*dy(j)*dz(k) * scratchData(DIVV_SCRATCH_CENTER_VAR,i,j,k)
+           delta_massi = delta_massi - scratchData(DIVV_SCRATCH_CENTER_VAR,i,j,k) / (dx(i)*dy(j)*dz(k))
          end do
        end do
      end do
