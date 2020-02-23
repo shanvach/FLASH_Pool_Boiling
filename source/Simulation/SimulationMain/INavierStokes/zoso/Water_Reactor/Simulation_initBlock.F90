@@ -128,12 +128,12 @@ subroutine Simulation_initBlock(blockId)
 
   sim_xmin1 = 0.0
   sim_xmax1 = 1.0
-  sim_ymin1 = 46.0
+  sim_ymin1 = 47.8
   sim_ymax1 = 48.0
 
   sim_xmin2 = 9.0
   sim_xmax2 = 10.0
-  sim_ymin2 = 46.0
+  sim_ymin2 = 47.8
   sim_ymax2 = 48.0
 
   sim_xjet(1) = 4.0

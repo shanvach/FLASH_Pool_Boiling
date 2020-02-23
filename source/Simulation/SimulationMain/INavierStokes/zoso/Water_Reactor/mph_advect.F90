@@ -531,12 +531,6 @@ enddo
 
          end if
 
-        if (ycell .lt. 23) then
-
-            solnData(DFUN_VAR,i,j,k) = min(xcell-sim_xmin, sim_xmax - xcell)
-
-        end if
-
        end do
      end do
     end do
