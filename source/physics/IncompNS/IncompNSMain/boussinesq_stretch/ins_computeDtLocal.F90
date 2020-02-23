@@ -81,9 +81,9 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
-                                                                2.*MAXVAL(dy(:,CENTER))**2.,  &
-                                                                2.*MAXVAL(dz(:,CENTER))**2. ))
+  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX( MAXVAL(dx(:,CENTER))**2.,  &
+                                                                  MAXVAL(dy(:,CENTER))**2.,  &
+                                                                  MAXVAL(dz(:,CENTER))**2. ))
 
 #else
   velcoeff = eps
@@ -102,11 +102,10 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps  
   endif
   
-  dtv = ins_sigma / (MAX(ins_invsqrtRa_Pr, ht_invsqrtRaPr)*MAX( 2.*MAXVAL(dx(:,CENTER))**2.,  &
-                                                                2.*MAXVAL(dy(:,CENTER))**2. ))
+  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX( MAXVAL(dx(:,CENTER))**2., MAXVAL(dy(:,CENTER))**2. ))
 #endif
 
-  dtl = MIN(dtc,dtv)
+  dtl = 0.5 * MIN(dtc,dtv) 
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
