@@ -68,8 +68,7 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps
   endif
   
-  dtv = MIN( ins_sigma / (ins_invsqrtRa_Pr*MAX( 2./(dx*dx), 2./(dy*dy), 2./(dz*dz) )) , &
-             ins_sigma / (ht_invsqrtRaPr  *MAX( 1./(dx*dx), 1./(dy*dy), 1./(dz*dz) )) )
+  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX(dx*dx, dy*dy, dz*dz))
 
 # else
 
@@ -82,12 +81,12 @@ subroutine ins_computeDtLocal(blockID,   &
   dtc = ins_cfl / eps  
   endif
   
-  dtv = MIN( ins_sigma / (ins_invsqrtRa_Pr*MAX( 1.0/(dx*dx), 1.0/(dy*dy) )) , & 
-             ins_sigma / (ht_invsqrtRaPr  *MAX( 1.0/(dx*dx), 1.0/(dy*dy) )) )
+
+  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX(dx*dx, dy*dy))
 
 # endif
 
-  dtl = MIN(dtc,dtv)
+  dtl = 0.5 * MIN(dtc,dtv)
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
