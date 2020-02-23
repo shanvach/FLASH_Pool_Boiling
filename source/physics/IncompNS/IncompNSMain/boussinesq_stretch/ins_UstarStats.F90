@@ -107,7 +107,7 @@ subroutine ins_UstarStats( blockCount, blockList, print_flg, qin_flg)
   if (qin_flg) ins_Qin = ins_Qin + ins_deltamass
 
   if ((ins_meshMe .eq. MASTER_PE) .and. print_flg) &
-  write(*,*) 'Mean DivUstar, DeltaMass=', ins_meanDivUstar, ins_deltamass, ins_meshMe
+  write(*,*) 'Mean DivUstar, DeltaMass=', ins_meanDivUstar, ins_deltamass
 
   return
 
