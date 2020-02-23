@@ -625,6 +625,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkCenterCoords(blockId,coord)
      call Grid_getDeltas(blockID,del)
 
+     k = 1
+
      do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
@@ -635,7 +637,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
            ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS)
 
-           if(xcell .gt. 3.0 .and. xcell .lt. 7.0 .and. abs(ycell-21.0) .le. 2*del(JAXIS)) then
+           if(xcell .gt. 4.0 .and. xcell .lt. 6.0 .and. abs(ycell-30.0) .le. 2*del(JAXIS)) then
 
                 faceyData(VELC_FACE_VAR,i,j,k) = 4.0
                 

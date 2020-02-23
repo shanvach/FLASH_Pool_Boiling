@@ -8,12 +8,13 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #include "constants.h"
 #include "Heat_AD.h"
 #include "Flash.h"
+#include "ImBound.h"
 
    use Heat_AD_interface, only: Heat_Solve,Heat_RHS_upwind,Heat_calGradT,Heat_calGradT_central,&
                                 Heat_extrapGradT,Heat_calMdot,Heat_RHS_3D,Heat_RHS_weno3,&
                                 Heat_extrapGradT_3D,Heat_calGradT_3D,Heat_RHS_central,&
                                 Heat_RHS_3D_weno3,Heat_calGradT_3D_central,Heat_extrapGradT_weno3,Heat_getQmicro,&
-                                Heat_getWallflux
+                                Heat_getWallflux,Heat_applyGFM
 
    use Grid_interface, only: Grid_getDeltas, Grid_getBlkIndexLimits,&
                              Grid_getBlkPtr, Grid_releaseBlkPtr,    &
@@ -25,9 +26,15 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    use Heat_AD_data, only: ht_hfit,ht_Tsat,ht_microFlg,ht_fmic,ht_qmic
 
-   use Driver_data,  only: dr_nstep,dr_simTime
+   use Driver_data,  only: dr_nstep,dr_simTime,dr_restart
 
    use Heat_AD_data, only: ht_AMR_specs, ht_qmic, ht_dxmin, ht_Nu_l, ht_Nu_t
+
+   use ImBound_data, only: ib_vel_flg, ib_dfun_flg, ib_temp_flg
+
+   use ImBound_interface, only: ImBound
+
+   use InCompNS_data, only: ins_alfa
 
 #ifdef FLASH_GRID_PARAMESH
    use physicaldata, ONLY : interp_mask_unk_res,      &
@@ -66,53 +73,63 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    real    :: dxmin
 
    iter_count = 0
-
-!_________________________________Microlayer solution_____________________________________________!
-
-   if(ht_microFlg) then
-
-      print *,"Calculating minimum dx: "
-
-      dxmin    = 1e10
-
-      do lb = 1,blockCount
-
-        blockID = blockList(lb)
-        call Grid_getDeltas(blockID,del)
-        dxmin = min(dxmin,del(JAXIS))
-
-      end do
-
-      call MPI_ALLREDUCE(dxmin,ht_dxmin,1,FLASH_REAL,MPI_MIN,MPI_COMM_WORLD,ierr)
-       
-      ht_microFlg = .FALSE. 
-
-   end if
-
-   !if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_fmic,ht_dxmin)
-
-   !call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-   !call MPI_BCAST(ht_fmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
-
-   if (ins_meshMe .eq. MASTER_PE) print *,"qmic,fmic: ",ht_qmic,ht_fmic
-
 !______________________________________Energy Equation____________________________________________!
 
    T_resBlock   = 0.0
 
-   !if (dr_simTime .ge. 1600.00 .and. dr_simTime .le. 1900.00) then
+   !if(dr_nstep == 1) then
 
-   !  ht_Tsat  = 0.0011*(dr_simTime-1600.00) + 0.0
-   !  mph_rho2 = 185 - 0.15*(dr_simTime-1600.00)
-   !  mph_cp2  = 185 - 0.15*(dr_simTime-1600.00)
+    do lb = 1,blockCount
 
-   !  if (ins_meshMe .eq. MASTER_PE) call Heat_getQmicro(ht_qmic,ht_dxmin)
+     blockID = blockList(lb)
+     call Grid_getDeltas(blockID,del)
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
 
-   !  call MPI_BCAST(ht_qmic, 1, FLASH_REAL, MASTER_PE, MPI_COMM_WORLD, ierr)
+     call Grid_getBlkBoundBox(blockId,boundBox)
+     bsize(:) = boundBox(2,:) - boundBox(1,:)
 
-   !  print *,"qmic: ",ht_qmic
+     call Grid_getBlkCenterCoords(blockId,coord)
+
+      do k=1,blkLimitsGC(HIGH,KAXIS)
+        do j=1,blkLimitsGC(HIGH,JAXIS)
+           do i=1,blkLimitsGC(HIGH,IAXIS)
+
+                xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+                        real(i - NGUARD - 1)*del(IAXIS) +   &
+                        0.5*del(IAXIS)
+
+                ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+                        real(j - NGUARD - 1)*del(JAXIS)  +  &
+                        0.5*del(JAXIS)
+
+
+           if(xcell .gt. 4.0 .and. xcell .lt. 6.0 .and. abs(ycell-30.0) .le. 2*del(JAXIS)) then
+
+                solnData(TEMP_VAR,i,j,k) = 1.0
+
+           end if
+
+           !solnData(TEMP_VAR,i,j,k) = 0.0
+
+           !if(solnData(LMDA_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = 1.0
+
+           !if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k).ge. -0.15) &
+           !   solnData(TEMP_VAR,i,j,k) = 1.0 - abs(solnData(LMDA_VAR,i,j,k))/0.15
+
+
+
+           end do
+        end do
+      end do
+ 
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+    end do
 
    !end if
+
+   call Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    do step = 1,1 ! RK-2 Loop
     do lb = 1,blockCount
@@ -135,7 +152,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
-     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),solnData(TGST_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      del(DIR_X),del(DIR_Y),del(DIR_Z),&
@@ -148,11 +165,11 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(SMRH_VAR,:,:,:),&
-                     solnData(CURV_VAR,:,:,:))
+                     solnData(CURV_VAR,:,:,:),solnData(LMDA_VAR,:,:,:),solnData(DPRB_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
-     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:), solnData(TEMP_VAR,:,:,:),&
+     call Heat_RHS_3D_weno3(solnData(RHST_VAR,:,:,:),solnData(TEMP_VAR,:,:,:),solnData(TGST_VAR,:,:,:),&
                      facexData(VELC_FACE_VAR,:,:,:),&
                      faceyData(VELC_FACE_VAR,:,:,:),&
                      facezData(VELC_FACE_VAR,:,:,:),&
@@ -168,7 +185,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(PFUN_VAR,:,:,:),solnData(DFUN_VAR,:,:,:),&
                      solnData(MDOT_VAR,:,:,:),solnData(NRMX_VAR,:,:,:),&
                      solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
+                     solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:),&
+                     solnData(LMDA_VAR,:,:,:),solnData(DPRB_VAR,:,:,:))
 #endif
 
      if (step == 1) then
@@ -270,7 +288,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         solnData(PFUN_VAR,:,:,:),del(DIR_X),del(DIR_Y),del(DIR_Z),&
                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:))
+                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(MFLG_VAR,:,:,:),solnData(LMDA_VAR,:,:,:))
 #endif
 
 #if NDIM == 3
@@ -281,7 +299,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                         blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                         solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),solnData(NRMZ_VAR,:,:,:),&
-                        solnData(MFLG_VAR,:,:,:))
+                        solnData(MFLG_VAR,:,:,:),&
+                        solnData(LMDA_VAR,:,:,:))
 #endif
 
      ! Microlayer contribution - only for nucleate boiling
@@ -351,8 +370,8 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    ht_Nu_l = ht_Nu_l/hcounterAll
    ht_Nu_t = ht_Nu_t/hcounterAll
 
-   if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number Liq - ",ht_Nu_l
-   if(ins_meshMe .eq. MASTER_PE) Print *,"Wall Nusselt Number Tot - ",ht_Nu_t
+   !if(ins_meshMe .eq. MASTER_PE) print *,"Wall Nusselt Number Liq - ",ht_Nu_l
+   !if(ins_meshMe .eq. MASTER_PE) Print *,"Wall Nusselt Number Tot - ",ht_Nu_t
   
    ! Apply BC
    gcMask = .FALSE.
@@ -478,6 +497,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      ! Calculate Mass Flux
      call Heat_calMdot(solnData(MDOT_VAR,:,:,:),&
+                       solnData(LMDA_VAR,:,:,:),&
                        solnData(TNLQ_VAR,:,:,:),solnData(TNVP_VAR,:,:,:),&
                        mph_thco2,mph_thco1,&
                        solnData(NRMX_VAR,:,:,:),solnData(NRMY_VAR,:,:,:),&

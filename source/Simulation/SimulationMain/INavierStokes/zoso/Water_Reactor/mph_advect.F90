@@ -58,7 +58,8 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   use IncompNS_data,     ONLY: ins_alfa
 
   use Simulation_data, only:  sim_xmin1, sim_xmax1, sim_xmin2, sim_xmax2,  &
-                              sim_ymin1, sim_ymax1, sim_ymin2, sim_ymax2
+                              sim_ymin1, sim_ymax1, sim_ymin2, sim_ymax2,  &
+                              sim_xmax, sim_xmin
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -529,6 +530,12 @@ enddo
                                           ycell-sim_ymin2, sim_ymax2-ycell))
 
          end if
+
+        if (ycell .lt. 23) then
+
+            solnData(DFUN_VAR,i,j,k) = min(xcell-sim_xmin, sim_xmax - xcell)
+
+        end if
 
        end do
      end do

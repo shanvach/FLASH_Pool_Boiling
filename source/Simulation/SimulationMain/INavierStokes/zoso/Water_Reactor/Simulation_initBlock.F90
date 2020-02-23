@@ -136,8 +136,8 @@ subroutine Simulation_initBlock(blockId)
   sim_ymin2 = 46.0
   sim_ymax2 = 48.0
 
-  sim_xjet(1) = 3.0
-  sim_xjet(2) = 7.0
+  sim_xjet(1) = 4.0
+  sim_xjet(2) = 6.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)

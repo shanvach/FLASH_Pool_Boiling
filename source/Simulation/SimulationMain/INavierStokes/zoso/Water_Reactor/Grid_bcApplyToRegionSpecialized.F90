@@ -371,8 +371,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                      if(xcell .ge. -2.0 .and. xcell .le. 2.0 .and. &
                         zcell .ge. -2.0 .and. zcell .le. 2.0) then
 
-                        regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(k-i,jjj,kkk,ivar)
-
+                        !regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(k-i,jjj,kkk,ivar)
+                        regionData(i,jjj,kkk,ivar) = regionData(k-i,jjj,kkk,ivar)
                      else
 
                         regionData(i,jjj,kkk,ivar) = regionData(k-i,jjj,kkk,ivar)
@@ -408,7 +408,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else
@@ -423,7 +423,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = -regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
              else
