@@ -1,10 +1,19 @@
 # Uniform Grid Binaries
-#--advanced --compile 4 --block_xyz 24 --dimension 2 --grid ug 
-#--advanced --compile 4 --block_xyz 32 --dimension 2 --grid ug 
-#--advanced --compile 4 --overwrite --block_xyz 50 --dimension 2 --grid ug 
+# 2d validation simulations
+--advanced --compile 4 --block_x  24 --block_y  24 --dimension 2 --grid ug
+--advanced --compile 4 --block_x  32 --block_y  32 --dimension 2 --grid ug
+--advanced --compile 4 --block_x 200 --block_y 200 --dimension 2 --grid ug
 
 # Regular Grid Binaries
-# 2d simulations -- 32 16 8 4 2 1
+# 2d validation simulations
+--advanced --compile 4 --block_x  24 --block_y  24 --dimension 2 --grid rg
+--advanced --compile 4 --block_x  32 --block_y  32 --dimension 2 --grid rg
+--advanced --compile 4 --block_x 200 --block_y 200 --dimension 2 --grid rg
+
+# 3d validation simulations
+--advanced --compile 4 --block_x  50 --block_y  50 --block_z 100 --dimension 3 --grid rg
+
+# 2d scaling simulations -- 32 16 8 4 2 1
 --advanced --compile 32 --block_x  64 --block_y  64 --dimension 2 --grid rg
 --advanced --compile 32 --block_x  64 --block_y 128 --dimension 2 --grid rg 
 --advanced --compile 32 --block_x 128 --block_y 128 --dimension 2 --grid rg 
