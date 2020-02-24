@@ -145,7 +145,7 @@ subroutine Simulation_initBlock(blockId)
   xmax_fs = 10.0
 
   ymin_fs = 20.0
-  ymax_fs = 24.0
+  ymax_fs = 25.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -175,9 +175,9 @@ subroutine Simulation_initBlock(blockId)
                                      -min(xcell-sim_xmin2, sim_xmax2-xcell, &
                                           ycell-sim_ymin2, sim_ymax2-ycell))
 
-           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
-           !                          -min(xcell-xmin_fs, xmax_fs-xcell, &
-           !                               ycell-ymin_fs, ymax_fs-ycell))
+           solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
+                                     -min(xcell-xmin_fs, xmax_fs-xcell, &
+                                          ycell-ymin_fs, ymax_fs-ycell))
 
 
         enddo

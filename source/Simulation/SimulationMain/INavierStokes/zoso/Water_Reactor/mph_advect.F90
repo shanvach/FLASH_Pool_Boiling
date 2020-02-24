@@ -59,7 +59,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Simulation_data, only:  sim_xmin1, sim_xmax1, sim_xmin2, sim_xmax2,  &
                               sim_ymin1, sim_ymax1, sim_ymin2, sim_ymax2,  &
-                              sim_xmax, sim_xmin
+                              sim_xmax, sim_xmin, sim_ymin
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -530,6 +530,13 @@ enddo
                                           ycell-sim_ymin2, sim_ymax2-ycell))
 
          end if
+        
+         !if (ycell .le. 24.0) then
+
+         !   solnData(DFUN_VAR,i,j,k) = -min(xcell-sim_xmin, sim_xmax-xcell, &
+         !                                   ycell-sim_ymin,     24.0-ycell)
+
+         !end if
 
        end do
      end do
