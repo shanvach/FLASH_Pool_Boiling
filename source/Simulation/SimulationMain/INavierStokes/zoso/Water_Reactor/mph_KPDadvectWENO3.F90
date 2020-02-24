@@ -99,16 +99,15 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-              if(ycell .lt. 23) then                        
+              if(ycell .lt. 24) then                        
 
-                     AA = ((23.0-ycell)/(23.0-sim_yMin))**2
+                     AA = ((24.0-ycell)/(24.0-sim_yMin))**2
                      AA = 0.1*AA
 
-                     phiBND = min(xcell-sim_xmin, sim_xmax - xcell)   
+                     phiBND = -min(xcell-sim_xmin, sim_xmax - xcell, &
+                                   ycell-sim_ymin, 24-ycell)
                         
-
               end if
-
 
               !***************** KPD **********************
 
@@ -377,7 +376,7 @@
 
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*AA*(s(i,j,k) - phiBND)
+                                      - AA*(s(i,j,k) - phiBND)
               !else
 
               !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
