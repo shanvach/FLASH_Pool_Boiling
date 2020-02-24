@@ -130,12 +130,12 @@ subroutine Simulation_initBlock(blockId)
 
   sim_xmin1 = 0.0
   sim_xmax1 = 1.0
-  sim_ymin1 = 20.0
+  sim_ymin1 = 46.0
   sim_ymax1 = 48.0
 
   sim_xmin2 = 9.0
   sim_xmax2 = 10.0
-  sim_ymin2 = 20.0
+  sim_ymin2 = 46.0
   sim_ymax2 = 48.0
 
   sim_xjet(1) = 4.0
@@ -175,9 +175,9 @@ subroutine Simulation_initBlock(blockId)
                                      -min(xcell-sim_xmin2, sim_xmax2-xcell, &
                                           ycell-sim_ymin2, sim_ymax2-ycell))
 
-           solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
-                                     -min(xcell-xmin_fs, xmax_fs-xcell, &
-                                          ycell-ymin_fs, ymax_fs-ycell))
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
+           !                          -min(xcell-xmin_fs, xmax_fs-xcell, &
+           !                               ycell-ymin_fs, ymax_fs-ycell))
 
 
         enddo

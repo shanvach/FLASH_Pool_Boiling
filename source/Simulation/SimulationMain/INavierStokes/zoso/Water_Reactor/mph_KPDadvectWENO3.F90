@@ -102,11 +102,13 @@
               if(ycell .lt. 24) then                        
 
                      AA = ((24.0-ycell)/(24.0-sim_yMin))**2
-                     AA = 0.1*AA
+                     AA = 0.2*AA
 
-                     phiBND = -min(xcell-sim_xmin, sim_xmax - xcell, &
-                                   ycell-sim_ymin, 24-ycell)
-                        
+                     !phiBND = -min(xcell-sim_xmin, sim_xmax - xcell, &
+                     !              ycell-sim_ymin, 24-ycell)
+                     
+                     phiBND = min(xcell-sim_xmin,sim_xmax-xcell)
+   
               end if
 
               !***************** KPD **********************
