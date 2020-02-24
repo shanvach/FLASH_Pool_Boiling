@@ -130,22 +130,22 @@ subroutine Simulation_initBlock(blockId)
 
   sim_xmin1 = 0.0
   sim_xmax1 = 1.0
-  sim_ymin1 = 46.0
+  sim_ymin1 = 0.0
   sim_ymax1 = 48.0
 
   sim_xmin2 = 9.0
   sim_xmax2 = 10.0
-  sim_ymin2 = 46.0
+  sim_ymin2 = 0.0
   sim_ymax2 = 48.0
 
-  sim_xjet(1) = 4.0
-  sim_xjet(2) = 6.0
+  sim_xjet(1) = 1.2
+  sim_xjet(2) = 8.8
 
   xmin_fs = 0.0
   xmax_fs = 10.0
 
   ymin_fs = 20.0
-  ymax_fs = 25.0
+  ymax_fs = 23.0
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -175,17 +175,52 @@ subroutine Simulation_initBlock(blockId)
                                      -min(xcell-sim_xmin2, sim_xmax2-xcell, &
                                           ycell-sim_ymin2, sim_ymax2-ycell))
 
-           solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
-                                     -min(xcell-xmin_fs, xmax_fs-xcell, &
-                                          ycell-ymin_fs, ymax_fs-ycell))
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
+           !                          -min(xcell-xmin_fs, xmax_fs-xcell, &
+           !                               ycell-ymin_fs, ymax_fs-ycell))
 
 
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
+           !                          -min(xcell-sim_xmin1, sim_xmax1-xcell, &
+           !                               ycell-ymin_fs,   ymax_fs-ycell))
+
+           !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),&
+           !                          -min(xcell-sim_xmin2, sim_xmax2-xcell, &
+           !                               ycell-ymin_fs,   ymax_fs-ycell))
         enddo
      enddo
   enddo
 
   sim_ymin1 = 47.8
   sim_ymin2 = 47.8
+
+  do k=1,blkLimitsGC(HIGH,KAXIS)
+        do i=1,blkLimitsGC(HIGH,IAXIS)
+
+           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                   real(i - NGUARD - 1)*del(IAXIS)  +  &
+                   0.5*del(IAXIS)
+
+           zcell = 0.0
+
+           sim_dfun_top(i,k,blockID)     =  min(-sim_xmax1+xcell,-xcell+sim_xmin2)
+
+           sim_vel(i,k,blockID)      =   0.0
+           sim_vel_flg(i,k,blockID)  =   0.0
+           sim_pres_flg(i,k,blockID) =   1.0
+
+           if (xcell .gt. sim_xjet(1) .and. xcell .lt. sim_xjet(2)) then
+                sim_vel(i,k,blockID)      =  4.0
+           end if
+
+           if (xcell .lt. 1.0 - 2.0*del(IAXIS) .or. xcell .gt. 9.0 + 2.0*del(IAXIS)) then
+                sim_vel_flg(i,k,blockID)  =  1.0
+                sim_pres_flg(i,k,blockID) = -1.0
+           end if
+
+     enddo
+  enddo
+
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 

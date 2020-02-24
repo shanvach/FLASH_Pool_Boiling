@@ -637,11 +637,11 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
            ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS)
 
-           if(xcell .gt. 4.0 .and. xcell .lt. 6.0 .and. abs(ycell-30.0) .le. 2*del(JAXIS)) then
+           !if(xcell .gt. 4.0 .and. xcell .lt. 6.0 .and. abs(ycell-30.0) .le. 2*del(JAXIS)) then
 
-                faceyData(VELC_FACE_VAR,i,j,k) = 4.0
+           !     faceyData(VELC_FACE_VAR,i,j,k) = 4.0
                 
-           end if
+           !end if
 
            if(xcell .gt. 0.0 .and. xcell .lt. 1.0 .and. abs(ycell-48.0) .le. 2*del(JAXIS)) then
 

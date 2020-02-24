@@ -77,8 +77,6 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
   
   use tree, only : lrefine
-
-  use Simulation_data, only: sim_pres_flg, sim_pres_flg_top
   
   implicit none
  
@@ -453,13 +451,10 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
 
               else   !- kpd - Boundary Node
 
-                 !MdensYL = 0.0 ! Neumann
+                 MdensYL = 0.0 ! Neumann
                  !MdensYL = 4.0
                  !MdensYL = 2*(facevary(RH1F_FACE_VAR,i  ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k)) ! Dirichlet
                  temp_BoxVal(iter+3) = 0.0
-
-                 MdensYL = (1 - sim_pres_flg(i,k,blockID))*0.5*&
-                           2*(facevary(RH1F_FACE_VAR,i ,j,k)+facevary(RH2F_FACE_VAR,i  ,j  ,k))
 
               end if
               
@@ -501,9 +496,6 @@ subroutine gr_hypreCreateMatrix_KPD(iVar, bcTypes, bcValues, dt, &
                  !MdensYR = 4.0
                  MdensYR = 2*(facevary(RH1F_FACE_VAR,i,j+1,k)+facevary(RH2F_FACE_VAR,i  ,j+1,k))
                  temp_BoxVal(iter+4) = 0.0
-
-                 !MdensYR = (1 - sim_pres_flg_top(i,k,blockID))*0.5*&
-                 !          2*(facevary(RH1F_FACE_VAR,i,j+1,k)+facevary(RH2F_FACE_VAR,i  ,j+1,k))
 
               end if
               

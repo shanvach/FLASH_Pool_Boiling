@@ -208,8 +208,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
   use IncompNS_data, only: ins_convvel
 
-  use Simulation_data, only: sim_vel, sim_vel_flg, sim_pres_flg,&
-                       sim_vel_top, sim_vel_flg_top, sim_pres_flg_top, sim_dfun_top
+
+  use Simulation_data, only: sim_vel_flg, sim_vel, sim_pres_flg
 
 #ifdef FLASH_GRID_PARAMESH
   use tree , only : lrefine
@@ -374,8 +374,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                      if(xcell .ge. -2.0 .and. xcell .le. 2.0 .and. &
                         zcell .ge. -2.0 .and. zcell .le. 2.0) then
 
-                        regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(k-i,jjj,kkk,ivar)
-
+                        !regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(k-i,jjj,kkk,ivar)
+                        regionData(i,jjj,kkk,ivar) = regionData(k-i,jjj,kkk,ivar)
                      else
 
                         regionData(i,jjj,kkk,ivar) = regionData(k-i,jjj,kkk,ivar)
@@ -401,24 +401,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                do jjj = 1,je
                do i = 1,guard
 
-                  !regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) !- (guard+1-i)*del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
+                  regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) !- &
+                                               !(guard+1-i)*del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
                   
-                  regionData(i,jjj,kkk,ivar) = 2*sim_dfun_top(i,k,blockHandle) - regionData(guard+1,jjj,kkk,ivar)
-
                end do
                end do
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
-               ja = endPoints(LOW,IAXIS)
-               jb = endPoints(HIGH,IAXIS)
-               ka = endPoints(LOW,KAXIS)
-               kb = endPoints(HIGH,KAXIS)
-
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = sim_pres_flg(ja:jb,ka:kb,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
                else
@@ -431,14 +424,9 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
              else if(gridDataStruct == WORK) then
 
-               ja = endPoints(LOW,IAXIS)
-               jb = endPoints(HIGH,IAXIS)
-               ka = endPoints(LOW,KAXIS)
-               kb = endPoints(HIGH,KAXIS)
-
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = sim_pres_flg(ja:jb,ka:kb,blockHandle)*regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
                end do
 
              else
@@ -447,34 +435,17 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                
                         if (isFace) then
 
-                        ja = endPoints(LOW,IAXIS)
-                        jb = endPoints(HIGH,IAXIS)
-                        ka = endPoints(LOW,KAXIS)
-                        kb = endPoints(HIGH,KAXIS)
-
-                        regionData(guard+1,1:je,1:ke,ivar)= sim_vel(ja:jb,ka:kb,blockHandle)*&
-                                                         (1-sim_vel_flg(ja:jb,ka:kb,blockHandle)) + &
-                                                            sim_vel_flg(ja:jb,ka:kb,blockHandle)*&
-                                                            regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(guard+1,1:je,1:ke,ivar)= 0.
  
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=sim_vel(ja:jb,ka:kb,blockHandle)*&
-                                                  (1-sim_vel_flg(ja:jb,ka:kb,blockHandle)) + &
-                                                     sim_vel_flg(ja:jb,ka:kb,blockHandle)*&
-                                                     regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
                         end do
               
-                        else         
-
-                        ja = endPoints(LOW,IAXIS)
-                        jb = endPoints(HIGH,IAXIS)
-                        ka = endPoints(LOW,KAXIS)
-                        kb = endPoints(HIGH,KAXIS)
- 
+                        else          
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(i,1:je,1:ke,ivar)=regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(i,1:je,1:ke,ivar)=-regionData(k-i,1:je,1:ke,ivar)
                         end do
                         endif
 
@@ -648,21 +619,12 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then
-
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = -regionData(i,1:je,1:ke,ivar)
                end do
 
-               else if (ivar == DFUN_VAR) then
-
-               k = 2*guard+1
-               do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
-               end do
-
                else
-
                k = 2*guard+1
                do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
@@ -683,17 +645,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
               
                         if (isFace) then
 
-                        regionData(guard+1,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
-
                         k = 2*guard+2
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard+1,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
                         end do
 
                         else
                         k = 2*guard+1
                         do i = 1,guard
-                        regionData(k-i,1:je,1:ke,ivar) = regionData(guard,1:je,1:ke,ivar)
+                        regionData(k-i,1:je,1:ke,ivar) = regionData(i,1:je,1:ke,ivar)
                         end do
                         endif
 
