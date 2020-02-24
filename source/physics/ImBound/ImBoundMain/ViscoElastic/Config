@@ -4,14 +4,14 @@
 # ib_viscoElastic_data
 
 # To declare a cell centered variable
-! VARIABLE varc TYPE:GENERIC
+#! VARIABLE varc TYPE:GENERIC
 VARIABLE lmda_var TYPE:GENERIC ! viscoelastic solid distance function
 VARIABLE lmdx_var TYPE:GENERIC ! x dynamic grid
 VARIABLE lmdy_var TYPE:GENERIC ! y dynamic grid
 VARIABLE lmds_var TYPE:GENERIC ! solid strain tensor
 VARIABLE musf_var TYPE:GENERIC ! mus factor. varies from 0-1 in the diffused solid interface
 # To declare a face centered variable
-! FACEVAR varf
-FACEVAR velc_face_var ! used to update ustar
+#! FACEVAR varf
+#!FACEVAR velc_face_var ! used to update ustar
 # To declare a runtime parameter 
 PARAMETER varp  REAL 1.0
