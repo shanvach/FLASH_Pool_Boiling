@@ -134,10 +134,42 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      ! Place function calls here - Below is sample function call
-     call ib_sample_function_call(facexData(VARF_FACE_VAR,:,:,:),&
-                                  faceyData(VARF_FACE_VAR,:,:,:),&
-                                  facezData(VARF_FACE_VAR,:,:,:),&
-                                   solnData(VARC_VAR,:,:,:),&
+     !call ib_sample_function_call(facexData(VARF_FACE_VAR,:,:,:),&
+     !                             faceyData(VARF_FACE_VAR,:,:,:),&
+     !                             facezData(VARF_FACE_VAR,:,:,:),&
+     !                              solnData(VARC_VAR,:,:,:),&
+     !                  blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     !                  blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+     !                  blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+     !                  del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     call ib_solid_stress(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDX_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                                  solnData(LMDS_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     call ib_ustar_solid(facexData(VELC_FACE_VAR,:,:,:),&
+                                  faceyData(VELC_FACE_VAR,:,:,:),&
+                                  solnData(MUSF_VAR,:,:,:),&
+                                  solnData(LMDS_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDX_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&

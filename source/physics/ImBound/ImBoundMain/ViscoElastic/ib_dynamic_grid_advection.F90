@@ -10,18 +10,19 @@
 
 
 
-      !subroutine ib_dynamic_grid_advection(sn, sd, stest, adfx, adfy, cpt)
-      subroutine ib_dynamic_grid_advection(sn,sd,stest,adf,adfx,adfy,&
-                                           cpt,dx,dy,dz,ix1,ix2,jy1,jy2)
+      !subroutine ib_dynamic_grid_advection(sn,sd,stest,adf,adfx,adfy,&
+      !                                     cpt,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+      subroutine ib_dynamic_grid_advection(sd,stest,&
+                                           ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
-        include 'mpif.h' !where is this?
+        !include 'mpif.h' !where is this?
 
         real, dimension(:,:,:), intent(inout) :: sn,adf,adfx,adfy
         real, dimension(:,:,:), intent(in)    :: sd,stest
         integer, dimension(:),  intent(in)    :: cpt
 
         real, intent(in)    :: dx,dy,dz
-        integer, intent(in) :: ix1,ix2,jy1,jy2
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         !end interface header
 
         integer :: step,i,j,k

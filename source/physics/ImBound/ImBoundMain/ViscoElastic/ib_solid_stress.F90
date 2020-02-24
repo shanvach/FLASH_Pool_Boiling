@@ -15,16 +15,16 @@
 !!           :: ix1,ix2   - low,high block x indeces
 !!           :: jy1,jy2   - low,high block y indeces 
 !===============================================================================
-        subroutine ib_solid_stress(sd,sY,sX,A,AT,A_inv,&
-                                   Taux,Tauy,Taum,Tau,&
-                                   dx,dy,ix1,ix2,jy1,jy2)   
+        subroutine ib_solid_stress(sd,sX,sY,Tau,&
+                                   ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
         !include 'mpif.h'
-        real, dimension(:,:,:), intent(inout) :: Tau,Taux,Tauy,Taum
-        real, dimension(:,:,:), intent(in)    :: sd,sY,sX,A,AT,A_inv
+        real, dimension(:,:,:), intent(inout) :: Tau
+        real, dimension(:,:,:), intent(in)    :: sd,sX,sY,A,AT,A_inv
+        real, dimension(:,:,:)                :: Taux,Tauy,Taum
 
-        real, intent(in)    :: dx,dy
-        integer, intent(in) :: ix1,ix2,jy1,jy2
+        real, intent(in)    :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
         integer :: i,j,k
         real    :: ul,ur,vl,vr

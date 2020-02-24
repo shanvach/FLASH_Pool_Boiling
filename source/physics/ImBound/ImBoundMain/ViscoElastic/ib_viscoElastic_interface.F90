@@ -54,4 +54,20 @@ module ib_viscoElastic_interface
         end subroutine
         end interface
 
+        interface
+        subroutine ib_ustar_solid(ustr, vstr, xms, Tau,&
+                                 ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        implicit none
+        real, dimension(:,:,:), intent(inout) :: ustr, vstr, Tau
+        real, dimension(:,:,:), intent(in)    :: xms
+        real, intent(in)    :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        integer :: i,j,k
+        real :: ustrB, vstrB
+        real :: xmsccc, xmsrcc, xmslcc, xmscrc
+        real :: xmsrrc, xmsrlc, xmslrc, xmsclc
+        real :: re_s
+        end subroutine ib_ustar_solid
+        end interface
+
 end module ib_viscoElastic_interface
