@@ -99,16 +99,18 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-              if(ycell .lt. 23) then                        
+              if((ycell .le. 22) .or. &
+                 (ycell .le. 24 .and. ycell .gt. 22 .and. xcell .le. 1.0 .and. xcell .gt. 0.5) .or. &
+                 (ycell .le. 24 .and. ycell .gt. 22 .and. xcell .le. 9.0 .and. xcell .gt. 8.5)) then
 
-                     AA = ((23.0-ycell)/(23.0-sim_yMin))**2
-                     AA = 0.5*AA
+                     AA = ((22.0-ycell)/(22.0-sim_yMin))**2
+                     AA = 0.75*AA
 
                      phiBND = -min(xcell-sim_xmin1, sim_xmax1 - xcell, &
-                                   ycell-sim_ymin, 23-ycell)
+                                   ycell-sim_ymin, 22-ycell)
  
                      phiBND = min(phiBND,-min(xcell-sim_xmin2, sim_xmax2 - xcell, &
-                                   ycell-sim_ymin, 23-ycell))
+                                   ycell-sim_ymin, 22-ycell))
                      
                      !phiBND = min(xcell-sim_xmin,sim_xmax-xcell)
    
