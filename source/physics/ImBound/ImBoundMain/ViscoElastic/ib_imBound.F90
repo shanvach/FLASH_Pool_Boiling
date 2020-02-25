@@ -116,7 +116,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   character(len=6) :: IndNStep
   integer :: NStep
 
-  ! Loop through multiple blocks on a processor
+!------subroutine1: Loop through multiple blocks on a processor
 
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -146,34 +146,72 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call ib_solid_stress(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
-                                  solnData(LMDS_VAR,:,:,:),&
+                                  solnData(LMS1_VAR,:,:,:),&
+                                  solnData(LMS2_VAR,:,:,:),&
+                                  solnData(LMS3_VAR,:,:,:),&
+                                  solnData(LMS4_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  gcMask(VARC_VAR) = .TRUE.
+
+  ! BC fill for face center variables
+  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+  !------subroutine2: Loop through multiple blocks on a processor
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
 
      call ib_ustar_solid(facexData(VELC_FACE_VAR,:,:,:),&
                                   faceyData(VELC_FACE_VAR,:,:,:),&
                                   solnData(MUSF_VAR,:,:,:),&
-                                  solnData(LMDS_VAR,:,:,:),&
+                                  solnData(LMS1_VAR,:,:,:),&
+                                  solnData(LMS2_VAR,:,:,:),&
+                                  solnData(LMS3_VAR,:,:,:),&
+                                  solnData(LMS4_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
 
-     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(LMDX_VAR,:,:,:),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-
-     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(LMDY_VAR,:,:,:),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z))
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -201,4 +239,113 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
+  !------subroutine3&4 should be called after LMDX&LMDY advection and LMDA advection+redistance------
+  !------subroutine3: Loop through multiple blocks on a processor
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDX_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  gcMask(VARC_VAR) = .TRUE.
+
+  ! BC fill for face center variables
+  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+  !------subroutine4: Loop through multiple blocks on a processor
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_advection(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  gcMask(VARC_VAR) = .TRUE.
+
+  ! BC fill for face center variables
+  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+
+
 end subroutine ib_imBound

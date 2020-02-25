@@ -8,10 +8,15 @@
 VARIABLE lmda TYPE:GENERIC ! viscoelastic solid distance function
 VARIABLE lmdx TYPE:GENERIC ! x dynamic grid
 VARIABLE lmdy TYPE:GENERIC ! y dynamic grid
-VARIABLE lmds TYPE:GENERIC ! solid strain tensor
+VARIABLE lms1 TYPE:GENERIC ! component of solid strain tensor
+VARIABLE lms2 TYPE:GENERIC ! component of solid strain tensor
+VARIABLE lms3 TYPE:GENERIC ! component of solid strain tensor
+VARIABLE lms4 TYPE:GENERIC ! component of solid strain tensor
 VARIABLE musf TYPE:GENERIC ! mus factor. varies from 0-1 in the diffused solid interface
+
 # To declare a face centered variable
 # FACEVAR varf
-#FACEVAR velc_face_var ! used to update ustar
+# FACEVAR velc_face_var ! used to update ustar
+
 # To declare a runtime parameter 
 PARAMETER varp  REAL 1.0

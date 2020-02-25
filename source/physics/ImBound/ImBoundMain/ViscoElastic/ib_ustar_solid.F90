@@ -7,13 +7,13 @@
 !===============================================================================      
 
                      
-      subroutine ib_ustar_solid(ustr, vstr, xms, Tau,& 
+      subroutine ib_ustar_solid(ustr, vstr, xms, Tau1,Tau2,Tau3,Tau4,& 
                                 ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
 
         implicit none
         !include 'mpif.h'
-        real, dimension(:,:,:), intent(inout) :: ustr, vstr, Tau
-        real, dimension(:,:,:), intent(in)    :: xms
+        real, dimension(:,:,:), intent(inout) :: ustr, vstr
+        real, dimension(:,:,:), intent(in)    :: xms,Tau1,Tau2,Tau3,Tau4
 
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
@@ -49,11 +49,11 @@
 
                  ustrB(i,j,1) =  &                                          !
                                                                             !
-                          (xmsrcc  * Tau(i+1,j,1) -             &           !
-                           xmsccc  * Tau(i,j,1)) / 1.d0 / dx/ re_s   &      !  
+                          (xmsrcc  * Tau1(i+1,j,k) -             &           !
+                           xmsccc  * Tau1(i,j,k)) / 1.d0 / dx/ re_s   &      !  
                                                                             !
-                        + (xmscrc*Tau(i,j+1,2) +xmsrrc*Tau(i+1,j+1,2) &     ! 
-                        - xmsclc*Tau(i,j-1,2) -xmsrlc*Tau(i+1,j-1,2)) & 
+                        + (xmscrc*Tau2(i,j+1,k) +xmsrrc*Tau2(i+1,j+1,k) &     ! 
+                        - xmsclc*Tau2(i,j-1,k) -xmsrlc*Tau2(i+1,j-1,k)) & 
                             /2.d0/ 2.d0/dy/re_s
                                                                         
                  ustr(i,j,1) = ustr(i,j,1) + ustrB(i,j,1)
@@ -63,12 +63,12 @@
 
                  vstrB(i,j,1) =  &                                          !
                                                                             !
-                         (xmsrcc*Tau(i+1,j,3) + xmsrrc*Tau(i+1,j+1,3)  & 
-                         -xmslcc*Tau(i-1,j,3)-xmslrc*Tau(i-1,j+1,3))   &    !  
+                         (xmsrcc*Tau3(i+1,j,k) + xmsrrc*Tau3(i+1,j+1,k)  & 
+                         -xmslcc*Tau3(i-1,j,k)-xmslrc*Tau3(i-1,j+1,k))   &    !  
                           / 2.d0 / 2.d0 / dx/ re_s                     &
  
-                        +(xmscrc  * Tau(i,j+1,4) -                     &    ! 
-                              xmsccc  * Tau(i,j,4)) / 1.d0 / dy/ re_s    
+                        +(xmscrc  * Tau4(i,j+1,k) -                     &    ! 
+                              xmsccc  * Tau4(i,j,k)) / 1.d0 / dy/ re_s    
                                                                         
 
                  vstr(i,j,1) = vstr(i,j,1) + vstrB(i,j,1)
