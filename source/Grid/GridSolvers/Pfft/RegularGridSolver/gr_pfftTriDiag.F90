@@ -40,7 +40,7 @@ subroutine gr_pfftTriDiag (lower, main, upper, rhs, x, length, ierr)
  
 end subroutine gr_pfftTriDiag
 
-subroutine gr_pfftCyclicTriDiag(lower, main, upper, alpha, beta, rhs, x, length)
+subroutine gr_pfftCyclicTriDiag(lower, main, upper, alpha, beta, rhs, x, length, ierr)
 
   implicit none
 
@@ -48,15 +48,19 @@ subroutine gr_pfftCyclicTriDiag(lower, main, upper, alpha, beta, rhs, x, length)
   real, dimension(length), intent(out) :: x
   real, intent(in)    :: alpha, beta
   integer, intent(in) :: length
+  integer, intent(out)    :: ierr
   real, dimension(length) :: prime, u, z
   real    :: delta, fact
-  integer :: i
+  integer :: i, err
+
+  ! is the matrix singular
+  ierr = 0
 
   !
   ! Solve none periodic system
   !  
-  call gr_pfftTridiag(lower, main, upper, rhs, x, length)
-
+  call gr_pfftTridiag(lower, main, upper, rhs, x, length, err)
+  ierr = ierr + err
    
   !
   ! Sherman-Morrison formula applied 
@@ -70,7 +74,8 @@ subroutine gr_pfftCyclicTriDiag(lower, main, upper, alpha, beta, rhs, x, length)
   prime(length) = main(length) - alpha * beta / delta
 
   ! solve the system -->  A' x = rhs
-  call gr_pfftTridiag(lower, prime, upper, rhs, x, length)
+  call gr_pfftTridiag(lower, prime, upper, rhs, x, length, err)
+  ierr = ierr + err
 
   ! form vector u
   u(1) = delta
@@ -78,7 +83,8 @@ subroutine gr_pfftCyclicTriDiag(lower, main, upper, alpha, beta, rhs, x, length)
   u(length) = alpha
 
   ! solve the system -->  A' z = u
-  call gr_pfftTridiag(lower, prime, upper, u, z, length)
+  call gr_pfftTridiag(lower, prime, upper, u, z, length, err)
+  ierr = ierr + err
 
   ! form the coefficient -->  v x / (1 + v z) 
   fact = (x(1) + beta * x(length) / delta) / (1.0 + z(1) + beta * z(length) / delta)

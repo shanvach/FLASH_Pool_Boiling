@@ -12,6 +12,7 @@
 
 # 3d validation simulations
 --advanced --compile 4 --block_x  50 --block_y  50 --block_z 100 --dimension 3 --grid rg
+--advanced --compile 4 --block_x  50 --block_y  50 --block_z 100 --dimension 3 --grid pg
 
 # 2d scaling simulations -- 32 16 8 4 2 1
 --advanced --compile 32 --block_x  64 --block_y  64 --dimension 2 --grid rg

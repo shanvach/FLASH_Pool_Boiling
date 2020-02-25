@@ -254,11 +254,12 @@ module gr_pfftinterface
   end interface
 
   interface
-    subroutine gr_pfftCyclicTridiag (lower, main, upper, alpha, beta, rhs, x, length)
+    subroutine gr_pfftCyclicTridiag (lower, main, upper, alpha, beta, rhs, x, length, ierr)
       real, dimension(length), intent(in)  :: lower, main, upper, rhs
       real, dimension(length), intent(out) :: x
       real, intent(in)    :: alpha, beta
       integer, intent(in) :: length
+      integer, intent(out) :: ierr
     end subroutine gr_pfftCyclicTriDiag
   end interface
 

@@ -67,11 +67,15 @@ FFLAGS_DEBUG = -ggdb -c -fdefault-real-8 -fdefault-double-8 \
 -fbacktrace -fdump-core -finit-real=nan \
 -finit-integer=-999999 -fimplicit-none
 
-FFLAGS_TEST =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
--ffree-line-length-none \
--ffpe-trap=invalid,zero,overflow -fbounds-check \
--fbacktrace -fdump-core -finit-real=nan \
--finit-integer=-999999 -fimplicit-none
+FFLAGS_TEST = -ggdb -c -O0 -fdefault-real-8 -fdefault-double-8 \
+-fbacktrace -fdump-core -fimplicit-none -ffpe-trap=invalid,zero,overflow -fbounds-check \
+-ffree-line-length-none
+
+#FFLAGS_TEST =  -c -O3 -fdefault-real-8 -fdefault-double-8 \
+#-ffree-line-length-none \
+#-ffpe-trap=invalid,zero,overflow -fbounds-check \
+#-fbacktrace -fdump-core -finit-real=nan \
+#-finit-integer=-999999 -fimplicit-none
 
 F90FLAGS =
 

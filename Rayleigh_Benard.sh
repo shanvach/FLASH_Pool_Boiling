@@ -87,8 +87,12 @@ done
 # Identify Simulation Directory
 if [ "${grd}" == "+rg" ]; then
     simdir="INavierStokes/zoso/Rayleigh_Benard_Stretch/"
-else
+elif [ "${grd}" == "+ug" ]; then
     simdir="INavierStokes/zoso/Rayleigh_Benard/"
+elif [ "${grd}" == "+pg" ]; then
+    simdir="INavierStokes/zoso/Poisson/"
+    grd="+rg"
+    dir="POISS"
 fi
 
 # Create Setup Command From User Options

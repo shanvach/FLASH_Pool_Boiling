@@ -395,8 +395,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
     ! transpose the pencil grid about y-axis :: {x,y} -> {y,x}
     call gr_pfftTranspose(iDirection, PFFT_PCLDATA_REAL, pfft_work1, pfft_work2, &
-                          pfft_inLen, pfft_midLen, pfft_procGrid(JAXIS), pfft_comm(JAXIS))
- 
+                          pfft_t1Len, pfft_midLen, pfft_procGrid(JAXIS), pfft_comm(JAXIS))
+    
     ! lets work with the data as a 2d array {y,x} vice a 1d vector {y*x}
     allocate(temp2DArray(pfft_midLen(IAXIS), pfft_midLen(JAXIS)))
     temp2DArray = reshape(pfft_work2, pfft_midLen(1:2))
@@ -425,13 +425,13 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
         BML(1:M) = BM(1:M) - AK(J/2+1)
       end select
       RHS(:) = temp2DArray(:,JL)
-      X(:) = 0.
+      X(:) = 0.0
 
       ! solve the system
       if (transformType(JAXIS) == PFFT_COS_CC .or. transformType(JAXIS) == PFFT_SIN_CC) then
         call gr_pfftTriDiag(AM, BML, CM, RHS, X, M, ierr)     
       else 
-        call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M)
+        call gr_pfftCyclicTriDiag(AM, BML, CM, CM(M), AM(1), RHS, X, M, ierr)
       endif
  
       errorAux = errorAux + ierr   
@@ -447,6 +447,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     deallocate(temp2DArray)
     deallocate(BML, RHS, X)    
 
+    error = 0
     ! identify if there was a need to prevent a div-by-zero floating point error
     call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
     if (error >= 1 .and. pfft_myPE == 0) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
