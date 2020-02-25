@@ -395,18 +395,15 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                !end do
 
                else if(ivar == DFUN_VAR) then
+
+               ja = endPoints(LOW,IAXIS)
+               jb = endPoints(HIGH,IAXIS)
+               ka = endPoints(LOW,KAXIS)
+               kb = endPoints(HIGH,KAXIS)
+
                k = 2*guard+1
-
-               do kkk = 1,ke
-               do jjj = 1,je
-               do i = 1,guard
-
-                  !regionData(i,jjj,kkk,ivar) = regionData(guard+1,jjj,kkk,ivar) !- (guard+1-i)*del(DIR_Y)*cos(mph_psi(jjj+NGUARD,kkk+NGUARD*K3D,blockHandle))
-                  
-                  regionData(i,jjj,kkk,ivar) = 2*sim_dfun_top(i,k,blockHandle) - regionData(guard+1,jjj,kkk,ivar)
-
-               end do
-               end do
+               do i = 1,guard                 
+                  regionData(i,1:je,1:ke,ivar) = 2*sim_dfun_top(ja:jb,ka:kb,blockHandle) - regionData(guard+1,1:je,1:ke,ivar)
                end do
 
                else if (ivar == MGW3_VAR .or. ivar == PTES_VAR .or. ivar == PRES_VAR .or. ivar == DELP_VAR) then

@@ -118,8 +118,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.4
 sigma		= 0.4
-dtspec          = 1.0d-4
-dtinit          = 1.0d-4
+dtspec          = 1.0d-3
+dtinit          = 1.0d-3
 tstep_change_factor=1.01
 
 
@@ -139,11 +139,11 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 10.0
 
 #plotFileIntervalTime = 0.1
-plotFileIntervalStep = 2000
+plotFileIntervalStep = 200
 
 ##	AMR parameters
-nblockx	= 10
-nblocky	= 30
+nblockx	= 4
+nblocky	= 12
 
 lrefine_min	= 1
 lrefine_max     = 1
