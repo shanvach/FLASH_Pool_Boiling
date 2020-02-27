@@ -208,6 +208,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   ddp = 0.
   tp = 0.
 
+  c_rho = 0. ! Added for Multiphase -- EG --
+
    ! Initial the flow in z direction. This is necessary for the 2D case
    we   = 0.; dwdx = 0.; dwdy =0.;
    dwdz = 0.
