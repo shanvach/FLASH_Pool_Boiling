@@ -149,7 +149,7 @@ LIB_STDCXX = -L/lib64 -lstdc++
 #Specify TEC_PLOT=YES in order to link the tec plot library.
 TEC_PLOT=YES
 #ifeq ($(TEC_PLOT), YES)
-CONFIG_LIB = -I${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -L${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -ltecio -lstdc++
+CONFIG_LIB = -I${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -L${setup_dir}/../source/Simulation/SimulationMain/INavierStokes -ltecio -lstdc++ -llapack -lblas
 #endif
 
 
