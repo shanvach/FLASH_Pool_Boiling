@@ -543,7 +543,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
           if (transformType(KAXIS) == PFFT_COS_CC .or. transformType(KAXIS) == PFFT_SIN_CC) then
             call gr_pfftTriDiag(AM, BMM, CM, RHS, X, M, ierr)
           else
-            call gr_pfftCyclicTriDiag(AM, BMM, CM, CM(M), AM(1), RHS, X, M)
+            call gr_pfftCyclicTriDiag(AM, BMM, CM, CM(M), AM(1), RHS, X, M, ierr)
           endif
 
           errorAux = errorAux + ierr   

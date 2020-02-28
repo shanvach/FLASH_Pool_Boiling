@@ -31,7 +31,7 @@
 
 subroutine Simulation_initBlock(blockId)
 
-  use Simulation_Data, Only : sim_xMin, sim_xMax, sim_yMin, sim_yMax, sim_init
+  use Simulation_Data, Only : sim_xMin, sim_xMax, sim_yMin, sim_yMax, sim_zMin, sim_zMax, sim_init
 
   use Grid_interface, only  : Grid_getCellMetrics, Grid_getBlkIndexLimits, &
                               Grid_getCellCoords, &

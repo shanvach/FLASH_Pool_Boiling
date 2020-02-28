@@ -447,13 +447,17 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  k = 2*guard+1   
                  if(ivar == VELC_FACE_VAR) then                               
                  do i = 1,guard
-                  ! if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
-                  !     ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
-                  !     ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
+#if DIM == 3
+                   if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
+                       ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
+                       ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
                      regionData(i,1:je,1:ke,ivar)= 2. - regionData(k-i,1:je,1:ke,ivar)
-                  ! else
-                  !   regionData(i,1:je,1:ke,ivar)= 0. - regionData(k-i,1:je,1:ke,ivar)
-                  ! endif
+                   else
+                     regionData(i,1:je,1:ke,ivar)= 0. - regionData(k-i,1:je,1:ke,ivar)
+                   endif
+#else
+                   regionData(i,1:je,1:ke,ivar)= 2. - regionData(k-i,1:je,1:ke,ivar)
+#endif
                  end do
                  endif
               endif
@@ -759,13 +763,17 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               else             ! Use guardcells to set to zero velocities not normal to boundary, at boundary
                  if(ivar == VELC_FACE_VAR) then       
                  do i = 1,guard
-                   !if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
-                   !    ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
-                   !    ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
+#if DIM == 3
+                   if( ((axis == KAXIS) .and. (gridDataStruct .eq. FACEY)) .or. &
+                       ((axis == JAXIS) .and. (gridDataStruct .eq. FACEX)) .or. &
+                       ((axis == IAXIS) .and. (gridDataStruct .eq. FACEZ)) ) then
                      regionData(k-i,1:je,1:ke,ivar)= 2. - regionData(i,1:je,1:ke,ivar) 
-                   !else
-                   !  regionData(k-i,1:je,1:ke,ivar)= 0. - regionData(i,1:je,1:ke,ivar)
-                   !endif
+                   else
+                     regionData(k-i,1:je,1:ke,ivar)= 0. - regionData(i,1:je,1:ke,ivar)
+                   endif
+#else
+                     regionData(k-i,1:je,1:ke,ivar)= 2. - regionData(i,1:je,1:ke,ivar)
+#endif 
                  end do
                  endif
               endif
