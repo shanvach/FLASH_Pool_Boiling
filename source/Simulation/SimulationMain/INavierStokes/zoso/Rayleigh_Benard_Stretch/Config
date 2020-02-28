@@ -1,0 +1,18 @@
+# Configuration file for Rayleigh Benard 2D Cavity Problem
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/boussinesq_stretch
+REQUIRES physics/Heat_AD
+REQUIRES physics/Heat_AD/Heat_ADMain/boussinesq_stretch
+
+USESETUPVARS Grid
+
+LIBRARY STDCXX
+
+# Stretched Grid Solver
+#REQUESTS Grid/GridMain/RegularGrid
+#REQUESTS Grid/GridSolvers/Pfft/RegularGridSolver
+#REQUESTS Grid/GridSolvers/Pfft/HomBcTrigSolver
+#REQUESTS Grid/GridSolvers/Pfft/SimplePeriodicSolver
+
+# Number of guardcells at each boundary
+GUARDCELLS 1

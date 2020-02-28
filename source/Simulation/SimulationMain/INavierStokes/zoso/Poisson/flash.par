@@ -1,0 +1,61 @@
+# Runtime parameters for the Taylor-Green Vortex Problem
+
+#       Grid dimensionality and geometry
+geometry        = "cartesian"
+poisson_solver  = "user"
+x_poisson_solve = "trig"
+y_poisson_solve = "trig"
+z_poisson_solve = "direct"
+
+#       Size of computational volume
+xmin            =  0.000000000000000
+xmax            =  1.000000000000000
+ymin            =  0.000000000000000
+ymax            =  1.000000000000000
+zmin            =  0.000000000000000
+zmax            =  1.000000000000000
+
+# Grid Stretching
+x_stretch       = .false.
+x_stretch_type  = "sg_tanh"
+x_stretch_value = 0.75
+
+y_stretch       = .false.
+y_stretch_type  = "sg_tanh"
+y_stretch_value = 0.001
+
+z_stretch       = .false.
+z_stretch_type  = "sg_tanh"
+z_stretch_value = 0.75
+
+# Boundary Conditions
+xl_boundary_type = "neumann"
+xr_boundary_type = "neumann"
+yl_boundary_type = "neumann"
+yr_boundary_type = "neumann"
+zl_boundary_type = "neumann"
+zr_boundary_type = "neumann"
+
+# Boundary Conditions
+#xl_boundary_type = "dirichlet"
+#xr_boundary_type = "dirichlet"
+#yl_boundary_type = "dirichlet"
+#yr_boundary_type = "dirichlet"
+#zl_boundary_type = "dirichlet"
+#zr_boundary_type = "dirichlet"
+
+# Simulation (grid, time, I/O) parameters
+run_comment	= "Poisson Test Problem"
+log_file	= "Poisson.log"
+basenm		= "Poisson_"
+
+# Simulation Output Parameters
+plot_var_1	= "nsrc"
+plot_var_2      = "nfld"
+  
+# Process Specification for UG
+iProcs		= 8	#number of procs in the i direction
+jProcs		= 1	#number of procs in the j direction
+kProcs		= 1	#number of procs in the j direction
+
+

@@ -1,6 +1,6 @@
 #Config file for Pfft implementation in the GridSolver subunit
-EXCLUSIVE DirectSolver SimplePeriodicSolver SimpleDirichletSolver HomBcTrigSolver
-DEFAULT DirectSolver
+EXCLUSIVE DirectSolver SimplePeriodicSolver SimpleDirichletSolver HomBcTrigSolver RegularGridSolver
+DEFAULT HomBcTrigSolver 
 
 REQUIRES Grid/GridSolvers/Pfft/ProcessGrid
 REQUIRES Grid/GridSolvers/Pfft/MeshReconfiguration

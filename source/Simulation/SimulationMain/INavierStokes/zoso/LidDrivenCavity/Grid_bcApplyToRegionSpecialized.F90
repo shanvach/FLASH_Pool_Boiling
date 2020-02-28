@@ -295,7 +295,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                  regionData(i,1:je,1:ke,ivar) = regionData(k-i,1:je,1:ke,ivar)
+                  regionData(i,1:je,1:ke,ivar) = 2* ht_Twall_low - regionData(k-i,1:je,1:ke,ivar)
                end do
 
                applied = .true.
@@ -329,7 +329,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                k = 2*guard+1
                do i = 1,guard
-                 regionData(k-i,1:je,1:ke,ivar) = 2*1.0 - regionData(i,1:je,1:ke,ivar)
+                 regionData(k-i,1:je,1:ke,ivar) = 2*ht_Twall_high - regionData(i,1:je,1:ke,ivar)
                end do
 
                applied = .true.

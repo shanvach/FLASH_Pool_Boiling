@@ -182,6 +182,15 @@ Module Grid_interface
      end subroutine Grid_getCellCoords
   end interface
 
+  interface
+     subroutine Grid_getCellMetrics(axis, blockID, edge, guardcell, metrics, size)
+       integer, intent(in) :: axis, blockID, edge
+       integer, intent(in) :: size
+       logical, intent(in) :: guardcell
+       real,intent(out), dimension(size) :: metrics
+     end subroutine Grid_getCellMetrics
+  end interface
+
   interface 
      subroutine Grid_getDeltas(blockId, del)
        integer, intent(in) :: blockId

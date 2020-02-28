@@ -1,0 +1,63 @@
+# Runtime parameters for the Taylor-Green Vortex Problem
+
+# Simulation Controlling Parameters
+Ra                = 100.0
+Pr                = 100.0
+Re                =   2.0
+coupled_transport = .false.
+initial_flowType  = 21 
+internally_heated = .false.
+
+# Grid dimensionality and geometry
+geometry = "cartesian"
+
+# Size of computational volume
+xmin =  0.000000000000000
+xmax =  6.283185307195865
+ymin =  0.000000000000000
+ymax =  6.283185307195865
+
+# Momentum Boundary conditions
+xl_boundary_type = "periodic"
+xr_boundary_type = "periodic"
+yl_boundary_type = "periodic"
+yr_boundary_type = "periodic"
+
+# Temperature Wall Boundary Conditions
+Txl_boundary_type = "periodic"
+Txr_boundary_type = "periodic"
+Tyl_boundary_type = "periodic"
+Tyr_boundary_type = "periodic"
+
+Txl_boundary_value = 0.00
+Txr_boundary_value = 0.00
+Tyl_boundary_value = 0.00
+Tyr_boundary_value = 0.00
+
+# Simulation (grid, time, I/O) parameters
+run_comment	= "Taylor-Green Vortex Problem"
+log_file	= "INS_Taylor.log"
+basenm		= "INS_Taylor_"
+restart         = .false.
+nend            = 1000000000 
+tmax            = 10.0 
+
+# Simulation Output Parameters
+plot_var_1	= "pres"
+plot_var_2      = "delp"
+plot_var_3      = "temp"
+  
+checkpointFileIntervalTime = 5.0
+checkpointFileIntervalStep = 1000000 
+
+plotFileIntervalTime = 0.1
+plotFileIntervalStep = 1000 
+
+# Process Specification for UG
+iProcs		= 2 	#number of procs in the i direction
+jProcs		= 2	#number of procs in the j direction
+
+# Other Simulation Properties
+cflflg              = 0 
+dtspec              = 1.0e-4 
+

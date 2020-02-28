@@ -1,0 +1,90 @@
+# Runtime parameters for the 2d Rayleigh Benard Problem.
+#
+#   Simulation is intended to verify the correctness
+#   of the implementation of the boussinesq approximation
+#
+# Rayleigh Benard Cavity heated/cooled from bottom/top
+
+# Simulation Controlling Parameters
+Ra              =    1.0e8
+Pr              =    1.0
+Re              =    1.0
+coupled_transport = .true.
+internally_heated = .false.
+initial_flowType  = 1 
+
+#       Grid dimensionality and geometry
+geometry        = "cartesian"
+poisson_solver  = "user"
+x_poisson_solve = "direct"
+y_poisson_solve = "direct"
+
+#       Size of computational volume
+xmin            =  0.000000000000000
+xmax            =  2.000000000000000
+ymin            =  0.000000000000000
+ymax            =  1.000000000000000
+
+# Grid Stretching
+x_stretch       = .false.
+x_stretch_type  = "sg_tanh"
+x_stretch_value = 0.97
+
+y_stretch       = .true.
+y_stretch_type  = "sg_tanh"
+y_stretch_value = 0.97
+
+# Momentum Boundary Conditions
+xl_boundary_type = "slip_ins"
+xr_boundary_type = "slip_ins"
+yl_boundary_type = "slip_ins"
+yr_boundary_type = "slip_ins"
+
+# Temperature Boundary Conditions
+Txl_boundary_type = "neumann_ht"
+Txr_boundary_type = "neumann_ht"
+Tyl_boundary_type = "dirichlet_ht"
+Tyr_boundary_type = "dirichlet_ht"
+
+Txl_boundary_value = 0.00
+Txr_boundary_value = 0.00
+Tyl_boundary_value = 1.00
+Tyr_boundary_value = 0.00
+
+# Simulation (grid, time, I/O) parameters
+run_comment     = "Turbulent Rayleigh Benard Problem"
+log_file        = "INS_Rayleigh.log"
+basenm          = "INS_Rayleigh_"
+nend            = 10000000
+tmax            = 120.0
+
+# Restart Simulation Parameters
+restart              = .false.
+checkPointFileNumber = 1
+plotFileNumber       = 1
+
+# Simulation Output Parameters
+plot_var_1	= "pres"
+plot_var_2      = "delp"
+plot_var_3      = "temp"
+
+checkpointFileIntervalTime = 5.0
+checkpointFileIntervalStep = 100000
+rolling_checkpoint         = 3
+
+plotFileIntervalTime = 0.1
+plotFileIntervalStep = 10000
+  
+# Process Specification for UG
+iProcs		= 8 	#number of procs in the i direction
+jProcs		= 4	#number of procs in the j direction
+kProcs		= 1	#number of procs in the j direction
+
+# Other Simulation Properties
+intschm             = 2
+cfl                 = 0.3
+sigma               = 0.2
+#cflflg              = 0
+#dtspec              = 1.e-3
+#dtinit              = 1.e-3
+#tstep_change_factor = 1.

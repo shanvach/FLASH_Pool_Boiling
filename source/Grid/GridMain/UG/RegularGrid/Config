@@ -1,0 +1,38 @@
+# Configuration File for Uniform Grid Package w/ Stretched Grid 
+#REQUIRES Grid/GridMain/UG
+#REQUIRES Grid/GridSolvers/Pfft/RegularGridSolver
+
+# add pre-processor symbol for use of Regular Grids 
+PPDEFINE FLASH_GRID_REGULAR
+
+PARAMETER x_stretch             BOOLEAN         false
+PARAMETER y_stretch             BOOLEAN         false
+PARAMETER z_stretch             BOOLEAN         false
+
+PARAMETER x_stretch_type        STRING          "sg_user"
+PARAMETER y_stretch_type        STRING          "sg_user"
+PARAMETER z_stretch_type        STRING          "sg_user"
+
+PARAMETER x_stretch_value       REAL            0.00
+PARAMETER y_stretch_value       REAL            0.70
+PARAMETER z_stretch_value       REAL            0.70
+
+D Method of Specifying Poisson Solver for Each Axis
+PARAMETER poisson_solver        STRING         "auto"	# allowed are : 'auto', 'user', 'trig', or 'direct' 
+							#   auto   : each is set on the basis of 
+                                                        #            of whether the axis is stretched
+                                                        #            w/ stretched == 'direct' else 'trig'
+							#   user   : each is set on the basis of the values 
+                                                        #            given to each ?_poisson_solve variable 
+							#   trig   : each is set 'trig' 
+							#   direct : each is set 'direct' 
+
+D Type of Solution Method in the x Direction (IAXIS)
+PARAMETER x_poisson_solve       STRING         "trig"	# either 'trig' or 'direct'
+
+D Type of Solution Method in the y Direction (JAXIS)
+PARAMETER y_poisson_solve       STRING         "trig"	# either 'trig' or 'direct'
+
+D Type of Solution Method in the z Direction (KAXIS)
+PARAMETER z_poisson_solve       STRING         "trig"	# either 'trig' or 'direct'
+
