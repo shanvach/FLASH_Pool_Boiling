@@ -62,8 +62,8 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(GRID_JHI_GC) :: ycell, yedge
   real, dimension(GRID_KHI_GC) :: zcell, zedge
 
-  real :: xMag, xPwr, xSgn, xAmp, xFrq,             &
-          yMag, yPwr, ySgn, yAmp, yFrq, rMag,       &
+  real :: xMag, xPwr, xSgn, xSym, xAmp, xFrq,       &
+          yMag, yPwr, ySgn, ySym, yAmp, yFrq, rMag, &
           xFMag, xFPwr, xFSgn, yFMag, yFPwr, yFSgn, &
           xCnt, xWth, yCnt, yWth,                   &
           xSrcPol, xSrcSin, ySrcPol, ySrcSin
@@ -211,12 +211,14 @@ subroutine Simulation_initBlock(blockId)
       xMag = 1.0000
       xPwr = 0.0000
       xSgn = 0.0000
+      xSym = 0.0000
       xAmp = 0.2000
       xFrq = 2.0000
 
-      yMag = 1.0000
+      yMag = 2.0000
       yPwr = 4.0000
-      ySgn = 1.0000
+      ySgn = 0.0000
+      ySym = 1.0000
       yAmp = 0.0000
       yFrq = 0.0000
 
@@ -250,12 +252,14 @@ subroutine Simulation_initBlock(blockId)
         do j=1, blkLimitsGC(HIGH,JAXIS)
           do i=1, blkLimitsGC(HIGH,IAXIS)
             
-            xSrcPol = ((-1)**xSgn * (2.0 * (xcell(i) - xCnt) / xWth)**max(0.0, 2.0 * xPwr - 1) + 1) * xMag / 2.0
+            xSrcPol = ((-1)**xSgn * (xSym * (xCnt - xcell(i) + 1e-6) / abs(xCnt - xcell(i) + 1e-6) + (1.0 - xSym)) *   &
+                                    (2.0 * (xcell(i) - xCnt) / xWth)**max(0.0, 2.0 * xPwr - 1) + 1) * xMag / 2.0
             xSrcSin = xMag * xAmp * sin(2 * (2.0 * xFrq - xSgn) * 3.14 * (xcell(i) - xCnt) / xWth) *    &
                       (((-1)**xFSgn * (2.0 * (xcell(i) - xCnt) / xWth)**(2 * xFPwr) + xFSgn) * xFMag) * &
                       (((-1)**yFSgn * (2.0 * (ycell(j) - yCnt) / yWth)**(2 * yFPwr) + yFSgn) * yFMag)
             
-            ySrcPol = ((-1)**ySgn * (2.0 * (ycell(j) - yCnt) / yWth)**max(0.0, 2.0 * yPwr - 1) + 1) * yMag / 2.0
+            ySrcPol = ((-1)**ySgn * (ySym * (yCnt - ycell(j) + 1e-6) / abs(yCnt - ycell(j) + 1e-6) + (1.0 - ySym)) *   &
+                                    (2.0 * (ycell(j) - yCnt) / yWth)**max(0.0, 2.0 * yPwr - 1) + 1) * yMag / 2.0
             ySrcSin = yMag * yAmp * sin(2 * (2.0 * yFrq - ySgn) * 3.14 * (ycell(j) - yCnt) / yWth) *    &
                       (((-1)**xFSgn * (2.0 * (xcell(i) - xCnt) / xWth)**(2 * xFPwr) + xFSgn) * xFMag) * &
                       (((-1)**yFSgn * (2.0 * (ycell(j) - yCnt) / yWth)**(2 * yFPwr) + yFSgn) * yFMag)
