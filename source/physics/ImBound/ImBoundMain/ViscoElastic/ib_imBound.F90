@@ -71,6 +71,8 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   use ib_viscoElastic_interface
 
+  use ib_viscoElastic_data
+
   implicit none
 
   include "Flash_mpi.h"
@@ -168,14 +170,20 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  gcMask(VARC_VAR) = .TRUE.
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDX_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+  gcMask(LMS1_VAR) = .TRUE.
+  gcMask(LMS2_VAR) = .TRUE.
+  gcMask(LMS3_VAR) = .TRUE.
+  gcMask(LMS4_VAR) = .TRUE.
 
-  ! BC fill for face center variables
-  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#endif
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
@@ -202,7 +210,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
      call ib_ustar_solid(facexData(VELC_FACE_VAR,:,:,:),&
                                   faceyData(VELC_FACE_VAR,:,:,:),&
-                                  solnData(MUSF_VAR,:,:,:),&
+                                  solnData(XMUS_VAR,:,:,:),&
                                   solnData(LMS1_VAR,:,:,:),&
                                   solnData(LMS2_VAR,:,:,:),&
                                   solnData(LMS3_VAR,:,:,:),&
@@ -226,21 +234,151 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  gcMask(VARC_VAR) = .TRUE.
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(MUSF_VAR) = .TRUE.
+  gcMask(LMS1_VAR) = .TRUE.
+  gcMask(LMS2_VAR) = .TRUE.
+  gcMask(LMS3_VAR) = .TRUE.
+  gcMask(LMS4_VAR) = .TRUE.
 
   ! BC fill for face center variables
-  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.
 #if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.
 #endif
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
-  !------subroutine3&4 should be called after LMDX&LMDY advection and LMDA advection+redistance------
+  !------subroutine3 should be called after LMDX&LMDY advection------
   !------subroutine3: Loop through multiple blocks on a processor
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+     !ib_solid_interface_advection(sd,sX,sY,&
+     !                                ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+
+     !ib_solid_interface_advection needs to be changed for different initial interface profile
+     call ib_solid_interface_advection(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDX_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LMDX_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+  !------subroutine4: Loop through multiple blocks on a processor
+
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+     !subroutine ib_redistance_PM(s,ib_vis_rho1, ib_vis_rho2, ib_vis_xmu1, ib_vis_xmu2,&
+     !                                   ib_vis_xmus, rho, xmu, xms,blockID,&
+     !                                   ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+     call ib_redistance_PM(solnData(LMDA_VAR,:,:,:),&
+                                  ib_vis_rho1, ib_vis_rho2,&
+                                  ib_vis_xmu1, ib_vis_xmu2,& 
+                                  ib_vis_xmus,             &
+                                  solnData(XRHO_VAR,:,:,:),&
+                                  solnData(XMUF_VAR,:,:,:),&
+                                  solnData(XMUS_VAR,:,:,:),&
+                                  blockID,                 &
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(XRHO_VAR) = .TRUE.
+  gcMask(XMUF_VAR) = .TRUE.
+  gcMask(XMUS_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+  !------subroutine5: Loop through multiple blocks on a processor
 
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -280,20 +418,22 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  gcMask(VARC_VAR) = .TRUE.
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LMDX_VAR) = .TRUE.
 
-  ! BC fill for face center variables
-  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#endif
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
-  !------subroutine4: Loop through multiple blocks on a processor
+  !------subroutine6: Loop through multiple blocks on a processor
 
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -333,14 +473,16 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  gcMask(VARC_VAR) = .TRUE.
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
 
-  ! BC fill for face center variables
-  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-#endif
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&

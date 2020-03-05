@@ -15,7 +15,7 @@
 !!           :: ix1,ix2   - low,high block x indeces
 !!           :: jy1,jy2   - low,high block y indeces 
 !===============================================================================
-        subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4&
+        subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
         !include 'mpif.h'

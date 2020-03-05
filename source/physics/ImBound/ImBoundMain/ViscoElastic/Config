@@ -12,7 +12,9 @@ VARIABLE lms1 TYPE:GENERIC ! component of solid strain tensor
 VARIABLE lms2 TYPE:GENERIC ! component of solid strain tensor
 VARIABLE lms3 TYPE:GENERIC ! component of solid strain tensor
 VARIABLE lms4 TYPE:GENERIC ! component of solid strain tensor
-VARIABLE musf TYPE:GENERIC ! mus factor. varies from 0-1 in the diffused solid interface
+VARIABLE xmus TYPE:GENERIC ! mus, varies from 0-1 in the diffused solid interface
+VARIABLE xmuf TYPE:GENERIC ! muf, varies from mu_f-mu_s in the diffused solid interface
+VARIABLE xrho TYPE:GENERIC ! rho, varies from rho_f-rho_s in the diffused solid interface
 
 # To declare a face centered variable
 # FACEVAR varf
