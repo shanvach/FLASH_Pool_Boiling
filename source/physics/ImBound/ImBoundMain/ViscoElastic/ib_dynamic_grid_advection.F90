@@ -15,7 +15,7 @@
       subroutine ib_dynamic_grid_advection(sd,stest,&
                                            ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
-        !include 'mpif.h' !where is this?
+        !include 'mpif.h' 
 
         real, dimension(:,:,:), intent(inout) :: sn,adf,adfx,adfy
         real, dimension(:,:,:), intent(in)    :: sd,stest

@@ -67,4 +67,61 @@ module ib_viscoElastic_interface
         end subroutine ib_ustar_solid
         end interface
 
+        interface 
+        subroutine ib_dynamic_grid_directional_derivative(sd,stest,adfx,adfy,sn,&
+                                             ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        implicit none
+          real, dimension(:,:,:), intent(inout) :: sn,adfx,adfy
+          real, dimension(:,:,:), intent(in)    :: sd,stest
+          real, intent(in)    :: dx,dy,dz
+          integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        end subroutine ib_dynamic_grid_directional_derivative
+        end interface
+
+        interface
+        subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
+                                             ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        implicit none
+          real, dimension(:,:,:), intent(inout) :: adfx,adfy
+          real, dimension(:,:,:), intent(in)    :: sd,stest
+          real, dimension(:,:,:)                :: adf
+          real, intent(in)    :: dx,dy,dz
+          integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        end subroutine ib_dynamic_grid_normal_vector
+        end interface
+
+        interface
+        subroutine ib_dynamic_grid_retain_inside(sd,sn0,sn,&
+                                             ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        implicit none
+          real, dimension(:,:,:), intent(inout) :: sn0,sn
+          real, dimension(:,:,:), intent(in)    :: sd
+          real, intent(in)    :: dx,dy,dz
+          integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        end subroutine
+        end interface
+
+        interface
+        subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
+                                       rho, xmu, xms, blockID,     &
+                                       ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+          implicit none
+            real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
+            real, intent(in)    :: rho1, rho2, xmu1, xmu2, xmus
+            real, intent(in)    :: dx,dy,dz
+            integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+            integer, intent(in) :: blockID
+        end subroutine
+        end interface
+
+        interface
+        subroutine ib_solid_interface_advection(sd,sX,sY,&
+                                     ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+          implicit none
+          real, dimension(:,:,:), intent(inout) :: sd,sX,sY
+          real, intent(in)    :: dx,dy,dz
+          integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+        end subroutine
+        end interface
+
 end module ib_viscoElastic_interface

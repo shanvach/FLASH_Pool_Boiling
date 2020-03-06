@@ -11,12 +11,13 @@
 !!           :: ix1,ix2 - low,high block x indeces
 !!           :: jy1,jy2 - low,high block y indeces 
 !===============================================================================
-        subroutine ib_levelset_constantprojection(s,so,u,v,dx,dy,ix1,ix2,jy1,jy2)
+        subroutine ib_levelset_constantprojection(s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         real, dimension(:,:,:), intent(inout) :: s
-        real, dimension(:,:,:), intent(in)    :: so,u,v
-        real, intent(in)    :: dx,dy
-        integer, intent(in) :: ix1,ix2,jy1,jy2
+        real, dimension(:,:,:), intent(in)    :: u,v
+        real, dimension(:,:,:)                :: so
+        real, intent(in)    :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
         integer :: i,j,k
         real    :: ul,ur,vl,vr,delta_t
