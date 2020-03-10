@@ -5,23 +5,23 @@
 
 # To declare a cell centered variable
 # VARIABLE varc TYPE:GENERIC
-VARIABLE lmda TYPE:GENERIC ! viscoelastic solid distance function
-VARIABLE lmdx TYPE:GENERIC ! x dynamic grid
-VARIABLE lm0x TYPE:GENERIC ! x dynamic grid
-VARIABLE lmdy TYPE:GENERIC ! y dynamic grid
-VARIABLE lm0y TYPE:GENERIC ! y dynamic grid
-VARIABLE ddsn TYPE:GENERIC ! directional derivative in normal direction
-VARIABLE d0sn TYPE:GENERIC ! directional derivative in normal direction
-VARIABLE adfx TYPE:GENERIC ! unit normal vector in x
-VARIABLE adfy TYPE:GENERIC ! unit normal vector in y
+VARIABLE lmda TYPE:GENERIC # viscoelastic solid distance function
+VARIABLE lmdx TYPE:GENERIC # x dynamic grid
+VARIABLE lm0x TYPE:GENERIC # x dynamic grid
+VARIABLE lmdy TYPE:GENERIC # y dynamic grid
+VARIABLE lm0y TYPE:GENERIC # y dynamic grid
+VARIABLE ddsn TYPE:GENERIC # directional derivative in normal direction
+VARIABLE d0sn TYPE:GENERIC # directional derivative in normal direction
+VARIABLE adfx TYPE:GENERIC # unit normal vector in x
+VARIABLE adfy TYPE:GENERIC # unit normal vector in y
 
-VARIABLE lms1 TYPE:GENERIC ! component of solid strain tensor
-VARIABLE lms2 TYPE:GENERIC ! component of solid strain tensor
-VARIABLE lms3 TYPE:GENERIC ! component of solid strain tensor
-VARIABLE lms4 TYPE:GENERIC ! component of solid strain tensor
-VARIABLE xmus TYPE:GENERIC ! mus, varies from 0-1 in the diffused solid interface
-VARIABLE xmuf TYPE:GENERIC ! muf, varies from mu_f-mu_s in the diffused solid interface
-VARIABLE xrho TYPE:GENERIC ! rho, varies from rho_f-rho_s in the diffused solid interface
+VARIABLE lms1 TYPE:GENERIC # component of solid strain tensor
+VARIABLE lms2 TYPE:GENERIC # component of solid strain tensor
+VARIABLE lms3 TYPE:GENERIC # component of solid strain tensor
+VARIABLE lms4 TYPE:GENERIC # component of solid strain tensor
+VARIABLE xmus TYPE:GENERIC # mus, varies from 0-1 in the diffused solid interface
+VARIABLE xmuf TYPE:GENERIC # muf, varies from mu_f-mu_s in the diffused solid interface
+VARIABLE xrho TYPE:GENERIC # rho, varies from rho_f-rho_s in the diffused solid interface
 
 # To declare a face centered variable
 # FACEVAR varf
