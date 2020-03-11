@@ -23,6 +23,7 @@
         integer :: step,i,j,k
 
         real :: sxl, sxr, syl, syr
+        real :: h_preserve
         !end buit-in header
 
         sn = 0.d0

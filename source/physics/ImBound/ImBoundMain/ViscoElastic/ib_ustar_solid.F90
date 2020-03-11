@@ -18,6 +18,7 @@
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         integer :: i,j,k
+        !real, dimension(ix2-ix1+1,jy2-jy1+1,kz2-kz1+1)  :: ustrB, vstrB
         real :: ustrB, vstrB
         real :: xmsccc, xmsrcc, xmslcc, xmscrc
         real :: xmsrrc, xmsrlc, xmslrc, xmsclc
@@ -30,7 +31,7 @@
         ustrB = 0.d0
         vstrB = 0.d0
 
-        do k = 1
+           k = 1
            do j = jy1, jy2
               do i = ix1, ix2
               
@@ -47,7 +48,8 @@
 
                 !---Update ustar by adding elastic solid force term to solid region 
 
-                 ustrB(i,j,1) =  &                                          !
+                 !ustrB(i,j,1) =  &                                          !
+                 ustrB =  & 
                                                                             !
                           (xmsrcc  * Tau1(i+1,j,k) -             &           !
                            xmsccc  * Tau1(i,j,k)) / 1.d0 / dx/ re_s   &      !  
@@ -56,12 +58,14 @@
                         - xmsclc*Tau2(i,j-1,k) -xmsrlc*Tau2(i+1,j-1,k)) & 
                             /2.d0/ 2.d0/dy/re_s
                                                                         
-                 ustr(i,j,1) = ustr(i,j,1) + ustrB(i,j,1)
+                 !ustr(i,j,1) = ustr(i,j,1) + ustrB(i,j,1)
+                 ustr(i,j,1) = ustr(i,j,1) + ustrB
 
                                                                             !
                 !---Update vstar by adding elastic solid force term to solid region 
 
-                 vstrB(i,j,1) =  &                                          !
+                 !vstrB(i,j,1) =  &                                          !
+                 vstrB =  &
                                                                             !
                          (xmsrcc*Tau3(i+1,j,k) + xmsrrc*Tau3(i+1,j+1,k)  & 
                          -xmslcc*Tau3(i-1,j,k)-xmslrc*Tau3(i-1,j+1,k))   &    !  
@@ -71,12 +75,12 @@
                               xmsccc  * Tau4(i,j,k)) / 1.d0 / dy/ re_s    
                                                                         
 
-                 vstr(i,j,1) = vstr(i,j,1) + vstrB(i,j,1)
+                 !vstr(i,j,1) = vstr(i,j,1) + vstrB(i,j,1)
+                 vstr(i,j,1) = vstr(i,j,1) + vstrB
 
 
 
               end do
            end do
-        end do
 
       end subroutine ib_ustar_solid

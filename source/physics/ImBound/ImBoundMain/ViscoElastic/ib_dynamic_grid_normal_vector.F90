@@ -10,14 +10,13 @@
 
 
 
-      subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
+      subroutine ib_dynamic_grid_normal_vector(sd,stest,adf,adfx,adfy,&
                                            ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         !include 'mpif.h' 
 
-        real, dimension(:,:,:), intent(inout) :: adfx,adfy
+        real, dimension(:,:,:), intent(inout) :: adfx,adfy,adf
         real, dimension(:,:,:), intent(in)    :: sd,stest
-        real, dimension(:,:,:)                :: adf
 
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2

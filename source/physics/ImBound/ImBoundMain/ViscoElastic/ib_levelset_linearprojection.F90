@@ -12,10 +12,10 @@
 !!           :: ix1,ix2 - low,high block x indeces
 !!           :: jy1,jy2 - low,high block y indeces 
 !===============================================================================
-        subroutine ib_levelset_linearprojection(s,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        subroutine ib_levelset_linearprojection(s,so,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         !include 'mpif.h'
-        real, dimension(:,:,:), intent(inout) :: s
+        real, dimension(:,:,:), intent(inout) :: s,so
         real, dimension(:,:,:), intent(in)    :: u,v
         real, dimension(:,:,:), intent(in)    :: sn
         real, intent(in)    :: dx,dy,dz
@@ -30,10 +30,10 @@
         do j = jy1,jy2
           do i = ix1,ix2
           !normal vectors
-          ul = u(i-1,j,k) 
-          ur = u(i,j,k)   
-          vl = v(i,j-1,k) 
-          vr = v(i,j,k) 
+          !ul = u(i-1,j,k) 
+          !ur = u(i,j,k)   
+          !vl = v(i,j-1,k) 
+          !vr = v(i,j,k) 
           ! use dx/2 as dt to advect level set
           if(u(i,j,k).ge.0.d0.and.v(i,j,k).ge.0.d0) then
             s(i,j,k) = so(i,j,k) - dx/2.d0*u(i,j,k)*(so(i,j,k) - so(i-1,j,k)) / dx &

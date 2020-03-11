@@ -16,14 +16,16 @@
 !!           :: jy1,jy2   - low,high block y indeces 
 !===============================================================================
         subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4,&
+                                   A1,A2,A3,A4,AT1,AT2,AT3,AT4,&
+                                   A_inv1,A_inv2,A_inv3,A_inv4,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
         !include 'mpif.h'
         real, dimension(:,:,:), intent(inout) :: Tau1, Tau2, Tau3, Tau4
-        real, dimension(:,:,:), intent(in)    :: sd,sX,sY
-        real, dimension(:,:,:), intent(in)    :: A1,A2,A3,A4
-        real, dimension(:,:,:), intent(in)    :: AT1,AT2,AT3,AT4
-        real, dimension(:,:,:), intent(in)    :: A_inv1,A_inv2,A_inv3,A_inv4
+        real, dimension(:,:,:), intent(inout)    :: sd,sX,sY
+        real, dimension(:,:,:), intent(inout)    :: A1,A2,A3,A4
+        real, dimension(:,:,:), intent(inout)    :: AT1,AT2,AT3,AT4
+        real, dimension(:,:,:), intent(inout)    :: A_inv1,A_inv2,A_inv3,A_inv4
         !real, dimension(:,:,:)                :: Taux,Tauy,Taum
 
         real, intent(in)    :: dx,dy,dz
@@ -65,6 +67,7 @@
         Tau2 = 0.d0
         Tau3 = 0.d0
         Tau4 = 0.d0
+
         !Taux = 0.d0
         !Tauy = 0.d0
         !Taum = 0.d0 

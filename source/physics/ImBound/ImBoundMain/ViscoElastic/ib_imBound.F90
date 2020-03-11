@@ -109,6 +109,8 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   real bsize(MDIM),coord(MDIM)
   integer datasize(MDIM)
+  !! define x,y,z coordinate
+  !real xcell(MDIM),ycell(MDIM),zcell(MDIM)
 
   integer nxc, nyc, nzc
   real del(MDIM)
@@ -154,6 +156,18 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                                   solnData(LMS2_VAR,:,:,:),&
                                   solnData(LMS3_VAR,:,:,:),&
                                   solnData(LMS4_VAR,:,:,:),&
+                                  solnData(AAA1_VAR,:,:,:),&
+                                  solnData(AAA2_VAR,:,:,:),&
+                                  solnData(AAA3_VAR,:,:,:),&
+                                  solnData(AAA4_VAR,:,:,:),&
+                                  solnData(AAT1_VAR,:,:,:),&
+                                  solnData(AAT2_VAR,:,:,:),&
+                                  solnData(AAT3_VAR,:,:,:),&
+                                  solnData(AAT4_VAR,:,:,:),&
+                                  solnData(AIV1_VAR,:,:,:),&
+                                  solnData(AIV2_VAR,:,:,:),&
+                                  solnData(AIV3_VAR,:,:,:),&
+                                  solnData(AIV4_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -179,6 +193,18 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask(LMS2_VAR) = .TRUE.
   gcMask(LMS3_VAR) = .TRUE.
   gcMask(LMS4_VAR) = .TRUE.
+  gcMask(AAA1_VAR) = .TRUE.
+  gcMask(AAA2_VAR) = .TRUE.
+  gcMask(AAA3_VAR) = .TRUE.
+  gcMask(AAA4_VAR) = .TRUE.
+  gcMask(AAT1_VAR) = .TRUE.
+  gcMask(AAT2_VAR) = .TRUE.
+  gcMask(AAT3_VAR) = .TRUE.
+  gcMask(AAT4_VAR) = .TRUE.
+  gcMask(AIV1_VAR) = .TRUE.
+  gcMask(AIV2_VAR) = .TRUE.
+  gcMask(AIV3_VAR) = .TRUE.
+  gcMask(AIV4_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
@@ -238,7 +264,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   ! BC fill for cell center variables
   !gcMask(VARC_VAR) = .TRUE.
-  gcMask(MUSF_VAR) = .TRUE.
+  gcMask(XMUS_VAR) = .TRUE.
   gcMask(LMS1_VAR) = .TRUE.
   gcMask(LMS2_VAR) = .TRUE.
   gcMask(LMS3_VAR) = .TRUE.
@@ -329,6 +355,31 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      ! Get Blocks internal limits indexes:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
 
+    !! calculate xcell, ycell and zcell 
+    !      call Grid_getBlkBoundBox(blockID,boundBox)
+    !      bsize(:) = boundBox(2,:) - boundBox(1,:)
+  
+    !      call Grid_getBlkCenterCoords(blockID,coord)
+
+    ! do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+    !  do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+    !     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+ 
+    !        xcell(i) = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
+    !                real(i - NGUARD - 1)*del(IAXIS) +   &
+    !                0.5*del(IAXIS)
+ 
+    !        ycell(j)  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
+    !                real(j - NGUARD - 1)*del(JAXIS)  +  &
+    !                0.5*del(JAXIS)
+ 
+    !        zcell(k)  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+    !                real(k - NGUARD - 1)*del(KAXIS)  +  &
+    !                0.5*del(KAXIS)
+    !     enddo
+    !  enddo
+    !enddo
+
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
@@ -405,6 +456,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
+                                  solnData(ADF0_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -429,6 +481,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   !gcMask(VARC_VAR) = .TRUE.
   gcMask(LMDA_VAR) = .TRUE.
   gcMask(LMDX_VAR) = .TRUE.
+  gcMask(ADF0_VAR) = .TRUE.
   gcMask(ADFX_VAR) = .TRUE.
   gcMask(ADFY_VAR) = .TRUE.
 
@@ -524,6 +577,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -549,6 +603,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask(ADFX_VAR) = .TRUE.
   gcMask(ADFY_VAR) = .TRUE.
   gcMask(D0SN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
@@ -644,6 +699,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
 
      call ib_levelset_linearprojection(solnData(LM0X_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
@@ -671,6 +727,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
   gcMask(ADFY_VAR) = .TRUE.
   gcMask(LM0X_VAR) = .TRUE.
   gcMask(DDSN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
@@ -767,6 +824,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
+                                  solnData(ADF0_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -791,6 +849,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
   !gcMask(VARC_VAR) = .TRUE.
   gcMask(LMDA_VAR) = .TRUE.
   gcMask(LMDY_VAR) = .TRUE.
+  gcMask(ADF0_VAR) = .TRUE.
   gcMask(ADFX_VAR) = .TRUE.
   gcMask(ADFY_VAR) = .TRUE.
 
@@ -886,6 +945,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -911,6 +971,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
   gcMask(ADFX_VAR) = .TRUE.
   gcMask(ADFY_VAR) = .TRUE.
   gcMask(D0SN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
@@ -1006,6 +1067,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
 
      call ib_levelset_linearprojection(solnData(LM0Y_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
@@ -1033,6 +1095,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
   gcMask(ADFY_VAR) = .TRUE.
   gcMask(LM0Y_VAR) = .TRUE.
   gcMask(DDSN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.

@@ -8,18 +8,20 @@
       subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
                                      rho, xmu, xms, blockID,     &
                                      ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
-        implicit none
-          !include 'mpif.h'
+#include "constants.h"
+#include "Flash.h"
+
+        use Grid_interface, only: Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+
+          implicit none
+
           real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
           real, intent(in)    :: rho1, rho2, xmu1, xmu2, xmus
           real, intent(in)    :: dx,dy,dz
           integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
           integer, intent(in) :: blockID
+
           integer :: nx, ny, nz
-          nx = ix2-ix1+1
-          ny = jy2-jy1+1
-          nz = kz2-kz1+1
-  
           integer :: i,j,k
           integer :: nip,nip_max,inv,n1, n3, nn1, nn2, n, m, n2 
           real    :: ul,ur,vl,vr
@@ -27,13 +29,19 @@
           real    :: eps, psi
           real    :: r1, r2, r3
           real    :: xx01, yy01, xx02, yy02, xx03, yy03
-          real    :: rho1, rho2, xmu1, xmu2, xmus
           real    :: xcell1,ycell1,zcell1,xcell2,ycell2,zcell2
 
-          real, dimension(:,:,:)      :: phi, s1, dns
-          nip_max = max(nx,ny) * min(nx,ny)
-          real, dimension(nip_max,6)  :: xip, xip1
+          !nx = ix2-ix1+1
+          !ny = jy2-jy1+1
+          !nz = kz2-kz1+1
+          !nip_max = max(nx,ny) * min(nx,ny)
+          real, dimension(ix2-ix1+1,jy2-jy1+1,kz2-kz1+1)  :: phi, s1, dns
+          real, dimension( (ix2-ix1+1)*(jy2-jy1+1),6)  :: xip
+          !real, dimension(nip_max,6)  :: xip, xip1
           !end header
+          real, dimension(2,MDIM) :: boundBox
+          real bsize(MDIM),coord(MDIM)
+          real del(MDIM)
 
         !implicit none
         !include 'mpif.h'
