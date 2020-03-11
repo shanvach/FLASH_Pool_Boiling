@@ -27,7 +27,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   use IncompNS_data, ONLY : ins_gravX,ins_gravY,ins_gravZ
 
 ! Added for multiphase -- EG --
-  use Multiphase_data, only: mph_rho1,mph_rho2
+  use Multiphase_data, only: mph_rho1,mph_rho2,mph_vis1,mph_vis2
 
   implicit none
   integer, intent(IN) :: blockID
@@ -39,9 +39,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   ! Local Variables....
   real :: xp,yp,zp,zL,h,hl,dx,dy,dz,dsx,dsy,dsz,ubd,vbd,wbd,ubdd,vbdd,wbdd,nxp,nyp,nzp
   real, dimension(MDIM) :: xbe,del,coord,bsize,np
-! Added for multiphase -- EG -- ??
+! Added for multiphase -- EG --
   real, dimension(MDIM) :: xdf,ndf, part_Nml
-  real :: zdfun, nxdf, nydf, nzdf, dfunle(ib_stencil,NDIM+1), c_rho, dfe
+  real :: zdfun, nxdf, nydf, nzdf, dfunle(ib_stencil,NDIM+1),c_nu, c_vis, c_rho, dfe
 
 
   integer, parameter, dimension(MDIM)      :: grdip = (/ CENTER, CENTER, CENTER /)
@@ -147,7 +147,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
   np(IAXIS) = nxp
   np(JAXIS) = nyp
-! Added for multiphase -- EG -- ??
+! Added for multiphase -- EG -- 
   ndf(IAXIS) = nxdf
   ndf(JAXIS) = nydf
 
@@ -156,18 +156,18 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   wbd = particleData(VELZ_PART_PROP)
   wbdd= particleData(ACCZ_PART_PROP)
   nzp = particleData(NMLZ_PART_PROP)
-! Added for multiphase -- EG -- ??
+! Added for multiphase -- EG -- 
   nzdf = particleData(DFUN_PART_PROP)
 #else
   zp  = 0.
   wbd = 0.
   wbdd= 0.
   nzp = 0.
-! Added for multiphase -- EG -- ??
+! Added for multiphase -- EG -- 
   nzdf = 0.
 #endif
   np(KAXIS) = nzp
-! Added for multiphase -- EG -- ??
+! Added for multiphase -- EG -- 
   ndf(KAXIS) = nzdf
 
 
@@ -209,6 +209,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   tp = 0.
 
   c_rho = 0. ! Added for Multiphase -- EG --
+  c_vis = 0.
+  c_nu  = 0.
 
    ! Initial the flow in z direction. This is necessary for the 2D case
    we   = 0.; dwdx = 0.; dwdy =0.;
@@ -283,76 +285,31 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
                                       ielem(i,JAXIS,1), &
                                       ielem(i,KAXIS,1));
 
+              ! Sum of distance function for markers
               zdfun = zdfun + dfunle(i,1)*imp(2,2,2)
         end do
 
+        ! Average distance function for markers
         zdfun = zdfun / ib_stencil
 
+        ! Assign density and viscosity coefficient based on if the
+        ! marker is inside of the liquid or the gas (or fluid 1 or 2).
         if ( zdfun >= 0 ) then
                c_rho = mph_rho1 / mph_rho2
+               c_vis = mph_vis1 / mph_vis2
         else
                c_rho = mph_rho2 / mph_rho2
+               c_vis = mph_vis2 / mph_vis2
         end if 
+
+        ! Define the coefficient / the scaled kinematic viscosity
+        ! (remember nu = invRe).
+        c_nu = nu * ( c_vis / c_rho ) ! c_nu Added for Multiphase -- EG --
 
         ! Release Pointer
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
-! Added for multiphase -- EG --
-!           ! Point to cell centered Variables:
-!          call Grid_getBlkPtr(blockID,solnData,CENTER)
-! 
-!     do i = 1 , ib_stencil
-!           part_Nml(IAXIS) = solnData(NMLX_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-!           part_Nml(JAXIS) = solnData(NMLY_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-!           part_Nml(KAXIS) = 0.0
-!#if NDIM == 3
-!           part_Nml(KAXIS) = solnData(NMLZ_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1))
-!#endif
-!     end do
-!           ! Cell centered stencil for DFUN interpolation at probe
-!           gridfl(:) = CENTER
-!
-!           call ib_stencils(xdf,part_Nml,gridfl,del,coord,bsize, &
-!                            ielem(:,:,1),dfe,FORCE_FLOW)
-!
-!           delaux = 0.5*del
-!
-!           xyz_stencil(:,:) = 0.
-!        
-!           do idim = 1,NDIM
-!                xyz_stencil(1:ib_stencil,idim) = coord(idim) - 0.5*bsize(idim) + &
-!                        real(ielem(1:ib_stencil,idim,1) - NGUARD - 1)*del(idim) + delaux(idim) 
-!           enddo
-!
-!           ! Get shape function ib_external_phile  for points on stencil
-!           call ib_getInterpFunc(xdf,xyz_stencil,del,derivflag,dfunle)
-!
-!           zdfun = 0.      ! zp = DFUN at probe point
-!
-!#if NDIM == 2
-!           do i = 1 , ib_stencil
-!                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
-!                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),1);
-!           enddo
-!#endif
-!
-!#if NDIM == 3
-!           do i = 1 , ib_stencil
-!                zdfun = zdfun + dfunle(i,CONSTANT_ONE) * &
-!                solnData(DFUN_VAR,ielem(i,IAXIS,1),ielem(i,JAXIS,1),ielem(i,KAXIS,1));
-!           enddo
-!#endif
-!           if ( zdfun >= 0 ) then
-!                  c_rho = mph_rho1 / mph_rho2
-!           else
-!                  c_rho = mph_rho2 / mph_rho2
-!           end if 
-!
-!           ! Release Pointer
-!           call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!
-
-! End of Added for multiphase -- EG --
+! End of interpolation Added for multiphse -- EG --
 
   zpres = 0.
   zv(1:MDIM) = 0.
@@ -527,8 +484,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
            ! Get Pressure approximation at surface marker: Acceleration +
            ! gravity effects.
-           dpdn = - c_rho * (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
-                    c_rho * (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
+           dpdn = - (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
+                    (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
            zL = zpres - dpdn*h;
 
         else                                         ! Tangent stress
@@ -986,9 +943,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   zL2    = zpres - dpdxn*h
 
   ! Fvisc = Tau * n
-  fvx_l = nu*2.*(exx*nxp+exy*nyp+exz*nzp)
-  fvy_l = nu*2.*(exy*nxp+eyy*nyp+eyz*nzp)
-  fvz_l = nu*2.*(exz*nxp+eyz*nyp+ezz*nzp)
+  fvx_l = c_nu*2.*(exx*nxp+exy*nyp+exz*nzp) ! c_nu Added for Multiphase -- EG --
+  fvy_l = c_nu*2.*(exy*nxp+eyy*nyp+eyz*nzp) ! c_nu Added for Multiphase -- EG --
+  fvz_l = c_nu*2.*(exz*nxp+eyz*nyp+ezz*nzp) ! c_nu Added for Multiphase -- EG --
 
   fv_c = 0.0
   do kk = 1, MDIM
@@ -999,7 +956,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
     enddo
   enddo  
 
-  fv_c  =  -fv_c*h*nu
+  fv_c  =  -fv_c*h*c_nu ! c_nu Added for Multiphase -- EG --
   fvx_c = fv_c*tp(1)
   fvy_c = fv_c*tp(2)
   fvz_c = fv_c*tp(3)
@@ -1024,13 +981,13 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   w_l(2) = dwdy - dvdz ! w_x
   w_l(3) = dudz - dwdx ! w_y
 
-  w_c(1) = (fvy_c*nxp - fvx_c*nyp)/nu
-  w_c(2) = (fvz_c*nyp - fvy_c*nzp)/nu
-  w_c(3) = (fvx_c*nzp - fvz_c*nxp)/nu
+  w_c(1) = (fvy_c*nxp - fvx_c*nyp)/c_nu ! c_nu Added for Multiphase -- EG --
+  w_c(2) = (fvz_c*nyp - fvy_c*nzp)/c_nu ! c_nu Added for Multiphase -- EG --
+  w_c(3) = (fvx_c*nzp - fvz_c*nxp)/c_nu ! c_nu Added for Multiphase -- EG --
 
-  w_cc(1) = (fvy_cc*nxp - fvx_cc*nyp)/nu
-  w_cc(2) = (fvz_cc*nyp - fvy_cc*nzp)/nu
-  w_cc(3) = (fvx_cc*nzp - fvz_cc*nxp)/nu
+  w_cc(1) = (fvy_cc*nxp - fvx_cc*nyp)/c_nu ! c_nu Added for Multiphase -- EG --
+  w_cc(2) = (fvz_cc*nyp - fvy_cc*nzp)/c_nu ! c_nu Added for Multiphase -- EG --
+  w_cc(3) = (fvx_cc*nzp - fvz_cc*nxp)/c_nu ! c_nu Added for Multiphase -- EG --
 
   zv = w_l + w_c + w_cc
 
@@ -1126,6 +1083,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
               dpdz = dpdz + phile(i,4)*p_i;
 #endif             
 #endif
+              dpdx = dpdx * (1 / c_rho )
+              dpdy = dpdy * (1 / c_rho )
+              dpdz = dpdz * (1 / c_rho )
            enddo
 
            ! Release Pointer
@@ -1133,8 +1093,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
            ! Get Pressure approximation at surface marker: Acceleration +
            ! gravity effects.
-           dpdn = - c_rho * (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
-                    c_rho * (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
+           dpdn = - (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
+                    (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
            zL = zpres - dpdn*h;
 
         else                                         ! Tangent stress
@@ -1150,7 +1110,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
                                                            ielem(i,JAXIS,presflag+1), &
                                                            ielem(i,KAXIS,presflag+1)); 
            enddo
-           nuwz = nu*zv(gridind)
+           nuwz = c_nu*zv(gridind) ! c_nu Added for Multiphase -- EG --
 
            case(2)
            ! wx:
@@ -1160,7 +1120,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
                                                            ielem(i,JAXIS,presflag+1), &
                                                            ielem(i,KAXIS,presflag+1)); 
            enddo
-           nuwx = nu*zv(gridind)          
+           nuwx = c_nu*zv(gridind) ! c_nu Added for Multiphase -- EG --
 
            case(3)
            ! wy:
@@ -1170,7 +1130,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
                                                            ielem(i,JAXIS,presflag+1), &
                                                            ielem(i,KAXIS,presflag+1)); 
            enddo
-           nuwy = nu*zv(gridind)
+           nuwy = c_nu*zv(gridind) ! c_nu Added for Multiphase -- EG --
 
            end select
 
@@ -1422,7 +1382,8 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   endif ! case zero velocity difference
 
   ! Diffusion correction - 1/rho*dp/dxt*h/(2nu) * t:
-  normt = ( 1 / c_rho ) * ( h/(2.*nu) )
+  !normt = 2.*( c_rho / c_vis ) * ( h/(2.*nu) )
+  normt = 2. * ( h/(2.*c_nu) ) ! c_nu Added for Multiphase -- EG --
 
   ! Using Strain tensor on the external point:
   ! Strain velocities tensor:
@@ -1452,9 +1413,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   !dwn = 2.*(wes-wps)/h - dwne
 
   ! Fvisc = nu dv/dn - 1/rho*dp/dxt*h/2 * t, here rho=1:
-  particleData(FXVI_PART_PROP) = ( 1 / c_rho ) * ( nu*dun )
-  particleData(FYVI_PART_PROP) = ( 1 / c_rho ) * ( nu*dvn )
-  particleData(FZVI_PART_PROP) = ( 1 / c_rho ) * ( nu*dwn )
+  particleData(FXVI_PART_PROP) = ( c_nu*dun ) ! c_nu Added for Multiphase -- EG --
+  particleData(FYVI_PART_PROP) = ( c_nu*dvn ) ! c_nu Added for Multiphase -- EG --
+  particleData(FZVI_PART_PROP) = ( c_nu*dwn ) ! c_nu Added for Multiphase -- EG --
  
   ! Vorticity:
   ! In Z dir: wz = dv/dx - du/dy
@@ -1477,9 +1438,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   ezz = dwdz 
 
   ! Fvisc = Tau * n
-  particleData(FXVI_PART_PROP) = 2.*nu*(exx*nxp+exy*nyp+exz*nzp)
-  particleData(FYVI_PART_PROP) = 2.*nu*(exy*nxp+eyy*nyp+eyz*nzp)
-  particleData(FZVI_PART_PROP) = 2.*nu*(exz*nxp+eyz*nyp+ezz*nzp)
+  particleData(FXVI_PART_PROP) = 2.*c_nu*(exx*nxp+exy*nyp+exz*nzp) ! c_nu Added for Multiphase -- EG --
+  particleData(FYVI_PART_PROP) = 2.*c_nu*(exy*nxp+eyy*nyp+eyz*nzp) ! c_nu Added for Multiphase -- EG --
+  particleData(FZVI_PART_PROP) = 2.*c_nu*(exz*nxp+eyz*nyp+ezz*nzp) ! c_nu Added for Multiphase -- EG --
 
   ! Vorticity:
   ! In Z dir: wz = dv/dx - du/dy
