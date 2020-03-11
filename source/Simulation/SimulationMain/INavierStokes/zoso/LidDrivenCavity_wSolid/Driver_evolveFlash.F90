@@ -60,6 +60,9 @@ subroutine Driver_evolveFlash()
 
   !use Multiphase_interface, only:Multiphase
   use Heat_AD_interface, only: Heat_AD
+
+  use ib_viscoElastic_interface, only: ib_imBound
+
   implicit none
 
 #include "constants.h"
@@ -158,6 +161,8 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !----
 
      dr_simTime = dr_simTime + dr_dt
+
+     call ib_imBound( blockCount, blockList, dr_simTime, dr_dt)
 
 #ifdef DEBUG_DRIVER
      print*, 'going into Multiphase'
