@@ -1,4 +1,5 @@
 ImBound += ib_imBound.o \
+           ib_advect.o \
  	   ib_viscoElastic_interface.o \
 	   ib_viscoElastic_data.o \
            ib_solid_stress.o \

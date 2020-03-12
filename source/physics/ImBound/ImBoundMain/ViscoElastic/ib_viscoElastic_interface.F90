@@ -59,6 +59,16 @@ module ib_viscoElastic_interface
         end interface
 
         interface
+        subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
+        implicit none
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList !blockCount
+        real,    INTENT(IN) :: timeEndAdv,dt
+        end subroutine
+        end interface
+
+
+        interface
         subroutine ib_ustar_solid(ustr, vstr, xms, Tau1,Tau2,Tau3,Tau4,&
                                   ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
