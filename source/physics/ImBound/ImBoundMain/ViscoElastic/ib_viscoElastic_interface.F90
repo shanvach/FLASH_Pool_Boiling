@@ -138,4 +138,24 @@ module ib_viscoElastic_interface
         end subroutine
         end interface
 
+        interface
+        subroutine ib_advectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
+        implicit none
+        real, dimension(:,:,:), intent(inout):: s
+        real, dimension(:,:,:), intent(in) :: u,v
+        real, intent(in) :: dt,dx,dy
+        integer, intent(in) :: ix1,ix2,jy1,jy2
+        end subroutine
+        end interface
+
+        interface
+        subroutine ib_lsRedistance(s,u,v,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
+        implicit none
+        integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
+        real, dimension(:,:,:), intent(inout):: s
+        real, intent(in) :: dx,dy,lsDT, minCellDiag
+        real, dimension(:,:,:), intent(in):: u,v,soo
+        end subroutine
+        end interface
+
 end module ib_viscoElastic_interface
