@@ -72,10 +72,11 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   use ib_viscoElastic_interface, only: ib_levelset_linearprojection, ib_levelset_constantprojection, &
                                        ib_dynamic_grid_directional_derivative, ib_solid_stress, ib_ustar_solid, & 
                                        ib_redistance_PM, ib_dynamic_grid_retain_inside, ib_dynamic_grid_normal_vector, & 
-                                       ib_solid_interface_advection
+                                       ib_advectWENO3, ib_solid_interface_advection
 
   use ib_viscoElastic_data
 
+  use IncompNS_data, only: ins_meshME
   implicit none
 
   include "Flash_mpi.h"
@@ -124,6 +125,62 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   integer :: NStep
   integer :: step
 
+
+  if(ins_meshME .eq. MASTER_PE) print *,"Entering IB level set advection" 
+
+  ! WENO3 advection for LMDX, LMDY
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+     call ib_advectWENO3(solnData(LMDX_VAR,:,:,:), &
+                          facexData(VELC_FACE_VAR,:,:,:), &
+                          faceyData(VELC_FACE_VAR,:,:,:), &
+                          dt, &
+                          del(DIR_X), &
+                          del(DIR_Y), &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+
+     call ib_advectWENO3(solnData(LMDY_VAR,:,:,:), &
+                          facexData(VELC_FACE_VAR,:,:,:), &
+                          faceyData(VELC_FACE_VAR,:,:,:), &
+                          dt, &
+                          del(DIR_X), &
+                          del(DIR_Y), &
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  gcMask(LMDX_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
 
   !------3 should be called after LMDX&LMDY advection------
   !------3: Loop through multiple blocks on a processor

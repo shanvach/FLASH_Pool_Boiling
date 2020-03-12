@@ -11,3 +11,5 @@ ImBound += ib_imBound.o \
            ib_levelset_linearprojection.o \
            ib_redistance_PM.o \
            ib_solid_interface_advection.o \
+           ib_lsRedistance.o \
+           ib_advectWENO3.o

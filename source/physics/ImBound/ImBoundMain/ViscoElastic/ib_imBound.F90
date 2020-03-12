@@ -76,6 +76,8 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   use ib_viscoElastic_data
 
+  use IncompNS_data, only: ins_meshMe
+
   implicit none
 
   include "Flash_mpi.h"
@@ -123,6 +125,9 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   character(len=6) :: IndNStep
   integer :: NStep
   integer :: step
+
+
+  if(ins_meshME .eq. MASTER_PE) print *,"Applying IB visco elastic forcing"
 
 !------1: Loop through multiple blocks on a processor
 !--------------------calculate components of solid strain tensor---------

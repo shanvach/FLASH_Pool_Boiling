@@ -97,8 +97,10 @@ subroutine Simulation_initBlock(blockId)
            ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                    real(j - NGUARD - 1)*del(JAXIS)  +  &
                    0.5*del(JAXIS)
-
-           solnData(LMDA_VAR,i,j,k) = 0.125 - sqrt(xcell**2 + ycell**2)
+            
+           solnData(LMDX_VAR,i,j,k) = xcell
+           solnData(LMDY_VAR,i,j,k) = ycell
+           solnData(LMDA_VAR,i,j,k) = -0.125 + sqrt(xcell**2 + ycell**2)
 
         enddo
      enddo
