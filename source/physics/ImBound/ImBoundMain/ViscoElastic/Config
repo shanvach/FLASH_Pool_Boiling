@@ -5,6 +5,8 @@
 
 # To declare a cell centered variable
 # VARIABLE varc TYPE:GENERIC
+VARIABLE lmxx TYPE:GENERIC
+VARIABLE lmyy TYPE:GENERIC
 VARIABLE lmda TYPE:GENERIC # viscoelastic solid distance function
 VARIABLE lmdx TYPE:GENERIC # x dynamic grid
 VARIABLE lm0x TYPE:GENERIC # x dynamic grid
@@ -49,8 +51,8 @@ VARIABLE rdns TYPE:GENERIC # dns in ib_redistance_PM
 
 # To declare a runtime parameter 
 #PARAMETER varp  REAL 1.0
-PARAMETER ib_vis_rho1  REAL     1.0      # Density of fluid 1.
-PARAMETER ib_vis_rho2  REAL     1.0      # Density of fluid 2.
-PARAMETER ib_vis_xmu1  REAL     1.0      # viscosity of fluid 1.
-PARAMETER ib_vis_xmu2  REAL     1.0      # viscosity of fluid 2.
-PARAMETER ib_vis_xmus  REAL     1.0      # modulus of elasticity of solid.
+#PARAMETER ib_vis_rho1  REAL     1.0      # Density of fluid 1.
+#PARAMETER ib_vis_rho2  REAL     1.0      # Density of fluid 2.
+#PARAMETER ib_vis_xmu1  REAL     1.0      # viscosity of fluid 1.
+#PARAMETER ib_vis_xmu2  REAL     1.0      # viscosity of fluid 2.
+#PARAMETER ib_vis_xmus  REAL     1.0      # modulus of elasticity of solid.
