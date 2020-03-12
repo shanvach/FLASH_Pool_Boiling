@@ -7,6 +7,7 @@
       !subroutine ib_redistance_PM(s, phi, rho, xmu, xms, x, y, z, cpt, iwt)
       subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
                                      rho, xmu, xms, blockID,     &
+                                     phi, s1, dns,               &
                                      ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
 #include "constants.h"
 #include "Flash.h"
@@ -20,6 +21,7 @@
           real, intent(in)    :: dx,dy,dz
           integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
           integer, intent(in) :: blockID
+          real, dimension(:,:,:), intent(inout) :: phi, s1, dns
 
           integer :: nx, ny, nz
           integer :: i,j,k
@@ -35,8 +37,8 @@
           !ny = jy2-jy1+1
           !nz = kz2-kz1+1
           !nip_max = max(nx,ny) * min(nx,ny)
-          real, dimension(ix2-ix1+1,jy2-jy1+1,kz2-kz1+1)  :: phi, s1, dns
-          real, dimension( (ix2-ix1+1)*(jy2-jy1+1),6)  :: xip
+          !real, dimension(ix2-ix1+1,jy2-jy1+1,kz2-kz1+1)  :: phi, s1, dns
+          real, dimension((ix2-ix1+1)*(jy2-jy1+1),6)  :: xip
           !real, dimension(nip_max,6)  :: xip, xip1
           !end header
           real, dimension(2,MDIM) :: boundBox

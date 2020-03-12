@@ -389,6 +389,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
      !subroutine ib_redistance_PM(s,ib_vis_rho1, ib_vis_rho2, ib_vis_xmu1, ib_vis_xmu2,&
      !                                   ib_vis_xmus, rho, xmu, xms,blockID,&
+     !                                   phi,s1,dns,                        &
      !                                   ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
      call ib_redistance_PM(solnData(LMDA_VAR,:,:,:),&
                                   ib_vis_rho1, ib_vis_rho2,&
@@ -398,6 +399,9 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                                   solnData(XMUF_VAR,:,:,:),&
                                   solnData(XMUS_VAR,:,:,:),&
                                   blockID,                 &
+                                  solnData(RPHI_VAR,:,:,:),&
+                                  solnData(RRS1_VAR,:,:,:),&
+                                  solnData(RDNS_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -422,6 +426,9 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask(XRHO_VAR) = .TRUE.
   gcMask(XMUF_VAR) = .TRUE.
   gcMask(XMUS_VAR) = .TRUE.
+  gcMask(RPHI_VAR) = .TRUE.
+  gcMask(RRS1_VAR) = .TRUE.
+  gcMask(RDNS_VAR) = .TRUE.
 
 !  ! BC fill for face center variables
 !  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
@@ -557,7 +564,8 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   !!!constant projection of directional derivative
-  solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+  !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+
   do step = 1, 200 !projection step can be changed
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -574,7 +582,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-
+     solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
                                   solnData(SOLD_VAR,:,:,:),&
@@ -642,6 +650,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
 
+     solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -675,11 +684,11 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 ! retain level set inside solid. Update level set outside solid
 
 enddo
-solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
+!solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 !!!end of constant projection of directional derivative
 
 !!!linear extrapolation of X grid
-        solnData(LM0X_VAR,:,:,:) = solnData(LMDX_VAR,:,:,:)
+        !solnData(LM0X_VAR,:,:,:) = solnData(LMDX_VAR,:,:,:)
         do step = 1, 200 !projection step can be changed
      do lb = 1,blockCount
      blockID = blockList(lb)
@@ -697,6 +706,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
 
+     solnData(LM0X_VAR,:,:,:) = solnData(LMDX_VAR,:,:,:)
 
      call ib_levelset_linearprojection(solnData(LM0X_VAR,:,:,:),&
                                   solnData(SOLD_VAR,:,:,:),&
@@ -766,6 +776,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
 
+     solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -799,7 +810,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 ! ! end of retain level set inside solid. Update level set outside solid 
 
         enddo
-        solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
+        !solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
 !!!end of linear extrapolation of X grid
 
   !------6: Loop through multiple blocks on a processor
@@ -925,7 +936,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   !!!constant projection of directional derivative
-  solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+  !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
   do step = 1, 200 !projection step can be changed
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -942,7 +953,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-
+     solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
                                   solnData(SOLD_VAR,:,:,:),&
@@ -1010,6 +1021,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
 
+     solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -1043,11 +1055,11 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 ! retain level set inside solid. Update level set outside solid
 
 enddo
-solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
+!solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 !!!end of constant projection of directional derivative
 
 !!!linear extrapolation of Y grid
-        solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
+        !solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
         do step = 1, 200 !projection step can be changed
      do lb = 1,blockCount
      blockID = blockList(lb)
@@ -1064,7 +1076,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-
+     solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
 
      call ib_levelset_linearprojection(solnData(LM0Y_VAR,:,:,:),&
                                   solnData(SOLD_VAR,:,:,:),&
@@ -1134,6 +1146,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z))
 
+     solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -1167,7 +1180,7 @@ solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
 ! ! end of retain level set inside solid. Update level set outside solid 
 
         enddo
-        solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
+        !solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
 !!!end of linear extrapolation of X grid
 
  

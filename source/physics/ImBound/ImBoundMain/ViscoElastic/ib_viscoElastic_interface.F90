@@ -106,6 +106,7 @@ module ib_viscoElastic_interface
         interface
         subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
                                        rho, xmu, xms, blockID,     &
+                                       phi, s1, dns,               &
                                        ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
           implicit none
             real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
@@ -113,6 +114,7 @@ module ib_viscoElastic_interface
             real, intent(in)    :: dx,dy,dz
             integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
             integer, intent(in) :: blockID
+            real, dimension(:,:,:), intent(inout) :: phi, s1, dns
         end subroutine
         end interface
 

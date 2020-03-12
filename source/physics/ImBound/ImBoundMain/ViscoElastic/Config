@@ -39,6 +39,10 @@ VARIABLE xmus TYPE:GENERIC # mus, varies from 0-1 in the diffused solid interfac
 VARIABLE xmuf TYPE:GENERIC # muf, varies from mu_f-mu_s in the diffused solid interface
 VARIABLE xrho TYPE:GENERIC # rho, varies from rho_f-rho_s in the diffused solid interface
 
+VARIABLE rphi TYPE:GENERIC # phi in ib_redistance_PM 
+VARIABLE rrs1 TYPE:GENERIC # s1 in ib_redistance_PM
+VARIABLE rdns TYPE:GENERIC # dns in ib_redistance_PM
+
 # To declare a face centered variable
 # FACEVAR varf
 # FACEVAR velc_face_var ! used to update ustar
