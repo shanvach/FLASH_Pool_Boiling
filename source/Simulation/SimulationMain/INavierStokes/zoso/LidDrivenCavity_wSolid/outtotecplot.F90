@@ -51,7 +51,7 @@
   real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
-           vortz,divpp, tpt ! tpt declared by Akash
+           vortz,divpp, tpt, tplmdx, tplmdy ! tpt declared by Akash
 
   real*4 arraylb(NXB+1,NYB+1,1)
  
@@ -127,7 +127,7 @@
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p lmda wz div'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p lmda lmdx lmdy wz mod'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -168,6 +168,8 @@
      tpv = 0.
      tpp = 0.
      tpt = 0. ! Akash
+     tplmdx = 0.0
+     tplmdy = 0.0
 
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
@@ -199,6 +201,13 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(LMDA_VAR,:,:,1),tpt)
 
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(LMDX_VAR,:,:,1),tplmdx)
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(LMDY_VAR,:,:,1),tplmdy)
+
+
      ! Divergence: 
      ! ----------
      solnData(DUST_VAR,:,:,:) = 0.
@@ -208,7 +217,7 @@
              (facevaryy(NGUARD+1:nxc-1,NGUARD+2:nyc) - &
               facevaryy(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dy
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                             solnData(DUST_VAR,:,:,1),divpp)
+                             solnData(XMUF_VAR,:,:,1),divpp)
 
 
             ! Velocity derivatives:
@@ -270,6 +279,12 @@
 
       ! Write t: ! Akash
       arraylb(:,:,1) = sngl(tpt)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tplmdx)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,1) = sngl(tplmdy)
       i = TecDat(ijk,arraylb,0)
 
       ! Write omgZ:

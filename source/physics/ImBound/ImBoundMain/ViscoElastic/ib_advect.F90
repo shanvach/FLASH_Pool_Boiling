@@ -25,7 +25,7 @@
 !!
 !!***
 
-#define XY_REDISTANCE
+!#define XY_REDISTANCE
 
 subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 

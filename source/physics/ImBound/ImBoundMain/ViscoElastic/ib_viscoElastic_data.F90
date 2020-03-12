@@ -22,12 +22,7 @@
  
 module ib_viscoElastic_data
 
-  real, save :: ib_vis_rho1, ib_vis_rho2  
-  real, save :: ib_vis_xmu1, ib_vis_xmu2, ib_vis_xmus 
-  !ib_vis_rho1 = 1.d0
-  !ib_vis_rho2 = 1.d0
-  !ib_vis_xmu1 = 1.d0
-  !ib_vis_xmu2 = 1.d0
-  !ib_vis_xmus = 1.d0
+  real, save :: ib_vis_rho1 = 1.0, ib_vis_rho2 = 1.0  
+  real, save :: ib_vis_xmu1 = 1.0, ib_vis_xmu2 = 1.0, ib_vis_xmus = 1.0
 
 end module ib_viscoElastic_data
