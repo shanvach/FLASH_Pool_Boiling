@@ -18,6 +18,7 @@ Grid += Grid_init.o Grid_getListOfBlocks.o \
 	Grid_getSingleCellCoords.o Grid_sendOutputData.o Grid_finalize.o \
 	Grid_putLocalNumBlks.o Grid_dump.o \
 	Grid_initDomain.o \
+        Grid_writeDomain.o\
 	Grid_markRefineSpecialized.o \
 	Grid_restrictAllLevels.o Grid_restrictByLevels.o \
 	Grid_getGlobalIndexLimits.o \

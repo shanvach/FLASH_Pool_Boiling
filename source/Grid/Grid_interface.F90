@@ -302,6 +302,11 @@ Module Grid_interface
      end subroutine Grid_initDomain
   end interface
 
+  interface Grid_writeDomain
+     subroutine Grid_writeDomain()
+     end subroutine Grid_writeDomain
+  end interface
+
   interface Grid_markBlkDerefine
      subroutine Grid_markBlkDerefine(block,mark)
        integer, intent(IN) :: block
