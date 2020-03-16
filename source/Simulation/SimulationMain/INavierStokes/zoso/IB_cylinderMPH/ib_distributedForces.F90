@@ -486,7 +486,9 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
            ! gravity effects.
            dpdn = - (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
                     (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
-           zL = zpres - dpdn*h;
+           zL = zpres - ( 1 / c_rho ) * dpdn*h; ! c_rho Added for Multiphase -- EG --
+           ! Added to scale pressure by the reference pressure, it comes from
+           ! non-dimensionalization of the euqation for multiphase.
 
         else                                         ! Tangent stress
 
@@ -940,7 +942,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
 
   dpdxn = dpdx*nxp + dpdy*nyp + dpdz*nzp
-  zL2    = zpres - dpdxn*h
+  zL2    = ( 1 / c_rho ) * zpres - ( 1 / c_rho ) * dpdxn*h
 
   ! Fvisc = Tau * n
   fvx_l = c_nu*2.*(exx*nxp+exy*nyp+exz*nzp) ! c_nu Added for Multiphase -- EG --
@@ -1095,7 +1097,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
            ! gravity effects.
            dpdn = - (     ubdd*nxp +      vbdd*nyp +      wbdd*nzp) + & ! -rho*Du/Dt * n 
                     (ins_gravX*nxp + ins_gravY*nyp + ins_gravZ*nzp);    ! +rho*    g * n
-           zL = zpres - dpdn*h;
+           zL = zpres - ( 1 / c_rho ) * dpdn*h;
 
         else                                         ! Tangent stress
 
