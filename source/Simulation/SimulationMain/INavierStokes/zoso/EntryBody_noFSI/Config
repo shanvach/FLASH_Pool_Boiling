@@ -41,6 +41,13 @@ REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
 
 DATAFILES kinematics.input.h5 sm_body.00001.h5
 
+PARTICLEPROP dfun REAL
+PARTICLEPROP difp REAL
+PARTICLEPROP fdf REAL
+PARTICLEPROP df REAL
+PARTICLEPROP ftp REAL
+PARTICLEPROP tl REAL
+
 # Tecplot routines:
 REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
