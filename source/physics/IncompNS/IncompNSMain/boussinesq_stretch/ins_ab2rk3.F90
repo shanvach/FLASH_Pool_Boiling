@@ -540,6 +540,18 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                          kMetrics(:,CENTER,lb),         &
                          solnData(DUST_VAR,:,:,:) )
 
+     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING
+     call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         facezData(VELC_FACE_VAR,:,:,:),&
+             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                         iMetrics(:,CENTER,blockID),    &
+                         jMetrics(:,CENTER,blockID),    &
+                         kMetrics(:,CENTER,blockID),    &
+             solnData(SDUS_VAR,:,:,:) )
+
 
      ! Poisson RHS source vector
      solnData(DUST_VAR,                                   &
@@ -594,6 +606,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 #if NDIM ==3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 #endif
+
+     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING    
+     solnData(SDLP_VAR,:,:,:) = solnData(DELP_VAR,:,:,:) 
+
 
      ! update divergence-free velocities (not on block boundary)
      !write(*,*) 'ready for corrector on ', ins_meshME
@@ -684,6 +700,9 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                          jMetrics(:,CENTER,blockID),    &
                          kMetrics(:,CENTER,blockID),    &
              scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
+
+     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING    
+     solnData(SDVC_VAR,:,:,:) = solnData(DIVV_SCRATCH_CENTER_VAR,:,:,:) 
 
   mxdivv = max( mxdivv, maxval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
   mndivv = min( mndivv, minval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 

@@ -37,7 +37,7 @@ PARAMETER dtspec           REAL     0.001     # Specified constant timestep
 
 PARAMETER intschm          INTEGER     2      # if 2: 2nd order Adams-Bashforth (21 if variable), if 3: 3rd order Runge-Kutta method
 
-PARAMETER pressure_correct BOOLEAN  true      # if true does pressure correction time splitting scheme (solve Poisson for DP)
+PARAMETER pressure_correct BOOLEAN  false     # if true does pressure correction time splitting scheme (solve Poisson for DP)
                                               # else fractional step method (solve Poisson for P).
 
 PARAMETER vel_prolong_method INTEGER   1 [0,1,101,102]  # if 0 injection for prolongation in update refinement, if 1 divergence 
@@ -65,6 +65,10 @@ VARIABLE delp            	# pressure correction
 VARIABLE dust                  	# divergence of ustar, poissons equation source term
 VARIABLE tvis               	# turbulent viscosity
 VARIABLE omgm                   # Vorticity module
+
+VARIABLE sdus
+VARIABLE sdlp
+VARIABLE sdvc
 
 # Fluxes
 FLUX velc
