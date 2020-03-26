@@ -253,7 +253,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+                       del(DIR_X),del(DIR_Y),del(DIR_Z),dt)
 
 
      ! Release pointers:
