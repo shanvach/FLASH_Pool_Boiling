@@ -341,14 +341,22 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               end do  
 
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
-              !select case(ivar)
-              !case (PRES_VAR,DELP_VAR,TVIS_VAR)
+
+              select case(ivar)
+
+              case (PRES_VAR,DELP_VAR,TVIS_VAR)
               k = 2*guard+1 
               do i = 1,guard
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
-              end do                          
-              !end select
-
+              end do
+              
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+              end do
+                          
+              end select
 
               else ! BOUNDARY CONDITIONS ON VELOCITIES               
               if (isFace) then ! Set to zero velocities normal to boundary, up to boundary
@@ -425,13 +433,22 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               end do  
 
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
-              !select case(ivar)
-              !case (PRES_VAR,DELP_VAR,TVIS_VAR)
+
+              select case(ivar)
+
+              case (PRES_VAR,DELP_VAR,TVIS_VAR)
               k = 2*guard+1 
               do i = 1,guard
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
               end do                          
-              !end select
+
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+              end do
+
+              end select
 
 
               else ! BOUNDARY CONDITIONS ON VELOCITIES               
@@ -650,13 +667,22 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               end do                          
 
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
-              !select case(ivar)
-              !case (PRES_VAR,DELP_VAR,TVIS_VAR)
+
+              select case(ivar)
+
+              case (PRES_VAR,DELP_VAR,TVIS_VAR)
               k = 2*guard+1 
               do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
-              end do                          
-              !end select
+              end do
+                          
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+              end do
+
+              end select
 
 
               else ! BOUNDARY CONDITIONS ON VELOCITIES               
@@ -731,13 +757,22 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
               end do                          
 
               elseif (gridDataStruct==CENTER) then !NEUMANN BC FOR PRESSURE AND DELTAP
-              !select case(ivar)
-              !case (PRES_VAR,DELP_VAR,TVIS_VAR)           
+
+              select case(ivar)
+
+              case (PRES_VAR,DELP_VAR,TVIS_VAR)           
               k = 2*guard+1 
               do i = 1,guard
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
               end do                          
-              !end select
+
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
+              end do
+
+              end select
 
 
               else ! BOUNDARY CONDITIONS ON VELOCITIES               
