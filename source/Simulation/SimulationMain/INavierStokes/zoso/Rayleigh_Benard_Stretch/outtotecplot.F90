@@ -54,7 +54,7 @@
        facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1,NZB+2*NGUARD), &
        facevarzz(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD+1)
 
-  real, dimension(NXB+1,NYB+1,NZB+1) :: tpu,tpv,tpw,tpp,tpt,&
+  real, dimension(NXB+1,NYB+1,NZB+1) :: tpu,tpv,tpw,tpp,tpt,tpd,&
            tpdudxcorn, tpdudycorn, tpdudzcorn, &
            tpdvdxcorn, tpdvdycorn, tpdvdzcorn, &
            tpdwdxcorn, tpdwdycorn, tpdwdzcorn, &
@@ -131,7 +131,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                                      &
-             'x y z u v w p t'//NULLCHR,      &
+             'x y z u v w p t div'//NULLCHR,      &
              filename//NULLCHR,                                     &
              './IOData/'//NULLCHR,                                  &
              Debug,VIsdouble)
@@ -168,6 +168,7 @@
      tpw = 0.
      tpp = 0.
      tpt = 0.
+     tpd = 0.
 
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
      call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1)
@@ -227,6 +228,10 @@
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
                              solnData(TEMP_VAR,:,:,:),tpt)
 
+     ! div u: sdvc(nxb+1, nyb+1, nzb+1) 
+     ! -------------------------------
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+                             solnData(SDVC_VAR,:,:,:),tpd)
      ! Divergence: 
      ! ----------
      !call ins_divergence(facevarxx,&
@@ -353,6 +358,10 @@
 
       ! Write t:
       arraylb(:,:,:) = sngl(tpt)
+      i = TecDat(ijk,arraylb,0)
+
+      ! Write divu:
+      arraylb(:,:,:) = sngl(tpd)
       i = TecDat(ijk,arraylb,0)
 
       ! Write omgX:
@@ -607,7 +616,7 @@
   real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
-           vortz,divpp, tpt ! tpt declared by Akash
+           vortz, divpp, tpt, tpd ! tpt declared by Akash
 
   real*4 arraylb(NXB+1,NYB+1,1)
  
@@ -684,7 +693,7 @@
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t div'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -718,6 +727,7 @@
      tpv = 0.
      tpp = 0.
      tpt = 0. 
+     tpd = 0.
 
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
      call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1) 
@@ -749,6 +759,11 @@
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(TEMP_VAR,:,:,1),tpt)
+
+     ! div u: divu(nxb+1, nyb+1) 
+     ! -------------------------------
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(SDVC_VAR,:,:,1),tpd)
 
 
       ! Write Block Results into data file:
@@ -790,6 +805,10 @@
 
       ! Write t: ! Akash
       arraylb(:,:,1) = sngl(tpt)
+      i = TecDat(ijk,arraylb,0)
+
+      ! Write divu: 
+      arraylb(:,:,1) = sngl(tpd)
       i = TecDat(ijk,arraylb,0)
 
    enddo

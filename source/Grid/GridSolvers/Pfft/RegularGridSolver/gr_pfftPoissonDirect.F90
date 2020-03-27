@@ -110,7 +110,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! apply boundary conditions y-axis
     select case (transformType(JAXIS))
     case (PFFT_COS_CC)
-      if (pfft_myPE == 0) write(*,*) '3d pfft solver using JAXIS neumann coefficents'
+      if (pfft_myPE == 0) write(*,*) '2d pfft solver using JAXIS neumann coefficents'
       BM(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
       BM(M) = gr_jMetricsGlb(LEFT_EDGE, M,1)
     case default
@@ -125,7 +125,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! apply boundary conditions x-axis
     select case (transformType(IAXIS))
     case (PFFT_COS_CC)
-      if (pfft_myPE == 0) write(*,*) '3d pfft solver using IAXIS neumann coefficents'
+      if (pfft_myPE == 0) write(*,*) '2d pfft solver using IAXIS neumann coefficents'
       BN(1) = gr_iMetricsGlb(RIGHT_EDGE,1,1)
       BN(N) = gr_iMetricsGlb(LEFT_EDGE, N,1)
     case default
