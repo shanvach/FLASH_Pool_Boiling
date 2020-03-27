@@ -66,42 +66,6 @@ END SUBROUTINE ins_predictor
 
 !########################################################################
 
-SUBROUTINE ins_divergence(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
-                          dx,dy,dz,divv)
-
-      ! This routine computes the divergence of the velocity field.
-
-      implicit none
-
-#include "Flash.h"
-#include "constants.h"
-
-      INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
-      REAL, DIMENSION(:), INTENT(IN) :: dx,dy,dz
-      REAL, DIMENSION(:,:,:), INTENT(IN) :: uni,vni,wni
-      REAL, DIMENSION(:,:,:), INTENT(OUT) :: divv
-      
-      INTEGER :: i, j, k
-
-      do k = kz1,kz2
-        do j = jy1,jy2
-          do i = ix1,ix2
-#if NDIM == MDIM
-            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
-                          dy(j) * (vni(i,j+1,k) - vni(i,j,k)) + &
-                          dz(k) * (wni(i,j,k+1) - wni(i,j,k))
-#else
-            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
-                          dy(j) * (vni(i,j+1,k) - vni(i,j,k))
-#endif
-          end do
-        end do
-      end do  
-
-END SUBROUTINE ins_divergence
-
-!########################################################################
-
 SUBROUTINE ins_corrector(uni,vni,wni,p,ix1,ix2,jy1,jy2,kz1,kz2, &
         dt,dx,dy,dz,alfa)
 
@@ -122,26 +86,63 @@ SUBROUTINE ins_corrector(uni,vni,wni,p,ix1,ix2,jy1,jy2,kz1,kz2, &
 
       do k = kz1,kz2
         do j = jy1,jy2
-          uni(ix1+1:ix2,j,k) = uni(ix1+1:ix2,j,k) - &
-            dt*alfa*dx(ix1+1:ix2)*( p(ix1+1:ix2,j,k) - p(ix1:ix2-1,j,k) )
+          uni(ix1:ix2+1,j,k) = uni(ix1:ix2+1,j,k) - &
+            dt*alfa*dx(ix1:ix2+1)*( p(ix1:ix2+1,j,k) - p(ix1-1:ix2,j,k) )
         end do
       end do
 
       do k = kz1,kz2
         do i = ix1,ix2
-          vni(i,jy1+1:jy2,k) = vni(i,jy1+1:jy2,k) - &
-            dt*alfa*dy(jy1+1:jy2)*( p(i,jy1+1:jy2,k) - p(i,jy1:jy2-1,k) )
+          vni(i,jy1:jy2+1,k) = vni(i,jy1:jy2+1,k) - &
+            dt*alfa*dy(jy1:jy2+1)*( p(i,jy1:jy2+1,k) - p(i,jy1-1:jy2,k) )
         end do
       end do
 
 #if NDIM == MDIM
       do j = jy1,jy2
         do i = ix1,ix2
-          wni(i,j,kz1+1:kz2) = wni(i,j,kz1+1:kz2) - &
-            dt*alfa*dz(kz1+1:kz2)*( p(i,j,kz1+1:kz2) - p(i,j,kz1:kz2-1) )
+          wni(i,j,kz1:kz2+1) = wni(i,j,kz1:kz2+1) - &
+            dt*alfa*dz(kz1:kz2+1)*( p(i,j,kz1:kz2+1) - p(i,j,kz1-1:kz2) )
         end do
       end do
 #endif
 
 END SUBROUTINE ins_corrector
 
+!########################################################################
+
+SUBROUTINE ins_divergence(uni,vni,wni,ix1,ix2,jy1,jy2,kz1,kz2,&
+                          dx,dy,dz,divv)
+
+      ! This routine computes the divergence of the velocity field.
+
+      implicit none
+
+#include "Flash.h"
+#include "constants.h"
+
+      INTEGER, INTENT(IN) :: ix1,ix2,jy1,jy2,kz1,kz2
+      REAL, DIMENSION(:), INTENT(IN) :: dx,dy,dz
+      REAL, DIMENSION(:,:,:), INTENT(IN) :: uni,vni,wni
+      REAL, DIMENSION(:,:,:), INTENT(OUT) :: divv
+
+      INTEGER :: i, j, k
+
+      do k = kz1,kz2
+        do j = jy1,jy2
+          do i = ix1,ix2
+#if NDIM == MDIM
+            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
+                          dy(j) * (vni(i,j+1,k) - vni(i,j,k)) + &
+                          dz(k) * (wni(i,j,k+1) - wni(i,j,k))
+#else
+            divv(i,j,k) = dx(i) * (uni(i+1,j,k) - uni(i,j,k)) + &
+                          dy(j) * (vni(i,j+1,k) - vni(i,j,k))
+#endif
+          end do
+        end do
+      end do
+
+END SUBROUTINE ins_divergence
+
+!########################################################################

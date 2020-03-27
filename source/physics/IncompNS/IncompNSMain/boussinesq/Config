@@ -65,16 +65,10 @@ VARIABLE delp            	# pressure correction
 VARIABLE dust                  	# divergence of ustar, poissons equation source term
 VARIABLE tvis               	# turbulent viscosity
 VARIABLE omgm                   # Vorticity module
-
-VARIABLE sdus
-VARIABLE sdlp
-VARIABLE sdvc
+VARIABLE sdvc                   # divergence of corrected velocity field
 
 # Fluxes
 FLUX velc
-
-# Use GRIDVAR for temporary storages
-SCRATCHCENTERVAR divv
 
 # Use FACEVAR for cell interface velocity fields
 FACEVAR velc     

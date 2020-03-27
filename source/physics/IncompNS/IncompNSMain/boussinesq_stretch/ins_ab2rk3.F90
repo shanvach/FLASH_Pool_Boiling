@@ -109,7 +109,7 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 
   logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
             
-  real, pointer, dimension(:,:,:,:) :: solnData,scratchData,facexData,faceyData,facezData
+  real, pointer, dimension(:,:,:,:) :: solnData,facexData,faceyData,facezData
 
   integer :: lb,blockID,ii,jj,kk,ierr,i,j,k
 
@@ -540,19 +540,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                          kMetrics(:,CENTER,lb),         &
                          solnData(DUST_VAR,:,:,:) )
 
-     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING
-     call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
-                         faceyData(VELC_FACE_VAR,:,:,:),&
-                         facezData(VELC_FACE_VAR,:,:,:),&
-             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                         iMetrics(:,CENTER,blockID),    &
-                         jMetrics(:,CENTER,blockID),    &
-                         kMetrics(:,CENTER,blockID),    &
-             solnData(SDUS_VAR,:,:,:) )
-
-
      ! Poisson RHS source vector
      solnData(DUST_VAR,                                   &
           blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
@@ -606,10 +593,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 #if NDIM ==3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 #endif
-
-     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING    
-     solnData(SDLP_VAR,:,:,:) = solnData(DELP_VAR,:,:,:) 
-
 
      ! update divergence-free velocities (not on block boundary)
      !write(*,*) 'ready for corrector on ', ins_meshME
@@ -683,13 +666,13 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      blockID = blockList(lb)
 
      call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,scratchData,SCRATCH_CTR)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 #endif
-
+     
+     solnData(SDVC_VAR,:,:,:) = 0.0
      call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
@@ -699,13 +682,10 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
                          iMetrics(:,CENTER,blockID),    &
                          jMetrics(:,CENTER,blockID),    &
                          kMetrics(:,CENTER,blockID),    &
-             scratchData(DIVV_SCRATCH_CENTER_VAR,:,:,:) )
+             solnData(SDVC_VAR,:,:,:) )
 
-     ! TEMP FOR DIVERGENCE ISSUE DEBUGGING    
-     solnData(SDVC_VAR,:,:,:) = solnData(DIVV_SCRATCH_CENTER_VAR,:,:,:) 
-
-  mxdivv = max( mxdivv, maxval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
-  mndivv = min( mndivv, minval(scratchData(DIVV_SCRATCH_CENTER_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+  mxdivv = max( mxdivv, maxval(solnData(SDVC_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+  mndivv = min( mndivv, minval(solnData(SDVC_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
 
   maxu = max(maxu,maxval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minu = min(minu,minval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
@@ -732,7 +712,6 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
 #endif
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,scratchData,SCRATCH_CTR)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
 #if NDIM == 3
