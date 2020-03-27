@@ -70,10 +70,13 @@ VARIABLE sdvc                   # divergence of corrected velocity field
 # Fluxes
 FLUX velc
 
+# Use GRIDVAR for temporary storages
+SCRATCHCENTERVAR divv
+
 # Use FACEVAR for cell interface velocity fields
 FACEVAR velc     
 FACEVAR rhds
 FACEVAR velo
 
 # Number of guardcells at each boundary
-GUARDCELLS 1 
+GUARDCELLS 1
