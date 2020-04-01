@@ -31,9 +31,10 @@
         ustrB = 0.d0
         vstrB = 0.d0
 
-           k = 1
+        k = 1
+        !!!------------Caculate and add u component ustrB-------------!!!
            do j = jy1, jy2
-              do i = ix1, ix2
+              do i = ix1, ix2+1
               
                  !--- elastic modulus                  
                  xmsccc = xms(i,  j,  k)
@@ -48,7 +49,6 @@
 
                 !---Update ustar by adding elastic solid force term to solid region 
 
-                 !ustrB(i,j,1) =  &                                          !
                  ustrB =  & 
                                                                             !
                           (xmsrcc  * Tau1(i+1,j,k) -             &           !
@@ -58,13 +58,29 @@
                         - xmsclc*Tau2(i,j-1,k) -xmsrlc*Tau2(i+1,j-1,k)) & 
                             /2.d0/ 2.d0/dy/re_s
                                                                         
-                 !ustr(i,j,1) = ustr(i,j,1) + ustrB(i,j,1)
                  ustr(i,j,1) = ustr(i,j,1) + ustrB*dt
 
-                                                                            !
+              end do
+           end do
+
+        !!!------------Caculate and add v component vstrB-------------!!!
+
+           do j = jy1, jy2+1
+              do i = ix1, ix2
+              
+                 !--- elastic modulus                  
+                 xmsccc = xms(i,  j,  k)
+                 xmsrcc = xms(i+1,j,  k)
+                 xmslcc = xms(i-1,j,  k)
+                 xmscrc = xms(i,  j+1,k)
+                 xmsclc = xms(i,  j-1,k)
+                 xmsrrc = xms(i+1,j+1,k)
+                 xmsrlc = xms(i+1,j-1,k)
+                 xmslrc = xms(i-1,j+1,k)
+
+
                 !---Update vstar by adding elastic solid force term to solid region 
 
-                 !vstrB(i,j,1) =  &                                          !
                  vstrB =  &
                                                                             !
                          (xmsrcc*Tau3(i+1,j,k) + xmsrrc*Tau3(i+1,j+1,k)  & 
@@ -75,10 +91,7 @@
                               xmsccc  * Tau4(i,j,k)) / 1.d0 / dy/ re_s    
                                                                         
 
-                 !vstr(i,j,1) = vstr(i,j,1) + vstrB(i,j,1)
                  vstr(i,j,1) = vstr(i,j,1) + vstrB*dt
-
-
 
               end do
            end do
