@@ -132,7 +132,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   integer :: max_lsit, maxiter
 
   max_lsit = 3
-  maxiter = 20
+  maxiter = 60
 
   if(ins_meshME .eq. MASTER_PE) print *,"Entering IB level set advection" 
 
@@ -289,6 +289,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      !                                ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
 
      !ib_solid_interface_advection needs to be changed for different initial interface profile
+     solnData(LMDA_VAR,:,:,:) = 0.0
      call ib_solid_interface_advection(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
@@ -867,7 +868,8 @@ enddo !end of iteration
 
 
      solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
-
+     solnData(D0SN_VAR,:,:,:) = 0.0
+     solnData(DDSN_VAR,:,:,:) = 0.0
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -882,6 +884,8 @@ enddo !end of iteration
   !gcMask(VARC_VAR) = .TRUE.
   gcMask(LM0X_VAR) = .TRUE.
   gcMask(LMDX_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
@@ -892,372 +896,472 @@ enddo !end of iteration
 
 !  !------6: Loop through multiple blocks on a processor
 !  !--------------------dynamic grid projection for Y grid---------
-!  !!!calculate normal vector
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!
-!
-!     call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
-!                                  solnData(LMDY_VAR,:,:,:),&
-!                                  solnData(ADF0_VAR,:,:,:),&
-!                                  solnData(ADFX_VAR,:,:,:),&
-!                                  solnData(ADFY_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(LMDA_VAR) = .TRUE.
-!  gcMask(LMDY_VAR) = .TRUE.
-!  gcMask(ADF0_VAR) = .TRUE.
-!  gcMask(ADFX_VAR) = .TRUE.
-!  gcMask(ADFY_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-! 
-!  !!!define directional derivative
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!
-!
-!     call ib_dynamic_grid_directional_derivative(solnData(LMDA_VAR,:,:,:),&
-!                                  solnData(LMDY_VAR,:,:,:),&
-!                                  solnData(ADFX_VAR,:,:,:),&
-!                                  solnData(ADFY_VAR,:,:,:),&
-!                                  solnData(DDSN_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(LMDA_VAR) = .TRUE.
-!  gcMask(LMDY_VAR) = .TRUE.
-!  gcMask(ADFX_VAR) = .TRUE.
-!  gcMask(ADFY_VAR) = .TRUE.
-!  gcMask(DDSN_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-! 
-!  !!!constant projection of directional derivative
-!  !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
-!  do step = 1, maxiter !projection step can be changed
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!     solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
-!
-!     call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
-!                                  solnData(SOLD_VAR,:,:,:),&
-!                                  solnData(ADFX_VAR,:,:,:),&
-!                                  solnData(ADFY_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(ADFX_VAR) = .TRUE.
-!  gcMask(ADFY_VAR) = .TRUE.
-!  gcMask(D0SN_VAR) = .TRUE.
-!  gcMask(SOLD_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-! 
-!! retain level set inside solid. Update level set outside solid 
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!
-!
-!     call ib_dynamic_grid_retain_inside(solnData(LMDA_VAR,:,:,:),&
-!                                  solnData(D0SN_VAR,:,:,:),&
-!                                  solnData(DDSN_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!     solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(LMDA_VAR) = .TRUE.
-!  gcMask(D0SN_VAR) = .TRUE.
-!  gcMask(DDSN_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-! 
-!! retain level set inside solid. Update level set outside solid
-!
-!enddo
-!!solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
-!!!!end of constant projection of directional derivative
-!
-!!!!linear extrapolation of Y grid
-!        !solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
-!        do step = 1, maxiter !projection step can be changed
-!     do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!     solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
-!
-!     call ib_levelset_linearprojection(solnData(LM0Y_VAR,:,:,:),&
-!                                  solnData(SOLD_VAR,:,:,:),&
-!                                  solnData(DDSN_VAR,:,:,:),&
-!                                  solnData(ADFX_VAR,:,:,:),&
-!                                  solnData(ADFY_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(ADFX_VAR) = .TRUE.
-!  gcMask(ADFY_VAR) = .TRUE.
-!  gcMask(LM0Y_VAR) = .TRUE.
-!  gcMask(DDSN_VAR) = .TRUE.
-!  gcMask(SOLD_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-!
-!! ! retain level set inside solid. Update level set outside solid 
-!  do lb = 1,blockCount
-!     blockID = blockList(lb)
-!
-!     ! Get blocks dx, dy ,dz:
-!     call Grid_getDeltas(blockID,del)
-!
-!     ! Get Blocks internal limits indexes:
-!     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!
-!
-!
-!     call ib_dynamic_grid_retain_inside(solnData(LMDA_VAR,:,:,:),&
-!                                  solnData(LM0Y_VAR,:,:,:),&
-!                                  solnData(LMDY_VAR,:,:,:),&
-!                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-!                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-!                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-!                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-!
-!     solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!
-!  enddo
-!
-!
-!  ! Guard Cell Mask
-!  gcMask = .FALSE.
-!
-!  ! BC fill for cell center variables
-!  !gcMask(VARC_VAR) = .TRUE.
-!  gcMask(LMDA_VAR) = .TRUE.
-!  gcMask(LM0Y_VAR) = .TRUE.
-!  gcMask(LMDY_VAR) = .TRUE.
-!
-!!  ! BC fill for face center variables
-!!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#if NDIM == 3
-!!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!!#endif
-!
-!  ! Fill guard cells
-!  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-! 
-!! ! end of retain level set inside solid. Update level set outside solid 
-!
-!        enddo
-!        !solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
+
+  !!!calculate normal vector
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                                  solnData(ADF0_VAR,:,:,:),&
+                                  solnData(ADFX_VAR,:,:,:),&
+                                  solnData(ADFY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+  gcMask(ADF0_VAR) = .TRUE.
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+  !!!define directional derivative
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_directional_derivative(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                                  solnData(ADFX_VAR,:,:,:),&
+                                  solnData(ADFY_VAR,:,:,:),&
+                                  solnData(DDSN_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+  !!!constant projection of directional derivative
+  !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+
+  do step = 1, maxiter !projection step can be changed
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+     !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
+
+     call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
+                                  solnData(ADFX_VAR,:,:,:),&
+                                  solnData(ADFY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+! retain level set inside solid. Update level set outside solid 
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_retain_inside(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(D0SN_VAR,:,:,:),&
+                                  solnData(DDSN_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     !solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+! retain level set inside solid. Update level set outside solid
+
+enddo !end of iteration
+
+     do lb = 1,blockCount
+     blockID = blockList(lb)
+
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+
+     solnData(DDSN_VAR,:,:,:) = solnData(D0SN_VAR,:,:,:)
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+     enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
+!!!end of constant projection of directional derivative
+
+
+!!!linear extrapolation of Y grid
+
+     do lb = 1,blockCount
+     blockID = blockList(lb)
+
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+
+     solnData(LM0Y_VAR,:,:,:) = solnData(LMDY_VAR,:,:,:)
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+     enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LM0Y_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
+
+        do step = 1, maxiter !projection step can be changed
+     do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+     !solnData(LM0X_VAR,:,:,:) = solnData(LMDX_VAR,:,:,:)
+
+     call ib_levelset_linearprojection(solnData(LM0Y_VAR,:,:,:),&
+                                  solnData(SOLD_VAR,:,:,:),&
+                                  solnData(DDSN_VAR,:,:,:),&
+                                  solnData(ADFX_VAR,:,:,:),&
+                                  solnData(ADFY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
+  gcMask(LM0Y_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
+  gcMask(SOLD_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
+! ! retain level set inside solid. Update level set outside solid 
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     ! Get blocks dx, dy ,dz:
+     call Grid_getDeltas(blockID,del)
+
+     ! Get Blocks internal limits indexes:
+     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+
+
+
+     call ib_dynamic_grid_retain_inside(solnData(LMDA_VAR,:,:,:),&
+                                  solnData(LM0Y_VAR,:,:,:),&
+                                  solnData(LMDY_VAR,:,:,:),&
+                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+
+     !solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+
+  enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LMDA_VAR) = .TRUE.
+  gcMask(LM0Y_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+
+!  ! BC fill for face center variables
+!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
+!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
+!#endif
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+ 
+! ! end of retain level set inside solid. Update level set outside solid 
+
+        enddo !end of iteration
+
+
+     do lb = 1,blockCount
+     blockID = blockList(lb)
+
+
+     ! Point to blocks center and face vars:
+     call Grid_getBlkPtr(blockID,solnData,CENTER)
+
+
+     solnData(LMDY_VAR,:,:,:) = solnData(LM0Y_VAR,:,:,:)
+     solnData(D0SN_VAR,:,:,:) = 0.0
+     solnData(DDSN_VAR,:,:,:) = 0.0
+
+
+     ! Release pointers:
+     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+
+     enddo
+
+
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+
+  ! BC fill for cell center variables
+  !gcMask(VARC_VAR) = .TRUE.
+  gcMask(LM0Y_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+  gcMask(D0SN_VAR) = .TRUE.
+  gcMask(DDSN_VAR) = .TRUE.
+
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+        !solnData(LMDX_VAR,:,:,:) = solnData(LM0X_VAR,:,:,:)
+
 !!!!end of linear extrapolation of Y grid
 
  

@@ -23,14 +23,13 @@
 
            !!!!! reconsruct sd based on sX and sY
            ! below is a sample function for level set. It needs to be changed for a specific problem
-             sd = 0.d0
-           do k = kz1, kz2
+             !sd = 0.d0
+              k = 1
               do j = jy1, jy2
                  do i = ix1, ix2
                   sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k)-0.1)**2 + &
                                          (sY(i,j,k))**2)
                  end do
               end do
-           end do
-
+         !print *,"ib_solid_interface_advection"
          end subroutine ib_solid_interface_advection

@@ -28,11 +28,11 @@
         !end buit-in header
 
         !**args
-        adfx = 0.d0
-        adfy = 0.d0
+        !adfx = 0.d0
+        !adfy = 0.d0
 
         !created in this function, now passed as args
-        adf = 0.d0
+        !adf = 0.d0
 
         !this obtains normal components (nx,ny) of interface
         !--------normal components---------------------------------

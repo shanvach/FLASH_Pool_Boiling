@@ -26,7 +26,7 @@
         real :: h_preserve
         !end buit-in header
 
-        sn = 0.d0
+        !sn = 0.d0
 
         !created in this function, now passed as args
         !sn0 = 0.d0
