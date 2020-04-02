@@ -207,29 +207,30 @@ subroutine Simulation_initBlock(blockId)
 
     ! Rayleigh Benard flow (w/ Plum init)
     case (3)
-      
-      xMag = 1.0000
-      xPwr = 0.0000
-      xSgn = 0.0000
-      xSym = 0.0000
-      xAmp = 0.2000
-      xFrq = 2.0000
+                     !   RBC     IHC
+                     !  ------  ------
+      xMag = 1.0000  !  1.0000  1.0000  
+      xPwr = 0.0000  !  0.0000  0.0000
+      xSgn = 0.0000  !  0.0000  0.0000
+      xSym = 0.0000  !  0.0000  0.0000
+      xAmp = 0.2000  !  0.2000  0.2000
+      xFrq = 2.0000  !  2.0000  2.0000
 
-      yMag = 2.0000
-      yPwr = 4.0000
-      ySgn = 0.0000
-      ySym = 1.0000
-      yAmp = 0.0000
-      yFrq = 0.0000
+      yMag = 1.0000  !  1.0000  2.0000
+      yPwr = 4.0000  !  4.0000  4.0000
+      ySgn = 1.0000  !  1.0000  0.0000
+      ySym = 0.0000  !  0.0000  1.0000
+      yAmp = 0.0000  !  0.0000  0.0000
+      yFrq = 0.0000  !  0.0000  0.0000
 
-      rMag = 0.0025
+      rMag = 0.0025  !  0.0025  0.0025
 
-      xFMag = 1.000
-      xFPwr = 3.000
-      xFSgn = 1.000
-      yFMag = 1.000
-      yFPwr = 2.000
-      yFSgn = 0.000 
+      xFMag = 1.000  !  1.0000  1.0000
+      xFPwr = 3.000  !  3.0000  3.0000
+      xFSgn = 1.000  !  1.0000  1.0000
+      yFMag = 1.000  !  1.0000  1.0000
+      yFPwr = 2.000  !  2.0000  2.0000
+      yFSgn = 0.000  !  0.0000  0.0000
 
       xWth =  sim_xMax - sim_xMin
       xCnt = (sim_xMax + sim_xMin) / 2.0
