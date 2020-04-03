@@ -22,7 +22,8 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   ! given time step on a given particle.  A diffuse interface method is employed.
   use Grid_data, ONLY: gr_meshMe
   
-  use ImBound_data, only : ib_stencil,ib_alphax,ib_alphay,ib_dt,ib_BlockMarker_flag,ib_vel_flg,ib_temp_flg,ib_dfun_flg
+  use ImBound_data, only : ib_stencil,ib_alphax,ib_alphay,ib_dt,ib_BlockMarker_flag,&
+                           ib_vel_flg,ib_temp_flg,ib_dfun_flg
   
   use ib_interface, ONLY : ib_stencils,      &
                            ib_interpLpoints, &
@@ -140,6 +141,8 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
 #if NDIM == 3
   force_fl(KAXIS) = force_dir(IAXIS) .and. force_dir(JAXIS)
 #endif
+  if(ib_vel_flg) then
+
   if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
 
   do i = 1,NDIM
@@ -286,6 +289,61 @@ subroutine ib_forcing(ibd,p,blockID,particleData)
   !endif
   !write(33,*) ibd,p,ib_uL(IAXIS:KAXIS),ib_FuL(IAXIS:KAXIS)
   !close(33)
+  
+  endif
+
+  endif
+ 
+  if(ib_dfun_flg) then
+
+     if (gr_sbBodyInfo(ibd)%sbIsFixed .eq. CONSTANT_ZERO) then
+
+     gridfl(:) = CENTER
+     indx(:)   = CONSTANT_ZERO
+
+     if (force_center) then
+
+        ! External Point  
+        hnorm   = 1.*sqrt((del(IAXIS)*part_Nml(IAXIS))**2. + (del(JAXIS)*part_Nml(JAXIS))**2.)
+
+        externalPt(IAXIS) = part_Pos(IAXIS) + part_Nml(IAXIS)*hnorm
+        externalPt(JAXIS) = part_Pos(JAXIS) + part_Nml(JAXIS)*hnorm
+        externalPt(KAXIS) = 0.0
+
+        call ib_stencils(externalPt,part_Nml,gridfl,del,coord,bsize, &
+                         ib_external(:,:),dfe,FORCE_FLOW)
+
+        call ib_interpLpoints(externalPt, gridfl, &
+                              del, coord, bsize, ib_external(:,:), ib_external_phile(:,:), &
+                              external_dfun,FORCE_FLOW,blockID,CENTER_IND)
+
+        particleData(DFUN_PART_PROP) = 0.0
+
+        ! Forcing
+        call ib_stencils(part_Pos,part_Nml,gridfl,del,coord,bsize,   &
+                         ib_dfun_ielem(:,:),dfl,FORCE_FLOW)
+
+
+        call ib_interpLpoints(part_Pos,gridfl,                     &
+              del,coord,bsize,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),     &
+              ib_dfun,FORCE_FLOW,blockID,CENTER_IND)
+
+        !if(abs(ib_dfun) .le. 0.5*del(IAXIS)) then
+           ib_Fdfun  = invdt*(0.0 - ib_dfun)
+        !else
+        !   ib_Fdfun = 0.0
+        !end if
+
+        particleData(FTP_PART_PROP)  = particleData(FTP_PART_PROP) + ib_Fdfun
+        particleData(DIFP_PART_PROP) = ib_dfun
+
+        particleData(DF_PART_PROP) = dfl
+
+        call ib_extrapEpoints(part_Pos,sb,dfl,del,ib_dfun_ielem(:,:),ib_dfun_phile(:,:),   &
+                              ib_Fdfun,blockID,CENTER_IND)
+
+     endif
+     endif
 
   endif
 
