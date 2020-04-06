@@ -42,7 +42,7 @@
   real, dimension(GRID_JHI_GC,3,blockCount) :: jMetrics
   real, dimension(GRID_KHI_GC,3,blockCount) :: kMetrics
 
-  real, dimension(NXB+1,NYB+1,NZB+1) :: nsrc,nfld,     &
+  real, dimension(NXB+1,NYB+1,NZB+1) :: nsrc,nfld,nerr,   &
                                         nxp, nyp, nzp
 
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
@@ -111,7 +111,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                                      &
-             'x y z nsrc nfld'//NULLCHR,      &
+             'x y z nsrc nfld nerr'//NULLCHR,      &
              filename//NULLCHR,                                     &
              './IOData/'//NULLCHR,                                  &
              Debug,VIsdouble)
@@ -140,6 +140,10 @@
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
+     nsrc = 0.
+     nfld = 0.
+     nerr = 0.
+
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
      call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1)
      call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)-1)
@@ -153,6 +157,9 @@
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
                              solnData(NFLD_VAR,:,:,:),nfld)
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc, &
+                             solnData(NERR_VAR,:,:,:),nfld)
 
      ! Write Block Results into data file:
      call int2char(lb,index_lb)
@@ -200,6 +207,9 @@
       i = TecDat(ijk,arraylb,0)
 
       arraylb(:,:,:) = sngl(nfld)
+      i = TecDat(ijk,arraylb,0)
+
+      arraylb(:,:,:) = sngl(nerr)
       i = TecDat(ijk,arraylb,0)
 
    enddo
@@ -415,7 +425,7 @@
 
   real, pointer, dimension(:,:,:,:) :: solnData
 
-  real, dimension(NXB+1,NYB+1) :: nsrc,nfld 
+  real, dimension(NXB+1,NYB+1) :: nsrc,nfld,nerr
 
   real*4 arraylb(NXB+1,NYB+1,1)
  
@@ -477,7 +487,7 @@
         count, mype
 
 
-  i = TecIni('AMR2D'//NULLCHR,'x y nsrc nfld'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y nsrc nfld nerr'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -497,6 +507,10 @@
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
 
+     nsrc = 0.
+     nfld = 0.
+     nerr = 0.
+
      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC)
      call Grid_getCellCoords(IAXIS, blockId, CENTER, .false., xcell, blkLimits(HIGH, IAXIS)-1) 
      call Grid_getCellCoords(JAXIS, blockId, CENTER, .false., ycell, blkLimits(HIGH, JAXIS)-1) 
@@ -507,6 +521,8 @@
                             solnData(NSRC_VAR,:,:,1),nsrc)
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(NFLD_VAR,:,:,1),nfld)
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(NERR_VAR,:,:,1),nfld)
 
 
       ! Write Block Results into data file:
@@ -539,6 +555,8 @@
       arraylb(:,:,1) = sngl(nfld)
       i = TecDat(ijk,arraylb,0)
 
+      arraylb(:,:,1) = sngl(nerr)
+      i = TecDat(ijk,arraylb,0)
 
    enddo
 

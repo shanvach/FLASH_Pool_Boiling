@@ -8,6 +8,7 @@ LIBRARY STDCXX
 
 VARIABLE nsrc
 VARIABLE nfld
+VARIABLE nerr
 
 
 # Number of guardcells at each boundary

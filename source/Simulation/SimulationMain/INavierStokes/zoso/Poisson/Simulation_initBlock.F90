@@ -43,8 +43,12 @@ subroutine Simulation_initBlock(blockId)
   real, pointer, dimension(:,:,:,:) :: solnData
 
   call Grid_getBlkPtr(blockID, solnData, CENTER)
+
   solnData(NSRC_VAR,:,:,:) = 1.0
   solnData(NSRC_VAR,:,:,:) = real(dr_meshMe)
+
+  solnData(NFLD_VAR,:,:,:) = 1.0
+  solnData(NERR_VAR,:,:,:) = 0.0
 
   call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 

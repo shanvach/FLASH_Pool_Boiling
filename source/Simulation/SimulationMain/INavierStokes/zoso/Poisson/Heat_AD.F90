@@ -79,11 +79,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
    fact = 1.0
    bc_types = reshape(gr_domainBC, (/ 2*MDIM /) ) 
 
-   
-   !do i=1,6
-   !  write(*,*) i, bc_types(i)
-   !end do
-
    do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -100,18 +95,20 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      solnData(NSRC_VAR,:,:,:) = 0.0
      solnData(NFLD_VAR,:,:,:) = 0.0
+     solnData(NERR_VAR,:,:,:) = 0.0
      
          
      !write(*,*) "Neumann Source Term should be ", OUTFLOW 
      if (bc_types(1) == OUTFLOW) then
-       !write(*,*) "Neumann Source Term"
        do k=1, blkLimitsGC(HIGH,KAXIS)
          do j=1, blkLimitsGC(HIGH,JAXIS)
            do i=1, blkLimitsGC(HIGH,IAXIS)
 #if NDIM == 2
              solnData(NSRC_VAR,i,j,k) = -8.00 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
+             solnData(NERR_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
 #else
              solnData(NSRC_VAR,i,j,k) = -12.0 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j))) * cos(real(2.0 * pi * zcell(k)))
+             solnData(NERR_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j))) * cos(real(2.0 * pi * zcell(k)))
 #endif
            enddo
          enddo
@@ -124,8 +121,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
            do i=1, blkLimitsGC(HIGH,IAXIS)
 #if NDIM == 2
              solnData(NSRC_VAR,i,j,k) = -8.00 * pi**2 * sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j)))
+             solnData(NERR_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j)))
 #else
              solnData(NSRC_VAR,i,j,k) = -12.0 * pi**2 * sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j))) * sin(real(2.0 * pi * zcell(k)))
+             solnData(NERR_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j))) * sin(real(2.0 * pi * zcell(k)))
 #endif
            enddo
          enddo
@@ -135,13 +134,17 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      call Grid_solvePoisson(NFLD_VAR, NSRC_VAR, bc_types, bc_values, fact)
 
+     solnData(NERR_VAR,:,:,:) = solnData(NFLD_VAR,:,:,:) - solnData(NERR_VAR,:,:,:)
+
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
    end do
 
   gcMask = .FALSE.
   gcMask(NFLD_VAR)=.TRUE.
+  gcMask(NERR_VAR)=.TRUE.
   call Grid_fillGuardCells(CENTER,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
 
 end subroutine Heat_AD
