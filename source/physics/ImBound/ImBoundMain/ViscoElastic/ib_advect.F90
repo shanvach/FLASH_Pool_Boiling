@@ -131,6 +131,9 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   integer :: max_lsit, maxiter
 
+  integer :: time_projection(2)
+  real*8  :: elapsed_time
+
   max_lsit = 3
   maxiter = 60
 
@@ -553,6 +556,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   !!!constant projection of directional derivative
   !solnData(D0SN_VAR,:,:,:) = solnData(DDSN_VAR,:,:,:)
 
+  CALL SYSTEM_CLOCK(time_projection(1),count_rate)
+
   do step = 1, maxiter !projection step can be changed
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -735,6 +740,9 @@ enddo !end of iteration
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
+  CALL SYSTEM_CLOCK(time_projection(2),count_rate)
+  elapsed_time=REAL(time_projection(2)-time_projection(1),8)/count_rate
+  if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total Projection Step Time =', elapsed_time
 
         do step = 1, maxiter !projection step can be changed
      do lb = 1,blockCount
