@@ -147,16 +147,6 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     ! Place function calls here - Below is sample function call
-     !call ib_sample_function_call(facexData(VARF_FACE_VAR,:,:,:),&
-     !                             faceyData(VARF_FACE_VAR,:,:,:),&
-     !                             facezData(VARF_FACE_VAR,:,:,:),&
-     !                              solnData(VARC_VAR,:,:,:),&
-     !                  blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-     !                  blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-     !                  blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-     !                  del(DIR_X),del(DIR_Y),del(DIR_Z))
-
      call ib_solid_stress(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
@@ -194,32 +184,10 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
-  !gcMask(VARC_VAR) = .TRUE.
-  gcMask(LMDX_VAR) = .TRUE.
-  gcMask(LMDY_VAR) = .TRUE.
   gcMask(LMS1_VAR) = .TRUE.
   gcMask(LMS2_VAR) = .TRUE.
   gcMask(LMS3_VAR) = .TRUE.
   gcMask(LMS4_VAR) = .TRUE.
-  gcMask(AAA1_VAR) = .TRUE.
-  gcMask(AAA2_VAR) = .TRUE.
-  gcMask(AAA3_VAR) = .TRUE.
-  gcMask(AAA4_VAR) = .TRUE.
-  gcMask(AAT1_VAR) = .TRUE.
-  gcMask(AAT2_VAR) = .TRUE.
-  gcMask(AAT3_VAR) = .TRUE.
-  gcMask(AAT4_VAR) = .TRUE.
-  gcMask(AIV1_VAR) = .TRUE.
-  gcMask(AIV2_VAR) = .TRUE.
-  gcMask(AIV3_VAR) = .TRUE.
-  gcMask(AIV4_VAR) = .TRUE.
-
-!  ! BC fill for face center variables
-!  gcMask(NUNK_VARS+VARF_FACE_VAR) = .TRUE.
-!  gcMask(NUNK_VARS+1*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!#if NDIM == 3
-!  gcMask(NUNK_VARS+2*NFACE_VARS+VARF_FACE_VAR) = .TRUE.
-!#endif
 
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
@@ -267,14 +235,6 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   ! Guard Cell Mask
   gcMask = .FALSE.
-
-  ! BC fill for cell center variables
-  !gcMask(VARC_VAR) = .TRUE.
-  gcMask(XMUS_VAR) = .TRUE.
-  gcMask(LMS1_VAR) = .TRUE.
-  gcMask(LMS2_VAR) = .TRUE.
-  gcMask(LMS3_VAR) = .TRUE.
-  gcMask(LMS4_VAR) = .TRUE.
 
   ! BC fill for face center variables
   gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.
