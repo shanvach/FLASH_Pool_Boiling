@@ -16,16 +16,14 @@
 !!           :: jy1,jy2   - low,high block y indeces 
 !===============================================================================
         subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4,&
-                                   A1,A2,A3,A4,AT1,AT2,AT3,AT4,&
-                                   A_inv1,A_inv2,A_inv3,A_inv4,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
         !include 'mpif.h'
         real, dimension(:,:,:), intent(inout) :: Tau1, Tau2, Tau3, Tau4
         real, dimension(:,:,:), intent(inout)    :: sd,sX,sY
-        real, dimension(:,:,:), intent(inout)    :: A1,A2,A3,A4
-        real, dimension(:,:,:), intent(inout)    :: AT1,AT2,AT3,AT4
-        real, dimension(:,:,:), intent(inout)    :: A_inv1,A_inv2,A_inv3,A_inv4
+        real :: A1,A2,A3,A4
+        real :: AT1,AT2,AT3,AT4
+        real :: A_inv1,A_inv2,A_inv3,A_inv4
         !real, dimension(:,:,:)                :: Taux,Tauy,Taum
 
         real, intent(in)    :: dx,dy,dz
@@ -78,33 +76,34 @@
         do j = jy1,jy2
           do i = ix1,ix2
 
-          A_inv1(i,j,k) = 1.d0/(2*dx)*(sX(i+1,j,k)-sX(i-1,j,k))
-          A_inv2(i,j,k) = 1.d0/(2*dy)*(sX(i,j+1,k)-sX(i,j-1,k))
-          A_inv3(i,j,k) = 1.d0/(2*dx)*(sY(i+1,j,k)-sY(i-1,j,k))
-          A_inv4(i,j,k) = 1.d0/(2*dy)*(sY(i,j+1,k)-sY(i,j-1,k))
+          A_inv1 = 1.d0/(2*dx)*(sX(i+1,j,k)-sX(i-1,j,k))
+          A_inv2 = 1.d0/(2*dy)*(sX(i,j+1,k)-sX(i,j-1,k))
+          A_inv3 = 1.d0/(2*dx)*(sY(i+1,j,k)-sY(i-1,j,k))
+          A_inv4 = 1.d0/(2*dy)*(sY(i,j+1,k)-sY(i,j-1,k))
 
 
-          if(abs(A_inv1(i,j,k)*A_inv4(i,j,k)-A_inv2(i,j,k)*A_inv3(i,j,k)).gt.1E-12) then
-           A1(i,j,k) = 1.d0/(A_inv1(i,j,k)*A_inv4(i,j,k)-A_inv2(i,j,k)*A_inv3(i,j,k))  &
-                      *A_inv4(i,j,k)
-           A2(i,j,k) = 1.d0/(A_inv1(i,j,k)*A_inv4(i,j,k)-A_inv2(i,j,k)*A_inv3(i,j,k))  &
-                      *(-A_inv2(i,j,k)) 
-           A3(i,j,k) = 1.d0/(A_inv1(i,j,k)*A_inv4(i,j,k)-A_inv2(i,j,k)*A_inv3(i,j,k))  &
-                      *(-A_inv3(i,j,k)) 
-           A4(i,j,k) = 1.d0/(A_inv1(i,j,k)*A_inv4(i,j,k)-A_inv2(i,j,k)*A_inv3(i,j,k))  &
-                      *A_inv1(i,j,k) 
+          if(abs(A_inv1*A_inv4-A_inv2*A_inv3).gt.1E-12) then
+
+           A1 = 1.d0/(A_inv1*A_inv4-A_inv2*A_inv3)*A_inv4
+
+           A2 = 1.d0/(A_inv1*A_inv4-A_inv2*A_inv3)*(-A_inv2) 
+
+           A3 = 1.d0/(A_inv1*A_inv4-A_inv2*A_inv3)*(-A_inv3) 
+
+           A4 = 1.d0/(A_inv1*A_inv4-A_inv2*A_inv3)*A_inv1
+
           end if
 
-          AT1(i,j,k) = A1(i,j,k)
-          AT2(i,j,k) = A3(i,j,k)
-          AT3(i,j,k) = A2(i,j,k)
-          AT4(i,j,k) = A4(i,j,k)
+          AT1 = A1
+          AT2 = A3
+          AT3 = A2
+          AT4 = A4
 
           !Tau is the strain tensor
-          Tau1(i,j,k) = (A1(i,j,k)*AT1(i,j,k)+A2(i,j,k)*AT3(i,j,k)-1)
-          Tau2(i,j,k) = (A1(i,j,k)*AT2(i,j,k)+A2(i,j,k)*AT4(i,j,k))
-          Tau3(i,j,k) = (A3(i,j,k)*AT1(i,j,k)+A4(i,j,k)*AT3(i,j,k))
-          Tau4(i,j,k) = (A3(i,j,k)*AT2(i,j,k)+A4(i,j,k)*AT4(i,j,k)-1)
+          Tau1(i,j,k) = (A1*AT1+A2*AT3-1)
+          Tau2(i,j,k) = (A1*AT2+A2*AT4)
+          Tau3(i,j,k) = (A3*AT1+A4*AT3)
+          Tau4(i,j,k) = (A3*AT2+A4*AT4-1)
         
           end do
         end do

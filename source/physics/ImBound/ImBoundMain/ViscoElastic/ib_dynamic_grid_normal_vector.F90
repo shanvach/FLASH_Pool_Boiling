@@ -10,13 +10,14 @@
 
 
 
-      subroutine ib_dynamic_grid_normal_vector(sd,stest,adf,adfx,adfy,&
+      subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
                                            ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         !include 'mpif.h' 
 
-        real, dimension(:,:,:), intent(inout) :: adfx,adfy,adf
+        real, dimension(:,:,:), intent(inout) :: adfx,adfy
         real, dimension(:,:,:), intent(in)    :: sd,stest
+        real :: adf
 
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
@@ -47,10 +48,10 @@
               syl = sd(i,j-1,1)
               syr = sd(i,j+1,1)
               
-              adf(i,j,k) = sqrt( ((sxr-sxl)/2./dx)**2 + ((syr-syl)/2./dy)**2 )
+              adf = sqrt( ((sxr-sxl)/2./dx)**2 + ((syr-syl)/2./dy)**2 )
 
-              adfx(i,j,k) = (sxr-sxl)/2./dx / adf(i,j,k)
-              adfy(i,j,k) = (syr-syl)/2./dy / adf(i,j,k)
+              adfx(i,j,k) = (sxr-sxl)/2./dx / adf
+              adfy(i,j,k) = (syr-syl)/2./dy / adf
 
             end do
          end do

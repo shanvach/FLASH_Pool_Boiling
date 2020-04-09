@@ -154,18 +154,6 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                                   solnData(LMS2_VAR,:,:,:),&
                                   solnData(LMS3_VAR,:,:,:),&
                                   solnData(LMS4_VAR,:,:,:),&
-                                  solnData(AAA1_VAR,:,:,:),&
-                                  solnData(AAA2_VAR,:,:,:),&
-                                  solnData(AAA3_VAR,:,:,:),&
-                                  solnData(AAA4_VAR,:,:,:),&
-                                  solnData(AAT1_VAR,:,:,:),&
-                                  solnData(AAT2_VAR,:,:,:),&
-                                  solnData(AAT3_VAR,:,:,:),&
-                                  solnData(AAT4_VAR,:,:,:),&
-                                  solnData(AIV1_VAR,:,:,:),&
-                                  solnData(AIV2_VAR,:,:,:),&
-                                  solnData(AIV3_VAR,:,:,:),&
-                                  solnData(AIV4_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&

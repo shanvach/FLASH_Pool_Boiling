@@ -4,38 +4,22 @@
 # ib_viscoElastic_data
 
 # To declare a cell centered variable
-# VARIABLE varc TYPE:GENERIC
-VARIABLE lmxx TYPE:GENERIC
-VARIABLE lmyy TYPE:GENERIC
 VARIABLE lmda TYPE:GENERIC # viscoelastic solid distance function
 VARIABLE lmdx TYPE:GENERIC # x dynamic grid
 VARIABLE lm0x TYPE:GENERIC # x dynamic grid
 VARIABLE lmdy TYPE:GENERIC # y dynamic grid
 VARIABLE lm0y TYPE:GENERIC # y dynamic grid
+
 VARIABLE ddsn TYPE:GENERIC # directional derivative in normal direction
 VARIABLE d0sn TYPE:GENERIC # directional derivative in normal direction
-VARIABLE sold TYPE:GENERIC # so (create s_old of dimension of (:,:,:);so=s in constant and linear projection)
 
 VARIABLE adfx TYPE:GENERIC # unit normal vector in x
 VARIABLE adfy TYPE:GENERIC # unit normal vector in y
-VARIABLE adf0 TYPE:GENERIC  # unit normal vector 
 
 VARIABLE lms1 TYPE:GENERIC # component of solid strain tensor
 VARIABLE lms2 TYPE:GENERIC # component of solid strain tensor
 VARIABLE lms3 TYPE:GENERIC # component of solid strain tensor
 VARIABLE lms4 TYPE:GENERIC # component of solid strain tensor
-VARIABLE aaa1 TYPE:GENERIC # component of deformation gradient tensor
-VARIABLE aaa2 TYPE:GENERIC # component of deformation gradient tensor
-VARIABLE aaa3 TYPE:GENERIC # component of deformation gradient tensor
-VARIABLE aaa4 TYPE:GENERIC # component of deformation gradient tensor
-VARIABLE aat1 TYPE:GENERIC # component of transpose deformation gradient tensor
-VARIABLE aat2 TYPE:GENERIC # component of transpose deformation gradient tensor
-VARIABLE aat3 TYPE:GENERIC # component of transpose deformation gradient tensor
-VARIABLE aat4 TYPE:GENERIC # component of transpose deformation gradient tensor
-VARIABLE aiv1 TYPE:GENERIC # component of inverse deformation gradient tensor
-VARIABLE aiv2 TYPE:GENERIC # component of inverse deformation gradient tensor
-VARIABLE aiv3 TYPE:GENERIC # component of inverse deformation gradient tensor
-VARIABLE aiv4 TYPE:GENERIC # component of inverse deformation gradient tensor
 
 VARIABLE xmus TYPE:GENERIC # mus, varies from 0-1 in the diffused solid interface
 VARIABLE xmuf TYPE:GENERIC # muf, varies from mu_f-mu_s in the diffused solid interface
@@ -46,8 +30,6 @@ VARIABLE rrs1 TYPE:GENERIC # s1 in ib_redistance_PM
 VARIABLE rdns TYPE:GENERIC # dns in ib_redistance_PM
 
 # To declare a face centered variable
-# FACEVAR varf
-# FACEVAR velc_face_var ! used to update ustar
 
 # To declare a runtime parameter 
 #PARAMETER varp  REAL 1.0

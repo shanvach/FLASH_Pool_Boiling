@@ -11,18 +11,23 @@
 !!           :: ix1,ix2 - low,high block x indeces
 !!           :: jy1,jy2 - low,high block y indeces 
 !===============================================================================
-        subroutine ib_levelset_constantprojection(s,so,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+#include "constants.h"
+#include "Flash.h"
+
+        subroutine ib_levelset_constantprojection(s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
-        real, dimension(:,:,:), intent(inout) :: s,so
+        real, dimension(:,:,:), intent(inout) :: s
         real, dimension(:,:,:), intent(in)    :: u,v
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
+        real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: so
+ 
         integer :: i,j,k
         real    :: ul,ur,vl,vr,delta_t
 
         so(:,:,:) = s(:,:,:)
-        
+       
         k = 1
 
         !use dx/2 as dt to advect level set

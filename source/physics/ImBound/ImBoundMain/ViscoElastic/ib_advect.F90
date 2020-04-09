@@ -317,7 +317,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
-                                  solnData(ADF0_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -392,7 +391,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
- 
+
   do step = 1, maxiter !projection step can be changed
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -410,7 +409,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
-                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -476,7 +474,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_levelset_linearprojection(solnData(LM0X_VAR,:,:,:),&
-                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
@@ -553,7 +550,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
-                                  solnData(ADF0_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -644,7 +640,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_levelset_constantprojection(solnData(D0SN_VAR,:,:,:),&
-                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -711,7 +706,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_levelset_linearprojection(solnData(LM0Y_VAR,:,:,:),&
-                                  solnData(SOLD_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&

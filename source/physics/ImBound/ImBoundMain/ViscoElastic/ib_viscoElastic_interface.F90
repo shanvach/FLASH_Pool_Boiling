@@ -13,9 +13,9 @@ module ib_viscoElastic_interface
         !end interface
 
         interface
-        subroutine ib_levelset_constantprojection(s,so,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz) 
+        subroutine ib_levelset_constantprojection(s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz) 
         implicit none
-        real, dimension(:,:,:), intent(inout) :: s,so
+        real, dimension(:,:,:), intent(inout) :: s
         real, dimension(:,:,:), intent(in)    :: u,v
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
@@ -23,9 +23,9 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_levelset_linearprojection(s,so,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        subroutine ib_levelset_linearprojection(s,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
-        real, dimension(:,:,:), intent(inout) :: s,so
+        real, dimension(:,:,:), intent(inout) :: s
         real, dimension(:,:,:), intent(in)    :: u,v
         real, dimension(:,:,:), intent(in)    :: sn
         real, intent(in)    :: dx,dy,dz
@@ -35,15 +35,10 @@ module ib_viscoElastic_interface
 
         interface
         subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4,&
-                                   A1,A2,A3,A4,AT1,AT2,AT3,AT4,&
-                                   A_inv1,A_inv2,A_inv3,A_inv4,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         real, dimension(:,:,:), intent(inout) :: Tau1, Tau2, Tau3, Tau4
         real, dimension(:,:,:), intent(in)    :: sd,sX,sY
-        real, dimension(:,:,:), intent(in)    :: A1,A2,A3,A4
-        real, dimension(:,:,:), intent(in)    :: AT1,AT2,AT3,AT4
-        real, dimension(:,:,:), intent(in)    :: A_inv1,A_inv2,A_inv3,A_inv4
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         end subroutine ib_solid_stress
@@ -91,12 +86,11 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_dynamic_grid_normal_vector(sd,stest,adf,adfx,adfy,&
+        subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
                                              ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
           real, dimension(:,:,:), intent(inout) :: adfx,adfy
           real, dimension(:,:,:), intent(in)    :: sd,stest
-          real, dimension(:,:,:), intent(in)    :: adf 
           real, intent(in)    :: dx,dy,dz
           integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         end subroutine ib_dynamic_grid_normal_vector
