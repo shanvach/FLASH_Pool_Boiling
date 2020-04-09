@@ -1,7 +1,7 @@
 ! Directives for three phase treatment
 
 !#define LEVEL_SET_UNION
-#define THREE_PHASE_TREATMENT
+!#define THREE_PHASE_TREATMENT
 
 !#define FREE_SURFACE_TREATMENT
 !#define free_surface_loc -2.0
