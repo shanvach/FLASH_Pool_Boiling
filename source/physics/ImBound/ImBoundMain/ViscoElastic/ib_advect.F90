@@ -184,15 +184,15 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
+  ! Guard Cell Mask
+  gcMask = .FALSE.
 
-  !! BC fill for cell center variables
-  !gcMask(LMDX_VAR) = .TRUE.
-  !gcMask(LMDY_VAR) = .TRUE.
+  ! BC fill for cell center variables
+  gcMask(LMDX_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
 
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
   !------2: Loop through multiple blocks on a processor
   !--------------------dynamic grid projection for X grid---------
@@ -231,16 +231,16 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
-  !
-  !! BC fill for cell center variables
-  !gcMask(ADFX_VAR) = .TRUE.
-  !gcMask(ADFY_VAR) = .TRUE.
-  !
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+  
+  ! BC fill for cell center variables
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
+  
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   !!!define directional derivative
   do lb = 1,blockCount
@@ -413,16 +413,16 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
+  ! Guard Cell Mask
+  gcMask = .FALSE.
 
-  !! BC fill for cell center variables
-  !gcMask(ADFX_VAR) = .TRUE.
-  !gcMask(ADFY_VAR) = .TRUE.
+  ! BC fill for cell center variables
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
 
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   !!!define directional derivative
   do lb = 1,blockCount
