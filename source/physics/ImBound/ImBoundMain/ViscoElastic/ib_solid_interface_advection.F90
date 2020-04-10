@@ -9,6 +9,10 @@
 !! Definition of the level set for solid-fluid interface remains the same  
 !! in terms of X and Y throughout the simulation, where X(x,y), Y(x,y)
 !===============================================================================
+
+#include "constants.h"
+#include "Flash.h"
+
          subroutine ib_solid_interface_advection(sd,sX,sY,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
@@ -25,8 +29,8 @@
            ! below is a sample function for level set. It needs to be changed for a specific problem
              !sd = 0.d0
               k = 1
-              do j = jy1, jy2
-                 do i = ix1, ix2
+              do j = jy1-NGUARD, jy2+NGUARD
+                 do i = ix1-NGUARD, ix2+NGUARD
                   sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k)-0.1)**2 + &
                                          (sY(i,j,k))**2)
                  end do

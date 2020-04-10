@@ -4,10 +4,8 @@
 !!
 !=============================================================================== 
 
-      !subroutine ib_redistance_PM(s, phi, rho, xmu, xms, x, y, z, cpt, iwt)
       subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
                                      rho, xmu, xms, blockID,     &
-                                     phi, s1, dns,               &
                                      ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
 #include "constants.h"
 #include "Flash.h"
@@ -21,7 +19,8 @@
           real, intent(in)    :: dx,dy,dz
           integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
           integer, intent(in) :: blockID
-          real, dimension(:,:,:), intent(inout) :: phi, s1, dns
+
+          real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: phi, s1, dns
 
           integer :: nx, ny, nz
           integer :: i,j,k
@@ -464,8 +463,8 @@
 !        !end do                                                     !
 !        !!----------------------------------------------------------!
          !     phi = s
-          do j = jy1, jy2
-             do i = ix1, ix2
+          do j = jy1-NGUARD, jy2+NGUARD
+             do i = ix1-NGUARD, ix2+NGUARD
                   !----update density and viscosity-----------------!
                   psi = (1.d0 + derf(-s(i,j,1)/(2.d0*dx)))/2.d0   !
                   xmu(i,j,1) = psi*(xmu1-xmu2) + xmu2               !

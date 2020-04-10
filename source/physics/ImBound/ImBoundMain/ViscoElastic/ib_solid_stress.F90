@@ -15,6 +15,9 @@
 !!           :: ix1,ix2   - low,high block x indeces
 !!           :: jy1,jy2   - low,high block y indeces 
 !===============================================================================
+#include "constants.h"
+#include "Flash.h"
+
         subroutine ib_solid_stress(sd,sX,sY,Tau1,Tau2,Tau3,Tau4,&
                                    ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)   
         implicit none
@@ -73,8 +76,8 @@
         !A(i,j,ind) is the deformation gradient tensor in 2D 
         !ind is the index of each component in the deformation gradient tensor. dX/dx:1; dX/dy:2; dY/dx:3; dY/dy:4.
         k = 1
-        do j = jy1,jy2
-          do i = ix1,ix2
+        do j = jy1-NGUARD+1,jy2+NGUARD-1
+          do i = ix1-NGUARD+1,ix2+NGUARD-1
 
           A_inv1 = 1.d0/(2*dx)*(sX(i+1,j,k)-sX(i-1,j,k))
           A_inv2 = 1.d0/(2*dy)*(sX(i,j+1,k)-sX(i,j-1,k))

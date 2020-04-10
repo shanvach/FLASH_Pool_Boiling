@@ -1,32 +1,20 @@
 module ib_viscoElastic_interface
 
-        !interface
-        !subroutine ib_dynamic_grid_advection(sd,stest,&
-        !                                     ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
-        !implicit none
-        !real, dimension(:,:,:), intent(inout) :: sn,adf,adfx,adfy
-        !real, dimension(:,:,:), intent(in)    :: sd,stest
-        !integer, dimension(:),  intent(in)    :: cpt
-        !real, intent(in)    :: dx,dy,dz
-        !integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
-        !end subroutine ib_dynamic_grid_advection
-        !end interface
-
         interface
-        subroutine ib_levelset_constantprojection(s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz) 
+        subroutine ib_levelset_constantprojection(lmda,s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz) 
         implicit none
         real, dimension(:,:,:), intent(inout) :: s
-        real, dimension(:,:,:), intent(in)    :: u,v
+        real, dimension(:,:,:), intent(in)    :: u,v,lmda
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         end subroutine ib_levelset_constantprojection
         end interface
 
         interface
-        subroutine ib_levelset_linearprojection(s,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        subroutine ib_levelset_linearprojection(lmda,s,sn,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         real, dimension(:,:,:), intent(inout) :: s
-        real, dimension(:,:,:), intent(in)    :: u,v
+        real, dimension(:,:,:), intent(in)    :: u,v,lmda
         real, dimension(:,:,:), intent(in)    :: sn
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
@@ -110,7 +98,6 @@ module ib_viscoElastic_interface
         interface
         subroutine ib_redistance_PM(s,rho1, rho2, xmu1, xmu2, xmus,&
                                        rho, xmu, xms, blockID,     &
-                                       phi, s1, dns,               &
                                        ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
           implicit none
             real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
@@ -118,7 +105,6 @@ module ib_viscoElastic_interface
             real, intent(in)    :: dx,dy,dz
             integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
             integer, intent(in) :: blockID
-            real, dimension(:,:,:), intent(inout) :: phi, s1, dns
         end subroutine
         end interface
 

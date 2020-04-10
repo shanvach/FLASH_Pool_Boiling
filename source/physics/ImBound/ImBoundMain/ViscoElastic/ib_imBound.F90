@@ -148,16 +148,16 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_solid_stress(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(LMDX_VAR,:,:,:),&
-                                  solnData(LMDY_VAR,:,:,:),&
-                                  solnData(LMS1_VAR,:,:,:),&
-                                  solnData(LMS2_VAR,:,:,:),&
-                                  solnData(LMS3_VAR,:,:,:),&
-                                  solnData(LMS4_VAR,:,:,:),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z))
+                          solnData(LMDX_VAR,:,:,:),&
+                          solnData(LMDY_VAR,:,:,:),&
+                          solnData(LMS1_VAR,:,:,:),&
+                          solnData(LMS2_VAR,:,:,:),&
+                          solnData(LMS3_VAR,:,:,:),&
+                          solnData(LMS4_VAR,:,:,:),&
+                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                          del(DIR_X),del(DIR_Y),del(DIR_Z))
 
 ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -167,19 +167,18 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
+  !! Guard Cell Mask
+  !gcMask = .FALSE.
 
-  ! Guard Cell Mask
-  gcMask = .FALSE.
+  !! BC fill for cell center variables
+  !gcMask(LMS1_VAR) = .TRUE.
+  !gcMask(LMS2_VAR) = .TRUE.
+  !gcMask(LMS3_VAR) = .TRUE.
+  !gcMask(LMS4_VAR) = .TRUE.
 
-  ! BC fill for cell center variables
-  gcMask(LMS1_VAR) = .TRUE.
-  gcMask(LMS2_VAR) = .TRUE.
-  gcMask(LMS3_VAR) = .TRUE.
-  gcMask(LMS4_VAR) = .TRUE.
-
-  ! Fill guard cells
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  !! Fill guard cells
+  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
   !------2: Loop through multiple blocks on a processor
   !--------------------update ustar with stress term added---------
@@ -200,16 +199,16 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_ustar_solid(facexData(VELC_FACE_VAR,:,:,:),&
-                                  faceyData(VELC_FACE_VAR,:,:,:),&
-                                  solnData(XMUS_VAR,:,:,:),&
-                                  solnData(LMS1_VAR,:,:,:),&
-                                  solnData(LMS2_VAR,:,:,:),&
-                                  solnData(LMS3_VAR,:,:,:),&
-                                  solnData(LMS4_VAR,:,:,:),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z),dt)
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         solnData(XMUS_VAR,:,:,:),&
+                         solnData(LMS1_VAR,:,:,:),&
+                         solnData(LMS2_VAR,:,:,:),&
+                         solnData(LMS3_VAR,:,:,:),&
+                         solnData(LMS4_VAR,:,:,:),&
+                         blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+                         blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+                         blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                         del(DIR_X),del(DIR_Y),del(DIR_Z),dt)
 
 
      ! Release pointers:

@@ -14,50 +14,46 @@
 #include "constants.h"
 #include "Flash.h"
 
-        subroutine ib_levelset_constantprojection(s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        subroutine ib_levelset_constantprojection(lmda,s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
         real, dimension(:,:,:), intent(inout) :: s
-        real, dimension(:,:,:), intent(in)    :: u,v
+        real, dimension(:,:,:), intent(in)    :: u,v,lmda
         real, intent(in)    :: dx,dy,dz
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
 
         real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: so
- 
+        integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: pfl
+
         integer :: i,j,k
-        real    :: ul,ur,vl,vr,delta_t
+        real :: up, vp
+        real :: sxplus, sxmins, syplus, symins
 
         so(:,:,:) = s(:,:,:)
-       
+        pfl(:,:,:) = (int(sign(1.0,dx + lmda(:,:,:))) + 1)/2
+
+        so(:,:,:) = s(:,:,:)
+        
         k = 1
 
-        !use dx/2 as dt to advect level set
-        delta_t = dx/2.d0
+        do j = jy1-NGUARD+1,jy2+NGUARD-1
+          do i = ix1-NGUARD+1,ix2+NGUARD-1
 
-        do j = jy1,jy2
-          do i = ix1,ix2
           !normal vectors
-          ul = u(i-1,j,k) 
-          ur = u(i,j,k)   
-          vl = v(i,j-1,k) 
-          vr = v(i,j,k) 
-          !use dx/2 as dt to advect level set
-          if(u(i,j,k).ge.0.d0.and.v(i,j,k).ge.0.d0) then
-            s(i,j,k) = so(i,j,k) - delta_t*u(i,j,k)*(so(i,j,k) - so(i-1,j,k)) / dx &
-                                 - delta_t*v(i,j,k)*(so(i,j,k) - so(i,j-1,k)) / dy
-          end if
-          if(u(i,j,k).ge.0.d0.and.v(i,j,k).le.0.d0) then
-            s(i,j,k) = so(i,j,k) - delta_t*u(i,j,k)*(so(i,j,k) - so(i-1,j,k)) / dx &
-                                 - delta_t*v(i,j,k)*(so(i,j+1,k) - so(i,j,k)) / dy
-          end if
-          if(u(i,j,k).le.0.d0.and.v(i,j,k).ge.0.d0) then
-            s(i,j,k) = so(i,j,k) - delta_t*u(i,j,k)*(so(i+1,j,k) - so(i,j,k)) / dx &
-                                 - delta_t*v(i,j,k)*(so(i,j,k) - so(i,j-1,k)) / dy
-          end if
-          if(u(i,j,k).le.0.d0.and.v(i,j,k).le.0.d0) then
-            s(i,j,k) = so(i,j,k) - delta_t*u(i,j,k)*(so(i+1,j,k) - so(i,j,k)) / dx &
-                                 - delta_t*v(i,j,k)*(so(i,j+1,k) - so(i,j,k)) / dy
-          end if
+          up = u(i,j,k)
+          vp = v(i,j,k)
+
+          !gradients
+          sxplus = (so(i+1,j,k) - so(i,j,k)) / dx
+          sxmins = (so(i,j,k) - so(i-1,j,k)) / dx
+          syplus = (so(i,j+1,k) - so(i,j,k)) / dy
+          symins = (so(i,j,k) - so(i,j-1,k)) / dy
+
+          ! use dx/2 as dt to advect level set
+          s(i,j,k) = so(i,j,k) + pfl(i,j,k)*dx/2.d0*&
+                             ( - max(up,0.0d0)*sxmins - min(up,0.0d0)*sxplus &
+                               - max(vp,0.0d0)*symins - min(vp,0.0d0)*syplus )
+
           end do
         end do
-               
+            
       end subroutine ib_levelset_constantprojection

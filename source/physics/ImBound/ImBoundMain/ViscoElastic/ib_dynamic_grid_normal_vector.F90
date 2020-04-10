@@ -7,8 +7,8 @@
 !! THIS NEEDS TO BE BROKEN DOWN INTO MULTIPLE SUBROUTINES IN ACCORDANCE
 !  WITH imBound.F90
 !===============================================================================
-
-
+#include "constants.h"
+#include "Flash.h"
 
       subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
                                            ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
@@ -26,22 +26,12 @@
         integer :: i,j,k
 
         real :: sxl, sxr, syl, syr
-        !end buit-in header
-
-        !**args
-        !adfx = 0.d0
-        !adfy = 0.d0
-
-        !created in this function, now passed as args
-        !adf = 0.d0
 
         !this obtains normal components (nx,ny) of interface
         !--------normal components---------------------------------
         k = 1
-          !do j = 2, ny-1
-          do j = jy1,jy2
-            !do i = 2, nx-1
-            do i = ix1,ix2
+        do j = jy1-NGUARD+1,jy2+NGUARD-1
+          do i = ix1-NGUARD+1,ix2+NGUARD-1
 
               sxl = sd(i-1,j,1)
               sxr = sd(i+1,j,1)
@@ -56,6 +46,5 @@
             end do
          end do
          !--------normal components---------------------------------
-
 
         end subroutine ib_dynamic_grid_normal_vector
