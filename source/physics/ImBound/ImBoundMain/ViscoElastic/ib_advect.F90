@@ -139,6 +139,9 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   if(ins_meshME .eq. MASTER_PE) print *,"Entering IB level set advection" 
 
+  !------1: Loop through multiple blocks on a processor
+  !--------------------WENO3 advection-----------
+
   ! WENO3 advection for LMDX, LMDY
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -191,8 +194,9 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
   !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
-  !------5: Loop through multiple blocks on a processor
+  !------2: Loop through multiple blocks on a processor
   !--------------------dynamic grid projection for X grid---------
+
   !!!calculate normal vector
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -233,7 +237,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   !! BC fill for cell center variables
   !gcMask(ADFX_VAR) = .TRUE.
   !gcMask(ADFY_VAR) = .TRUE.
-
+  !
   !! Fill guard cells
   !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
   !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
@@ -272,12 +276,12 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
- ! Guard Cell Mask
+  ! Guard Cell Mask
   gcMask = .FALSE.
-
+  
   ! BC fill for cell center variables
   gcMask(DDSN_VAR) = .TRUE.
-
+   
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
@@ -316,7 +320,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   enddo
   enddo !end of iteration
 
- ! Guard Cell Mask
+  ! Guard Cell Mask
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
@@ -361,7 +365,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   enddo
   enddo !end of iteration
 
- ! Guard Cell Mask
+  ! Guard Cell Mask
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
@@ -373,7 +377,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   !!!end of linear extrapolation of X grid
 
-!  !------6: Loop through multiple blocks on a processor
+!  !------3: Loop through multiple blocks on a processor
 !  !--------------------dynamic grid projection for Y grid---------
 
   !!!calculate normal vector
@@ -454,12 +458,12 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
- ! Guard Cell Mask
+  ! Guard Cell Mask
   gcMask = .FALSE.
-
+  
   ! BC fill for cell center variables
   gcMask(DDSN_VAR) = .TRUE.
-
+  
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
@@ -553,8 +557,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
-  !------3 should be called after LMDX&LMDY advection------
-  !------3: Loop through multiple blocks on a processor
+  !------4: Loop through multiple blocks on a processor
   !--------------------calculate the level set of interface using X and Y grid---------
 
   do lb = 1,blockCount
@@ -599,9 +602,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
-  !------4: Loop through multiple blocks on a processor
+  !------5: Loop through multiple blocks on a processor
   !--------------------redistancing the level set of interface using projection method---------
-
 
   do lb = 1,blockCount
      blockID = blockList(lb)

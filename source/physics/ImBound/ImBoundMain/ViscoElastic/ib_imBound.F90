@@ -159,7 +159,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
                           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                           del(DIR_X),del(DIR_Y),del(DIR_Z))
 
-! Release pointers:
+     ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
      call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
