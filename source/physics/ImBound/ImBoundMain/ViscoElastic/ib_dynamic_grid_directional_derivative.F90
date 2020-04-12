@@ -24,10 +24,10 @@
 
         real :: sxl, sxr, syl, syr
         real :: h_preserve
-        integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: h_pfl
+        integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: pfl
 
         h_preserve = 0.d0
-        h_pfl = (1 - int(sign(1.0,sd + dx - h_preserve)))/2
+        pfl = (1 - int(sign(1.0,sd + dx - h_preserve)))/2
 
         k = 1
         !------define sn(diectional derivative of level set s in normal direction)------       
