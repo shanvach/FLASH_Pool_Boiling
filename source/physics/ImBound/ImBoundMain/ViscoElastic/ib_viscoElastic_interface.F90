@@ -74,11 +74,11 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_dynamic_grid_normal_vector(sd,stest,adfx,adfy,&
+        subroutine ib_dynamic_grid_normal_vector(sd,adfx,adfy,&
                                              ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
         implicit none
           real, dimension(:,:,:), intent(inout) :: adfx,adfy
-          real, dimension(:,:,:), intent(in)    :: sd,stest
+          real, dimension(:,:,:), intent(in)    :: sd
           real, intent(in)    :: dx,dy,dz
           integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         end subroutine ib_dynamic_grid_normal_vector
@@ -119,10 +119,10 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_advectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
+        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
         implicit none
         real, dimension(:,:,:), intent(inout):: s
-        real, dimension(:,:,:), intent(in) :: u,v
+        real, dimension(:,:,:), intent(in) :: u,v,lmda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2
         end subroutine

@@ -30,9 +30,13 @@
         integer :: i,j,k
         real :: up, vp
         real :: sxplus, sxmins, syplus, symins
+        real :: delta_t
 
-        so(:,:,:) = s(:,:,:)
-        pfl(:,:,:) = (int(sign(1.0,dx + lmda(:,:,:))) + 1)/2
+        pfl = (int(sign(1.0,lmda)) + 1)/2
+
+        so = s
+
+        delta_t = dx/2.0d0
 
         !solve advection equation to get advected level set s with well defined sn  
         k = 1
@@ -50,7 +54,7 @@
           symins = (so(i,j,k) - so(i,j-1,k)) / dy
 
           ! use dx/2 as dt to advect level set
-          s(i,j,k) = so(i,j,k) + pfl(i,j,k)*dx/2.d0*(sn(i,j,k) &
+          s(i,j,k) = so(i,j,k) + pfl(i,j,k)*delta_t*(sn(i,j,k) &
                                 - max(up,0.0d0)*sxmins - min(up,0.0d0)*sxplus &
                                 - max(vp,0.0d0)*symins - min(vp,0.0d0)*syplus)
 

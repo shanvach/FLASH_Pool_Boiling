@@ -58,7 +58,7 @@
                         - xmsclc*Tau2(i,j-1,k) -xmsrlc*Tau2(i+1,j-1,k)) & 
                             /2.d0/ 2.d0/dy/re_s
                                                                         
-                 ustr(i,j,1) = ustr(i,j,1) + ustrB*dt
+                 ustr(i,j,k) = ustr(i,j,k) + ustrB*dt
 
               end do
            end do
@@ -91,7 +91,7 @@
                               xmsccc  * Tau4(i,j,k)) / 1.d0 / dy/ re_s    
                                                                         
 
-                 vstr(i,j,1) = vstr(i,j,1) + vstrB*dt
+                 vstr(i,j,k) = vstr(i,j,k) + vstrB*dt
 
               end do
            end do

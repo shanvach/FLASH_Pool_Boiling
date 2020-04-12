@@ -217,7 +217,7 @@
              (facevaryy(NGUARD+1:nxc-1,NGUARD+2:nyc) - &
               facevaryy(NGUARD+1:nxc-1,NGUARD+1:nyc-1))/dy
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                             solnData(XMUS_VAR,:,:,1),divpp)
+                             solnData(DDSN_VAR,:,:,1),divpp)
 
 
             ! Velocity derivatives:

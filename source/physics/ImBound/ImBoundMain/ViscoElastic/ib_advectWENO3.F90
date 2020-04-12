@@ -1,5 +1,5 @@
 
-        subroutine ib_advectWENO3(s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
+        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
 
         implicit none
 
@@ -7,7 +7,7 @@
 #include "constants.h"
 
         real, dimension(:,:,:), intent(inout):: s
-        real, dimension(:,:,:), intent(in) :: u,v
+        real, dimension(:,:,:), intent(in) :: u,v,lmda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2
 
@@ -22,6 +22,9 @@
                    frx,flx,fry,fly
 
         integer :: i,j,k,n
+        integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: pfl
+
+        pfl = (1 - int(sign(1.0,lmda)))/2
 
         !- kpd - for 2D calcs
         k=1

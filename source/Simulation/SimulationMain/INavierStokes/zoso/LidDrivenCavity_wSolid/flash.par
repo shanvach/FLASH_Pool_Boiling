@@ -41,13 +41,13 @@ basenm		= "INS_LidDr_Cavity_"
 restart         = .false.
 #checkPointFileNumber=1
 #plotFileNumber  = 1
-nend            = 30000
+nend            = 300000000
 tmax            = 300. 
 cflflg          = 0
 cfl             = 0.05
 sigma		= 0.05
-dtspec          = 1.0d-3
-dtinit          = 1.0d-3
+dtspec          = 0.25d-2
+dtinit          = 0.25d-2
 tstep_change_factor = 1.
 pressure_correct= .true.
 
@@ -64,7 +64,7 @@ checkpointFileIntervalTime = 5.
 checkpointFileIntervalStep =20000 
 
 plotFileIntervalTime = 0.1
-plotFileIntervalStep = 2000
+plotFileIntervalStep = 40
 
 ##	AMR parameters
 nblockx	= 2

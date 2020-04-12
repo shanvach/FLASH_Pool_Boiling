@@ -158,7 +158,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     call ib_advectWENO3(solnData(LMDX_VAR,:,:,:), &
+     call ib_advectWENO3(solnData(LMDA_VAR,:,:,:), &
+                         solnData(LMDX_VAR,:,:,:), &
                          facexData(VELC_FACE_VAR,:,:,:), &
                          faceyData(VELC_FACE_VAR,:,:,:), &
                          dt, &
@@ -167,7 +168,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))
 
-     call ib_advectWENO3(solnData(LMDY_VAR,:,:,:), &
+     call ib_advectWENO3(solnData(LMDA_VAR,:,:,:), &
+                         solnData(LMDY_VAR,:,:,:), &
                          facexData(VELC_FACE_VAR,:,:,:), &
                          faceyData(VELC_FACE_VAR,:,:,:), &
                          dt, &
@@ -184,18 +186,19 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
-  !
-  !! BC fill for cell center variables
-  !gcMask(LMDX_VAR) = .TRUE.
-  !gcMask(LMDY_VAR) = .TRUE.
-  !
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+  
+  ! BC fill for cell center variables
+  gcMask(LMDX_VAR) = .TRUE.
+  gcMask(LMDY_VAR) = .TRUE.
+  
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
   !------2: Loop through multiple blocks on a processor
-  !--------------------dynamic grid projection for X grid---------
+  !--------------------calculate normal vectors---------
 
   !!!calculate normal vector
   do lb = 1,blockCount
@@ -214,7 +217,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(LMDX_VAR,:,:,:),&
                                   solnData(ADFX_VAR,:,:,:),&
                                   solnData(ADFY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
@@ -231,17 +233,20 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
+  ! Guard Cell Mask
+  gcMask = .FALSE.
   
-  !! BC fill for cell center variables
-  !gcMask(ADFX_VAR) = .TRUE.
-  !gcMask(ADFY_VAR) = .TRUE.
+  ! BC fill for cell center variables
+  gcMask(ADFX_VAR) = .TRUE.
+  gcMask(ADFY_VAR) = .TRUE.
   
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
+  !------3: Loop through multiple blocks on a processor
+  !--------------------dynamic grid projection for X grid---------
+
   !!!define directional derivative
   do lb = 1,blockCount
      blockID = blockList(lb)
@@ -318,7 +323,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   enddo
-  enddo !end of iteration
 
   ! Guard Cell Mask
   gcMask = .FALSE.
@@ -329,6 +333,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
+  enddo !end of iteration
 
   do step = 1, maxiter !projection step can be changed
   do lb = 1,blockCount
@@ -363,7 +369,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   enddo
-  enddo !end of iteration
 
   ! Guard Cell Mask
   gcMask = .FALSE.
@@ -375,54 +380,12 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
+  enddo !end of iteration
+
   !!!end of linear extrapolation of X grid
 
-!  !------3: Loop through multiple blocks on a processor
-!  !--------------------dynamic grid projection for Y grid---------
-
-  !!!calculate normal vector
-  do lb = 1,blockCount
-     blockID = blockList(lb)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-     call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(LMDY_VAR,:,:,:),&
-                                  solnData(ADFX_VAR,:,:,:),&
-                                  solnData(ADFY_VAR,:,:,:),&
-                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                       del(DIR_X),del(DIR_Y),del(DIR_Z))
-
-     ! Release pointers:
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-
-  enddo
-
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
-
-  !! BC fill for cell center variables
-  !gcMask(ADFX_VAR) = .TRUE.
-  !gcMask(ADFY_VAR) = .TRUE.
-
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  !------4: Loop through multiple blocks on a processor
+  !--------------------dynamic grid projection for Y grid---------
  
   !!!define directional derivative
   do lb = 1,blockCount
@@ -500,9 +463,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   enddo
-  enddo !end of iteration
 
- ! Guard Cell Mask
+  ! Guard Cell Mask
   gcMask = .FALSE.
 
   ! BC fill for cell center variables
@@ -511,6 +473,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
+  enddo !end of iteration
 
   do step = 1, maxiter !projection step can be changed
   do lb = 1,blockCount
@@ -545,7 +509,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   enddo
-  enddo !end of iteration
 
   ! Guard Cell Mask
   gcMask = .FALSE.
@@ -557,7 +520,9 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
-  !------4: Loop through multiple blocks on a processor
+  enddo !end of iteration
+
+  !------5: Loop through multiple blocks on a processor
   !--------------------calculate the level set of interface using X and Y grid---------
 
   do lb = 1,blockCount
@@ -602,7 +567,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
   !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
-  !------5: Loop through multiple blocks on a processor
+  !------6: Loop through multiple blocks on a processor
   !--------------------redistancing the level set of interface using projection method---------
 
   do lb = 1,blockCount
