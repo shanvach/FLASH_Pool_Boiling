@@ -350,12 +350,18 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
               end do
               
-              case default
+              case(LMDX_VAR,LMDY_VAR,LMDA_VAR)
               k = 2*guard+1 
               do i = guard,1,-1
                  regionData(i,1:je,1:ke,ivar)= 2*regionData(i+1,1:je,1:ke,ivar) - regionData(i+2,1:je,1:ke,ivar)
               end do
-                          
+ 
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+              end do
+                         
               end select
 
               else ! BOUNDARY CONDITIONS ON VELOCITIES               
@@ -442,12 +448,18 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
               end do                          
 
-              case default
+              case(LMDX_VAR,LMDY_VAR,LMDA_VAR)
               k = 2*guard+1 
               do i = guard,1,-1
                  regionData(i,1:je,1:ke,ivar)= 2*regionData(i+1,1:je,1:ke,ivar) - regionData(i+2,1:je,1:ke,ivar)
               end do
-
+ 
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(i,1:je,1:ke,ivar)= regionData(guard+1,1:je,1:ke,ivar)
+              end do
+ 
               end select
 
 
@@ -676,10 +688,16 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
               end do
                           
-              case default
+              case (LMDX_VAR,LMDY_VAR,LMDA_VAR)
               k = 2*guard+1 
               do i = guard,1,-1
                  regionData(k-i,1:je,1:ke,ivar)= 2*regionData(k-i-1,1:je,1:ke,ivar) - regionData(k-i-2,1:je,1:ke,ivar)
+              end do
+
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
               end do
 
               end select
@@ -766,10 +784,16 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
                  regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
               end do                          
 
-              case default
+              case (LMDX_VAR,LMDY_VAR,LMDA_VAR)
               k = 2*guard+1 
               do i = guard,1,-1
                  regionData(k-i,1:je,1:ke,ivar)= 2*regionData(k-i-1,1:je,1:ke,ivar) - regionData(k-i-2,1:je,1:ke,ivar)
+              end do
+
+              case default
+              k = 2*guard+1 
+              do i = 1,guard
+                 regionData(k-i,1:je,1:ke,ivar)= regionData(guard,1:je,1:ke,ivar)
               end do
 
               end select

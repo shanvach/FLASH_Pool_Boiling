@@ -22,21 +22,34 @@
 
         integer :: step,i,j,k
 
-        real :: sxl, sxr, syl, syr
+        real :: sxplus, sxmins, syplus, symins, up, vp
         real :: h_preserve
         integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: pfl
 
         h_preserve = 0.d0
 
         pfl = (1 - int(sign(1.0,sd)))/2
-           
+      
+        sn = 0.0d0
+     
         k = 1
         !------define sn(diectional derivative of level set s in normal direction)------       
-        do j = jy1-NGUARD+1,jy2+NGUARD-1
-           do i = ix1-NGUARD+1,ix2+NGUARD-1
+        do j = jy1,jy2
+           do i = ix1,ix2
  
-           sn(i,j,k) = (adfx(i,j,1)*1.d0/2.d0/dx*(stest(i+1,j,1)-stest(i-1,j,1)) + & 
-                        adfy(i,j,1)*1.d0/2.d0/dy*(stest(i,j+1,1)-stest(i,j-1,1)))
+          !normal vectors
+          up = adfx(i,j,k)
+          vp = adfy(i,j,k)
+
+          !gradients
+          sxplus = (stest(i+1,j,k) - stest(i,j,k)) / dx
+          sxmins = (stest(i,j,k) - stest(i-1,j,k)) / dx
+          syplus = (stest(i,j+1,k) - stest(i,j,k)) / dy
+          symins = (stest(i,j,k) - stest(i,j-1,k)) / dy
+
+          ! use dx/2 as dt to advect level set
+          sn(i,j,k) = (max(up,0.0d0)*sxmins + min(up,0.0d0)*sxplus + &
+                       max(vp,0.0d0)*symins + min(vp,0.0d0)*syplus)*pfl(i,j,k)
 
            end do
         end do

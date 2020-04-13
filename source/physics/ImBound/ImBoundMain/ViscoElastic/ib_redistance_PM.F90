@@ -463,8 +463,8 @@
 !        !end do                                                     !
 !        !!----------------------------------------------------------!
          !     phi = s
-          do j = jy1-NGUARD, jy2+NGUARD
-             do i = ix1-NGUARD, ix2+NGUARD
+          do j = jy1, jy2
+             do i = ix1, ix2
                   !----update density and viscosity-----------------!
                   psi = (1.d0 + derf(-s(i,j,1)/(2.d0*dx)))/2.d0   !
                   xmu(i,j,1) = psi*(xmu1-xmu2) + xmu2               !

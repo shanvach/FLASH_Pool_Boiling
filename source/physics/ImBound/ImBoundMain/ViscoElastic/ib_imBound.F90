@@ -167,18 +167,18 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
+  ! Guard Cell Mask
+  gcMask = .FALSE.
 
-  !! BC fill for cell center variables
-  !gcMask(LMS1_VAR) = .TRUE.
-  !gcMask(LMS2_VAR) = .TRUE.
-  !gcMask(LMS3_VAR) = .TRUE.
-  !gcMask(LMS4_VAR) = .TRUE.
+  ! BC fill for cell center variables
+  gcMask(LMS1_VAR) = .TRUE.
+  gcMask(LMS2_VAR) = .TRUE.
+  gcMask(LMS3_VAR) = .TRUE.
+  gcMask(LMS4_VAR) = .TRUE.
 
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
   !------2: Loop through multiple blocks on a processor
   !--------------------update ustar with stress term added---------

@@ -29,9 +29,9 @@
            ! below is a sample function for level set. It needs to be changed for a specific problem
              !sd = 0.d0
               k = 1
-              do j = jy1-NGUARD, jy2+NGUARD
-                 do i = ix1-NGUARD, ix2+NGUARD
-                  sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k)-0.1)**2 + &
+              do j = jy1, jy2
+                 do i = ix1, ix2
+                  sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k))**2 + &
                                          (sY(i,j,k))**2)
                  end do
               end do
