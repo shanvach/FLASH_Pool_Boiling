@@ -2,7 +2,7 @@
 !#define SMOOTHED_LS
 !#define SMOOTHED_SGN
 
-      subroutine ib_lsRedistance(s,u,v,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
+      subroutine ib_lsRedistance(s,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
 
         use IncompNS_data, ONLY : ins_cfl
 
@@ -14,7 +14,7 @@
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
         real, dimension(:,:,:), intent(inout):: s
         real, intent(in) :: dx,dy,lsDT, minCellDiag
-        real, dimension(:,:,:), intent(in):: u,v,soo
+        real, dimension(:,:,:), intent(in):: soo
 
         !- kpd - Local variables
         !real :: so(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC), &

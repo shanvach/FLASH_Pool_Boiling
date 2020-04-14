@@ -129,12 +129,12 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_lsRedistance(s,u,v,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
+        subroutine ib_lsRedistance(s,dx,dy,ix1,ix2,jy1,jy2,soo,lsDT, blockID,minCellDiag)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
         real, dimension(:,:,:), intent(inout):: s
         real, intent(in) :: dx,dy,lsDT, minCellDiag
-        real, dimension(:,:,:), intent(in):: u,v,soo
+        real, dimension(:,:,:), intent(in):: soo
         end subroutine
         end interface
 

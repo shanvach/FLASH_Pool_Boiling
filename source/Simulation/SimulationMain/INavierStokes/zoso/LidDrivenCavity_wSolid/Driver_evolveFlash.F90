@@ -185,19 +185,6 @@ if (dr_nstep .eq. 1) grid_changed = 1
   print*, 'return from IncompNS timestep'
 #endif
 
-
-#ifdef DEBUG_DRIVER
-     print*, 'going into Heat Advection Diffusion'
-#endif
-     call Heat_AD(blockCount, blockList, &
-               dr_simTime, dr_dt, dr_dtOld, sweepDummy)
-#ifdef DEBUG_DRIVER
-  print*, 'return from Heat Advection Diffusion'
-#endif
-
-
-
-
      if (dr_globalMe .eq. MASTER_PE) then
         write(*,*) ' '        
         write(*,'(I6,A,g16.8,A,g16.8)') dr_nstep,&
