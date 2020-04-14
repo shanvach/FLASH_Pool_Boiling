@@ -136,7 +136,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   CALL SYSTEM_CLOCK(time_projection(1),count_rate)
 
   max_lsit = 3
-  maxiter = 100
+  maxiter = 60
 
 #ifdef FLASH_GRID_PARAMESH
     !intval = 1

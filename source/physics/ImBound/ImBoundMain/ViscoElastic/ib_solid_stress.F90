@@ -34,35 +34,6 @@
 
         integer :: i,j,k
         real    :: ul,ur,vl,vr
-        !end header
-
-        !vars created in this subroutine
-        !A_inv(nx,ny,4), A(nx,ny,4), AT(nx,ny,4)
-
-        !integer i, j, k, nx, ny, nz
-        !integer nx1, nx2, ny1, ny2, nz1, nz2
-        !double precision Taux, Tauy, Tau_magnitude
-        !double precision A_inv, A, AT, Tau
-        !double precision sY, sX, sd
-        !double precision dx, dy, dz
-        !dimension   ::   sY(nx,ny,nz), sX(nx,ny,nz), sd(nx,ny,nz)
-        !dimension   ::   A_inv(nx,ny,4), A(nx,ny,4), AT(nx,ny,4), Tau(nx,ny,4)
-        !dimension   ::   Taux(nx,ny,nz), Tauy(nx,ny,nz), Tau_magnitude(nx,ny,nz)
-        !common/grid/     dx, dy, dz, nx, ny, nz
-        !common/grid_index/nx1, nx2, ny1, ny2, nz1, nz2
-
-        A_inv1 = 0.d0
-        A_inv2 = 0.d0
-        A_inv3 = 0.d0
-        A_inv4 = 0.d0
-        A1     = 0.d0
-        A2     = 0.d0
-        A3     = 0.d0
-        A4     = 0.d0
-        AT1    = 0.d0
-        AT2    = 0.d0
-        AT3    = 0.d0
-        AT4    = 0.d0
 
         Tau1 = 0.d0
         Tau2 = 0.d0
@@ -78,6 +49,16 @@
         k = 1
         do j = jy1,jy2
           do i = ix1,ix2
+
+          A1     = 0.d0
+          A2     = 0.d0
+          A3     = 0.d0
+          A4     = 0.d0
+
+          AT1    = 0.d0
+          AT2    = 0.d0
+          AT3    = 0.d0
+          AT4    = 0.d0
 
           A_inv1 = 1.d0/(2*dx)*(sX(i+1,j,k)-sX(i-1,j,k))
           A_inv2 = 1.d0/(2*dy)*(sX(i,j+1,k)-sX(i,j-1,k))
