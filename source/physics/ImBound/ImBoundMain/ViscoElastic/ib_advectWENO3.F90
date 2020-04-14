@@ -306,7 +306,8 @@
            end do
         end do
 
-        err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
+        s = pfl*s
 
+        err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
 
         end subroutine ib_advectWENO3

@@ -100,7 +100,7 @@ subroutine Simulation_initBlock(blockId)
             
            solnData(LMDX_VAR,i,j,k) = xcell
            solnData(LMDY_VAR,i,j,k) = ycell
-           solnData(LMDA_VAR,i,j,k) = -0.125 + sqrt(xcell**2 + ycell**2)
+           solnData(LMDA_VAR,i,j,k) = -0.2 + sqrt((xcell)**2 + ycell**2)
 
         enddo
      enddo

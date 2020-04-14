@@ -36,8 +36,8 @@
         delta_t = dx/2.0d0
         
         k = 1
-        do j = jy1-NGUARD+1,jy2+NGUARD-1
-          do i = ix1-NGUARD+1,ix2+NGUARD-1
+        do j = jy1,jy2
+          do i = ix1,ix2
 
           !normal vectors
           up = u(i,j,k)

@@ -127,15 +127,22 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   real :: minCellDiag, lsT, lsDT
 
-  integer :: max_lsit, maxiter
+  integer :: max_lsit, maxiter, intval
 
   integer :: time_projection(2)
   real*8  :: elapsed_time
 
-  max_lsit = 3
-  maxiter = 60
-
   CALL SYSTEM_CLOCK(time_projection(1),count_rate)
+
+  max_lsit = 3
+  maxiter = 100
+
+#ifdef FLASH_GRID_PARAMESH
+    !intval = 1
+    intval = 2
+    interp_mask_unk = intval;   interp_mask_unk_res = intval;
+    interp_mask_work= intval;
+#endif
 
   if(ins_meshME .eq. MASTER_PE) print *,"Entering IB level set advection" 
 
@@ -557,15 +564,15 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
-  !
-  !! BC fill for cell center variables
-  !gcMask(LMDA_VAR) = .TRUE.
-  !
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+   
+  ! BC fill for cell center variables
+  gcMask(LMDA_VAR) = .TRUE.
+  
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   !------6: Loop through multiple blocks on a processor
   !--------------------redistancing the level set of interface using projection method---------
@@ -607,18 +614,18 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-  !! Guard Cell Mask
-  !gcMask = .FALSE.
+  ! Guard Cell Mask
+  gcMask = .FALSE.
+  
+  ! BC fill for cell center variables
+  gcMask(XRHO_VAR) = .TRUE.
+  gcMask(XMUF_VAR) = .TRUE.
+  gcMask(XMUS_VAR) = .TRUE.
+  !gcMask(LMDA_VAR) = .TRUE.
 
-  !! BC fill for cell center variables
-  !gcMask(XRHO_VAR) = .TRUE.
-  !gcMask(XMUF_VAR) = .TRUE.
-  !gcMask(XMUS_VAR) = .TRUE.
-  !!gcMask(LMDA_VAR) = .TRUE.
-
-  !! Fill guard cells
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  ! Fill guard cells
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
  
   CALL SYSTEM_CLOCK(time_projection(2),count_rate)
   elapsed_time=REAL(time_projection(2)-time_projection(1),8)/count_rate
