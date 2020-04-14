@@ -225,8 +225,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
      call ib_dynamic_grid_normal_vector(solnData(LMDA_VAR,:,:,:),&
-                                  solnData(ADFX_VAR,:,:,:),&
-                                  solnData(ADFY_VAR,:,:,:),&
+                                  solnData(NMLX_VAR,:,:,:),&
+                                  solnData(NMLY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -245,8 +245,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
   gcMask = .FALSE.
   
   ! BC fill for cell center variables
-  gcMask(ADFX_VAR) = .TRUE.
-  gcMask(ADFY_VAR) = .TRUE.
+  gcMask(NMLX_VAR) = .TRUE.
+  gcMask(NMLY_VAR) = .TRUE.
   
   ! Fill guard cells
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
@@ -273,8 +273,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_dynamic_grid_directional_derivative(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDX_VAR,:,:,:),&
-                                  solnData(ADFX_VAR,:,:,:),&
-                                  solnData(ADFY_VAR,:,:,:),&
+                                  solnData(NMLX_VAR,:,:,:),&
+                                  solnData(NMLY_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
@@ -317,8 +317,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_levelset_constantprojection(solnData(LMDA_VAR,:,:,:),&
                                          solnData(DDSN_VAR,:,:,:),&
-                                         solnData(ADFX_VAR,:,:,:),&
-                                         solnData(ADFY_VAR,:,:,:),&
+                                         solnData(NMLX_VAR,:,:,:),&
+                                         solnData(NMLY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -363,8 +363,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call ib_levelset_linearprojection(solnData(LMDA_VAR,:,:,:),&
                                        solnData(LMDX_VAR,:,:,:),&
                                        solnData(DDSN_VAR,:,:,:),&
-                                       solnData(ADFX_VAR,:,:,:),&
-                                       solnData(ADFY_VAR,:,:,:),&
+                                       solnData(NMLX_VAR,:,:,:),&
+                                       solnData(NMLY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -413,8 +413,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_dynamic_grid_directional_derivative(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
-                                  solnData(ADFX_VAR,:,:,:),&
-                                  solnData(ADFY_VAR,:,:,:),&
+                                  solnData(NMLX_VAR,:,:,:),&
+                                  solnData(NMLY_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
@@ -457,8 +457,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
      call ib_levelset_constantprojection(solnData(LMDA_VAR,:,:,:),&
                                          solnData(DDSN_VAR,:,:,:),&
-                                         solnData(ADFX_VAR,:,:,:),&
-                                         solnData(ADFY_VAR,:,:,:),&
+                                         solnData(NMLX_VAR,:,:,:),&
+                                         solnData(NMLY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -503,8 +503,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
      call ib_levelset_linearprojection(solnData(LMDA_VAR,:,:,:),&
                                   solnData(LMDY_VAR,:,:,:),&
                                   solnData(DDSN_VAR,:,:,:),&
-                                  solnData(ADFX_VAR,:,:,:),&
-                                  solnData(ADFY_VAR,:,:,:),&
+                                  solnData(NMLX_VAR,:,:,:),&
+                                  solnData(NMLY_VAR,:,:,:),&
                        blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&

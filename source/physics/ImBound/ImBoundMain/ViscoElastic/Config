@@ -10,8 +10,8 @@ VARIABLE lmdy TYPE:GENERIC # y dynamic grid
 
 VARIABLE ddsn TYPE:GENERIC # directional derivative in normal direction
 
-VARIABLE adfx TYPE:GENERIC # unit normal vector in x
-VARIABLE adfy TYPE:GENERIC # unit normal vector in y
+VARIABLE nmlx TYPE:GENERIC # unit normal vector in x
+VARIABLE nmly TYPE:GENERIC # unit normal vector in y
 
 VARIABLE lms1 TYPE:GENERIC # component of solid strain tensor
 VARIABLE lms2 TYPE:GENERIC # component of solid strain tensor
