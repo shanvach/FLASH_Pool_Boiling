@@ -76,7 +76,8 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
 
   use ib_viscoElastic_data
 
-  use IncompNS_data, only: ins_meshME
+  use Grid_data, only: gr_meshMe
+
   implicit none
 
   include "Flash_mpi.h"
@@ -144,7 +145,7 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
     interp_mask_work= intval;
 #endif
 
-  if(ins_meshME .eq. MASTER_PE) print *,"Entering IB level set advection" 
+  if(gr_meshMe .eq. MASTER_PE) print *,"Entering IB level set advection" 
 
   !------1: Loop through multiple blocks on a processor
   !--------------------WENO3 advection-----------
@@ -629,6 +630,6 @@ subroutine ib_advect( blockCount, blockList, timeEndAdv, dt)
  
   CALL SYSTEM_CLOCK(time_projection(2),count_rate)
   elapsed_time=REAL(time_projection(2)-time_projection(1),8)/count_rate
-  if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total Level Set Advection Time =', elapsed_time
+  if (gr_meshMe .eq. MASTER_PE)  write(*,*) 'Total Level Set Advection Time =', elapsed_time
 
 end subroutine ib_advect

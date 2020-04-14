@@ -76,7 +76,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
 
   use ib_viscoElastic_data
 
-  use IncompNS_data, only: ins_meshMe
+  use Grid_data, only: gr_meshMe
 
   implicit none
 
@@ -127,7 +127,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   integer :: step
 
 
-  if(ins_meshME .eq. MASTER_PE) print *,"Applying IB visco elastic forcing"
+  if(gr_meshMe .eq. MASTER_PE) print *,"Applying IB visco elastic forcing"
 
 !------1: Loop through multiple blocks on a processor
 !--------------------calculate components of solid strain tensor---------

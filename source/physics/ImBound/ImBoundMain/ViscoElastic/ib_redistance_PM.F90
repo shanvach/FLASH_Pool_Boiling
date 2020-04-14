@@ -11,8 +11,11 @@
 #include "Flash.h"
 
         use Grid_interface, only: Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+        use Grid_data, only: gr_meshMe
 
           implicit none
+
+          include "Flash_mpi.h"
 
           real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
           real, intent(in)    :: rho1, rho2, xmu1, xmu2, xmus
@@ -23,7 +26,7 @@
           real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: phi, s1, dns
 
           integer :: nx, ny, nz
-          integer :: i,j,k
+          integer :: i,j,k,ierr
           integer :: nip,nip_max,inv,n1, n3, nn1, nn2, n, m, n2 
           real    :: ul,ur,vl,vr
           real    :: th, xx, yy, xx1, yy1, xx2, yy2
