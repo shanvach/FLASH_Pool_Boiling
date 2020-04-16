@@ -31,8 +31,8 @@
               k = 1
               do j = jy1, jy2
                  do i = ix1, ix2
-                  sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k))**2 + &
-                                         (sY(i,j,k))**2)
+                  sd(i,j,k) = - 0.2 + sqrt((sX(i,j,k)-0.1)**2 + &
+                                         (sY(i,j,k)-0.0)**2)
                  end do
               end do
          !print *,"ib_solid_interface_advection"

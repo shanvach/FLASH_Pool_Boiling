@@ -1,5 +1,5 @@
 
-        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
+        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,s_preserve)
 
         implicit none
 
@@ -10,6 +10,7 @@
         real, dimension(:,:,:), intent(in) :: u,v,lmda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2
+        logical, intent(in) :: s_preserve
 
         !real :: so(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC), &
         real :: so(NXB+2*NGUARD,NYB+2*NGUARD,1), &
@@ -306,7 +307,7 @@
            end do
         end do
 
-        s = pfl*s
+        if(.not. s_preserve) s = pfl*s
 
         err = sqrt(sum((s - so)**2)/dble(NXB-1)/dble(NYB-1))
 

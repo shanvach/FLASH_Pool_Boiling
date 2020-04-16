@@ -49,7 +49,7 @@
 
           ! use dx/2 as dt to advect level set
           sn(i,j,k) = (max(up,0.0d0)*sxmins + min(up,0.0d0)*sxplus + &
-                       max(vp,0.0d0)*symins + min(vp,0.0d0)*syplus)*pfl(i,j,k)
+                       max(vp,0.0d0)*symins + min(vp,0.0d0)*syplus)!*pfl(i,j,k)
 
            end do
         end do

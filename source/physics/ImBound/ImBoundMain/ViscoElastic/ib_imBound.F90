@@ -125,7 +125,8 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
   character(len=6) :: IndNStep
   integer :: NStep
   integer :: step
-
+ 
+  real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: lms1, lms2, lms3, lms4
 
   if(gr_meshMe .eq. MASTER_PE) print *,"Applying IB visco elastic forcing"
 
@@ -150,10 +151,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call ib_solid_stress(solnData(LMDA_VAR,:,:,:),&
                           solnData(LMDX_VAR,:,:,:),&
                           solnData(LMDY_VAR,:,:,:),&
-                          solnData(LMS1_VAR,:,:,:),&
-                          solnData(LMS2_VAR,:,:,:),&
-                          solnData(LMS3_VAR,:,:,:),&
-                          solnData(LMS4_VAR,:,:,:),&
+                          lms1, lms2, lms3, lms4, &
                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
@@ -166,19 +164,6 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   enddo
-
-  ! Guard Cell Mask
-  gcMask = .FALSE.
-
-  ! BC fill for cell center variables
-  gcMask(LMS1_VAR) = .TRUE.
-  gcMask(LMS2_VAR) = .TRUE.
-  gcMask(LMS3_VAR) = .TRUE.
-  gcMask(LMS4_VAR) = .TRUE.
-
-  ! Fill guard cells
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
   !------2: Loop through multiple blocks on a processor
   !--------------------update ustar with stress term added---------
@@ -201,10 +186,7 @@ subroutine ib_imBound( blockCount, blockList, timeEndAdv, dt)
      call ib_ustar_solid(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          solnData(XMUS_VAR,:,:,:),&
-                         solnData(LMS1_VAR,:,:,:),&
-                         solnData(LMS2_VAR,:,:,:),&
-                         solnData(LMS3_VAR,:,:,:),&
-                         solnData(LMS4_VAR,:,:,:),&
+                         lms1, lms2, lms3, lms4, &
                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&

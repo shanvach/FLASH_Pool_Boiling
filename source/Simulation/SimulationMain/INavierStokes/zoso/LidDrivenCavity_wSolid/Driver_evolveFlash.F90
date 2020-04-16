@@ -54,7 +54,7 @@ subroutine Driver_evolveFlash()
 
   use IO_data , ONLY : IO_checkpointFileIntervalStep, io_plotFileNumber, IO_plotFileIntervalTime, IO_plotFileIntervalStep
 
-  use tree, only : grid_changed
+  !use tree, only : grid_changed
 
   use IncompNS_data, only : ins_cflflg
 
@@ -88,7 +88,7 @@ subroutine Driver_evolveFlash()
 !-----------------------------------------------------------------------------------------
 
 !KPD
-if (dr_nstep .eq. 1) grid_changed = 1
+!if (dr_nstep .eq. 1) grid_changed = 1
 
 !-----------------------------------------------------------------------------------------
   endRun = .false.

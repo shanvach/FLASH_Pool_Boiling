@@ -109,6 +109,19 @@ module ib_viscoElastic_interface
         end interface
 
         interface
+        subroutine ib_fluid_props(s,rho1, rho2, xmu1, xmu2, xmus,&
+                                  rho, xmu, xms, blockID,     &
+                                  ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+          implicit none
+            real, dimension(:,:,:), intent(inout) :: s, rho, xmu, xms
+            real, intent(in)    :: rho1, rho2, xmu1, xmu2, xmus
+            real, intent(in)    :: dx,dy,dz
+            integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+            integer, intent(in) :: blockID
+        end subroutine
+        end interface
+
+        interface
         subroutine ib_solid_interface_advection(sd,sX,sY,&
                                      ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
           implicit none
@@ -119,12 +132,13 @@ module ib_viscoElastic_interface
         end interface
 
         interface
-        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2)
+        subroutine ib_advectWENO3(lmda,s,u,v,dt,dx,dy,ix1,ix2,jy1,jy2,s_preserve)
         implicit none
         real, dimension(:,:,:), intent(inout):: s
         real, dimension(:,:,:), intent(in) :: u,v,lmda
         real, intent(in) :: dt,dx,dy
         integer, intent(in) :: ix1,ix2,jy1,jy2
+        logical, intent(in) :: s_preserve
         end subroutine
         end interface
 

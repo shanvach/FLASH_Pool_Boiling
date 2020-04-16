@@ -82,7 +82,7 @@ subroutine ins_computeDtLocal(blockID,   &
   
   dtv = ins_sigma / (ins_invRe*MAX( 1.0/(dx*dx), 1.0/(dy*dy)))
 
-  dtv_h = (ins_sigma)*(ht_Pr) / (ins_invRe*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
+  dtv_h = (ins_sigma) / (ins_invRe*MAX( 1.0/(dx*dx), 1.0/(dy*dy))) ! Akash
 
 # endif
 
