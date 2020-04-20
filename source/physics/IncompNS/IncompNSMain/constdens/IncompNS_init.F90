@@ -77,6 +77,7 @@ subroutine IncompNS_init(restart)
      write(*,*) 'ins_intschm=',ins_intschm
      write(*,*) 'ins_prescoeff=',ins_prescoeff
      write(*,*) 'vel_prolong_method=',ins_prol_method
+     write(*,*) 'ins_prescoeff=',ins_prescoeff
   endif
 
   ! Read gravity acceleration components:
@@ -86,9 +87,12 @@ subroutine IncompNS_init(restart)
   ins_gravX = 0.0
   ins_gravY = 0.0
   ins_gravZ = 0.0
-  write(*,*) 'NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE'
-  write(*,*) 'Gravity is forced to be zero for iso-tropic turbulence'
-  write(*,*) 
+
+  if(ins_meshMe .eq. MASTER_PE) then
+     write(*,*) 'NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE'
+     write(*,*) 'Gravity is forced to be zero for iso-tropic turbulence'
+     write(*,*) 
+  end if
 
   ! Read pressure gradients if necessary, constant mass simulation data:
   call RuntimeParameters_get("dpdx",ins_dpdx)
