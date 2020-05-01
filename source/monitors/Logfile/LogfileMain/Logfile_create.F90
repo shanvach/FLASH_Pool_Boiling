@@ -368,7 +368,7 @@ subroutine Logfile_create ()
         call Logfile_break(" ")
 
         !write physical constants
-        call PhysicalConstants_list(log_lun)
+        !call PhysicalConstants_list(log_lun)
         call Logfile_break("=")
 
 

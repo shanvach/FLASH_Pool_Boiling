@@ -95,6 +95,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      solnData(NSRC_VAR,:,:,:) = 0.0
      solnData(NFLD_VAR,:,:,:) = 0.0
+     solnData(NSLN_VAR,:,:,:) = 0.0
      solnData(NERR_VAR,:,:,:) = 0.0
      
          
@@ -105,10 +106,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
            do i=1, blkLimitsGC(HIGH,IAXIS)
 #if NDIM == 2
              solnData(NSRC_VAR,i,j,k) = -8.00 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
-             solnData(NERR_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
+             solnData(NSLN_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j)))
 #else
              solnData(NSRC_VAR,i,j,k) = -12.0 * pi**2 * cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j))) * cos(real(2.0 * pi * zcell(k)))
-             solnData(NERR_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j))) * cos(real(2.0 * pi * zcell(k)))
+             solnData(NSLN_VAR,i,j,k) =                 cos(real(2.0 * pi * xcell(i))) * cos(real(2.0 * pi * ycell(j))) * cos(real(2.0 * pi * zcell(k)))
 #endif
            enddo
          enddo
@@ -121,10 +122,10 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
            do i=1, blkLimitsGC(HIGH,IAXIS)
 #if NDIM == 2
              solnData(NSRC_VAR,i,j,k) = -8.00 * pi**2 * sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j)))
-             solnData(NERR_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j)))
+             solnData(NSLN_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j)))
 #else
              solnData(NSRC_VAR,i,j,k) = -12.0 * pi**2 * sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j))) * sin(real(2.0 * pi * zcell(k)))
-             solnData(NERR_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j))) * sin(real(2.0 * pi * zcell(k)))
+             solnData(NSLN_VAR,i,j,k) =                 sin(real(2.0 * pi * xcell(i))) * sin(real(2.0 * pi * ycell(j))) * sin(real(2.0 * pi * zcell(k)))
 #endif
            enddo
          enddo
@@ -134,17 +135,18 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
      call Grid_solvePoisson(NFLD_VAR, NSRC_VAR, bc_types, bc_values, fact)
 
-     solnData(NERR_VAR,:,:,:) = solnData(NFLD_VAR,:,:,:) - solnData(NERR_VAR,:,:,:)
+     solnData(NERR_VAR,:,:,:) = solnData(NFLD_VAR,:,:,:) - solnData(NSLN_VAR,:,:,:)
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
 
    end do
 
-  gcMask = .FALSE.
-  gcMask(NFLD_VAR)=.TRUE.
-  gcMask(NERR_VAR)=.TRUE.
-  call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+  !gcMask = .FALSE.
+  !gcMask(NFLD_VAR)=.TRUE.
+  !gcMask(NSLN_VAR)=.TRUE.
+  !gcMask(NERR_VAR)=.TRUE.
+  !call Grid_fillGuardCells(CENTER,ALLDIR,&
+  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 
 
 end subroutine Heat_AD

@@ -146,8 +146,8 @@ subroutine Grid_writeDomain()
 #if NDIM == 3
       do k=2, NZB
         do j=2, NYB
-          gCoords(IAXIS,:,:,:,j,k,1) = gCoords(IAXIS,CENTER,:,:,j-1,k-1,1)
-          gMetrics(IAXIS,:,:,:,j,k,1) = gMetrics(IAXIS,CENTER,:,:,j-1,k-1,1)
+          gCoords(IAXIS,:,:,:,j,k,1) = gCoords(IAXIS,:,:,:,j-1,k-1,1)
+          gMetrics(IAXIS,:,:,:,j,k,1) = gMetrics(IAXIS,:,:,:,j-1,k-1,1)
         end do
         do i=2, NXB
           gCoords(JAXIS,:,:,i,:,k,1) = gCoords(JAXIS,:,:,i-1,:,k-1,1)

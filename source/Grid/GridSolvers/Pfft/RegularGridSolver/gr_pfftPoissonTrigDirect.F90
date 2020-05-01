@@ -310,7 +310,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
       CN(1:N) = 1.0 / gr_jMetricsGlb(CENTER,1:N,1)
 
       ! apply boundary conditions y-axis
-      select case (transformType(KAXIS))
+      select case (transformType(JAXIS))
       case (PFFT_COS_CC)
         if (pfft_myPE == 0) write(*,*) '3d pfft solver using JAXIS neumann coefficents'
         BN(1) = gr_jMetricsGlb(RIGHT_EDGE,1,1)
@@ -381,6 +381,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! --------------------------------------------------------------------------------------------------------!
     ! Solve 1d transform and 1d tridiagonal ------------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
+
+    write(*,*) pfft_comm
 
     ! dimensions
     L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
