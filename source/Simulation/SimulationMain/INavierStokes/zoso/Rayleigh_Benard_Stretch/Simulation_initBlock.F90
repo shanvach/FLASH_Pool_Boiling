@@ -40,7 +40,7 @@ subroutine Simulation_initBlock(blockId)
 
   use Driver_Interface, only : Driver_abortFlash
 
-  use Driver_Data, Only     : dr_simTime
+  use Driver_Data, Only     : dr_simTime, dr_meshMe
 
   use HDF5
 
@@ -53,11 +53,8 @@ subroutine Simulation_initBlock(blockId)
  
   real, pointer, dimension(:,:,:,:) :: solnData, facexData, faceyData, facezData
   
-  integer :: i, j, k
+  integer :: i, j, k, nxb, nyb, nzb
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
-  integer, dimension(MDIM)   :: blkIndSize, blkIndSizeGC
-  real, dimension(MDIM)      :: coord, bsize
-  real, dimension(2,MDIM)    :: boundBox
   real                       :: pi
   real, dimension(GRID_IHI_GC) :: dx
   real, dimension(GRID_JHI_GC) :: dy
@@ -78,38 +75,9 @@ subroutine Simulation_initBlock(blockId)
   integer(HID_T) :: file_id, dset_id, dataspace, memspace
   integer(HSIZE_T), dimension(4) :: data_dims
   integer(HSIZE_T), dimension(4) :: count, offset, stride, block 
+  real, allocatable, dimension(:,:,:,:) :: sdata
   character(len = 32) :: filename, dsetname
-  integer, dimension(10,8,1,1) :: sdata
 
-  rank = 4 
-  count  = (/ 1, 1, 1, 1 /)
-  offset = (/ 0, 0, 0, 1 /)
-  stride = (/ 1, 1, 1, 1 /)
-  block  = (/10, 8, 1, 1 /)
-
-  ! open fortran hdf5 interface
-  call h5open_f(error)
-
-  filename = "dsetf_4d.h5"
-  call h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, error)
-  if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
-
-  dsetname  = "/dset"
-  data_dims = (/ 10, 8, 1, 1 /)
-  call h5dopen_f(file_id, dsetname, dset_id, error)
-  call h5dget_space_f(dset_id, dataspace, error)
-  call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
-  call h5screate_simple_f(rank, data_dims, memspace, error)
-  call h5dread_f(dset_id, H5T_NATIVE_INTEGER, sdata, data_dims, error, memspace, dataspace) 
-  call h5dclose_f(dset_id, error)
-
-  call h5fclose_f(file_id, error)
-
-  call h5close_f(error)
-
-  do j=1, 8
-    print *, sdata(:,j,1,1)
-  end do 
 
   ! Point to Blocks centered variables:
   call Grid_getBlkPtr(blockID, solnData, CENTER)
@@ -139,10 +107,161 @@ subroutine Simulation_initBlock(blockId)
   select case (sim_init)
 
 
-
-    
-    ! Rayleigh Benard flow (Cold on Hot)
+    ! Read initial conditions from file
     case (0)
+
+      ! common parameters for hyperslab
+      rank = 4
+      count  = (/ 1, 1, 1, 1 /)
+      offset = (/ 0, 0, 0, dr_meshMe /)
+      stride = (/ 1, 1, 1, 1 /)
+
+      ! initialize fortran hdf5 interface
+      call h5open_f(error)
+
+      ! open hdf5 file
+      filename = "initBlock.h5"
+      call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, error)
+      if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
+
+
+      !!!! read in IAXIS velocity data
+      ! prepare parameters
+      dsetname  = "/velx"
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, FACEX)
+      nxb = blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) +1
+      nyb = blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) +1
+      nzb = blkLimits(HIGH,KAXIS) - blkLimits(LOW,KAXIS) +1
+      data_dims = (/ nxb, nyb, nzb, 1 /)
+      block     = (/ nxb, nyb, nzb, 1 /)
+      allocate(sdata(nxb, nyb, nzb, 1))
+
+      ! read file
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+
+      ! initialize velocity
+      facexData(VELC_FACE_VAR,:,:,:) = 0.0  
+      facexData(VELC_FACE_VAR, blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), & 
+                               blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS), & 
+                               blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) & 
+                               = sdata(:,:,:,1) 
+      deallocate(sdata)
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      
+      !!!! read in JAXIS velocity data
+      ! prepare parameters
+      dsetname  = "/vely"
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, FACEY)
+      nxb = blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) +1
+      nyb = blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) +1
+      nzb = blkLimits(HIGH,KAXIS) - blkLimits(LOW,KAXIS) +1
+      data_dims = (/ nxb, nyb, nzb, 1 /)
+      block     = (/ nxb, nyb, nzb, 1 /)
+      allocate(sdata(nxb, nyb, nzb, 1))
+
+      ! read file
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+
+      ! initialize velocity
+      faceyData(VELC_FACE_VAR,:,:,:) = 0.0  
+      faceyData(VELC_FACE_VAR, blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), & 
+                               blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS), & 
+                               blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) & 
+                               = sdata(:,:,:,1) 
+      deallocate(sdata)
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#if NDIM == 3
+      !!!! read in KAXIS velocity data
+      ! prepare parameters
+      dsetname  = "/velz"
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, FACEZ)
+      nxb = blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) +1
+      nyb = blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) +1
+      nzb = blkLimits(HIGH,KAXIS) - blkLimits(LOW,KAXIS) +1
+      data_dims = (/ nxb, nyb, nzb, 1 /)
+      block     = (/ nxb, nyb, nzb, 1 /)
+      allocate(sdata(nxb, nyb, nzb, 1))
+
+      ! read file
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+
+      ! initialize velocity
+      facezData(VELC_FACE_VAR,:,:,:) = 0.0  
+      facezData(VELC_FACE_VAR, blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), & 
+                               blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS), & 
+                               blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) & 
+                               = sdata(:,:,:,1) 
+      deallocate(sdata)
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#endif
+
+      !!!! read in temperature data
+      ! prepare parameters
+      dsetname  = "/temp"
+      call Grid_getBlkIndexLimits(blockId, blkLimits, blkLimitsGC, CENTER)
+      nxb = blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) +1
+      nyb = blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) +1
+      nzb = blkLimits(HIGH,KAXIS) - blkLimits(LOW,KAXIS) +1
+      data_dims = (/ nxb, nyb, nzb, 1 /)
+      block     = (/ nxb, nyb, nzb, 1 /)
+      allocate(sdata(nxb, nyb, nzb, 1))
+
+      ! read file
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+
+      ! initialize velocity
+      solnData(TEMP_VAR,:,:,:) = 0.0  
+      solnData(TEMP_VAR, blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS), & 
+                         blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS), & 
+                         blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) & 
+                         = sdata(:,:,:,1) 
+      deallocate(sdata)
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+      ! close hdf5 file 
+      call h5fclose_f(file_id, error)
+
+      ! close hdf5 fortran interface
+      call h5close_f(error)
+
+      ! initialize remaining unknowns   
+      solnData(PRES_VAR,:,:,:) = 0.0
+      solnData(DELP_VAR,:,:,:) = 0.0
+      solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(TVIS_VAR,:,:,:) = 0.0
+      facexData(RHDS_FACE_VAR,:,:,:) = 0.0
+      faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
+#if NDIM == 3
+      facezData(RHDS_FACE_VAR,:,:,:) = 0.0
+#endif
+
+
+ 
+    ! Rayleigh Benard flow (Cold on Hot)
+    case (1)
 
       solnData(PRES_VAR,:,:,:) = 0.0
       solnData(DELP_VAR,:,:,:) = 0.0
@@ -187,7 +306,7 @@ subroutine Simulation_initBlock(blockId)
 
 
     ! Rayleigh Benard flow (blank)
-    case (1)
+    case (5)
 
       solnData(PRES_VAR,:,:,:) = 0.0
       solnData(DELP_VAR,:,:,:) = 0.0
