@@ -38,7 +38,11 @@ subroutine Simulation_initBlock(blockId)
                               Grid_getBlkCenterCoords, Grid_getBlkBoundBox, &
                               Grid_getBlkPtr, Grid_releaseBlkPtr
 
+  use Driver_Interface, only : Driver_abortFlash
+
   use Driver_Data, Only     : dr_simTime
+
+  use HDF5
 
   implicit none
 
@@ -68,6 +72,43 @@ subroutine Simulation_initBlock(blockId)
           xCnt, xWth, yCnt, yWth,                   &
           xSrcPol, xSrcSin, ySrcPol, ySrcSin
   integer, parameter :: seed = 86456
+
+  ! locals necessary to read hdf5 file
+  integer :: error, rank
+  integer(HID_T) :: file_id, dset_id, dataspace, memspace
+  integer(HSIZE_T), dimension(1:2) :: dimsm, data_dims
+  integer(HSIZE_T), DIMENSION(1:2) :: count, offset, stride, block 
+  character(len = 32) :: filename, dsetname
+  integer, dimension(1:4,1:3) :: sdata
+
+  rank = 2
+  count  = (/ 4, 3 /)
+  offset = (/ 2, 1 /)
+  stride = (/ 1, 1 /)
+  block  = (/ 1, 1 /)
+
+  ! open fortran hdf5 interface
+  call h5open_f(error)
+
+  filename = "dsetf.h5"
+  call h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, error)
+  if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
+
+  dsetname  = "/dset"
+  data_dims = (/ 4, 3 /)
+  dimsm     = (/ 4, 3 /)
+  call h5dopen_f(file_id, dsetname, dset_id, error)
+  call h5dget_space_f(dset_id, dataspace, error)
+  call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+  call h5screate_simple_f(rank, dimsm, memspace, error)
+  call h5dread_f(dset_id, H5T_NATIVE_INTEGER, sdata, data_dims, error, memspace, dataspace) 
+  call h5dclose_f(dset_id, error)
+
+  call h5fclose_f(file_id, error)
+
+  call h5close_f(error)
+
+  print *, sdata
 
   ! Point to Blocks centered variables:
   call Grid_getBlkPtr(blockID, solnData, CENTER)
