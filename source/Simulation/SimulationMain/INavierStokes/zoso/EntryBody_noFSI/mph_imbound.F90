@@ -1,7 +1,7 @@
 subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
-#define CONTACT_LINE_PINNING
-!#define CONTACT_ANGLE
+!#define CONTACT_LINE_PINNING
+#define CONTACT_ANGLE
 
 #include "Flash.h"
 
@@ -118,7 +118,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   real :: ybase, free_surface_loc, base_radius, this_radius
 
-  ybase = 0.0 - 1.0*dr_simTime
+  ybase = 0.5 - 1.0*dr_simTime
   base_radius = 0.5
   free_surface_loc = -2.0
 
@@ -243,7 +243,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
 #ifdef CONTACT_ANGLE
-           dphidn = cos(90.0*acos(-1.0)/180)
+           dphidn = cos(80.0*acos(-1.0)/180)
            !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
 
            solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn

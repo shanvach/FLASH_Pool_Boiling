@@ -24,7 +24,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
   use Grid_data,ONLY : gr_imin,gr_jmin,gr_kmin
 
-  use IncompNS_data, ONLY : ins_gravX,ins_gravY,ins_gravZ
+  use IncompNS_data, ONLY : ins_meshMe,ins_gravX,ins_gravY,ins_gravZ
 
 ! Added for multiphase -- EG --
   use Multiphase_data, only: mph_rho1,mph_rho2,mph_vis1,mph_vis2
@@ -409,7 +409,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
                ddpdxdx = ddpdxdx + phile(i,1)*(imp(3,2,2)-2.*imp(2,2,2)+imp(1,2,2))/(dx*dx)
                ddpdydy = ddpdydy + phile(i,1)*(imp(2,3,2)-2.*imp(2,2,2)+imp(2,1,2))/(dy*dy)
                ddpdxdy = ddpdxdy + phile(i,1)*(imp(3,3,2)-imp(3,1,2)-imp(1,3,2)+imp(1,1,2))/(4.*dx*dy)
-
+! PRINT PRESSURE HERE
 #if NDIM == MDIM
 !              imp(1,1,1) = solnData(PRES_VAR,ielem(i,IAXIS,presflag+1)-1, &
 !                                          ielem(i,JAXIS,presflag+1)-1, &
@@ -1452,6 +1452,14 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   ! In Y dir: wy = du/dz - dw/dx
   zv(3) = dudz - dwdx
 
+  ! PRINT STATEMENTS HERE
+    if (gr_meshMe .eq. 0) print*,"----------------------------------------"
+    if (gr_meshMe .eq. 0) print*,"F_vis x  = ",FXVI_PART_PROP
+    if (gr_meshMe .eq. 0) print*,"F_vis y  = ",FYVI_PART_PROP
+    if (gr_meshMe .eq. 0) print*,"F_vis z  = ",FZVI_PART_PROP
+    if (gr_meshMe .eq. 0) print*,"Pressure = ",PRES_PART_PROP
+    if (gr_meshMe .eq. 0) print*,"----------------------------------------"
+    !endif
 
 #endif
 #endif
