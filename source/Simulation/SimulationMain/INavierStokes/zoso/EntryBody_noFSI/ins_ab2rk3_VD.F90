@@ -594,7 +594,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
   ! Force Immersed Boundaries:
-  call ImBound( blockCount, blockList, ins_alfa*dt,FORCE_FLOW)
+  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
   CALL SYSTEM_CLOCK(TAIB(2),count_rateIB)
   ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
