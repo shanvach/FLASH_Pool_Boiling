@@ -85,7 +85,9 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
 
   call Logfile_stamp( 'After Forcing' , '[ImBound]')
 
-  case(COMPUTE_FORCES)
+!  Commented out for the case of a moving body in which you also want to 
+!  compute the forces on the body, by Elizabeth Gregorio -- EG --
+!  case(COMPUTE_FORCES)
 
   call gr_sbDistributedForces()
 
