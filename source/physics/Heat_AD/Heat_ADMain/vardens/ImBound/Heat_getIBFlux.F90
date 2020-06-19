@@ -41,7 +41,8 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
   use Heat_AD_interface, only: Heat_GFMstencil_o1
 
   use Heat_AD_data, only: ht_hflux_flag, ht_hflux_counter, &
-                          ht_ibx, ht_iby, ht_ibz, ht_ibT, ht_ibNu
+                          ht_ibx, ht_iby, ht_ibz, ht_ibT, ht_ibNu, &
+                          ht_ibhflux_counter, ht_ibNu_t, ht_ibNu_l
  
   use Simulation_data, only: sim_xMin, sim_xMax, sim_yMin, sim_yMax
  
@@ -129,7 +130,11 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
   integer :: hflux_counter
 
-  real :: h2,h3
+  real :: h2,h3, hflux_buffer
+
+hflux_buffer = 1.0
+
+#define AROUND_INTERFACE 1
 
   thco3 = 10*mph_thco2 
 
@@ -172,12 +177,31 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
 
 #if NDIM == 2
+#if AROUND_INTERFACE == 1
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) &
+               ht_hflux_counter = ht_hflux_counter + 1
+#else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
                solnData(LMDA_VAR,i,j,k) .ge. 0.0) ht_hflux_counter = ht_hflux_counter + 1
+#endif
 
+#else
+#if AROUND_INTERFACE == 1
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) &
+               ht_hflux_counter = ht_hflux_counter + 1
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
@@ -187,7 +211,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
                solnData(LMDA_VAR,i,j,k) .ge. 0.0) ht_hflux_counter = ht_hflux_counter + 1
 #endif
-
+#endif
            end do
         end do
 #if NDIM == 3
@@ -252,12 +276,29 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 #endif
          
 #if NDIM == 2
+#if AROUND_INTERFACE == 1
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) then
+#else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
                solnData(LMDA_VAR,i,j,k) .ge. 0.0) then
+#endif
 
+#else
+#if AROUND_INTERFACE == 1
+           if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
+               solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
+               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) then
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
@@ -266,6 +307,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
                solnData(LMDA_VAR,i,j,k) .ge. 0.0) then
+#endif
 #endif
 
            ! Get probe in fluid
@@ -399,5 +441,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
   end do
- 
+
+  ht_ibNu_t = sum(ht_ibNu)
+
 end subroutine Heat_getIBFlux

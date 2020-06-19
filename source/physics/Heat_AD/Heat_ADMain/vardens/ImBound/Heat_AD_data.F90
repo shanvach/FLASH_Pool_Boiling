@@ -38,7 +38,9 @@ module Heat_AD_data
 
      real, allocatable, save :: ht_ibx(:), ht_iby(:), ht_ibz(:), ht_ibT(:), ht_ibNu(:)
 
-     integer, save :: ht_hflux_counter
+     real :: ht_ibNu_t, ht_ibNu_l
+
+     integer, save :: ht_hflux_counter, ht_ibhflux_counter
 
      logical, save :: ht_hflux_flag
 
