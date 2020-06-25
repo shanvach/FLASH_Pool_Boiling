@@ -134,7 +134,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 hflux_buffer = 1.0
 
-#define AROUND_INTERFACE 1
+#define AROUND_INTERFACE 0
 
   thco3 = 10*mph_thco2 
 
