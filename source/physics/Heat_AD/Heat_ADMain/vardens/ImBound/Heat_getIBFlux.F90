@@ -134,7 +134,7 @@ subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
 hflux_buffer = 1.0
 
-#define AROUND_INTERFACE 0
+#define FLUID_SIDE 1
 
   thco3 = 10*mph_thco2 
 
@@ -177,12 +177,12 @@ hflux_buffer = 1.0
 #endif
 
 #if NDIM == 2
-#if AROUND_INTERFACE == 1
+#if FLUID_SIDE == 1
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
-               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) &
+               solnData(LMDA_VAR,i,j,k) .lt. 0.0) &
                ht_hflux_counter = ht_hflux_counter + 1
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
@@ -193,14 +193,14 @@ hflux_buffer = 1.0
 #endif
 
 #else
-#if AROUND_INTERFACE == 1
+#if FLUID_SIDE == 1
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
-               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) &
+               solnData(LMDA_VAR,i,j,k) .lt. 0.0) &
                ht_hflux_counter = ht_hflux_counter + 1
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
@@ -276,12 +276,12 @@ hflux_buffer = 1.0
 #endif
          
 #if NDIM == 2
-#if AROUND_INTERFACE == 1
+#if FLUID_SIDE == 1
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 ) .and. &
-               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) then
+               solnData(LMDA_VAR,i,j,k) .lt. 0.0) then
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
@@ -291,14 +291,14 @@ hflux_buffer = 1.0
 #endif
 
 #else
-#if AROUND_INTERFACE == 1
+#if FLUID_SIDE == 1
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j+1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k+1) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j,k-1) .le. 0.0 ) .and. & 
-               solnData(LMDA_VAR,i,j,k) .ge. 0.0 .and. abs(solnData(DFUN_VAR,i,j,k)) .le. hflux_buffer) then
+               solnData(LMDA_VAR,i,j,k) .lt. 0.0) then
 #else
            if((solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i+1,j,k) .le. 0.0 .or.  &
                solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0 .or.  &
@@ -404,7 +404,11 @@ hflux_buffer = 1.0
         
            thcoE = ((solnData(LMDA_VAR,i,j,k)+hnorm(2))*thcoC*thcoP)/(thcoP*solnData(LMDA_VAR,i,j,k) + thcoC*hnorm(2))
 
+#if FLUID_SIDE == 1
+           hratio = thcoE
+#else
            hratio = thcoE/thcoP
+#endif
 
            ht_ibx(hflux_counter)  = xprobe(1)
            ht_iby(hflux_counter)  = yprobe(1)
