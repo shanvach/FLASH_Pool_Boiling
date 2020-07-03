@@ -22,11 +22,11 @@ isgs            = 0
 
 # Densities
 rho1 = 1.0
-rho2 = 1000.0
+rho2 = 816.0
 
-# Viscosities
+# # Viscosities
 vis1 = 1.0
-vis2 = 100.0
+vis2 = 49.0
 
 # Gravity in the +y direction
 gravX =  0.0
@@ -54,8 +54,8 @@ geometry	= "cartesian"
 #       Size of computational volume
 xmin =   -5.0
 xmax =    5.0
-ymin =  -10.0
-ymax =    5.0
+ymin =   -12.0
+ymax =    3.0
 
 #       Boundary conditions
 xl_boundary_type = "noslip_ins"
