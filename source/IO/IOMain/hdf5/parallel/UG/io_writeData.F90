@@ -432,7 +432,7 @@ subroutine io_writeData(fileID)
 
 #if (NFACE_VARS>0)
 
-    if (io_doublePrecision) then
+    if (io_doublePrecision .or. .true.) then
       allocate(faceXBuf(1,NXB+1,NYB,NZB,1))
       if(NDIM .gt. 1) allocate(faceYBuf(1,NXB,NYB+1,NZB,1))
       if(NDIM .gt. 2) allocate(faceZBuf(1, NXB,NYB,NZB+1,1))
