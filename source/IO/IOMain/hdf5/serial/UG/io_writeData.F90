@@ -653,7 +653,7 @@ subroutine io_writeData (fileID)
 #if(NFACE_VARS > 0) 
 
            
-           if(io_doublePrecision) then
+           if(io_doublePrecision .or. .true.) then
               
               call io_h5write_unknowns(io_globalMe, &
                    fileID, &

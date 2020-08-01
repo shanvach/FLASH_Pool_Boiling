@@ -120,8 +120,8 @@ subroutine Driver_evolveFlash()
   end if
 
   firstfileflag = 0
-  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                    0.0,blockList,blockCount,firstfileflag)
+!  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
+!                    0.0,blockList,blockCount,firstfileflag)
   ! Write to Bodies to Tecplot:
   !call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
   !call sm_outputBeam('beam_', count)
@@ -231,8 +231,8 @@ subroutine Driver_evolveFlash()
      if (tecplot_flg) then
         ! Write to Grid to Tecplot:
         count = count + 1
-        call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                          0.0,blockList,blockCount,firstfileflag)
+!        call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
+!                          0.0,blockList,blockCount,firstfileflag)
 
 !        call outtotecplot_uv(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
 !                          0.0,blockList,blockCount,firstfileflag)

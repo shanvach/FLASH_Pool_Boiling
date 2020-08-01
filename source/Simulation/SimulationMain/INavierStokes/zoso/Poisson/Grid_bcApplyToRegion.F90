@@ -202,6 +202,61 @@ subroutine Grid_bcApplyToRegion(bcType,gridDataStruct,&
   integer,intent(IN),dimension(LOW:HIGH,MDIM) :: endPoints, blkLimitsGC
   integer,intent(IN),OPTIONAL:: idest
 
+  integer :: i,j, k,ivar,je,ke,n,varCount,bcTypeActual
+  logical :: isFace
+
+
   applied = .true.
+
+  je=regionSize(SECOND_DIR)
+  ke=regionSize(THIRD_DIR)
+  varCount=regionSize(STRUCTSIZE)
+
+  do ivar = 1,varCount
+     if(mask(ivar)) then
+        call gr_bcMapBcType(bcTypeActual,bcType,ivar,gridDataStruct,axis,face,idest)
+
+        if(face==LOW) then
+           select case (bcTypeActual)
+
+           case(DIRICHLET)
+             do i = 1,guard
+               regionData(guard+1-i,1:je,1:ke,ivar)= (1-2*i)*regionData(guard+1,1:je,1:ke,ivar)
+             end do
+
+           case(NEUMANN_INS)  ! Neumann BC
+             write(*,*) "NEUMANN BCs APPLIED"
+             k = 2*guard+1
+             do i = 1,guard
+               regionData(i,1:je,1:ke,ivar)= regionData(k-i,1:je,1:ke,ivar)
+             end do
+
+           end select
+
+
+        else  !(face==HIGH)
+           select case (bcTypeActual)
+
+           case(DIRICHLET)
+              k=guard
+              do i = 1,guard
+                 regionData(k+i,1:je,1:ke,ivar)= (1-2*i)*regionData(k,1:je,1:ke,ivar)
+              end do
+
+           case(NEUMANN_INS)  ! Neumann BC
+             k = 2*guard+1
+             do i = 1,guard
+               regionData(k-i,1:je,1:ke,ivar)= regionData(i,1:je,1:ke,ivar)
+             end do
+
+           end select
+
+        end if
+
+     end if
+
+  end do
+
+
   return
 end subroutine Grid_bcApplyToRegion
