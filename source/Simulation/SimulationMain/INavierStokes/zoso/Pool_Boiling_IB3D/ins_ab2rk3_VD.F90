@@ -542,29 +542,29 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
      faceyData(RHDS_FACE_VAR,:,:,:) = newv(:,:,:)
 
 
-    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
-             if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
-        end do
-     end do
-    end do
+    !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+    ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+    !    do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
+    !         if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+    !    end do
+    ! end do
+    !end do
 
-    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-             if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-        end do
-     end do
-    end do
+    !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+    ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
+    !    do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+    !         if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
+    !    end do
+    ! end do
+    !end do
 
-    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)+1
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-             if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j,k-1)) .ge. 0.0) facezData(VELC_FACE_VAR,i,j,k) = 0.0
-        end do
-     end do
-    end do
+    !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)+1
+    ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+    !    do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+    !         if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j,k-1)) .ge. 0.0) facezData(VELC_FACE_VAR,i,j,k) = 0.0
+    !    end do
+    ! end do
+    !end do
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -639,62 +639,62 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 !*************************************************************************************************
 !*************************************************************************************************
 
-  do lb = 1,blockCount
-     blockID = blockList(lb)
+  !do lb = 1,blockCount
+     !blockID = blockList(lb)
 
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
+     !! Get blocks dx, dy ,dz:
+     !call Grid_getDeltas(blockID,del)
+     !
+     !! Get Blocks internal limits indexes:
+     !call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
 
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
+     !! Point to blocks center and face vars:
+     !call Grid_getBlkPtr(blockID,solnData,CENTER)
+     !call Grid_getBlkPtr(blockID,facexData,FACEX)
+     !call Grid_getBlkPtr(blockID,faceyData,FACEY)
+     !call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+    !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+    ! do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+    !    do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
+    !         facexData(VELC_FACE_VAR,i,j,k) = facexData(VELC_FACE_VAR,i,j,k) + dt* facexData(POLD_FACE_VAR,i,j,k)
+    !    end do
+    ! end do
+    !end do
 
-    do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
-             facexData(VELC_FACE_VAR,i,j,k) = facexData(VELC_FACE_VAR,i,j,k) + dt* facexData(POLD_FACE_VAR,i,j,k)
-        end do
-     end do
-    end do
-
-   do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-             faceyData(VELC_FACE_VAR,i,j,k) = faceyData(VELC_FACE_VAR,i,j,k) + dt* faceyData(POLD_FACE_VAR,i,j,k)
-        end do
-     end do
-  end do
+   !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+   !  do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
+   !     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+   !          faceyData(VELC_FACE_VAR,i,j,k) = faceyData(VELC_FACE_VAR,i,j,k) + dt* faceyData(POLD_FACE_VAR,i,j,k)
+   !     end do
+   !  end do
+   !end do
  
-  do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)+1
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-             facezData(VELC_FACE_VAR,i,j,k) = facezData(VELC_FACE_VAR,i,j,k) + dt* facezData(POLD_FACE_VAR,i,j,k)
-        end do
-     end do
-  end do
-      
-     ! Release pointers:
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+   !do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)+1
+   !   do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+   !     do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+   !          facezData(VELC_FACE_VAR,i,j,k) = facezData(VELC_FACE_VAR,i,j,k) + dt* facezData(POLD_FACE_VAR,i,j,k)
+   !     end do
+   !  end do
+   !end do
+   !   
+   !  ! Release pointers:
+   !  call Grid_releaseBlkPtr(blockID,solnData,CENTER)
+   !  call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+   !  call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+   !  call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
 
-  end do
+  !end do
 
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
-  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
-#endif
-  ins_predcorrflg = .false.
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+  !gcMask = .FALSE.
+  !gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
+  !gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
+!#if NDIM == 3
+!  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
+!#endif
+  !!ins_predcorrflg = .false.
+  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
 
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----

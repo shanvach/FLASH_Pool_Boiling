@@ -6,6 +6,8 @@
 !#define FREE_SURFACE_TREATMENT
 !#define free_surface_loc -2.0
 
+#define IB_JUMPS
+
         subroutine mph_KPDcurvature2DAB(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,blockID)
 
@@ -271,13 +273,15 @@
 !=========================================================================
 !=========================================================================
 
-        subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
+        subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,pres,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+
+        use IncompNS_data, only : ins_gravX, ins_gravY, ins_gravZ
 
         implicit none
 
@@ -292,8 +296,7 @@
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                               rho2y,pf,w,sigx,sigy,lambda
-
+                                               rho2y,pf,w,sigx,sigy,lambda,pres
         integer, intent(in) :: blockID
 
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
@@ -314,7 +317,7 @@
 
         real :: xcell,ycell
 
-        real :: rhob
+        real :: rhob, bb
 !--------------------------------------------
 !----------------jump conditions ------------
 !--------------------------------------------
@@ -355,10 +358,10 @@
 
         rhob = rho1 !(rho1 + rho2)/2.
 
-#ifdef THREE_PHASE_TREATMENT
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
+#ifdef THREE_PHASE_TREATMENT
         do j = jy1-1,jy2
            do i = ix1-1,ix2
 
@@ -560,7 +563,7 @@
                  w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx           !- kpd - sigma*K/rho/dx 
+                 sigx(i+1,j,k) = sigx(i+1,j,k) - xij/aa/dx           !- kpd - sigma*K/rho/dx 
          
                  else
 
@@ -603,7 +606,7 @@
                  w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) + xij/aa/dx
 
 !print*,"Jump X2",i,j,th,aa,rho1x(i+1,j,k)+rho2x(i+1,j,k),xij,"-->",w(i,j,k),w(i+1,j,k),sigx(i+1,j,k)
 
@@ -650,7 +653,7 @@
                  w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) - yij/aa/dy
 
 !print*,"Jump Y1",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
 
@@ -695,7 +698,7 @@
                  w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy  
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) + yij/aa/dy
 
 !print*,"Jump Y2",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
 
@@ -737,6 +740,54 @@
 !              print*,"Second Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
 !           end do
 !        end do
+
+
+#ifdef IB_JUMPS
+        do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+
+                    bb = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))              
+ 
+                    w(i,j,k)      = w(i,j,k)   + (pres(i+1,j,k) - pres(i,j,k))/bb/dx**2 - ins_gravX/dx
+                    w(i+1,j,k)    = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/bb/dx**2 + ins_gravX/dx
+                    sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/bb/dx - ins_gravX
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+
+                    bb = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i+1,j,k) - pres(i,j,k))/bb/dx**2 - ins_gravX/dx
+                    w(i+1,j,k)    = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/bb/dx**2 + ins_gravX/dx
+                    sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/bb/dx - ins_gravX
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+
+                    bb = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/bb/dy**2 - ins_gravY/dy
+                    w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/bb/dy**2 + ins_gravY/dy
+                    sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/bb/dy - ins_gravY
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+
+                    bb = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/bb/dy**2 - ins_gravY/dy
+                    w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/bb/dy**2 + ins_gravY/dy
+                    sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/bb/dy - ins_gravY
+                end if
+
+          end do
+        end do
+#endif
 
 
       end subroutine mph_KPDcurvature2DC

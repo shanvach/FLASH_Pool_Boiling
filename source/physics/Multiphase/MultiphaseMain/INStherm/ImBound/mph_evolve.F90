@@ -288,7 +288,7 @@ if(mph_flag == 1) then
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
- 
+
 !************************************************************************************************************
 !************************************************************************************************************
 
@@ -479,6 +479,7 @@ else if(mph_flag == 0) then
                           faceyData(RH1F_FACE_VAR,:,:,:), &
                           faceyData(RH2F_FACE_VAR,:,:,:), &
                           solnData(PFUN_VAR,:,:,:), &
+                          solnData(PRES_VAR,:,:,:), &
                           solnData(SIGP_VAR,:,:,:), &
                           facexData(SIGM_FACE_VAR,:,:,:), &
                           faceyData(SIGM_FACE_VAR,:,:,:), &
@@ -504,6 +505,7 @@ else if(mph_flag == 0) then
                            faceyData(RH1F_FACE_VAR,:,:,:)   , &
                            faceyData(RH2F_FACE_VAR,:,:,:)   , &
                            solnData(PFUN_VAR,:,:,:)         , &
+                           solnData(PRES_VAR,:,:,:)         , &
                            solnData(SIGP_VAR,:,:,:)         , &
                            facexData(SIGM_FACE_VAR,:,:,:)   , &
                            faceyData(SIGM_FACE_VAR,:,:,:)   , &

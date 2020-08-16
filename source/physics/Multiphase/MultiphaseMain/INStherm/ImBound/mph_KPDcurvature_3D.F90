@@ -334,7 +334,7 @@
 
 
         subroutine mph_KPDcurvature3DC(s,crv,rho1x,rho2x,rho1y,rho2y, &
-                                       pf,w,sigx,sigy,dx,dy,          &
+                                       pf,pres,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
                                        rho2z,sigz,mdot,tmic,temp,lambda,blockID)
@@ -345,6 +345,8 @@
         use Multiphase_data, ONLY : mph_baseCount
 
         use Heat_AD_data, only: ht_fmic
+
+        use IncompNS_data, only: ins_gravX, ins_gravY, ins_gravZ
 
         implicit none
 
@@ -358,7 +360,7 @@
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda
+        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda,pres
 
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
@@ -379,6 +381,7 @@
         real :: yit, cmi, mi
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: rho3, rhof
+        real :: cc
 
         sigx = 0.
         sigy = 0.
@@ -396,109 +399,6 @@
         call Grid_getBlkBoundBox(blockId,boundBox)
 
         bsize(:) = boundBox(2,:) - boundBox(1,:)
-
-        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
-        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
-        (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
-
-        rho3 = rho2 !(rho1 + rho2)/2.0
-
-        do k = kz1-1,kz2
-         do j = jy1-1,jy2
-           do i = ix1-1,ix2
-
-                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
-                    th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
-
-                    if(pf(i,j,k) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
-                end if
-                !
-                !
-                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
-                    th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
-
-                    if(pf(i+1,j,k) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
-                end if
-                !
-                ! 
-                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
-                    th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
-
-                    if(pf(i,j,k) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
-                end if
-                !
-                !
-                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
-                    th = abs(lambda(i,j,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
-
-                    if(pf(i,j+1,k) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
-                end if 
-                !
-                ! 
-                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j,k+1) .eq. 1.0) then
-                    th = abs(lambda(i,j,k+1))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
-
-                    if(pf(i,j,k) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
-                end if
-                !
-                !
-                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j,k+1) .eq. 0.0) then
-                    th = abs(lambda(i,j,k))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
-
-                    if(pf(i,j,k+1) .eq. 0.0) then
-                        rhof = rho2
-                    else
-                        rhof = rho1
-                    end if
-
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
-
-                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
-                end if 
-
-           end do
-         end do
-        end do
 
         do k = kz1-1,kz2
            do j = jy1-1,jy2
@@ -545,7 +445,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx + mT/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) - xij/aa/dx + mT/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -589,7 +489,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx - mT/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) + xij/aa/dx - mT/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -634,7 +534,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy + mT/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) - yij/aa/dy + mT/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -676,7 +576,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy - mT/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) + yij/aa/dy - mT/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -721,7 +621,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = - zij/aa/dz + mT/aa/dz
+                 sigz(i,j,k+1) = sigz(i,j,k+1) - zij/aa/dz + mT/aa/dz
 
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
@@ -763,7 +663,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = zij/aa/dz - mT/aa/dz
+                 sigz(i,j,k+1) = sigz(i,j,k+1) + zij/aa/dz - mT/aa/dz
 
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1
@@ -778,6 +678,146 @@
         end do
 
         !crv = crv*icrv
+
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
+        (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
+
+        rho3 = rho2 !(rho1 + rho2)/2.0
+
+        do k = kz1-1,kz2
+         do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+                    th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
+
+                    w(i,j,k)   = w(i,j,k) + (pres(i+1,j,k) - pres(i,j,k))/cc/dx**2 - ins_gravX/dy
+                    w(i+1,j,k) = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/cc/dx**2 + ins_gravX/dy
+                    sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/cc/dx - ins_gravX
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i+1,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
+
+                    w(i,j,k)   = w(i,j,k) + (pres(i+1,j,k) - pres(i,j,k))/cc/dx**2 - ins_gravX/dy
+                    w(i+1,j,k) = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/cc/dx**2 + ins_gravX/dy
+                    sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/cc/dx - ins_gravX
+                end if
+                !
+                ! 
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+                    th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/cc/dy**2 - ins_gravY/dy
+                    w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/cc/dy**2 + ins_gravY/dy
+                    sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/cc/dy - ins_gravY
+                 end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j+1,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/cc/dy**2 - ins_gravY/dy
+                    w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/cc/dy**2 + ins_gravY/dy
+                    sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/cc/dy - ins_gravY
+                 end if 
+                !
+                ! 
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j,k+1) .eq. 1.0) then
+                    th = abs(lambda(i,j,k+1))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1z(i,j,k+1) + rho2z(i,j,k+1))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j,k+1) - pres(i,j,k))/cc/dz**2 - ins_gravZ/dz
+                    w(i,j,k+1)    = w(i,j,k+1) + (pres(i,j,k) - pres(i,j,k+1))/cc/dz**2 + ins_gravZ/dz
+                    sigz(i,j,k+1) = sigz(i,j,k+1) + (pres(i,j,k+1) - pres(i,j,k))/cc/dz - ins_gravZ
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j,k+1) .eq. 0.0) then
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j,k+1))+abs(lambda(i,j,k)))
+
+                    if(pf(i,j,k+1) .eq. 0.0) then
+                        rhof = rho2
+                    else
+                        rhof = rho1
+                    end if
+
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+
+                    rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
+
+                    cc = 1./(rho1z(i,j,k+1) + rho2z(i,j,k+1))
+
+                    w(i,j,k)      = w(i,j,k)   + (pres(i,j,k+1) - pres(i,j,k))/cc/dz**2 - ins_gravZ/dz
+                    w(i,j,k+1)    = w(i,j,k+1) + (pres(i,j,k) - pres(i,j,k+1))/cc/dz**2 + ins_gravZ/dz
+                    sigz(i,j,k+1) = sigz(i,j,k+1) + (pres(i,j,k+1) - pres(i,j,k))/cc/dz - ins_gravZ
+                end if 
+
+           end do
+         end do
+        end do
+
 
       end subroutine mph_KPDcurvature3DC
 

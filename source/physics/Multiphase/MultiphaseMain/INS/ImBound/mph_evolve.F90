@@ -395,6 +395,7 @@ else if(mph_flag == 0) then
                           faceyData(RH1F_FACE_VAR,:,:,:), &
                           faceyData(RH2F_FACE_VAR,:,:,:), &
                           solnData(PFUN_VAR,:,:,:), &
+                          solnData(PRES_VAR,:,:,:), &
                           solnData(SIGP_VAR,:,:,:), &
                           facexData(SIGM_FACE_VAR,:,:,:), &
                           faceyData(SIGM_FACE_VAR,:,:,:), &
