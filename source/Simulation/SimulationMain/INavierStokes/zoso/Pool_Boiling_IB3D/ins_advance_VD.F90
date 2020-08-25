@@ -68,14 +68,14 @@ SUBROUTINE ins_predictor_VD(uni,vni,wni,unew,vnew,wnew,uold,vold,&
 
 
       uni(ix1:ix2+1,jy1:jy2,kz1:kz2) = uni(ix1:ix2+1,jy1:jy2,kz1:kz2) + &
-         dt*(unew(ix1:ix2+1,jy1:jy2,kz1:kz2))!-poldx(ix1:ix2+1,jy1:jy2,kz1:kz2))
+         dt*(unew(ix1:ix2+1,jy1:jy2,kz1:kz2)-poldx(ix1:ix2+1,jy1:jy2,kz1:kz2))
 
       vni(ix1:ix2,jy1:jy2+1,kz1:kz2) = vni(ix1:ix2,jy1:jy2+1,kz1:kz2) + &
-         dt*(vnew(ix1:ix2,jy1:jy2+1,kz1:kz2))!-poldy(ix1:ix2+1,jy1:jy2,kz1:kz2))
+         dt*(vnew(ix1:ix2,jy1:jy2+1,kz1:kz2)-poldy(ix1:ix2+1,jy1:jy2,kz1:kz2))
 
 #if NDIM == 3
       wni(ix1:ix2,jy1:jy2,kz1:kz2+1) = wni(ix1:ix2,jy1:jy2,kz1:kz2+1) + &
-         dt*(wnew(ix1:ix2,jy1:jy2,kz1:kz2+1))!-poldz(ix1:ix2,jy1:jy2,kz1:kz2+1))
+         dt*(wnew(ix1:ix2,jy1:jy2,kz1:kz2+1)-poldz(ix1:ix2,jy1:jy2,kz1:kz2+1))
 #endif
 
 

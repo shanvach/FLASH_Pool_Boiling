@@ -314,7 +314,7 @@
      ! Viscosity: visc(nxb+1,nyb+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(CURV_VAR,:,:,1),tpcurv)
+                            solnData(SIGP_VAR,:,:,1),tpcurv)
 
      ! Divergence: 
      ! ----------

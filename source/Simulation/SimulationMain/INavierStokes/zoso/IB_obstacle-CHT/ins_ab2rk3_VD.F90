@@ -550,6 +550,20 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                         faceyData(POLD_FACE_VAR,:,:,:),&
                         facezData(POLD_FACE_VAR,:,:,:))
 
+     !call ins_predictor_VD(facexData(VELC_FACE_VAR,:,:,:),&
+     !                   faceyData(VELC_FACE_VAR,:,:,:),&
+     !                   facezData(VELC_FACE_VAR,:,:,:),&
+     !                   newu,newv,neww,                &
+     !                   facexData(RHDS_FACE_VAR,:,:,:),&
+     !                   faceyData(RHDS_FACE_VAR,:,:,:),&
+     !                   facezData(RHDS_FACE_VAR,:,:,:),&
+     !                   solnData(PRES_VAR,:,:,:),      &
+     !                   dt,del(DIR_X),del(DIR_Y),del(DIR_Z),      &
+     !       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+     !       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+     !       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+     !       ins_gama,ins_rhoa,ins_alfa)
+
 
      ! save RHS for next step
      facexData(RHDS_FACE_VAR,:,:,:) = newu(:,:,:)
@@ -557,20 +571,20 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
      k = 1
      
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
-             if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
-             !if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
-
-        end do
-     end do
+     !do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+     !   do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)+1
+     !        if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i-1,j,k)) .ge. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+     !        !if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i-1,j,k) .le. 0.0) facexData(VELC_FACE_VAR,i,j,k) = 0.0
+     !
+     !   end do
+     !end do
      
-     do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-             if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-             !if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
-        end do
-     end do
+     !do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)+1
+     !   do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+     !        if(0.5*(solnData(LMDA_VAR,i,j,k)+solnData(LMDA_VAR,i,j-1,k)) .ge. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
+     !        !if(solnData(LMDA_VAR,i,j,k)*solnData(LMDA_VAR,i,j-1,k) .le. 0.0) faceyData(VELC_FACE_VAR,i,j,k) = 0.0
+     !   end do
+     !end do
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -639,19 +653,19 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   do lb = 1,blockCount
      blockID = blockList(lb)
-
+ 
      ! Get blocks dx, dy ,dz:
      call Grid_getDeltas(blockID,del)
-
+  
      ! Get Blocks internal limits indexes:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-
+  
      ! Point to blocks center and face vars:
      call Grid_getBlkPtr(blockID,solnData,CENTER)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
+  
      call ins_firstCorrector_VD_IB( facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&

@@ -86,7 +86,7 @@ sm_NumBodies   =  1
 gr_sbNumBodies =  1
 
 #       Size of computational volume
-xmin =   -5.00
+xmin =    0.00
 xmax =    5.00
 ymin =    0.00
 ymax =   10.00
@@ -117,8 +117,8 @@ tmax            = 2500.0
 cflflg          = 0
 cfl             = 0.1
 sigma		= 0.1
-dtspec          = 0.5d-4
-dtinit          = 0.5d-4
+dtspec          = 1.0d-4
+dtinit          = 1.0d-4
 tstep_change_factor=1.01
 
 
@@ -141,7 +141,7 @@ checkpointFileIntervalTime = 10.0
 plotFileIntervalStep = 1000
 
 ##	AMR parameters
-nblockx	= 10
+nblockx	= 5
 nblocky	= 10
 
 lrefine_min	= 1
