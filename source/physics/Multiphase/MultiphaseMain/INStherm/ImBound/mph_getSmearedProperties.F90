@@ -42,7 +42,7 @@ subroutine mph_getSmearedProperties2D(s,pf,dx,dy,rho1,rho2,ix1,ix2,jy1,jy2,xnorm
          !end do
 
          pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
-         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0 
+         !pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0 
 
          do j=jy1,jy2
            do i=ix1,ix2
@@ -125,7 +125,7 @@ subroutine mph_getSmearedProperties3D(s,pf,dx,dy,dz,rho1,rho2,ix1,ix2,jy1,jy2,kz
        !end do
 
        pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = 0.0
-       pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0 
+       !pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0 
 
 
        do k=kz1,kz2

@@ -449,7 +449,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
-              if(.not.(abs(ycell+0.5*del(JAXIS)) .le. eps)) then
+              !if(.not.(abs(ycell+0.5*del(JAXIS)) .le. eps)) then
  
               if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
 
@@ -542,7 +542,7 @@
 
               end if
 
-              end if
+              !end if
 
            end do
         end do
