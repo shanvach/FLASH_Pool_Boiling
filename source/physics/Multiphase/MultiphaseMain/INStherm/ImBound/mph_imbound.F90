@@ -316,22 +316,22 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
         end do
 #endif
 
-        k = 1
-#if NDIM == 3
-       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-#endif
-        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
- 
-          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
-             solnData(DFUN_VAR,i,j,k) = &
-             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
-
-         end do
-        end do
-#if NDIM == 3
-        end do
-#endif
+!        k = 1
+!#if NDIM == 3
+!       do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
+!#endif
+!        do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
+!         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
+! 
+!          if(solnData(LMDA_VAR,i,j,k) .gt. 1.5*del(IAXIS)) &
+!             solnData(DFUN_VAR,i,j,k) = &
+!             min(-solnData(LMDA_VAR,i,j,k) + 1.5*del(IAXIS),solnData(DFUN_VAR,i,j,k))
+!
+!         end do
+!        end do
+!#if NDIM == 3
+!        end do
+!#endif
         ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)

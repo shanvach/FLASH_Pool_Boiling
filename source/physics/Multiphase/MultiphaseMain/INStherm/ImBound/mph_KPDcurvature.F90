@@ -72,7 +72,7 @@
         pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
-        !pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
+        pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
         crv = 0.
         do j = jy1,jy2
@@ -359,7 +359,7 @@
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
 
-              !if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0) then
               if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1. ) then
 
                  !          = (+)            = (+)           = (-)
@@ -453,9 +453,9 @@
 
               end if
 
-              !end if
+              end if
 
-              !if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
+              if(lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) then
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
@@ -550,7 +550,7 @@
                  icrv(i,j+1,k) = 1
 
               end if
-              !end if
+              end if
 
            end do
         end do
@@ -575,9 +575,9 @@
                         rhof = rho1
                     end if
 
-                    !aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
-                    !rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa          
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa          
                     
                     cc = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
                     
@@ -596,9 +596,9 @@
                         rhof = rho1
                     end if
 
-                    !aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
-                    !rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
+                    rho2x(i+1,j,k) = rho2x(i+1,j,k)*(rho3/rho2)/aa
 
                     cc = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
 
@@ -617,9 +617,9 @@
                         rhof = rho1
                     end if
 
-                    !aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
-                    !rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
  
                     cc = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
 
@@ -638,9 +638,9 @@
                         rhof = rho1
                     end if
 
-                    !aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
-                    !rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
+                    rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
 
                     cc = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
 
