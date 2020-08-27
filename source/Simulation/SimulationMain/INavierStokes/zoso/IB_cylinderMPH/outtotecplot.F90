@@ -267,7 +267,7 @@
                             solnData(PRES_VAR,:,:,1),tpp)
 
     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DFUN_VAR,:,:,1),tpdfun)
+                            solnData(PGST_VAR,:,:,1),tpdfun)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(PFUN_VAR,:,:,1),tppfun)

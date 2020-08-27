@@ -316,7 +316,7 @@
                             solnData(MDOT_VAR,:,:,1),tmdot)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(TNLQ_VAR,:,:,1),txl)
+                            solnData(PGST_VAR,:,:,1),txl)
     
      !call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
      !                       solnData(TYLQ_VAR,:,:,1),tyl)

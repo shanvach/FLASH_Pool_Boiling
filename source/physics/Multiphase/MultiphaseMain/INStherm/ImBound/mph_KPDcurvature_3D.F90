@@ -334,7 +334,7 @@
 
 
         subroutine mph_KPDcurvature3DC(s,crv,rho1x,rho2x,rho1y,rho2y, &
-                                       pf,pres,w,sigx,sigy,dx,dy,          &
+                                       pf,pres,pgst,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
                                        rho2z,sigz,mdot,tmic,temp,lambda,blockID)
@@ -360,7 +360,7 @@
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda,pres
+        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda,pres,pgst
 
         !integer :: icrv(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC)
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
@@ -382,7 +382,8 @@
         real :: pfl(NXB+2*NGUARD,NYB+2*NGUARD,NZB+2*NGUARD)
         real :: rho3, rhof
         real :: cc
-
+        real :: p_solid, p_fluid
+ 
         sigx = 0.
         sigy = 0.
         sigz = 0.

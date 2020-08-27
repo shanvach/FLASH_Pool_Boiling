@@ -61,7 +61,7 @@ interface
 end interface
 
 interface
-        subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,pres,w,sigx,sigy,dx,dy, &
+        subroutine mph_KPDcurvature2DC(s,crv,rho1x,rho2x,rho1y,rho2y,pf,pres,pgst,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,thco1,thco2,cp1,cp2,mdot,tmic,lambda,blockID)
         implicit none
         integer, intent(in) :: ix1,ix2,jy1,jy2,blockID
@@ -71,7 +71,7 @@ interface
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,lambda,pres
+        real, dimension(:,:,:), intent(in) :: mdot,lambda,pres,pgst
         end subroutine mph_KPDcurvature2DC
 end interface
 
@@ -122,7 +122,7 @@ end interface
 
 interface
         subroutine mph_KPDcurvature3DC(s,crv,rho1x,rho2x,rho1y,rho2y, &
-                                       pf,pres,w,sigx,sigy,dx,dy,          &
+                                       pf,pres,pgst,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
                                        rho2z,sigz,mdot,tmic,temp,lambda,blockID)
@@ -134,7 +134,7 @@ interface
                                                 rho2y,pf,w,sigx,sigy, &
                                                 rho1z,rho2z,sigz,tmic
 
-        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda,pres
+        real, dimension(:,:,:), intent(in) :: mdot,temp,lambda,pres,pgst
 
         end subroutine mph_KPDcurvature3DC
 end interface
@@ -279,6 +279,15 @@ interface
       real,    INTENT(IN) :: timeEndAdv,dt,dtOld
 
       end subroutine
+end interface
+
+interface
+        subroutine mph_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+        integer, intent(in) :: sweepOrder
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+        end subroutine mph_applyGFM
 end interface
 ! End
 

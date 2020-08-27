@@ -4,8 +4,9 @@
 #include "Flash.h"
 #include "ImBound.h"
 
-!#define TWO_POINTSP 1
-#define NORMAL_GRAD_CORR
+#define INS_CONSTDENS
+#define TWO_POINTSP 1
+!#define NORMAL_GRAD_CORR
 !#define TEST_COMPARE 1
 
 subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)

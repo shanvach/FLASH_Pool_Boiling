@@ -668,32 +668,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
 
-!*************************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
-  ! DIVERGENCE OF USTAR:
-  ! ---------- -- -----
-  do lb = 1,blockCount
-     blockID = blockList(lb)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-#if NDIM ==3
-     !call Grid_getBlkPtr(blockID,facezData,FACEZ)
-#endif
-     call Grid_getBlkPtr(blockID,facezData,FACEZ)    !kpd - I moved this
-!*************************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----
   do lb = 1,blockCount
