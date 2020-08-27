@@ -623,6 +623,16 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
 
+  gcMask = .FALSE.
+  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
+  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
+#endif
+  ins_predcorrflg = .false.
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
   do lb = 1,blockCount
      blockID = blockList(lb)
 
