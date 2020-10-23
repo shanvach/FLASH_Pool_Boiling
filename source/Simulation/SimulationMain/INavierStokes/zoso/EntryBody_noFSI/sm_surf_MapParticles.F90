@@ -85,7 +85,6 @@ subroutine sm_surf_MapParticles(ibd)
                                    xnrm(1:ptelem),ynrm(1:ptelem), &
                                    areai(1:ptelem), loc_num(1:ptelem) )
 
-
 #endif
 
         case default

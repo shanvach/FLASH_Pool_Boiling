@@ -38,6 +38,7 @@ REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
 REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Kinematics
 
 DATAFILES kinematics.input.h5 sm_body.00001.h5
 

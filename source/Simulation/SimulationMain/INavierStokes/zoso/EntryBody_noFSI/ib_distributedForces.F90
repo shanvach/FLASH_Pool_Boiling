@@ -200,7 +200,7 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 ! Add by Shizhao Wang, Oct 22, 2014
 ! To take account the variation of pressure in normal idrection on coarse mesh
 #ifdef NORMAL_GRAD_CORR
-  print*,"Calculating ib_distributedForces"
+!  print*,"Calculating ib_distributedForces"
   
   ! The normal external probe point is set to be 2.0dx from the wall
   alpha = real(NDIM)
@@ -1002,12 +1002,12 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   particleData(PEX0_PART_PROP) = particleData(PEXT_PART_PROP)
   particleData(PEXT_PART_PROP) = zpres
 
-  print*,"------------------1----------------------"
-  print*,"F_vis x  = ",FXVI_PART_PROP
-  print*,"F_vis y  = ",FYVI_PART_PROP
-  print*,"F_vis z  = ",FZVI_PART_PROP
-  print*,"Pressure = ",PRES_PART_PROP
-  print*,"----------------------------------------"
+!  print*,"------------------1----------------------"
+!  print*,"F_vis x  = ",FXVI_PART_PROP
+!  print*,"F_vis y  = ",FYVI_PART_PROP
+!  print*,"F_vis z  = ",FZVI_PART_PROP
+!  print*,"Pressure = ",PRES_PART_PROP
+!  print*,"----------------------------------------"
 
 
 #ifdef TEST_COMPARE
@@ -1436,12 +1436,12 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   ! In Y dir: wy = du/dz - dw/dx
   zv(3) = dun*nzp - dwn*nxp
 
-  print*,"------------------2----------------------"
-  print*,"F_vis x  = ",FXVI_PART_PROP
-  print*,"F_vis y  = ",FYVI_PART_PROP
-  print*,"F_vis z  = ",FZVI_PART_PROP
-  print*,"Pressure = ",PRES_PART_PROP
-  print*,"----------------------------------------"
+!  print*,"------------------2----------------------"
+!  print*,"F_vis x  = ",FXVI_PART_PROP
+!  print*,"F_vis y  = ",FYVI_PART_PROP
+!  print*,"F_vis z  = ",FZVI_PART_PROP
+!  print*,"Pressure = ",PRES_PART_PROP
+!  print*,"----------------------------------------"
 
 #else /* USE_CF */
 
@@ -1468,12 +1468,12 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
   zv(3) = dudz - dwdx
 
   ! PRINT STATEMENTS HERE
-  print*,"------------------3----------------------"
-  print*,"F_vis x  = ",FXVI_PART_PROP
-  print*,"F_vis y  = ",FYVI_PART_PROP
-  print*,"F_vis z  = ",FZVI_PART_PROP
-  print*,"Pressure = ",PRES_PART_PROP
-  print*,"----------------------------------------"
+!  print*,"------------------3----------------------"
+!  print*,"F_vis x  = ",FXVI_PART_PROP
+!  print*,"F_vis y  = ",FYVI_PART_PROP
+!  print*,"F_vis z  = ",FZVI_PART_PROP
+!  print*,"Pressure = ",PRES_PART_PROP
+!  print*,"----------------------------------------"
     !endif
 
 #endif
@@ -1487,12 +1487,12 @@ subroutine ib_distributedForces(blockID, particleData, vortx, vorty, vortz)
 
 #endif /* NORMAL_GRAD_CORR */
   
-  print*,"------------------4----------------------"
-  print*,"F_vis x  = ",FXVI_PART_PROP
-  print*,"F_vis y  = ",FYVI_PART_PROP
-  print*,"F_vis z  = ",FZVI_PART_PROP
-  print*,"Pressure = ",PRES_PART_PROP
-  print*,"----------------------------------------"
+!  print*,"------------------4----------------------"
+!  print*,"F_vis x  = ",FXVI_PART_PROP
+!  print*,"F_vis y  = ",FYVI_PART_PROP
+!  print*,"F_vis z  = ",FZVI_PART_PROP
+!  print*,"Pressure = ",PRES_PART_PROP
+!  print*,"----------------------------------------"
 
   ! Vorticity components:
   particleData(VORZ_PART_PROP) = zv(1)
