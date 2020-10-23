@@ -36,11 +36,16 @@ subroutine Simulation_initBlock(blockId)
   use Grid_interface, only  : Grid_getCellMetrics, Grid_getBlkIndexLimits, &
                               Grid_getCellCoords, &
                               Grid_getBlkCenterCoords, Grid_getBlkBoundBox, &
-                              Grid_getBlkPtr, Grid_releaseBlkPtr
+                              Grid_getBlkPtr, Grid_releaseBlkPtr, &
+                              Grid_solvePoisson, Grid_fillGuardCells, GRID_PDE_BND_NEUMANN
+
+  use Grid_data, only : gr_domainBC
 
   use Driver_Interface, only : Driver_abortFlash
 
-  use Driver_Data, Only     : dr_simTime, dr_meshMe
+  use Driver_Data, only : dr_simTime, dr_meshMe
+
+  use ins_interface, only : ins_divergence, ins_corrector
 
   use HDF5
 
@@ -78,6 +83,11 @@ subroutine Simulation_initBlock(blockId)
   real, allocatable, dimension(:,:,:,:) :: sdata
   character(len = 32) :: filename, dsetname
 
+  ! locals necessary for solving poisson
+  logical :: gcMask(NUNK_VARS+NDIM*NFACE_VARS)
+  integer, dimension(6) :: bc_types  = GRID_PDE_BND_NEUMANN
+  real, dimension(2,6)  :: bc_values = 0.0
+  real                  :: poisfact  = 1.0
 
   ! Point to Blocks centered variables:
   call Grid_getBlkPtr(blockID, solnData, CENTER)
@@ -258,8 +268,57 @@ subroutine Simulation_initBlock(blockId)
       facezData(RHDS_FACE_VAR,:,:,:) = 0.0
 #endif
 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! make velocity field divergence free
 
- 
+    gcMask = .FALSE.
+    gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! u
+    gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! v
+#if NDIM == 3
+    gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! w
+#endif
+    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+    call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
+                        faceyData(VELC_FACE_VAR,:,:,:),&
+                        facezData(VELC_FACE_VAR,:,:,:),&
+            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                        dx, dy, dz,                    &
+                        solnData(DUST_VAR,:,:,:) )
+
+    !bc_types = reshape(gr_domainBC, (/ 2*MDIM /) )
+    call Grid_solvePoisson(DELP_VAR, DUST_VAR, bc_types, bc_values, poisfact)
+    solnData(PRES_VAR,:,:,:) = solnData(DELP_VAR,:,:,:)
+
+    gcMask = .FALSE.
+    gcMask(PRES_VAR) = .TRUE.
+    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,&
+                                                 selectBlockType=ACTIVE_BLKS)
+
+    call ins_corrector(facexData(VELC_FACE_VAR,:,:,:),&
+                       faceyData(VELC_FACE_VAR,:,:,:),&
+                       facezData(VELC_FACE_VAR,:,:,:),&
+                       solnData(DELP_VAR,:,:,:),      & 
+           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       1.0,                           & 
+                       dx, dy, dz,                    &
+                       1.0)
+
+    gcMask = .FALSE.
+    gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! u
+    gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! v
+#if NDIM == 3
+    gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! w
+#endif
+    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
     ! Rayleigh Benard flow (Cold on Hot)
     case (1)
 

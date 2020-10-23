@@ -51,7 +51,7 @@ subroutine gr_createDomain()
   use Grid_data, ONLY : scratch,scratch_ctr,&
        &scratch_facevarx,scratch_facevary,scratch_facevarz
   
-  use Grid_data, ONLY : gr_axisMe, gr_axisNumProcs,&
+  use Grid_data, ONLY : gr_axisMe, gr_meshMe, gr_axisNumProcs,&
        gr_guard, &
        gr_gIndexSize, gr_blkCornerID, &
        gr_lIndexSize, gr_kmax, gr_kmin, &
@@ -66,7 +66,9 @@ subroutine gr_createDomain()
        gr_iMetrics,gr_jMetrics,gr_kMetrics,&
        gr_iMetricsGlb,gr_jMetricsGlb,gr_kMetricsGlb,&
        gr_iCoordsGlb, gr_jCoordsGlb, gr_kCoordsGlb
-  
+ 
+  use HDF5
+
   implicit none
 
 #include "constants.h"
@@ -76,8 +78,17 @@ subroutine gr_createDomain()
   integer :: ierr
   integer :: color, key, range_b, range_e
   real :: halfDelta
-  integer :: i,j
+  integer :: i, j, k
   integer :: gI, gJ, gK
+
+  ! locals necessary to read hdf5 file
+  integer :: nxb, nyb, nzb
+  integer :: error, rank
+  integer(HID_T) :: file_id, dset_id, dataspace, memspace
+  integer(HSIZE_T), dimension(2) :: data_dims
+  integer(HSIZE_T), dimension(2) :: count, offset, stride, block 
+  real, allocatable, dimension(:,:) :: sdata
+  character(len = 32) :: filename, dsetname
 
   !store local index size for each block
   gr_lIndexSize = gr_gIndexSize/gr_axisNumProcs
@@ -228,9 +239,90 @@ subroutine gr_createDomain()
 
     case(SG_USER)
 
-      ! stretching method SG_USER not currently supported
-      print*,"Create Domain : invalid stretching method "
-      call Driver_abortFlash("Create Domain : invalid stretching method ")
+      ! common parameters for hyperslab
+      rank   = 2
+      count  = (/ 1, 1 /)
+      offset = (/ 0, gr_meshMe /)
+      stride = (/ 1, 1 /)
+
+      ! initialize fortran hdf5 interface
+      call h5open_f(error)
+
+      ! open hdf5 file
+      filename = "initGrid.h5"
+      call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, error)
+      if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
+
+      ! prepare parameters
+      nxb = gr_ihiGc - gr_iloGc + 1
+      data_dims = (/ nxb, 1 /)
+      block     = (/ nxb, 1 /)
+      allocate(sdata(nxb, 1))
+
+      ! read in Left Edge grid data by block
+      dsetname  = "/xblkl"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+      gr_iCoords(LEFT_EDGE,:,1) = sdata(:,1) 
+
+      ! read in Center grid data by block
+      dsetname  = "/xblkc"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+      gr_iCoords(CENTER,:,1) = sdata(:,1) 
+
+      ! read in Right Edge grid data by block
+      dsetname  = "/xblkr"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dget_space_f(dset_id, dataspace, error)
+      call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+      call h5screate_simple_f(rank, data_dims, memspace, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+      call h5dclose_f(dset_id, error)
+      gr_iCoords(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+      deallocate(sdata)
+
+      ! prepare parameters
+      data_dims = (/ gI, 1 /)
+      allocate(sdata(gI, 1))
+
+      ! read in Left Edge grid data globally 
+      dsetname  = "/xglbl"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+      call h5dclose_f(dset_id, error)
+      gr_iCoordsGlb(LEFT_EDGE,:,1) = sdata(:,1) 
+
+      ! read in Center grid data globally 
+      dsetname  = "/xglbc"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+      call h5dclose_f(dset_id, error)
+      gr_iCoordsGlb(CENTER,:,1) = sdata(:,1) 
+
+      ! read in Right Edge grid data globally 
+      dsetname  = "/xglbr"
+      call h5dopen_f(file_id, dsetname, dset_id, error)
+      call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+      call h5dclose_f(dset_id, error)
+      gr_iCoordsGlb(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+      deallocate(sdata)
+
+      ! close hdf5 file 
+      call h5fclose_f(file_id, error)
+
+      ! close hdf5 fortran interface
+      call h5close_f(error)
 
     case(SG_TANH)
 
@@ -320,9 +412,92 @@ subroutine gr_createDomain()
       
       case(SG_USER)
 
-        ! stretching method SG_USER not currently supported
-        print*,"Create Domain : invalid stretching method "
-        call Driver_abortFlash("Create Domain : invalid stretching method ")
+        ! common parameters for hyperslab
+        rank   = 2 
+        count  = (/ 1, 1 /)
+        offset = (/ 0, gr_meshMe /)
+        stride = (/ 1, 1 /)
+
+        ! initialize fortran hdf5 interface
+        call h5open_f(error)
+
+        ! open hdf5 file
+        filename = "initGrid.h5"
+        call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, error)
+        if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
+
+        ! prepare parameters
+        nyb = gr_jhiGC - gr_jloGc + 1
+        data_dims = (/ nyb, 1 /)
+        block     = (/ nyb, 1 /)
+        allocate(sdata(nyb, 1))
+        
+        if (gr_meshMe == 0) write(*,*) nyb
+
+        ! read in Left Edge grid data by block
+        dsetname  = "/yblkl"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_jCoords(LEFT_EDGE,:,1) = sdata(:,1) 
+
+        ! read in Center grid data by block
+        dsetname  = "/yblkc"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_jCoords(CENTER,:,1) = sdata(:,1) 
+
+        ! read in Right Edge grid data by block
+        dsetname  = "/yblkr"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_jCoords(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+        deallocate(sdata)
+
+        ! prepare parameters
+        data_dims = (/ gJ, 1 /)
+        allocate(sdata(gJ, 1))
+
+        ! read in Left Edge grid data globally 
+        dsetname  = "/yglbl"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_jCoordsGlb(LEFT_EDGE,:,1) = sdata(:,1) 
+
+        ! read in Center grid data globally 
+        dsetname  = "/yglbc"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_jCoordsGlb(CENTER,:,1) = sdata(:,1) 
+
+        ! read in Right Edge grid data globally 
+        dsetname  = "/yglbr"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_jCoordsGlb(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+        deallocate(sdata)
+
+        ! close hdf5 file 
+        call h5fclose_f(file_id, error)
+
+        ! close hdf5 fortran interface
+        call h5close_f(error)
 
       case(SG_TANH)
 
@@ -421,9 +596,90 @@ subroutine gr_createDomain()
 
       case(SG_USER)
 
-        ! stretching method SG_USER not currently supported
-        print*,"Create Domain : invalid stretching method "
-        call Driver_abortFlash("Create Domain : invalid stretching method ")
+        ! common parameters for hyperslab
+        rank   = 2
+        count  = (/ 1, 1 /)
+        offset = (/ 0, gr_meshMe /)
+        stride = (/ 1, 1 /)
+
+        ! initialize fortran hdf5 interface
+        call h5open_f(error)
+
+        ! open hdf5 file
+        filename = "initGrid.h5"
+        call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, error)
+        if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
+
+        ! prepare parameters
+        nzb = gr_khiGc - gr_kloGc + 1
+        data_dims = (/ nzb, 1 /)
+        block     = (/ nzb, 1 /)
+        allocate(sdata(nzb, 1))
+
+        ! read in Left Edge grid data by block
+        dsetname  = "/zblkl"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_kCoords(LEFT_EDGE,:,1) = sdata(:,1) 
+
+        ! read in Center grid data by block
+        dsetname  = "/zblkc"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_kCoords(CENTER,:,1) = sdata(:,1) 
+
+        ! read in Right Edge grid data by block
+        dsetname  = "/zblkr"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dget_space_f(dset_id, dataspace, error)
+        call h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error, stride, block)
+        call h5screate_simple_f(rank, data_dims, memspace, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error, memspace, dataspace)
+        call h5dclose_f(dset_id, error)
+        gr_kCoords(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+        deallocate(sdata)
+
+        ! prepare parameters
+        data_dims = (/ gK, 1 /)
+        allocate(sdata(gK, 1))
+
+        ! read in Left Edge grid data globally 
+        dsetname  = "/zglbl"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_kCoordsGlb(LEFT_EDGE,:,1) = sdata(:,1) 
+
+        ! read in Center grid data globally 
+        dsetname  = "/zglbc"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_kCoordsGlb(CENTER,:,1) = sdata(:,1) 
+
+        ! read in Right Edge grid data globally 
+        dsetname  = "/zglbr"
+        call h5dopen_f(file_id, dsetname, dset_id, error)
+        call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
+        call h5dclose_f(dset_id, error)
+        gr_kCoordsGlb(RIGHT_EDGE,:,1) = sdata(:,1) 
+
+        deallocate(sdata)
+
+        ! close hdf5 file 
+        call h5fclose_f(file_id, error)
+
+        ! close hdf5 fortran interface
+        call h5close_f(error)
 
       case(SG_TANH)
 
