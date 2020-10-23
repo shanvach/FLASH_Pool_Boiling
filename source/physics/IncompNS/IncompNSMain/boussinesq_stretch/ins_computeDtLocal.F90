@@ -64,48 +64,49 @@ subroutine ins_computeDtLocal(blockID,   &
   do k = GRID_KLO, GRID_KHI
     do j = GRID_JLO, GRID_JHI 
 
-      velcoeff = MAX(velcoeff,                                                                                    &
-                 MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,k))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
-                 MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dy(j,LEFT_EDGE)),                   &
+      velcoeff = MAX(velcoeff,                                                                                     &
+                 MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,k))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)) + &
+                 MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dy(j,LEFT_EDGE))                   + &
                  MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dz(k,LEFT_EDGE)))
     end do
   end do
 
-  velcoeff = MAX(velcoeff,                                                                                                  &
-             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,GRID_KLO:GRID_KHI))*dy(GRID_JHI+1,LEFT_EDGE)), &
+  velcoeff = MAX(velcoeff,                                                                                                   &
+             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,GRID_KLO:GRID_KHI))*dy(GRID_JHI+1,LEFT_EDGE)) + &
              MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KHI+1))*dz(GRID_KHI+1,LEFT_EDGE)))
 
   if (velcoeff .gt. eps) then
-  dtc = ins_cfl / velcoeff
+    dtc = ins_cfl / velcoeff
   else
-  dtc = ins_cfl / eps
+    dtc = ins_cfl / eps
   endif
   
-  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX( MAXVAL(dx(:,CENTER))**2.,  &
-                                                                  MAXVAL(dy(:,CENTER))**2.,  &
-                                                                  MAXVAL(dz(:,CENTER))**2. ))
+  dtv = ins_sigma / MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * (1 / MAXVAL(dx(:,CENTER))**2. + &
+                                                             1 / MAXVAL(dy(:,CENTER))**2. + &
+                                                             1 / MAXVAL(dz(:,CENTER))**2. )
 
 #else
   velcoeff = eps
 
   do j = GRID_JLO, GRID_JHI
-    velcoeff = MAX(velcoeff,                                                                                    &
-               MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,1))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)), &
+    velcoeff = MAX(velcoeff,                                                                                     &
+               MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,1))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)) + &
                MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,j,1))*dy(j,LEFT_EDGE)))
   end do
 
-  velcoeff = MAX(velcoeff,MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,1))*dy(GRID_JHI+1,LEFT_EDGE)))
+  velcoeff = MAX(velcoeff,                                                                                  &
+             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,1))*dy(GRID_JHI+1,LEFT_EDGE)))
                   
   if (velcoeff .gt. eps) then
-  dtc = ins_cfl / velcoeff
+    dtc = ins_cfl / velcoeff
   else
-  dtc = ins_cfl / eps  
+    dtc = ins_cfl / eps  
   endif
   
-  dtv = ins_sigma / (MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * MAX( MAXVAL(dx(:,CENTER))**2., MAXVAL(dy(:,CENTER))**2. ))
+  dtv = ins_sigma / MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * (1 / MAXVAL(dx(:,CENTER))**2. + 1 / MAXVAL(dy(:,CENTER))**2. )
 #endif
 
-  dtl = 0.5 * MIN(dtc,dtv) 
+  dtl = 0.5 * MIN(dtc, dtv) 
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
