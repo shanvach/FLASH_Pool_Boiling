@@ -144,20 +144,20 @@ subroutine Grid_writeDomain()
 
     ! fill out mesh grid
 #if NDIM == 3
-      do k=2, NZB
-        do j=2, NYB
-          gCoords(IAXIS,:,:,:,j,k,1) = gCoords(IAXIS,:,:,:,j-1,k-1,1)
-          gMetrics(IAXIS,:,:,:,j,k,1) = gMetrics(IAXIS,:,:,:,j-1,k-1,1)
+      do k=1, NZB
+        do j=1, NYB
+          gCoords(IAXIS,:,:,:,j,k,1) = gCoords(IAXIS,:,:,:,1,1,1)
+          gMetrics(IAXIS,:,:,:,j,k,1) = gMetrics(IAXIS,:,:,:,1,1,1)
         end do
-        do i=2, NXB
-          gCoords(JAXIS,:,:,i,:,k,1) = gCoords(JAXIS,:,:,i-1,:,k-1,1)
-          gMetrics(JAXIS,:,:,i,:,k,1) = gMetrics(JAXIS,:,:,i-1,:,k-1,1)
+        do i=1, NXB
+          gCoords(JAXIS,:,:,i,:,k,1) = gCoords(JAXIS,:,:,1,:,1,1)
+          gMetrics(JAXIS,:,:,i,:,k,1) = gMetrics(JAXIS,:,:,1,:,1,1)
         end do
       end do
-      do j=2, NYB
-        do i=2, NXB
-          gCoords(KAXIS,:,:,i,j,:,1) = gCoords(KAXIS,:,:,i-1,j-1,:,1)
-          gMetrics(KAXIS,:,:,i,j,:,1) = gMetrics(KAXIS,:,:,i-1,j-1,:,1)
+      do j=1, NYB
+        do i=1, NXB
+          gCoords(KAXIS,:,:,i,j,:,1) = gCoords(KAXIS,:,:,1,1,:,1)
+          gMetrics(KAXIS,:,:,i,j,:,1) = gMetrics(KAXIS,:,:,1,1,:,1)
         end do
       end do
 #else

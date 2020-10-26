@@ -98,11 +98,13 @@ subroutine Grid_sendOutputData()
   leftNeigh = gr_meshMe + gr_axisNumProcs(1) 
   rightNeigh = gr_meshMe - gr_axisNumProcs(1) 
   
-  if(leftNeigh >= gr_meshNumProcs) then
+  if(mod(leftNeigh, gr_axisNumProcs(1) * gr_axisNumProcs(2)) < gr_axisNumProcs(1)) then
      leftNeigh = -21
   end if
   
   if(rightNeigh < 0) then
+     rightNeigh = -21
+  elseif(mod(rightNeigh, gr_axisNumProcs(1) * gr_axisNumProcs(2)) >= (gr_axisNumProcs(2) - 1) * gr_axisNumProcs(1)) then
      rightNeigh = -21
   end if
   

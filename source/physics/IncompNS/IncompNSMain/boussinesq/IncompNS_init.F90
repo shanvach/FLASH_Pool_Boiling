@@ -103,9 +103,11 @@ subroutine IncompNS_init(restart)
   ins_gravX = 0.0
   ins_gravY = 0.0
   ins_gravZ = 0.0
-  write(*,*) 'NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE'
-  write(*,*) 'Gravity is forced to be zero for iso-tropic turbulence'
-  write(*,*) 
+  if (ins_meshMe .eq. MASTER_PE) then
+     write(*,*) 'NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE'
+     write(*,*) 'Gravity is forced to be zero for iso-tropic turbulence'
+     write(*,*) 
+  endif
 
   ! Read pressure gradients if necessary, constant mass simulation data:
   call RuntimeParameters_get("dpdx",ins_dpdx)
