@@ -28,7 +28,7 @@ subroutine sm_pk_apply(ibd,time)
   use sm_pk_data, only: sm_pk_dataset, sm_pk_info, sm_pk_timedelay
   use sm_pk_interface, only: sm_pk_Flapping_BermanWang, sm_pk_fixed, sm_pk_Whirl, &
                              sm_pk_fixed_dof,sm_pk_harmonic_dof, &
-                             sm_pk_Shaker, sm_pk_constvel_dof
+                             sm_pk_Shaker, sm_pk_constvel_dof, sm_pk_prescribed
   use Driver_interface, only: Driver_abortFlash
   implicit none
 
@@ -72,6 +72,10 @@ subroutine sm_pk_apply(ibd,time)
 
            
            call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+
+        case(SM_PK_PRESC)
+           ! Added by -- EG --
+           call sm_pk_prescribed(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
 
         case(SM_PK_HARMONIC)
 
