@@ -146,6 +146,14 @@ Module sm_pk_interface
   end interface
 
   interface
+     subroutine sm_pk_getVelocity(time,velocity,acceleration)
+       implicit none
+       real, intent(in)    :: time
+       real, intent(out)   :: velocity, acceleration
+     end subroutine sm_pk_getVelocity
+  end interface
+
+  interface
      subroutine sm_pk_masterslave_rigid(maxdofs,nfix,xm,qmstr,qdmstr,qddmstr, &
                                         TNB,NwB_N,NaB_N,Xi,XiB,v,vd,vdd)
        implicit none

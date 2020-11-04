@@ -22,6 +22,8 @@
 #include "constants.h"
 #include "SolidMechanics.h"
 
+#define PRESCRIBED_MOTION
+
 subroutine sm_pk_apply(ibd,time)
 
   use SolidMechanics_data, only :  sm_BodyInfo, sm_structure
@@ -62,6 +64,12 @@ subroutine sm_pk_apply(ibd,time)
      do ircoord=1,nfix_coord
 
         paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
+        
+        #ifdef PRESCRIBED_MOTION
+        
+        call sm_pk_prescribed(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+        
+        #else
 
         select case( body%restraints(ircoord)%restype )
         case(SM_PK_FIXED)
@@ -73,9 +81,6 @@ subroutine sm_pk_apply(ibd,time)
            
            call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
 
-        case(SM_PK_PRESC)
-           ! Added by -- EG --
-           call sm_pk_prescribed(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
 
         case(SM_PK_HARMONIC)
 
@@ -87,6 +92,9 @@ subroutine sm_pk_apply(ibd,time)
            call Driver_abortFlash('Restrained Dofs: kinematics type is unknown.')
                
         end select
+        
+        #endif
+
      enddo
 
 
