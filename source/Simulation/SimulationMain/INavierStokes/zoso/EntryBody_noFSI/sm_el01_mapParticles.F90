@@ -25,6 +25,7 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
                                 areai, loc_num )
   use SolidMechanics_data, only: sm_structure
   use sm_pk_data, only: sm_pk_timedelay
+  use sm_pk_interface, only: sm_pk_getVelocity
   use Driver_interface, only: Driver_abortFlash, Driver_getSimTime
   use Driver_data, only: dr_simTime
 

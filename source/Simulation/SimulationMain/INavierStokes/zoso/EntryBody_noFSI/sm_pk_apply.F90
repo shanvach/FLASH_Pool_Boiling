@@ -30,7 +30,8 @@ subroutine sm_pk_apply(ibd,time)
   use sm_pk_data, only: sm_pk_dataset, sm_pk_info, sm_pk_timedelay
   use sm_pk_interface, only: sm_pk_Flapping_BermanWang, sm_pk_fixed, sm_pk_Whirl, &
                              sm_pk_fixed_dof,sm_pk_harmonic_dof, &
-                             sm_pk_Shaker, sm_pk_constvel_dof, sm_pk_prescribed
+                             sm_pk_Shaker, sm_pk_constvel_dof, sm_pk_prescribed, &
+                             sm_pk_getVelocity
   use Driver_interface, only: Driver_abortFlash
   implicit none
 
@@ -65,11 +66,11 @@ subroutine sm_pk_apply(ibd,time)
 
         paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
         
-        #ifdef sm_pk_PRESCRIBED_MOTION
+#ifdef sm_pk_PRESCRIBED_MOTION
         
         call sm_pk_prescribed(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
         
-        #else
+#else
 
         select case( body%restraints(ircoord)%restype )
         case(SM_PK_FIXED)
@@ -93,7 +94,7 @@ subroutine sm_pk_apply(ibd,time)
                
         end select
         
-        #endif
+#endif
 
      enddo
 

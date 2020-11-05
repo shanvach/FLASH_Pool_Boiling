@@ -31,6 +31,7 @@ subroutine ib_advect (blockCount,blockList,dt)
                                 Grid_getBlkBoundBox,Grid_getBlkCenterCoords
 #ifdef IB_PRESCRIBED_MOTION
      use sm_pk_data, only: sm_pk_timedelay
+     use sm_pk_interface, only: sm_pk_getVelocity
 #endif
 
 

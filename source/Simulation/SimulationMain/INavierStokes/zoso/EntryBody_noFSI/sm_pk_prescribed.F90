@@ -9,6 +9,8 @@
 subroutine sm_pk_prescribed(time,maxrestparams,paramcoord,vc,vcd,vcdd)
 
 #include "constants.h"
+  use sm_pk_interface, only: sm_pk_getVelocity  
+
   implicit none
   integer, intent(in) :: maxrestparams
   real, intent(in)    :: time, paramcoord(maxrestparams)
