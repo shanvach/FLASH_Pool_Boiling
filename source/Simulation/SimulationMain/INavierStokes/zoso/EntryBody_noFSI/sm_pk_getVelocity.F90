@@ -7,7 +7,7 @@
 ! ib_advect.
 !          
 !!!!
-subroutine sm_pk_getVelocity(time,velocity,acceleration)
+subroutine sm_pk_getVelocity(time,sm_pk_velocity,sm_pk_acceleration)
 
 #include "constants.h"
   implicit none
@@ -15,11 +15,13 @@ subroutine sm_pk_getVelocity(time,velocity,acceleration)
   real, intent(out)   :: sm_pk_velocity, sm_pk_acceleration
 
 
-  sm_pk_velocity     = -2.918e-06*time**7 + 0.0001144*time**6 - 0.001822*time**5 + &
-                   0.01513*time**4 - 0.06986*time**3 + 0.1761*time**2 - 0.1189*time - 1
+  sm_pk_velocity     =  -1.471e-05*time**6 + 0.0004412*time**5 - & 
+                          0.004785*time**4 + 0.02112*time**3 - & 
+                           0.01789*time**2 - 0.009742*time - 0.9982
   
-  sm_pk_acceleration = -2.042e-05*time**6 + 0.0006863*time**5 - 0.009109*time**4 + &
-                   0.06053*time**3 - 0.2096*time**2 + 0.3522*time - 0.1189
+  sm_pk_acceleration =  -8.824e-05*time**5 + 0.002206*time**4 - &
+                          0.01914*time**3 + 0.06337*time**2 - &
+                           0.03579*time - 0.009742
 
   return
 

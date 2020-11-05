@@ -146,10 +146,10 @@ Module sm_pk_interface
   end interface
 
   interface
-     subroutine sm_pk_getVelocity(time,velocity,acceleration)
+     subroutine sm_pk_getVelocity(time,sm_pk_velocity,sm_pk_acceleration)
        implicit none
        real, intent(in)    :: time
-       real, intent(out)   :: velocity, acceleration
+       real, intent(out)   :: sm_pk_velocity, sm_pk_acceleration
      end subroutine sm_pk_getVelocity
   end interface
 
