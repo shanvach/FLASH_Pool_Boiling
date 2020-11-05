@@ -22,6 +22,8 @@
 #include "constants.h"
 #include "SolidMechanics.h"
 
+#define sm_pk_PRESCRIBED_MOTION
+
 subroutine sm_pk_apply(ibd,time)
 
   use SolidMechanics_data, only :  sm_BodyInfo, sm_structure
@@ -63,6 +65,12 @@ subroutine sm_pk_apply(ibd,time)
 
         paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
         
+        #ifdef sm_pk_PRESCRIBED_MOTION
+        
+        call sm_pk_prescribed(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+        
+        #else
+
         select case( body%restraints(ircoord)%restype )
         case(SM_PK_FIXED)
 
@@ -85,6 +93,8 @@ subroutine sm_pk_apply(ibd,time)
                
         end select
         
+        #endif
+
      enddo
 
 

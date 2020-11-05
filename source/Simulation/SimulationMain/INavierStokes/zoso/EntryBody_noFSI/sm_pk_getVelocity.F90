@@ -12,13 +12,13 @@ subroutine sm_pk_getVelocity(time,velocity,acceleration)
 #include "constants.h"
   implicit none
   real, intent(in)    :: time
-  real, intent(out)   :: velocity, acceleration
+  real, intent(out)   :: sm_pk_velocity, sm_pk_acceleration
 
 
-  velocity     = -2.918e-06*time**7 + 0.0001144*time**6 - 0.001822*time**5 +
+  sm_pk_velocity     = -2.918e-06*time**7 + 0.0001144*time**6 - 0.001822*time**5 + &
                    0.01513*time**4 - 0.06986*time**3 + 0.1761*time**2 - 0.1189*time - 1
   
-  acceleration = -2.042e-05*time**6 + 0.0006863*time**5 - 0.009109*time**4 +
+  sm_pk_acceleration = -2.042e-05*time**6 + 0.0006863*time**5 - 0.009109*time**4 + &
                    0.06053*time**3 - 0.2096*time**2 + 0.3522*time - 0.1189
 
   return

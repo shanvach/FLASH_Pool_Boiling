@@ -15,17 +15,19 @@ subroutine sm_pk_prescribed(time,maxrestparams,paramcoord,vc,vcd,vcdd)
   real, intent(out)   :: vc, vcd, vcdd
 
   real :: xo
-
-  xo = paramcoord(1)
+  real :: sm_pk_velocity, sm_pk_acceleration
 
   !print*,"body vel = ",vel
 
-  vcd = -2.918e-06*time**7 + 0.0001144*time**6 - 0.001822*time**5 +
-          0.01513*time**4 - 0.06986*time**3 + 0.1761*time**2 - 0.1189*time - 1
+  call sm_pk_getVelocity(time, sm_pk_velocity, sm_pk_acceleration)
+
   ! Parameters: Are s.t. x(t) = xo + vel*t 
-  vc  = xo + vcd*time
-  vcdd= -2.042e-05*time**6 + 0.0006863*time**5 - 0.009109*time**4 +
-          0.06053*time**3 - 0.2096*time**2 + 0.3522*time - 0.1189
+  xo = paramcoord(1)
+
+  vc  = xo + vel*time
+  vcd =           vel
+  vcdd=           0.0
+
 
   return
 
