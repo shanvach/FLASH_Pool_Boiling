@@ -98,6 +98,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! Initialize 1d transform and 1d tridiagonal -------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
     
+    if (pfft_myPE == 0) write(*,*) '2d pfft solver -- 1d transform + 1d tridiagonal'
+
     ! dimensions
     L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
     M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
@@ -163,6 +165,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! initialize 2d transform and 1d tridiagonal !------------------------------------------------------------!
     if (solveflag .eq. TRIG_TRIG_DRCT) then      !------------------------------------------------------------!
       
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver -- 2d transform + 1d tridiagonal'
+
       ! dimensions
       L = globalSize(IAXIS) !NX-1  ! Total Number of Points in X
       N = globalSize(JAXIS) !NY-1  ! Total Number of Points in Y
@@ -252,6 +256,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! --------------------------------------------------------------------------------------------------------!
     ! initialize 1d transform and 2d blktri (pdc2d)   !-------------------------------------------------------!
     else if (solveflag .eq. TRIG_DRCT_DRCT) then      !-------------------------------------------------------!
+
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver -- 1d transform + 2d tridiagonal'
 
       ! dimensions
       L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X

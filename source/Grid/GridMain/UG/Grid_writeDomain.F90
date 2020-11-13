@@ -26,11 +26,16 @@
  
 subroutine Grid_writeDomain()
 
+  use Driver_interface, ONLY : Driver_abortFlash
+
   use Grid_data, ONLY : gr_meshMe, gr_meshComm, gr_globalNumBlocks,    &
                         gr_iCoords, gr_jCoords, gr_kCoords,            &
                         gr_iMetrics, gr_jMetrics, gr_kMetrics,         &
                         gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi
+
   use Timers_interface, ONLY : Timers_start, Timers_stop
+
+  use HDF5
 
   implicit none
 
@@ -38,31 +43,39 @@ subroutine Grid_writeDomain()
 #include "constants.h"
 #include "Flash_mpi.h"
 
-  integer :: fileID, ierr, i, j, k, a, b, c, &
+  integer :: ierr, i, j, k, a, b, c, d, &
              realSize, newType
   integer(kind=MPI_ADDRESS_KIND) :: extent, begin
   integer, dimension(2) :: sizes, subSizes, starts
   integer, dimension(MDIM) :: axes, resizedType
   integer, allocatable, dimension(:) :: counts, displs
-  character(len=MAX_STRING_LENGTH) :: filename
   character(len=5) :: gCrdLbs(MDIM, 3), gMtrLbs(MDIM, 3)
   real, dimension(MDIM, 3) :: gCrdMax, gCrdMin, gMtrMax, gMtrMin 
   real, allocatable, dimension(:,:) :: iCoords, jCoords, kCoords
   real, allocatable, dimension(:,:) :: iMetrics, jMetrics, kMetrics
-  real, allocatable, dimension(:,:,:,:,:,:,:) :: gCoords, gMetrics
+  real, allocatable, dimension(:,:,:,:,:) :: gCoords, gMetrics
+
+  ! locals necessary to read hdf5 file
+  integer :: error
+  integer(HID_T) :: file_id, dspc_id, dset_id, aspc_id, attr_id 
+  integer(HSIZE_T), dimension(2) :: dset_dims
+  integer(HSIZE_T), dimension(1) :: dset_sngl
+  character(len = 32) :: filename, dsetname, attrname
 
 #ifdef FLASH_IO_HDF5
 
   call Timers_start("writeDomain")
+
 
   ! Open an hdf5 file for writing grid information
   if(gr_meshMe == MASTER_PE) then
 
     call io_getOutputName(0, "hdf5_", "grd_", filename, .false.)
 
-    fileID = -1
-    call io_h5init_file(fileID, filename)
-    if(fileID == -1) then
+    call h5open_f(error)
+
+    call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+    if(file_id == -1) then
       print *, "Error: Unable to initialize GRID OUTPUT file"
       call Driver_abortFlash("Unable to initialize hdf5 file")
     end if
@@ -104,15 +117,15 @@ subroutine Grid_writeDomain()
 
     ! Create mpi buffers and global grid storage array
     !   buffers shape are    (faces * blks, blk size)
-    !   global grid shape is (axes, faces, blks, bsz I, bsz J, bsz K, 1)
+    !   global grid shape is (axes, faces, blks, bsz, 1)
     allocate(iCoords(3 * gr_globalNumBlocks, NXB))
     allocate(jCoords(3 * gr_globalNumBlocks, NYB))
     allocate(kCoords(3 * gr_globalNumBlocks, NZB))
     allocate(iMetrics(3 * gr_globalNumBlocks, NXB))
     allocate(jMetrics(3 * gr_globalNumBlocks, NYB))
     allocate(kMetrics(3 * gr_globalNumBlocks, NZB))
-    allocate(gCoords(MDIM, 3, gr_globalNumBlocks, NXB, NYB, NZB, 1))
-    allocate(gMetrics(MDIM, 3, gr_globalNumBlocks, NXB, NYB, NZB, 1))
+    allocate(gCoords(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
+    allocate(gMetrics(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
 
   endif  
   
@@ -134,70 +147,82 @@ subroutine Grid_writeDomain()
   if(gr_meshMe == MASTER_PE) then
 
     ! Copy mpi buffers to global grid storage array
-    gCoords(IAXIS,:,:,:,1,1,1) = reshape(iCoords, (/ 3, gr_globalNumBlocks, NXB /)) 
-    gCoords(JAXIS,:,:,1,:,1,1) = reshape(jCoords, (/ 3, gr_globalNumBlocks, NYB /)) 
-    gCoords(KAXIS,:,:,1,1,:,1) = reshape(kCoords, (/ 3, gr_globalNumBlocks, NZB /)) 
-    gMetrics(IAXIS,:,:,:,1,1,1) = reshape(iMetrics, (/ 3, gr_globalNumBlocks, NXB /)) 
-    gMetrics(JAXIS,:,:,1,:,1,1) = reshape(jMetrics, (/ 3, gr_globalNumBlocks, NYB /)) 
-    gMetrics(KAXIS,:,:,1,1,:,1) = reshape(kMetrics, (/ 3, gr_globalNumBlocks, NZB /)) 
+    gCoords(IAXIS,:,:,1:NXB,1) = reshape(iCoords, (/ 3, gr_globalNumBlocks, NXB /)) 
+    gCoords(JAXIS,:,:,1:NYB,1) = reshape(jCoords, (/ 3, gr_globalNumBlocks, NYB /)) 
+    gCoords(KAXIS,:,:,1:NZB,1) = reshape(kCoords, (/ 3, gr_globalNumBlocks, NZB /)) 
+    gMetrics(IAXIS,:,:,1:NXB,1) = reshape(iMetrics, (/ 3, gr_globalNumBlocks, NXB /)) 
+    gMetrics(JAXIS,:,:,1:NYB,1) = reshape(jMetrics, (/ 3, gr_globalNumBlocks, NYB /)) 
+    gMetrics(KAXIS,:,:,1:NZB,1) = reshape(kMetrics, (/ 3, gr_globalNumBlocks, NZB /)) 
     deallocate(iCoords, jCoords, kCoords, iMetrics, jMetrics, kMetrics)
 
-    ! fill out mesh grid
-#if NDIM == 3
-      do k=1, NZB
-        do j=1, NYB
-          gCoords(IAXIS,:,:,:,j,k,1) = gCoords(IAXIS,:,:,:,1,1,1)
-          gMetrics(IAXIS,:,:,:,j,k,1) = gMetrics(IAXIS,:,:,:,1,1,1)
-        end do
-        do i=1, NXB
-          gCoords(JAXIS,:,:,i,:,k,1) = gCoords(JAXIS,:,:,1,:,1,1)
-          gMetrics(JAXIS,:,:,i,:,k,1) = gMetrics(JAXIS,:,:,1,:,1,1)
-        end do
-      end do
-      do j=1, NYB
-        do i=1, NXB
-          gCoords(KAXIS,:,:,i,j,:,1) = gCoords(KAXIS,:,:,1,1,:,1)
-          gMetrics(KAXIS,:,:,i,j,:,1) = gMetrics(KAXIS,:,:,1,1,:,1)
-        end do
-      end do
-#else
-      do j=2, NYB
-        gCoords(IAXIS,:,:,:,j,1,1) = gCoords(IAXIS,:,:,:,j-1,1,1)
-        gMetrics(IAXIS,:,:,:,j,1,1) = gMetrics(IAXIS,:,:,:,j-1,1,1)
-      end do
-      do i=2, NXB
-        gCoords(JAXIS,:,:,i,:,1,1) = gCoords(JAXIS,:,:,i-1,:,1,1)
-        gMetrics(JAXIS,:,:,i,:,1,1) = gMetrics(JAXIS,:,:,i-1,:,1,1)
-      end do
-      gCoords(KAXIS,:,:,:,:,1,1) = gCoords(KAXIS,1,1,1,1,1,1) 
-      gMetrics(KAXIS,:,:,:,:,1,1) = gMetrics(KAXIS,1,1,1,1,1,1)
-#endif      
+    ! Write coordinates to file
+    do a=IAXIS, KAXIS 
 
-    ! Write IAXIS coordinates 
-    do a=IAXIS, KAXIS
+      ! Determine bounds      
+      select case (a)
+        case (1)
+          d = NXB
+        case (2)
+          d = NYB
+        case (3)
+          d = NZB
+      end select 
+
+      ! write each face per axis
       do b=LEFT_EDGE, RIGHT_EDGE
-        do c=1, gr_globalNumBlocks    
 
-          ! find extreme values
-          gCrdMax(a, b) = maxval(gCoords(a, b, :, :, :, :, :)) 
-          gCrdMax(a, b) = maxval(gCoords(a, b, :, :, :, :, :)) 
-          gMtrMax(a, b) = maxval(gMetrics(a, b, :, :, :, :, :)) 
-          gMtrMax(a, b) = maxval(gMetrics(a, b, :, :, :, :, :)) 
-      
-          ! write to hdf5 file
-          call io_h5write_unknowns(gr_meshMe, fileID, NXB, NYB, NZB, & 
-                                   gCoords(a, b, c, :, :, :, :),     &
-                                   gCrdMin(a, b),                    & 
-                                   gCrdMax(a, b),                    &
-                                   gCrdLbs(a, b),                    &
-                                   1, gr_globalNumBlocks, c-1)   
-          call io_h5write_unknowns(gr_meshMe, fileID, NXB, NYB, NZB, & 
-                                   gMetrics(a, b, c, :, :, :, :),    &
-                                   gMtrMin(a, b),                    & 
-                                   gMtrMax(a, b),                    &
-                                   gMtrLbs(a, b),                    &
-                                   1, gr_globalNumBlocks, c-1)   
-        end do
+        ! find extreme values
+        gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
+        gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
+        gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
+        gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
+   
+        ! write dimensions
+        dsetname = gCrdLbs(a, b)
+        dset_dims = (/ d, gr_globalNumBlocks /)
+        call h5screate_simple_f(2, dset_dims, dspc_id, error)
+        call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
+        call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(gCoords(a, b, :, 1:d, 1)), dset_dims, error)
+       
+        attrname = "maximum"
+        dset_sngl = (/ 1 /)
+        call h5screate_simple_f(1, dset_sngl, aspc_id, error)
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gCrdMax(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
+
+        attrname = "minimum"
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gCrdMin(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
+        call h5sclose_f(aspc_id, error)
+
+        call h5dclose_f(dset_id, error)
+        call h5sclose_f(dspc_id, error)
+
+        ! write metrics 
+        dsetname = gMtrLbs(a, b)
+        dset_dims = (/ d, gr_globalNumBlocks /)
+        call h5screate_simple_f(2, dset_dims, dspc_id, error)
+        call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
+        call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(gMetrics(a, b, :, 1:d, 1)), dset_dims, error)
+       
+        attrname = "maximum"
+        dset_sngl = (/ 1 /)
+        call h5screate_simple_f(1, dset_sngl, aspc_id, error)
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMax(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
+
+        attrname = "minimum"
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMin(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
+        call h5sclose_f(aspc_id, error)
+
+        call h5dclose_f(dset_id, error)
+        call h5sclose_f(dspc_id, error)
+
       end do
     end do
    
@@ -215,7 +240,10 @@ subroutine Grid_writeDomain()
   ! Close the hdf5 file
   if(gr_meshMe == MASTER_PE) then
 
-    call io_h5close_file(fileID)
+    print *, "*** Wrote grid data to ", trim(filename), " ****"
+
+    call h5fclose_f(file_id, error)
+    call h5close_f(error)
 
   end if
 

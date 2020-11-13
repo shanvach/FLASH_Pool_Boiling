@@ -98,6 +98,8 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! --------------------------------------------------------------------------------------------------------!
     ! Initialize 2d block tridiagonal (pdc2d) ----------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
+ 
+    if (pfft_myPE == 0) write(*,*) '2d pfft solver -- 2d block tridiagonal (pdc2d)'
 
     ! dimensions
     N = globalSize(IAXIS) !NX-2  ! Total Number of Points in X 
@@ -211,6 +213,7 @@ subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globa
     ! Initialize 3d block pentadiagonal (pdc3d) --------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
     
+    if (pfft_myPE == 0) write(*,*) '3d pfft solver -- 3d block tridiagonal (pdc3d)'
 
     ! ////// NOT YET IMPLEMENTED ///////// !
 

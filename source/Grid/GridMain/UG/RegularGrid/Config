@@ -13,9 +13,9 @@ PARAMETER x_stretch_type        STRING          "sg_user"
 PARAMETER y_stretch_type        STRING          "sg_user"
 PARAMETER z_stretch_type        STRING          "sg_user"
 
-PARAMETER x_stretch_value       REAL            0.00
-PARAMETER y_stretch_value       REAL            0.70
-PARAMETER z_stretch_value       REAL            0.70
+PARAMETER x_stretch_value       REAL            0.50
+PARAMETER y_stretch_value       REAL            0.50
+PARAMETER z_stretch_value       REAL            0.50
 
 D Method of Specifying Poisson Solver for Each Axis
 PARAMETER poisson_solver        STRING         "auto"	# allowed are : 'auto', 'user', 'trig', or 'direct' 
