@@ -2,9 +2,9 @@
 
 # Default Options
 dim="-2d"
-nxb=24
-nyb=24
-nzb=24
+nxb=32
+nyb=32
+nzb=32
 opt="-opt"
 grd="+rg"
 dir="RBCAV"

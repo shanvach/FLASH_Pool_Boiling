@@ -98,6 +98,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! Initialize 1d transform and 1d tridiagonal -------------------------------------------------------------!
     ! --------------------------------------------------------------------------------------------------------!
     
+    if (pfft_myPE == 0) write(*,*) '2d pfft solver -- 1d transform + 1d tridiagonal'
+
     ! dimensions
     L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
     M = globalSize(JAXIS) !NY-2  ! Total Number of Points in Y
@@ -163,6 +165,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! initialize 2d transform and 1d tridiagonal !------------------------------------------------------------!
     if (solveflag .eq. TRIG_TRIG_DRCT) then      !------------------------------------------------------------!
       
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver -- 2d transform + 1d tridiagonal'
+
       ! dimensions
       L = globalSize(IAXIS) !NX-1  ! Total Number of Points in X
       N = globalSize(JAXIS) !NY-1  ! Total Number of Points in Y
@@ -252,6 +256,8 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
     ! --------------------------------------------------------------------------------------------------------!
     ! initialize 1d transform and 2d blktri (pdc2d)   !-------------------------------------------------------!
     else if (solveflag .eq. TRIG_DRCT_DRCT) then      !-------------------------------------------------------!
+
+      if (pfft_myPE == 0) write(*,*) '3d pfft solver -- 1d transform + 2d tridiagonal'
 
       ! dimensions
       L = globalSize(IAXIS) !NX-2  ! Total Number of Points in X
@@ -563,7 +569,7 @@ subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, g
 
       ! identify if there was a need to prevent a div-by-zero floating point error
       call MPI_ALLreduce(errorAux, error, 1, FLASH_REAL, MPI_SUM, pfft_comm(IAXIS), ierr)   
-      if (error >= 1) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
+      if (error >= 1 .and. pfft_myPE == 0) write(*,*) "Warning -- TriDiag encountered singular matrix error, adding eps to diagonal!"
 
     ! --------------------------------------------------------------------------------------------------------!
     ! Complete 2d transform and 1d tridiagonal  --------------------------------------------------------------!
