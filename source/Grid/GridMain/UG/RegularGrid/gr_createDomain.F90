@@ -256,8 +256,8 @@ subroutine gr_createDomain()
       call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
       call h5dclose_f(dset_id, error)
       gr_iCoordsGlb(LEFT_EDGE, :,1) = sdata(1:gI,1) 
-      gr_iCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gI,1) 
-      gr_iCoordsGlb(CENTER,    :,1) = (sdata(2:gI,1) + sdata(1:gI,1)) / 2.0 
+      gr_iCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gI+1,1) 
+      gr_iCoordsGlb(CENTER,    :,1) = (sdata(2:gI+1,1) + sdata(1:gI,1)) / 2.0 
 
       deallocate(sdata)
 
@@ -403,8 +403,8 @@ subroutine gr_createDomain()
         call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
         call h5dclose_f(dset_id, error)
         gr_jCoordsGlb(LEFT_EDGE, :,1) = sdata(1:gJ,1) 
-        gr_jCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gJ,1) 
-        gr_jCoordsGlb(CENTER,    :,1) = (sdata(2:gJ,1) + sdata(1:gJ,1)) / 2.0 
+        gr_jCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gJ+1,1) 
+        gr_jCoordsGlb(CENTER,    :,1) = (sdata(2:gJ+1,1) + sdata(1:gJ,1)) / 2.0 
 
         deallocate(sdata)
 
@@ -557,8 +557,8 @@ subroutine gr_createDomain()
         call h5dread_f(dset_id, H5T_NATIVE_DOUBLE, sdata, data_dims, error)
         call h5dclose_f(dset_id, error)
         gr_kCoordsGlb(LEFT_EDGE, :,1) = sdata(1:gK,1) 
-        gr_kCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gK,1) 
-        gr_kCoordsGlb(CENTER,    :,1) = (sdata(2:gK,1) + sdata(1:gK,1)) / 2.0 
+        gr_kCoordsGlb(RIGHT_EDGE,:,1) = sdata(2:gK+1,1) 
+        gr_kCoordsGlb(CENTER,    :,1) = (sdata(2:gK+1,1) + sdata(1:gK,1)) / 2.0 
 
         deallocate(sdata)
 
