@@ -39,7 +39,7 @@ subroutine Simulation_initBlock(blockId)
                               Grid_getBlkPtr, Grid_releaseBlkPtr, &
                               Grid_solvePoisson, Grid_fillGuardCells, GRID_PDE_BND_NEUMANN
 
-  use Grid_data, only : gr_domainBC, gr_meshNumProcs
+  use Grid_data, only : gr_domainBC
 
   use Driver_Interface, only : Driver_abortFlash
 
@@ -122,7 +122,7 @@ subroutine Simulation_initBlock(blockId)
 
       ! common parameters for hyperslab
       rank = 4
-      count  = (/ 1, 1, 1, 1 /) 
+      count  = (/ 1, 1, 1, 1 /)
       offset = (/ 0, 0, 0, dr_meshMe /)
       stride = (/ 1, 1, 1, 1 /)
 

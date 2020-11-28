@@ -4,7 +4,7 @@
 # Set the HDF5/MPI library paths -- these need to be updated for your system
 #----------------------------------------------------------------------------
 
-MPI_PATH = /apps/mpi/openmpi
+MPI_PATH   = /apps/mpi/openmpi/4.0.5/
 HDF5_PATH  = /apps/hdf5/1.8.20
 ZLIB_PATH  = /usr
 

@@ -248,7 +248,7 @@ subroutine gr_createDomain()
 
       ! prepare parameters
       data_dims = (/ gI, 1 /)
-      allocate(sdata(gI, 1))
+      allocate(sdata(gI+1, 1))
 
       ! read in iaxis faces grid data globally 
       dsetname  = "/xFaces"
@@ -391,11 +391,9 @@ subroutine gr_createDomain()
         call h5fopen_f(filename, H5F_ACC_RDONLY_F, file_id, error)
         if ( error < 0 ) call Driver_abortFlash("Please check input file for structure.")
 
-        deallocate(sdata)
-
         ! prepare parameters
         data_dims = (/ gJ, 1 /)
-        allocate(sdata(gJ, 1))
+        allocate(sdata(gJ + 1, 1))
 
         ! read in Left Edge grid data globally 
         dsetname  = "/yFaces"
@@ -549,7 +547,7 @@ subroutine gr_createDomain()
 
         ! prepare parameters
         data_dims = (/ gK, 1 /)
-        allocate(sdata(gK, 1))
+        allocate(sdata(gK + 1, 1))
 
         ! read in Left Edge grid data globally 
         dsetname  = "/zFaces"
