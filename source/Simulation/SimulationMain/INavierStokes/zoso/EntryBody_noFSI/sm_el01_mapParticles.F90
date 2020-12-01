@@ -24,10 +24,11 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
                                 xnrm,ynrm,        &
                                 areai, loc_num )
   use SolidMechanics_data, only: sm_structure
+  use sm_pk_interface, only: sm_pk_constvel_dof, sm_pk_getVelocity
   use sm_pk_data, only: sm_pk_timedelay
-  use sm_pk_interface, only: sm_pk_getVelocity
   use Driver_interface, only: Driver_abortFlash, Driver_getSimTime
   use Driver_data, only: dr_simTime
+  use Grid_data, ONLY : gr_meshMe
 
   implicit none
   
@@ -46,6 +47,8 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
   real :: del,area,area_sub
   real :: ei,N1,N2
 
+  real, allocatable, dimension(:) :: vc, vcd, vcdd, paramcoord
+  integer :: nfix_coord,maxrestparams,ircoord
   real :: sm_pk_velocity, sm_pk_acceleration
   real :: time_mod, time
 
@@ -54,7 +57,27 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
   time_mod = time - sm_pk_timedelay
 
-  call sm_pk_getVelocity(time_mod, sm_pk_velocity, sm_pk_acceleration)
+  !call sm_pk_getVelocity(dr_simTime, sm_pk_velocity, sm_pk_acceleration)
+
+  ! Set Restrained individual nodes for Body:
+  nfix_coord = Body%nrcoords
+  if (nfix_coord .gt. 0) then
+
+     allocate( vc(nfix_coord), vcd(nfix_coord), vcdd(nfix_coord) )
+     maxrestparams = body%maxrestparams
+     allocate( paramcoord(maxrestparams) )
+
+     do ircoord=1,nfix_coord
+
+        paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
+
+        call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+     enddo
+
+     sm_pk_velocity = vcd(2)
+     sm_pk_acceleration = vcdd(2)
+
+  endif
 
   !
   ! Get absolute position of each node in the element
@@ -79,6 +102,7 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
      end do
   enddo
+
 
   ! nXi -> nEta
   nEta  = body%ws_nXi(e)

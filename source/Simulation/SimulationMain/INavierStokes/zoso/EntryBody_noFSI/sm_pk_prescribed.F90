@@ -26,10 +26,11 @@ subroutine sm_pk_prescribed(time,maxrestparams,paramcoord,vc,vcd,vcdd)
   ! Parameters: Are s.t. x(t) = xo + vel*t 
   xo = paramcoord(1)
 
-  vc  = xo + vel*time
-  vcd =           vel
-  vcdd=           0.0
+  vc  = xo + sm_pk_velocity*time
+  vcd =      sm_pk_velocity
+  vcdd=      sm_pk_acceleration
 
+  print*,"sm_pk YVEL = ",vcd
 
   return
 

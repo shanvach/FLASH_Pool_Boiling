@@ -22,7 +22,7 @@
 #include "constants.h"
 #include "SolidMechanics.h"
 
-#define sm_pk_PRESCRIBED_MOTION
+!#define sm_pk_PRESCRIBED_MOTION
 
 subroutine sm_pk_apply(ibd,time)
 
