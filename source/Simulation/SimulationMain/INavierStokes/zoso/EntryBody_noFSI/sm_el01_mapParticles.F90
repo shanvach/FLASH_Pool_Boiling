@@ -57,27 +57,27 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
   time_mod = time - sm_pk_timedelay
 
-  !call sm_pk_getVelocity(dr_simTime, sm_pk_velocity, sm_pk_acceleration)
+  call sm_pk_getVelocity(dr_simTime, sm_pk_velocity, sm_pk_acceleration)
 
   ! Set Restrained individual nodes for Body:
-  nfix_coord = Body%nrcoords
-  if (nfix_coord .gt. 0) then
-
-     allocate( vc(nfix_coord), vcd(nfix_coord), vcdd(nfix_coord) )
-     maxrestparams = body%maxrestparams
-     allocate( paramcoord(maxrestparams) )
-
-     do ircoord=1,nfix_coord
-
-        paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
-
-        call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
-     enddo
-
-     sm_pk_velocity = vcd(2)
-     sm_pk_acceleration = vcdd(2)
-
-  endif
+!  nfix_coord = Body%nrcoords
+!  if (nfix_coord .gt. 0) then
+!
+!     allocate( vc(nfix_coord), vcd(nfix_coord), vcdd(nfix_coord) )
+!     maxrestparams = body%maxrestparams
+!     allocate( paramcoord(maxrestparams) )
+!
+!     do ircoord=1,nfix_coord
+!
+!        paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
+!
+!        call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+!     enddo
+!
+!     sm_pk_velocity = vcd(2)
+!     sm_pk_acceleration = vcdd(2)
+!
+!  endif
 
   !
   ! Get absolute position of each node in the element

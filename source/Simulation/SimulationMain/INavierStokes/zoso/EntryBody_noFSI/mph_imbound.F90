@@ -243,7 +243,7 @@ subroutine mph_imbound(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
            hratio = (solnData(LMDA_VAR,i,j,k) + hnorm)
 
 #ifdef CONTACT_ANGLE
-           dphidn = cos(80.0*acos(-1.0)/180)
+           dphidn = cos(100.0*acos(-1.0)/180)
            !dphidn = (zp(2)-zp(1))/(hnorm2-hnorm)
 
            solnData(DFUN_VAR,i,j,k) = zp(1) - hratio*dphidn

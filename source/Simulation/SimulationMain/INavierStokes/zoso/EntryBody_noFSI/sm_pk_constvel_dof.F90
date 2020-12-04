@@ -10,9 +10,6 @@ subroutine sm_pk_constvel_dof(time,maxrestparams,paramcoord,vc,vcd,vcdd)
   real, intent(out)   :: vc, vcd, vcdd
   
   real :: xo, vel
-  real :: sm_pk_velocity, sm_pk_acceleration
-
-  call sm_pk_getVelocity(time, sm_pk_velocity, sm_pk_acceleration)
 
   ! Parameters: Are s.t. x(t) = xo + vel*t 
   xo = paramcoord(1)
@@ -20,9 +17,9 @@ subroutine sm_pk_constvel_dof(time,maxrestparams,paramcoord,vc,vcd,vcdd)
 
   !print*,"body vel = ",vel
 
-  vc  = xo + (vel*time) * sm_pk_velocity 
-  vcd =           vel   * sm_pk_velocity
-  vcdd=           sm_pk_acceleration
+  vc  = xo + (vel*time)
+  vcd =           vel  
+  vcdd=           0.0  
 
   return
 

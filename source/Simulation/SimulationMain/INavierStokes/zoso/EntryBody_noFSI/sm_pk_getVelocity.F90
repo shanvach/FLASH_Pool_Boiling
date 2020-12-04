@@ -15,116 +15,83 @@ subroutine sm_pk_getVelocity(time,sm_pk_velocity,sm_pk_acceleration)
   real, intent(out)   :: sm_pk_velocity, sm_pk_acceleration
   real :: const_vel
 
-  sm_pk_velocity     =  -1.471e-05*time**6 + 0.0004412*time**5 - & 
-                          0.004785*time**4 + 0.02112*time**3 - & 
-                           0.01789*time**2 - 0.009742*time - 0.9982
-  
-  sm_pk_acceleration =  -8.824e-05*time**5 + 0.002206*time**4 - &
-                          0.01914*time**3 + 0.06337*time**2 - &
-                           0.03579*time - 0.009742
+  sm_pk_velocity = -0.002428 *time**7 + 0.04247 *time**6 - 0.2775 *time**5 &
+                   + 0.8175  *time**4 - 1.022   *time**3 + 0.427  *time**2 &
+                   + 0.006078*time    - 1.009
 
+  sm_pk_acceleration = -0.017*time**6 + 0.2548  *time**5 - 1.387  *time**4 &
+                       + 3.27*time**3 - 3.065   *time**2 + 0.8539 *time    &
+                       + 0.006078
 
   return
 
 end subroutine sm_pk_getVelocity
 
-! Linear Slope 0.1
+! very long -1 velocity (>20ndt)
+!  sm_pk_velocity = 1.972*10**(-14)*time**8 - 8.18*10**(-12)*time**7 &
+!                   + 1.361*10**(-9)*time**6 - 1.149*10**(-7)*time**5 &
+!                   + 5.091*10**(-6)*time**4 - 0.0001084*time**3 &
+!                   + 0.0009645*time**2       - 0.002502*time**1 - 1.001
 !
-!  sm_pk_velocity     =  -1.471e-05*time**6 + 0.0004412*time**5 - & 
-!                          0.004785*time**4 + 0.02112*time**3 - & 
-!                           0.01789*time**2 - 0.009742*time - 0.9982
-!  
-!  sm_pk_acceleration =  -8.824e-05*time**5 + 0.002206*time**4 - &
-!                          0.01914*time**3 + 0.06337*time**2 - &
-!                           0.03579*time - 0.009742
+!  sm_pk_acceleration = 1.578*10**(-13)*time**7 - 5.726*10**(-11)*time**6 &
+!                       + 8.165*10**(-9)*time**5 - 5.746*10**(-7)*time**4 &
+!                       + 2.036*10**(-5)*time**3 - 0.0003253*time**2 &
+!                       + 0.001929*time - 0.002502 
 
-! Linear Slope 0.2
+! medium long -1 velocity (=15ndt)
+!  sm_pk_velocity = -3.031e-13*time**8 + 9.6e-11*time**7 - 1.254e-08*time**6 &
+!                   + 8.699e-07*time**5 - 3.414e-05*time**4 + 0.0007392*time**3 &
+!                   - 0.007545*time**2 + 0.02677*time - 0.9999 
 !
-!  sm_pk_velocity     =  -2.941e-05*time**6 + 0.0008824*time**5 - & 
-!                          0.00957*time**4 + 0.04225*time**3 - & 
-!                           0.03579*time**2 - 0.01948*time - 0.9964
-!  
-!  sm_pk_acceleration =  0.0001765*time**5 + 0.004412*time**4 - &
-!                          0.03828*time**3 + 0.1267*time**2 - &
-!                           0.07158*time - 0.01948
+!  sm_pk_acceleration = -2.425e-12*time**7 + 6.72e-10*time**6 - 7.526e-08*time**5 &
+!                       + 4.349e-06*time**4 - 0.0001366*time**3 + 0.002218*time**2 &
+!                       - 0.01509*time + 0.02677 
 
-! Quadradic Slope 0.1
+! crashed
+!  sm_pk_velocity = -3.01e-05*time**14  + 0.001161*time**13  - 0.01985*time**12 &
+!                   + 0.1982*time**11   - 1.279   *time**10  + 5.582  *time**9 &
+!                   - 16.75 *time**8    + 34.49   *time**7   - 47.96  *time**6 &
+!                   + 43.65 *time**5    - 24.75   *time**4   + 8.065  *time**3 &
+!                   - 1.31  *time**2    + 0.07649 *time      - 0.9999
 !
-!  sm_pk_velocity     =  -7.095e-07*time**6 + 3.073e-05*time**5 - & 
-!                          0.0005286*time**4 + 0.004584*time**3 - & 
-!                           0.01092*time**2 + 0.007002*time - 1
-!  
-!  sm_pk_acceleration =  -4.257e-06*time**5 + 0.0001536*time**4 - &
-!                          0.002114*time**3 + 0.01375*time**2 - &
-!                           0.02183*time + 0.007002
+!  sm_pk_acceleration = -0.0004214*time**13  + 0.01509*time**12  - 0.2382*time**11 &
+!                       + 2.181   *time**10  - 12.79  *time**9   + 50.24 *time**8  &
+!                       - 134     *time**7   + 241.4  *time**6   - 287.8 *time**5  &
+!                       + 218.3   *time**4   - 98.99  *time**3   + 24.19 *time**2  &
+!                       - 2.62    *time + 0.07649
 
-! Quadradic Slope 0.3
+! adjusted
+!  sm_pk_velocity = -0.0001534*time**11  + 0.004001*time**10  - 0.0428*time**9 &
+!                   + 0.2371  *time**8   - 0.6852  *time**7   + 0.7378*time**6 &
+!                   + 1.091   *time**5   - 4.059   *time**4   + 4.428 *time**3 &
+!                   - 2.005   *time**2   + 0.31    *time      - 1.004
 !
-!  sm_pk_velocity     =  2.778e-05*time**6 - 0.0005192*time**5 + & 
-!                          0.002906*time**4 + 0.0004108*time**3 - & 
-!                           0.01528*time**2 + 0.01273*time - 1
-!  
-!  sm_pk_acceleration =  0.0001667*time**5 - 0.002596*time**4 + &
-!                          0.01162*time**3 + 0.001233*time**2 - &
-!                           0.03055*time + 0.01273
+!  sm_pk_acceleration = -0.001688*time**10  + 0.04001*time**9 - 0.3852*time**8 &
+!                       + 1.897  *time**7   - 4.796  *time**6 + 4.427 *time**5 &
+!                       + 5.457  *time**4   - 16.24  *time**3 + 13.28 *time**2 &
+!                       - 4.009  *time      + 0.31
 
-! Polynomial for Experimental 100 Degree Data
+! works!
+!  sm_pk_velocity = -0.002428 *time**7 + 0.04247 *time**6 - 0.2775 *time**5 &
+!                   + 0.8175  *time**4 - 1.022   *time**3 + 0.427  *time**2 &
+!                   + 0.006078*time    - 1.009
 !
-!  sm_pk_velocity = -3.526e-13*time**18 + 4.865e-11*time**17 - 3.083e-09*time**16 &
-!                   + 1.188e-07*time**15 - 3.112e-06*time**14 + 5.86e-05*time**13 &
-!                   - 0.0008183*time**12 + 0.00862  *time**11 - 0.06894 *time**10 &
-!                   + 0.4182   *time**9  - 1.906    *time**8  + 6.419   *time**7  &
-!                   - 15.51    *time**6  + 25.76    *time**5  - 27.55   *time**4 &
-!                   + 17.25    *time**3  - 5.411    *time**2  + 0.6141  *time - 1.002
-!
-!  sm_pk_acceleration = -6.346e-12 *time**17 + 8.271e-10 *time**16 - 4.932e-08*time**15 &
-!                       + 1.782e-06*time**14 - 4.357e-05 *time**13 + 0.0007617*time**12 &
-!                       - 0.00982  *time**11 + 0.09482   *time**10 - 0.6894   *time**9  &
-!                       + 3.764    *time**8  - 15.25     *time**7  + 44.93    *time**6  &
-!                       - 93.07    *time**5  + 128.8     *time**4  - 110.2    *time**3  &
-!                       + 51.74    *time**2  - 10.82     *time     + 0.6141
+!  sm_pk_acceleration = -0.017*time**6 + 0.2548  *time**5 - 1.387  *time**4 &
+!                       + 3.27*time**3 - 3.065   *time**2 + 0.8539 *time    &
+!                       + 0.006078
 
-! Velocity 08
+! super long
+!  sm_pk_velocity = -1.914e-09*time**13  + 1.737e-07*time**12 - 6.992e-06*time**11 &
+!                   + 0.0001643*time**10 - 0.002495 *time**9  + 0.0256   *time**8  &
+!                   - 0.1801   *time**7  + 0.8628   *time**6  - 2.734    *time**5  &
+!                   + 5.413    *time**4  - 6.052    *time**3  + 3.287    *time**2  &
+!                   - 0.6457   *time     - 0.9858
 !
-!  sm_pk_velocity = -1.536e-07*time**9 + 8.022e-06*time**8 - 0.0001656*time**7 &
-!                  + 0.001664 *time**6 - 0.007562 *time**5 + 0.003236 *time**4 &
-!                  + 0.08781  *time**3 - 0.2156   *time**2 + 0.1374   *time - 1.012
-!
-!  sm_pk_acceleration = -1.382e-06*time**8 + 6.418e-05*time**7 - 0.001159*time**6 &
-!                      + 0.009987 *time**5 - 0.03781  *time**4 + 0.01295 *time**3 &
-!                      + 0.2634   *time**2 - 0.4313   *time    + 0.1374
-
-! Velocity09
-!
-!  sm_pk_velocity = 6.787e-05*time**5 - 0.002118*time**4 + 0.02196*time**3 &
-!                  - 0.06933 *time**2 + 0.05757 *time**2 - 1
-!
-!  sm_pk_acceleration = 0.0003394*time**4 - 0.008474*time**3 + 0.06587*time**2 &
-!                      - 0.1387  *time + 0.05757
-
-! Velocity10
-!
-!  sm_pk_velocity = 1.831e-05*time**5 - 0.0006848*time**4 + 0.008622*time**3 &
-!                  - 0.03501 *time**2 + 0.04064  *time**2 - 1.003
-!
-!  sm_pk_acceleration = 9.154e-05*time**4 - 0.002739*time**3 + 0.02587*time**2 &
-!                      - 0.07002*time + 0.04064
-
-! Velocity11
-!
-!  sm_pk_velocity = -1.312e-06*time**7 + 6.55e-05*time**6 - 0.001226*time**5 &
-!                   + 0.01043 *time**4 - 0.03866 *time**3 + 0.05574 *time**2 &
-!                   - 0.02023 *time    - 1.002
-!
-!  sm_pk_acceleration = -9.184e-06*time**6 + 0.000393*time**5 - 0.006129*time**4 &
-!                       + 0.04172 *time**3 - 0.116   *time**2 + 0.1115  *time - 0.02023
-
-! Constant Vel
-!  const_vel = -10.0
-!
-!  sm_pk_velocity = const_vel !* ( -1.261e-17*time - 1 )
-!
-!  sm_pk_acceleration = 0.0 !-1.261e-17*time
+!  sm_pk_acceleration = -2.488e-08*time**12 + 2.084e-06*time**11 - 7.691e-05*time**10 &
+!                       + 0.001643*time**9  - 0.02245  *time**8  + 0.2048   *time**7  &
+!                       - 1.261   *time**6  + 5.177    *time**5  - 13.67    *time**4  &
+!                       + 21.65   *time**3  - 18.15    *time**2  + 6.573    *time     &
+!                       - 0.6457
 
 
 
