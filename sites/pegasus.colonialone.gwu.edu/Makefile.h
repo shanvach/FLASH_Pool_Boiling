@@ -11,7 +11,7 @@ PE_ENV =GNU
 
 LIB_BASE   =/groups/balarasgrp/flash-lib/openmpi
 
-MPI_PATH = /c1/apps/openmpi/4.0.1rc
+MPI_PATH = /c1/apps/openmpi/4.0.1rc.new
 
 HDF4_PATH  =
 HDF5_PATH  =$(LIB_BASE)/hdf5
