@@ -182,7 +182,7 @@ LIB_STDCXX = -lstdc++
 TEC_PLOT=YES
 TEC_DIR=/usr/local
 ifeq ($(TEC_PLOT), YES)
-  CONFIG_LIB = -I${TEC_DIR}/include -L${TEC_DIR}/lib -lstdc++ -ltecio 
+  CONFIG_LIB = -I${TEC_DIR}/include -L${TEC_DIR}/lib -ltecio -lstdc++ 
 endif
 
 #----------------------------------------------------------------------------
