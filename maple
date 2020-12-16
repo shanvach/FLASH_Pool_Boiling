@@ -4,7 +4,12 @@ if [ $1 = "build" ]; then
 
     docker pull akashdhruv/flash:4.0
 
-    docker run -dit --name flash_container -v $PWD:/home/FLASH -v ~/Desktop/run:/home/run akashdhruv/flash:4.0
+    docker run -dit --name flash_container -v $PWD:/home/FLASH -v $2:/home/run akashdhruv/flash:4.0
+
+    docker exec -it flash_container bash
+fi
+
+if [ $1 = "reconnect" ]; then
 
     docker exec -it flash_container bash
 fi
