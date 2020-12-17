@@ -1,34 +1,25 @@
 #!/bin/bash
 
+source maple.config
+
 if [ $1 = "build" ]; then
-
-    docker pull akashdhruv/flash:4.0
-
-    docker run -dit --name flash_container -v $PWD:/home/FLASH -v $2:/home/run akashdhruv/flash:4.0
-
-    docker exec -it flash_container bash
+docker build -t $maple_container --build-arg flash_object=$flash_object \
+                                 --build-arg flash_run_files=$flash_run_files \
+                                 --build-arg flash_path=$flash_path \
+                                 --file docker/Dockerfile .
 fi
 
-if [ $1 = "reconnect" ]; then
-
-    docker exec -it flash_container bash
+if [ $1 = "rebuild" ]; then
+docker build -t $maple_container --build-arg flash_object=$flash_object \
+                                 --build-arg flash_run_files=$flash_run_files \
+                                 --build-arg flash_path=$flash_path \
+                                 --file docker/Dockerfile .
 fi
 
-if [ $1 = "reset" ]; then
-
-    docker stop flash_container
-
-    docker rm -f flash_container
-
+if [ $1 = "run" ]; then
+docker run -v $2:/home/run/IOData $maple_container
 fi
- 
+
 if [ $1 = "clean" ]; then
-
-    docker stop flash_container
-
-    docker rm -f flash_container
-
-    docker rmi -f akashdhruv/flash:4.0
-
-    docker system prune -a
+docker rmi -f $maple_container
 fi
