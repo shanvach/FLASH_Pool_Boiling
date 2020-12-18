@@ -24,6 +24,7 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
                                 xnrm,ynrm,znrm,   &
                                 areai, loc_num )
   use SolidMechanics_data, only: sm_structure
+  use sm_pk_interface, only: sm_pk_constvel_dof, sm_pk_getVelocity
   use Driver_interface, only: Driver_abortFlash
   use sm_misc_interface,only : sm_crossprod
   use Driver_data, only: dr_simTime
@@ -46,6 +47,13 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
   real :: del,delp,area,area_sub
   real :: ei,ej,N1,N2,N3
   real :: phi
+
+  real :: sm_pk_velocity, sm_pk_acceleration
+
+  ! Get the simulation time
+
+  call sm_pk_getVelocity(dr_simTime, sm_pk_velocity, sm_pk_acceleration)
+
   !
   ! Get absolute position of each node in the element
   !
@@ -62,9 +70,9 @@ subroutine sm_el02_mapParticles(body, e, ptelem,  &
 
         if(i == 2) then
 
-        body%qn(idx2)   = -1.0*dr_simTime !-0.5*dr_simTime + 0.5*ins_gravY*dr_simTime*dr_simTime
-        body%qdn(idx2)  = -1.0            !-0.5 + ins_gravY*dr_simTime        
-        body%qddn(idx2) =  0.0            !ins_gravY
+        body%qn(idx2)   = sm_pk_velocity*dr_simTime !-0.5*dr_simTime + 0.5*ins_gravY*dr_simTime*dr_simTime
+        body%qdn(idx2)  = sm_pk_velocity            !-0.5 + ins_gravY*dr_simTime        
+        body%qddn(idx2) = sm_pk_acceleration            !ins_gravY
 
         u(a,i)   = u(a,i) + body%qn(idx2)
         ud(a,i)  = body%qdn(idx2)
