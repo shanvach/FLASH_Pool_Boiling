@@ -53,6 +53,7 @@ subroutine Simulation_initBlock(blockId)
 
 #include "constants.h"
 #include "Flash.h"
+#include "Flash_mpi.h"
 
   integer, intent(in) :: blockID
  
@@ -61,9 +62,9 @@ subroutine Simulation_initBlock(blockId)
   integer :: i, j, k, nxb, nyb, nzb
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
   real                       :: pi
-  real, dimension(GRID_IHI_GC) :: dx
-  real, dimension(GRID_JHI_GC) :: dy
-  real, dimension(GRID_KHI_GC) :: dz
+  real, dimension(GRID_IHI_GC) :: dx, dxe
+  real, dimension(GRID_JHI_GC) :: dy, dye
+  real, dimension(GRID_KHI_GC) :: dz, dze
   real, dimension(GRID_IHI_GC) :: xcell, xedge
   real, dimension(GRID_JHI_GC) :: ycell, yedge
   real, dimension(GRID_KHI_GC) :: zcell, zedge
@@ -89,6 +90,10 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(2,6)  :: bc_values = 0.0
   real                  :: poisfact  = 1.0
 
+  integer :: ierr
+  real :: mndivv,mxdivv
+  real :: vecminaux(6),vecmaxaux(6),vecmin(6),vecmax(6)
+
   ! Point to Blocks centered variables:
   call Grid_getBlkPtr(blockID, solnData, CENTER)
 
@@ -108,6 +113,10 @@ subroutine Simulation_initBlock(blockId)
   call Grid_getCellCoords(JAXIS, blockId, CENTER, .true., ycell, GRID_JHI_GC)  
   call Grid_getCellCoords(KAXIS, blockId, CENTER, .true., zcell, GRID_KHI_GC)  
   
+  call Grid_getCellMetrics(IAXIS, blockId, LEFT_EDGE, .true., dxe, GRID_IHI_GC)  
+  call Grid_getCellMetrics(JAXIS, blockId, LEFT_EDGE, .true., dye, GRID_JHI_GC)  
+  call Grid_getCellMetrics(KAXIS, blockId, LEFT_EDGE, .true., dze, GRID_KHI_GC)  
+
   call Grid_getCellCoords(IAXIS, blockId, LEFT_EDGE, .true., xedge, GRID_IHI_GC)  
   call Grid_getCellCoords(JAXIS, blockId, LEFT_EDGE, .true., yedge, GRID_JHI_GC)  
   call Grid_getCellCoords(KAXIS, blockId, LEFT_EDGE, .true., zedge, GRID_KHI_GC)  
@@ -261,6 +270,7 @@ subroutine Simulation_initBlock(blockId)
       solnData(PRES_VAR,:,:,:) = 0.0
       solnData(DELP_VAR,:,:,:) = 0.0
       solnData(DUST_VAR,:,:,:) = 0.0
+      solnData(SDVO_VAR,:,:,:) = 0.0
       solnData(SDVC_VAR,:,:,:) = 0.0
       solnData(TVIS_VAR,:,:,:) = 0.0
       facexData(RHDS_FACE_VAR,:,:,:) = 0.0
@@ -268,6 +278,15 @@ subroutine Simulation_initBlock(blockId)
 #if NDIM == 3
       facezData(RHDS_FACE_VAR,:,:,:) = 0.0
 #endif
+
+      call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
+                          faceyData(VELC_FACE_VAR,:,:,:),&
+                          facezData(VELC_FACE_VAR,:,:,:),&
+              blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                          dx, dy, dz,                    &
+                          solnData(SDVO_VAR,:,:,:) )
 
 !    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !    ! make velocity field divergence free
@@ -278,7 +297,7 @@ subroutine Simulation_initBlock(blockId)
 !#if NDIM == 3
 !    gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! w
 !#endif
-!    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+!   !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 !
 !    call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
 !                        faceyData(VELC_FACE_VAR,:,:,:),&
@@ -289,14 +308,15 @@ subroutine Simulation_initBlock(blockId)
 !                        dx, dy, dz,                    &
 !                        solnData(DUST_VAR,:,:,:) )
 !
-!    !bc_types = reshape(gr_domainBC, (/ 2*MDIM /) )
+!    bc_types = reshape(gr_domainBC, (/ 2*MDIM /) )
 !    call Grid_solvePoisson(DELP_VAR, DUST_VAR, bc_types, bc_values, poisfact)
 !    solnData(PRES_VAR,:,:,:) = solnData(DELP_VAR,:,:,:)
 !
 !    gcMask = .FALSE.
 !    gcMask(PRES_VAR) = .TRUE.
-!    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,&
-!                                                 selectBlockType=ACTIVE_BLKS)
+!    !gcMask(DELP_VAR) = .TRUE.
+!    !gcMask(DUST_VAR) = .TRUE.
+!    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 !
 !    call ins_corrector(facexData(VELC_FACE_VAR,:,:,:),&
 !                       faceyData(VELC_FACE_VAR,:,:,:),&
@@ -306,7 +326,7 @@ subroutine Simulation_initBlock(blockId)
 !           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
 !           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
 !                       1.0,                           & 
-!                       dx, dy, dz,                    &
+!                       dxe, dye, dze,                 &
 !                       1.0)
 !
 !    gcMask = .FALSE.
@@ -317,14 +337,50 @@ subroutine Simulation_initBlock(blockId)
 !#endif
 !    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
 !
-    call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
-                        faceyData(VELC_FACE_VAR,:,:,:),&
-                        facezData(VELC_FACE_VAR,:,:,:),&
-            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                        dx, dy, dz,                    &
-                        solnData(SDVC_VAR,:,:,:) )
+!    solnData(SDVC_VAR,:,:,:) = 0.0
+!    call ins_divergence(facexData(VELC_FACE_VAR,:,:,:),&
+!                        faceyData(VELC_FACE_VAR,:,:,:),&
+!                        facezData(VELC_FACE_VAR,:,:,:),&
+!            blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+!            blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+!            blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+!                        dx, dy, dz,                    &
+!                        solnData(SDVC_VAR,:,:,:) )
+!
+!    gcMask = .FALSE.
+!    gcMask(SDVC_VAR) = .TRUE.
+!    call Grid_fillGuardCells(CENTER_FACES,ALLDIR,maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
+!
+!    ! ------------------------------------------------------------------------------------------
+!    mxdivv = -10.**(10.)
+!    mndivv =  10.**(10.)  
+!
+!    vecmaxaux(1) = max( mxdivv, maxval(solnData(SDVO_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!    vecminaux(1) = min( mndivv, minval(solnData(SDVO_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!
+!    vecmaxaux(2) = max( mxdivv, maxval(solnData(DUST_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!    vecminaux(2) = min( mndivv, minval(solnData(DUST_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!
+!    vecmaxaux(3) = max( mxdivv, maxval(solnData(DELP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!    vecminaux(3) = min( mndivv, minval(solnData(DELP_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!
+!    vecmaxaux(4) = max( mxdivv, maxval(solnData(SDVC_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!    vecminaux(4) = min( mndivv, minval(solnData(SDVC_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)) ) 
+!
+!    call MPI_Allreduce(vecmaxaux, vecmax, 4, FLASH_REAL,&
+!                       MPI_MAX, MPI_COMM_WORLD, ierr)
+!
+!    call MPI_Allreduce(vecminaux, vecmin, 4, FLASH_REAL,&
+!                       MPI_MIN, MPI_COMM_WORLD, ierr)
+!  
+!    if (dr_meshMe .eq. MASTER_PE) then
+!       write(*,*) ' SIMULATION __ INIT __ BLOCK'
+!       write(*,'(A24,2g14.6)') ' Min , Max  Int Div =',vecmin(1),vecmax(1) !mndivv,mxdivv
+!       write(*,'(A24,2g14.6)') ' Min , Max  Dust    =',vecmin(2),vecmax(2) !mndivv,mxdivv
+!       write(*,'(A24,2g14.6)') ' Min , Max  DelP    =',vecmin(3),vecmax(3) !mndivv,mxdivv
+!       write(*,'(A24,2g14.6)') ' Min , Max  Fnl Div =',vecmin(4),vecmax(4) !mndivv,mxdivv
+!    endif
+!    ! ------------------------------------------------------------------------------------------
 !
 !    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

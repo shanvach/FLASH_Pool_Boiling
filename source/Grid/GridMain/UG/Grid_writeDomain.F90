@@ -49,9 +49,10 @@ subroutine Grid_writeDomain()
   integer, dimension(2) :: sizes, subSizes, starts
   integer, dimension(MDIM) :: axes, resizedType
   integer, allocatable, dimension(:) :: counts, displs
-  character(len=5) :: gCrdLbs(MDIM, 3), gMtrLbs(MDIM, 3)
-  real, dimension(MDIM, 3) :: gCrdMax, gCrdMin, gMtrMax, gMtrMin 
+  character(len=5) :: gCrdLbs(MDIM, 4), gMtrLbs(MDIM, 3)
+  real, dimension(MDIM, 4) :: gCrdMax, gCrdMin, gMtrMax, gMtrMin 
   real, allocatable, dimension(:,:) :: iCoords, jCoords, kCoords
+  real, allocatable, dimension(:,:) :: fCoord
   real, allocatable, dimension(:,:) :: iMetrics, jMetrics, kMetrics
   real, allocatable, dimension(:,:,:,:,:) :: gCoords, gMetrics
 
@@ -108,9 +109,9 @@ subroutine Grid_writeDomain()
   if(gr_meshMe == MASTER_PE) then
 
     ! Create dataset labels
-    gCrdLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'xxxl', 'xxxc', 'xxxr' /) 
-    gCrdLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'yyyl', 'yyyc', 'yyyr' /) 
-    gCrdLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'zzzl', 'zzzc', 'zzzr' /) 
+    gCrdLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'xxxl', 'xxxc', 'xxxr', 'xxxf' /) 
+    gCrdLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'yyyl', 'yyyc', 'yyyr', 'yyyf' /) 
+    gCrdLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'zzzl', 'zzzc', 'zzzr', 'zzzf' /) 
     gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddxl', 'ddxc', 'ddxr' /) 
     gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddyl', 'ddyc', 'ddyr' /) 
     gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddzl', 'ddzc', 'ddzr' /) 
@@ -173,9 +174,9 @@ subroutine Grid_writeDomain()
 
         ! find extreme values
         gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
-        gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
+        gCrdMin(a, b) = minval(gCoords(a, b, :, 1:d, :)) 
         gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
-        gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
+        gMtrMin(a, b) = minval(gMetrics(a, b, :, 1:d, :)) 
    
         ! write dimensions
         dsetname = gCrdLbs(a, b)
@@ -224,6 +225,42 @@ subroutine Grid_writeDomain()
         call h5sclose_f(dspc_id, error)
 
       end do
+
+      ! Consolodate axis "face" points
+      allocate(fCoord(gr_globalNumBlocks, d + 1))
+      fCoord(:, 1) = gCoords(a, LEFT_EDGE, :, 1, 1)
+      fCoord(:, 2:d+1) = gCoords(a, RIGHT_EDGE, :, 1:d, 1) 
+      if (a == KAXIS .AND. d == 1) fCoord(:, 2) = fCoord(:, 1) + 0.000001
+
+      ! find extreme values
+      gCrdMax(a, 4) = maxval(fCoord) 
+      gCrdMin(a, 4) = minval(fCoord) 
+   
+      ! write dimensions
+      dsetname = gCrdLbs(a, 4)
+      dset_dims = (/ d + 1, gr_globalNumBlocks /)
+      call h5screate_simple_f(2, dset_dims, dspc_id, error)
+      call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
+      call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(fCoord), dset_dims, error)
+       
+      attrname = "maximum"
+      dset_sngl = (/ 1 /)
+      call h5screate_simple_f(1, dset_sngl, aspc_id, error)
+      call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+      call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gCrdMax(a, b), dset_sngl, error)
+      call h5aclose_f(attr_id, error)
+
+      attrname = "minimum"
+      call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+      call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gCrdMin(a, b), dset_sngl, error)
+      call h5aclose_f(attr_id, error)
+      call h5sclose_f(aspc_id, error)
+
+      call h5dclose_f(dset_id, error)
+      call h5sclose_f(dspc_id, error)
+
+      deallocate(fCoord)
+
     end do
    
     ! release storage arrays

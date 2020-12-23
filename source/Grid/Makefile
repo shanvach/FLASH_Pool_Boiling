@@ -19,6 +19,7 @@ Grid += Grid_init.o Grid_getListOfBlocks.o \
 	Grid_putLocalNumBlks.o Grid_dump.o \
 	Grid_initDomain.o \
         Grid_writeDomain.o\
+	Grid_colocateFaceData.o\
 	Grid_markRefineSpecialized.o \
 	Grid_restrictAllLevels.o Grid_restrictByLevels.o \
 	Grid_getGlobalIndexLimits.o \

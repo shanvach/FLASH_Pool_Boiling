@@ -66,6 +66,7 @@ VARIABLE dust                  	# divergence of ustar, poissons equation source 
 VARIABLE tvis               	# turbulent viscosity
 VARIABLE omgm                   # Vorticity module
 VARIABLE sdvc                   # divergence of corrected velocity field
+VARIABLE sdvo                   # divergence of corrected velocity field
 
 # Fluxes
 FLUX velc

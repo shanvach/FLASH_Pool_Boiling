@@ -44,6 +44,14 @@ Module Grid_interface
      end subroutine Grid_applyBCEdgeAllUnkVars
   end interface
 
+  interface 
+     subroutine Grid_colocateFaceData (faceVar, axis, blockid, cellData)
+       implicit none
+       integer, intent(IN)  :: faceVar, axis, blockid
+       real, intent(OUT), dimension(:,:,:) :: cellData
+     end subroutine Grid_colocateFaceData
+  end interface
+
   interface Grid_computeUserVars
      subroutine Grid_computeUserVars()
      end subroutine Grid_computeUserVars
