@@ -82,7 +82,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: n_avg
   !kpd
   real :: lsDT,lsT,minCellDiag
-  real :: volSum,volSumAll
+  real :: volSum,volSumAll,volSumRad,mph_wet_diameter,volSumRadAll
 
   real :: vol, cx, cy, vx, vy
   real :: xh, yh, xl, yl
@@ -102,7 +102,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   real    :: tol=1E-13
 
-  real    :: veli
+  real    :: veli, tempdfun, mph_radius
 
     !------------------------------------------------------------------
     !- kpd - Advect the multiphase distance function using WENO3 scheme
@@ -112,6 +112,9 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
     volSum = 0.0
     volSumAll = 0.0
+    volSumRad = 0.0
+    volSumRadAll = 0.0
+    mph_wet_diameter = 0.0
 
   do ii=1,1
 
@@ -211,6 +214,125 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         endif
 
 #endif
+
+! Get the diameter of wetted area on the plate
+#if NDIM==2
+        if(ii == 1) then
+        k = 1
+        do j=blkLimitsGC(LOW,JAXIS)+1,blkLimits(HIGH,JAXIS)
+           do i=blkLimitsGC(LOW,IAXIS)+1,blkLimits(HIGH,IAXIS)
+
+               ! Outer if conditions -- 
+               ! Check the presence of immersed boundary direction-by-direction
+
+               if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i-1,j,k) .gt. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i-1,j,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_Y)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i-1,j,k) .le. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i-1,j,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_Y)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j-1,k) .gt. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j-1,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j-1,k) .le. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j-1,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)
+
+               endif
+
+           end do
+        end do
+        end if
+#else
+        if(ii == 1) then
+        do k=blkLimitsGC(LOW,KAXIS)+1,blkLimitsGC(HIGH,KAXIS)
+          do j=blkLimitsGC(LOW,JAXIS)+1,blkLimitsGC(HIGH,JAXIS)
+            do i=blkLimitsGC(LOW,IAXIS)+1,blkLimitsGC(HIGH,IAXIS)
+
+               ! Outer if conditions -- 
+               ! Check the presence of immersed boundary direction-by-direction
+
+               if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i-1,j,k) .gt. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i-1,j,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_Y)*del(DIR_Z)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i-1,j,k) .le. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i-1,j,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_Y)*del(DIR_Z)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j-1,k) .gt. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j-1,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)*del(DIR_Z)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j-1,k) .le. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j-1,k))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)*del(DIR_Z)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .le. 0.0 .and. solnData(LMDA_VAR,i,j,k-1) .gt. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j,k-1))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)*del(DIR_Y)
+
+               endif
+
+               if(solnData(LMDA_VAR,i,j,k) .gt. 0.0 .and. solnData(LMDA_VAR,i,j,k-1) .le. 0.0) then
+
+                  ! Inner if condition --
+                  ! Check if fluid - fluid interface at face center and add 
+                  tempdfun = 0.5*(solnData(DFUN_VAR,i,j,k)+solnData(DFUN_VAR,i,j,k-1))
+                  if(tempdfun .le. 0.0) volSumRad = volSumRad + del(DIR_X)*del(DIR_Y)
+
+               endif
+
+            end do
+          end do
+        end do
+        end if
+#endif
+
      ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -223,8 +345,35 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if(ii == 1) then
     call MPI_Allreduce(volSum, volSumAll, 1, FLASH_REAL,&
                        MPI_SUM, MPI_COMM_WORLD, ierr)
+
+    ! sum all volume from all processors
+    call MPI_Allreduce(volSumRad,  volSumRadAll, 1, FLASH_REAL,&
+                       MPI_SUM, MPI_COMM_WORLD, ierr)
+
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
+    if (mph_meshMe .eq. 0) print*,"Total    Wet   Area: ",volSumRadAll
+    if (mph_meshMe .eq. 0) print*,"----------------------------------------"
+    endif
+
+#if NDIM == 3
+
+    mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
+    mph_wet_diameter = 2.0*sqrt(volSumRadAll/acos(-1.0))
+
+#endif
+
+#if NDIM == 2
+
+    mph_radius = sqrt(volSumAll/acos(-1.0))
+    mph_wet_diameter = volSumRadAll
+
+#endif
+
+    if(ii == 1) then
+    if (mph_meshMe .eq. 0) print*,"----------------------------------------"
+    if (mph_meshMe .eq. 0) print*,"Total  Drop  Radius: ",mph_radius
+    if (mph_meshMe .eq. 0) print*,"Total Base Diameter: ",mph_wet_diameter
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     endif
 

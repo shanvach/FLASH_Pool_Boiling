@@ -122,8 +122,14 @@ subroutine Simulation_initBlock(blockId)
   !xbubble = -2.15
   !ybubble = -3.0
 
-  xdrop = 0.0
-  ydrop = -1.0
+  !xdrop = -0.7071
+  !ydrop =  0.7071
+
+  !xdrop =  0.0
+  !ydrop = -2.0
+
+  xdrop =  0.0
+  ydrop = -1.16497
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -186,7 +192,7 @@ subroutine Simulation_initBlock(blockId)
   solnData(PFUN_VAR,:,:,:) = 0.0
 
   facexData(VELC_FACE_VAR,:,:,:) = 0.0
-  faceyData(VELC_FACE_VAR,:,:,:) = 0.0
+  faceyData(VELC_FACE_VAR,:,:,:) =-6.808251908 ! set inital velocity
   facexData(RHDS_FACE_VAR,:,:,:) = 0.0
   faceyData(RHDS_FACE_VAR,:,:,:) = 0.0
 
