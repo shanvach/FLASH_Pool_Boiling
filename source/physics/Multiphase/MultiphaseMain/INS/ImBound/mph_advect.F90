@@ -167,7 +167,7 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
            do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
               do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-                 if (solnData(DFUN_VAR,i,j,k) .gt. 0) then
+                 if (solnData(DFUN_VAR,i,j,k) .gt. 0 .and. solnData(LMDA_VAR,i,j,1) .lt. 0.) then
                    volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
                  end if
               end do
@@ -211,7 +211,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
         endif
 
 #endif
-
      ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -228,18 +227,6 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
     if (mph_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
     if (mph_meshMe .eq. 0) print*,"----------------------------------------"
     endif
-
-#if NDIM == 3
-
-    !mph_radius =  ((3.0*volSumAll)/(4*acos(-1.0)))**(1.0/3.0)
-
-#endif
-
-#if NDIM == 2
-
-    !mph_radius = sqrt(volSumAll/acos(-1.0))
-
-#endif
 
     !********************************************************************************************************
     !-kpd - Fill distance function guard cells before re-initialization to

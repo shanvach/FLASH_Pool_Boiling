@@ -24,8 +24,11 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
                                 xnrm,ynrm,        &
                                 areai, loc_num )
   use SolidMechanics_data, only: sm_structure
-  use Driver_interface, only: Driver_abortFlash
+  use sm_pk_interface, only: sm_pk_constvel_dof, sm_pk_getVelocity
+  use sm_pk_data, only: sm_pk_timedelay
+  use Driver_interface, only: Driver_abortFlash, Driver_getSimTime
   use Driver_data, only: dr_simTime
+  use Grid_data, ONLY : gr_meshMe
 
   implicit none
   
@@ -44,6 +47,38 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
   real :: del,area,area_sub
   real :: ei,N1,N2
 
+  real, allocatable, dimension(:) :: vc, vcd, vcdd, paramcoord
+  integer :: nfix_coord,maxrestparams,ircoord
+  real :: sm_pk_velocity, sm_pk_acceleration
+  real :: time_mod, time
+
+  ! Get the simulation time
+  call Driver_getSimTime(time)
+
+  time_mod = time - sm_pk_timedelay
+
+  call sm_pk_getVelocity(dr_simTime, sm_pk_velocity, sm_pk_acceleration)
+
+  ! Set Restrained individual nodes for Body:
+!  nfix_coord = Body%nrcoords
+!  if (nfix_coord .gt. 0) then
+!
+!     allocate( vc(nfix_coord), vcd(nfix_coord), vcdd(nfix_coord) )
+!     maxrestparams = body%maxrestparams
+!     allocate( paramcoord(maxrestparams) )
+!
+!     do ircoord=1,nfix_coord
+!
+!        paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
+!
+!        call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+!     enddo
+!
+!     sm_pk_velocity = vcd(2)
+!     sm_pk_acceleration = vcdd(2)
+!
+!  endif
+
   !
   ! Get absolute position of each node in the element
   !
@@ -54,9 +89,9 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
      do i = 1,NDIM
         idx2     = body%ID(i,idx1)
         if(i == 2) then
-        u(a,i)   = u(a,i) - 1.0*dr_simTime
-        ud(a,i)  = -1.0
-        udd(a,i) = body%qddn(idx2)
+        u(a,i)   = u(a,i) - sm_pk_velocity*dr_simTime
+        ud(a,i)  = sm_pk_velocity
+        udd(a,i) = sm_pk_acceleration !body%qddn(idx2)
         body%qn(idX2) = -1.0*dr_simTime
 
         else
@@ -67,6 +102,7 @@ subroutine sm_el01_mapParticles(body, e, ptelem,  &
 
      end do
   enddo
+
 
   ! nXi -> nEta
   nEta  = body%ws_nXi(e)

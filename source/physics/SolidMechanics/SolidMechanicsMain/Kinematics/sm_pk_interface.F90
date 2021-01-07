@@ -135,6 +135,23 @@ Module sm_pk_interface
        real, intent(out)   :: vc, vcd, vcdd
      end subroutine sm_pk_constvel_dof
   end interface
+  
+  interface
+     subroutine sm_pk_prescribed(time,maxrestparams,paramcoord,vc,vcd,vcdd)
+       implicit none
+       integer, intent(in) :: maxrestparams
+       real, intent(in)    :: time, paramcoord(maxrestparams)
+       real, intent(out)   :: vc, vcd, vcdd
+     end subroutine sm_pk_prescribed
+  end interface
+
+  interface
+     subroutine sm_pk_getVelocity(time,sm_pk_velocity,sm_pk_acceleration)
+       implicit none
+       real, intent(in)    :: time
+       real, intent(out)   :: sm_pk_velocity, sm_pk_acceleration
+     end subroutine sm_pk_getVelocity
+  end interface
 
   interface
      subroutine sm_pk_masterslave_rigid(maxdofs,nfix,xm,qmstr,qdmstr,qddmstr, &

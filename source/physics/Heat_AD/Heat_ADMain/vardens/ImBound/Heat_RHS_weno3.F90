@@ -71,49 +71,41 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
      !______________________Diffusion Terms_______________________!
 
      ! Case 1 !
-     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i+1,j,k)))&
+     if(s(i,j,k)*s(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i+1,j,k) .lt. 0.0)&
      call Heat_GFMstencil_o1(Tx_plus,Tij,ht_Tsat,max(tol,thxp1))
      ! End of Case 1 !
 
      ! Case 2 !
-     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i-1,j,k))) &
+     if(s(i,j,k)*s(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i-1,j,k) .lt. 0.0) &
      call Heat_GFMstencil_o1(Tx_mins,Tij,ht_Tsat,max(tol,thxm1))
      ! End of Case 2 !
 
      ! Case 3 !
-     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j+1,k))) &
+     if(s(i,j,k)*s(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j+1,k) .lt. 0.0) &
      call Heat_GFMstencil_o1(Ty_plus,Tij,ht_Tsat,max(tol,thyp1))
      ! End of Case 3 !
 
      ! Case 4 !
-     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .ne. sign(1.,phip(i,j-1,k))) &
+     if(s(i,j,k)*s(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. lambda(i,j-1,k) .lt. 0.0) &
      call Heat_GFMstencil_o1(Ty_mins,Tij,ht_Tsat,max(tol,thym1))
      ! End of Case 4 ! 
  
      !______________________IB Terms_______________________!
 
      ! Case 1 !
-     if((lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i+1,j,k))) .or. &
-        (lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i+1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
-     Tx_plus = T_g(i+1,j,k)
+     if(lambda(i,j,k)*lambda(i+1,j,k) .le. 0.d0) Tx_plus = T_g(i+1,j,k)
      ! End of Case 1 !
 
      ! Case 2 !
-     if((lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i-1,j,k))) .or. &
-        (lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i-1,j,k)) .eq. sign(1.,phip(i,j,k)))  )   &
-     Tx_mins = T_g(i-1,j,k)
+     if(lambda(i,j,k)*lambda(i-1,j,k) .le. 0.d0) Tx_mins = T_g(i-1,j,k)
      ! End of Case 2 !
 
      ! Case 3 !
-     if((lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j+1,k))) .or. &
-        (lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j+1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
-     Ty_plus = T_g(i,j+1,k)
+     if(lambda(i,j,k)*lambda(i,j+1,k) .le. 0.d0) Ty_plus = T_g(i,j+1,k)
      ! End of Case 3 !
 
      ! Case 4 !
-     if((lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .lt. 0.0 .and. sign(1.,s(i,j,k)) .eq. sign(1.,phip(i,j-1,k))) .or. &
-        (lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0 .and. lambda(i,j,k) .ge. 0.0 .and. sign(1.,s(i,j-1,k)) .eq. sign(1.,phip(i,j,k)))  )   &
-     Ty_mins = T_g(i,j-1,k)
+     if(lambda(i,j,k)*lambda(i,j-1,k) .le. 0.d0) Ty_mins = T_g(i,j-1,k)
      ! End of Case 4 !
 
      !______________________Advection Terms_______________________!
@@ -373,7 +365,7 @@ subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz,inRe, ix1,ix2, jy1,j
 
     else
 
-    T_rhs(i,j,k) = Txx + Tyy
+    T_rhs(i,j,k) = (1.0 - Tij)/dr_dt !Txx + Tyy
 
     end if
 

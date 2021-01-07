@@ -1,1 +1,2 @@
-Multiphase += mph_imbound.o
+Multiphase += mph_imbound.o \
+              mph_applyGFM.o

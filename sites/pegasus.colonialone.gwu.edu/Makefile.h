@@ -6,13 +6,15 @@
 
 # Programming environment GNU or INTEL:
 PE_ENV =GNU
+#PE_ENV =INTEL
 
-LIB_BASE   = /Users/Akash/Desktop/Akash/PhD/FLASH-LIB
 
-MPI_PATH = /usr/local
+LIB_BASE   =/groups/balarasgrp/flash-lib/openmpi
+
+MPI_PATH = /c1/apps/openmpi/4.0.1rc
 
 HDF4_PATH  =
-HDF5_PATH  = $(LIB_BASE)/hdf5
+HDF5_PATH  =$(LIB_BASE)/hdf5
 
 ZLIB_PATH  = 
 
@@ -22,13 +24,16 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-BLAS_PATH = $(MPI_PATH)
+BLAS_PATH = /c1/apps/openblas/0.2.20
+#BLAS_PATH  = 
 
-LAPACK_PATH = $(MPI_PATH)
+LAPACK_PATH = $(BLAS_PATH)
+#LAPACK_PATH  =
 
 HYPRE_PATH   = $(LIB_BASE)/hypre
 
-SUPERLU_PATH = $(LIB_BASE)/SuperLU
+SUPERLU_PATH = $(LIB_BASE)/SuperLU_4.3
+#SUPERLU_PATH  = 
 
 # Current directory:
 export cur-dir := $(shell pwd)
@@ -107,13 +112,13 @@ endif
 FFLAGS_HDF5 = -I${HDF5_PATH}/include -DH5_USE_16_API
 CFLAGS_HDF5 = -I${HDF5_PATH}/include -DH5_USE_16_API
 
-FLAGS_MPI   = -I${MPI_PATH}/include
+FLAGS_MPI   = -I$(MPI_PATH)/include
 
-CFLAGS_BLAS = -I${BLAS_PATH}/include 
-FFLAGS_BLAS = -I${BLAS_PATH}/include
+CFLAGS_BLAS = -I${BLAS_PATH}/include/openblas 
+FFLAGS_BLAS = -I${BLAS_PATH}/include/openblas
 
-CFLAGS_LAPACK = -I${LAPACK_PATH}/include
-FFLAGS_LAPACK = -I${LAPACK_PATH}/include
+CFLAGS_LAPACK = -I${LAPACK_PATH}/include/openblas
+FFLAGS_LAPACK = -I${LAPACK_PATH}/include/openblas
 
 CFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
 FFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
@@ -168,13 +173,13 @@ LIB_MATH  = -limf -lm
 else
 LIB_MATH  = -lm
 endif
-LIB_MPI   = ${MPI_PATH}/lib/libmpi.dylib
+LIB_MPI   = ${MPI_PATH}/lib/libmpi.so
 LIB_NCMPI = -L${NCMPI_PATH}/lib -lpnetcdf
 LIB_MPE   =
 
-LIB_BLAS  = ${BLAS_PATH}/lib/libblas.a
-LIB_LAPACK= ${BLAS_PATH}/lib/libblas.a
-LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3 ${BLAS_PATH}/lib/libblas.a
+LIB_BLAS  = ${BLAS_PATH}/lib/libopenblas.a
+LIB_LAPACK= ${BLAS_PATH}/lib/libopenblas.a
+LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3 ${BLAS_PATH}/lib/libopenblas.a
 LIB_HYPRE = ${HYPRE_PATH}/lib/libHYPRE.a
 LIB_STDCXX = -lstdc++
 
@@ -182,9 +187,9 @@ LIB_STDCXX = -lstdc++
 
 #Specify TEC_PLOT=YES in order to link the tec plot library.
 TEC_PLOT=YES
-TEC_DIR=/Applications/Tecplot/tecio
+TEC_DIR=/groups/balarasgrp/flash-lib/openmpi/TecioLib
 ifeq ($(TEC_PLOT), YES)
-  CONFIG_LIB = -I${TEC_DIR} -L${TEC_DIR} -lc++ -ltecio 
+  CONFIG_LIB = -I${TEC_DIR} -L${TEC_DIR}  -lstdc++ -ltecio 
 endif
 
 #----------------------------------------------------------------------------

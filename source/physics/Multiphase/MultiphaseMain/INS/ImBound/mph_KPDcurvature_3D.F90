@@ -1,10 +1,6 @@
 ! Directives for three phase treatment
 
-!#define LEVEL_SET_UNION
 #define THREE_PHASE_TREATMENT
-
-!#define FREE_SURFACE_TREATMENT
-!#define free_surface_loc -2.0
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &
@@ -74,17 +70,6 @@
 
         sunion = s
         pfl = 0.0
-
-#ifdef LEVEL_SET_UNION
-        do k=kz1-2,kz2+2
-         do j=jy1-2,jy2+2
-            do i=ix1-2,ix2+2
-                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-            end do
-         end do
-        end do
-#endif
 
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pf(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
@@ -182,15 +167,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-              if(ycell .gt. free_surface_loc) then        
-                 vis3 = vis1
-              else
-                 vis3 = vis2         
-              endif
-#else
                  vis3 = visb
-#endif
 
               visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
@@ -225,15 +202,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-              if(ycell .gt. free_surface_loc) then        
-                 rho3 = rho1
-              else
-                 rho3 = rho2         
-              endif
-#else
                  rho3 = rhob
-#endif
 
               rho1x(i,j,k) = 0.
               rho2x(i,j,k) = 0.
@@ -272,15 +241,7 @@
                       real(k - NGUARD - 1)*del(KAXIS)  +  &
                       0.5*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-              if(ycell .gt. free_surface_loc) then        
-                 rho3 = rho1
-              else
-                 rho3 = rho2         
-              endif
-#else
                  rho3 = rhob
-#endif
 
               rho1y(i,j,k) = 0.
               rho2y(i,j,k) = 0.
@@ -319,15 +280,7 @@
               zcell = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
                       real(k - NGUARD - 1)*del(KAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-              if(ycell .gt. free_surface_loc) then        
-                 rho3 = rho1
-              else
-                 rho3 = rho2         
-              endif
-#else
                  rho3 = rhob
-#endif
 
               rho1z(i,j,k) = 0.
               rho2z(i,j,k) = 0.
@@ -373,7 +326,7 @@
 
 
         subroutine mph_KPDcurvature3DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y, &
-                                       pf,w,sigx,sigy,dx,dy,          &
+                                       pf,pres,pgst,w,sigx,sigy,dx,dy,          &
                                        rho1,rho2,xit,ix1,ix2, &
                                        jy1,jy2,dz,kz1,kz2,rho1z, &
                                        rho2z,sigz,blockID)
@@ -390,7 +343,7 @@
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
                                                 rho2y,pf,w,sigx,sigy, &
-                                                rho1z,rho2z,sigz,lambda
+                                                rho1z,rho2z,sigz,lambda,pres,pgst
 
         integer, intent(in) :: blockID
 
@@ -411,6 +364,8 @@
 
         real :: xcell,ycell,zcell
 
+        real :: bb, p_solid, p_fluid
+
         call Grid_getDeltas(blockID,del)
         call Grid_getBlkCenterCoords(blockId,coord)
         call Grid_getBlkBoundBox(blockId,boundBox)
@@ -425,11 +380,12 @@
         
         rhob = rho1 !(rho1 + rho2)/2.0
 
-#ifdef THREE_PHASE_TREATMENT
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1)   = &
         (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,kz1-1:kz2+1))+1.0)/2.0
 
+
+#ifdef THREE_PHASE_TREATMENT
         do k = kz1-1,kz2
          do j = jy1-1,jy2
            do i = ix1-1,ix2
@@ -455,15 +411,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -492,15 +440,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -529,15 +469,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -566,15 +498,8 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
@@ -602,15 +527,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -639,16 +556,8 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
                         rho3 = rhob
-#endif
-                    aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
+                   aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2z(i,j,k+1) = rho2z(i,j,k+1)*(rho3/rho2)/aa
                 end if 
@@ -656,38 +565,6 @@
            end do
          end do
         end do
-
-#ifdef FREE_SURFACE_TREATMENT
-        do k = kz1-1,kz2
-         do j = jy1-1,jy2
-           do i = ix1-1,ix2
-
-             if(lambda(i,j,k) .ge. 0.0) then
-
-                if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
-
-                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
-                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
-                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
-                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
-
-                end if
-
-                if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
-
-                  th = abs(s(i,j,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
-                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
-                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
-                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
-
-                end if
-
-             end if
-
-           end do
-         end do
-        end do
-#endif
 #endif
 
         do k = kz1-1,kz2
@@ -728,7 +605,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) - xij/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -770,7 +647,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) + xij/aa/dx
 
 
                  icrv(i,j,k) = 1
@@ -812,7 +689,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) - yij/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -853,7 +730,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) + yij/aa/dy
 
 
                  icrv(i,j,k) = 1
@@ -894,7 +771,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = - zij/aa/dz
+                 sigz(i,j,k+1) = sigz(i,j,k+1) - zij/aa/dz
 
                  icrv(i,j,k)   = 1
                  icrv(i,j,k+1) = 1
@@ -933,7 +810,7 @@
 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigz(i,j,k+1) = zij/aa/dz
+                 sigz(i,j,k+1) = sigz(i,j,k+1) + zij/aa/dz
 
                  icrv(i,j,k) = 1
                  icrv(i,j,k+1) = 1

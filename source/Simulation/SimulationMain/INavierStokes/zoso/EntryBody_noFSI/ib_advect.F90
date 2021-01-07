@@ -4,7 +4,10 @@ subroutine ib_advect (blockCount,blockList,dt)
 #include "ImBound.h"
 #include "constants.h"
 
+
 #define IB_REDISTANCE
+#define IB_PRESCRIBED_MOTION
+
 
   ! Modules Use:
 #ifdef FLASH_GRID_PARAMESH
@@ -27,6 +30,12 @@ subroutine ib_advect (blockCount,blockList,dt)
                                 Grid_getBlkIndexLimits, &
                                 Grid_fillGuardCells,    &
                                 Grid_getBlkBoundBox,Grid_getBlkCenterCoords
+#ifdef IB_PRESCRIBED_MOTION
+     use SolidMechanics_data, only :  sm_BodyInfo, sm_structure
+     use sm_pk_data, only: sm_pk_dataset, sm_pk_info, sm_pk_timedelay
+     use sm_pk_interface, only: sm_pk_constvel_dof, sm_pk_getVelocity
+     use sm_pk_data, only: sm_pk_timedelay
+#endif
 
 
       use ib_lset_interface, only: ib_advectWENO3, ib_advectWENO3_3D, ib_lsRedistance, &
@@ -39,8 +48,7 @@ subroutine ib_advect (blockCount,blockList,dt)
       implicit none
 
 #include "IncompNS.h"
-
-  include "Flash_mpi.h"
+#include "Flash_mpi.h"
 
       integer, INTENT(INOUT) :: blockCount
       integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
@@ -63,6 +71,18 @@ subroutine ib_advect (blockCount,blockList,dt)
       integer :: max_lsit
 
       real :: amp, omega, pi, offset, phase
+#ifdef IB_PRESCRIBED_MOTION
+      real, allocatable, dimension(:) :: vc, vcd, vcdd, paramcoord
+      type(sm_structure),  pointer :: body
+      integer :: nfix_coord,maxrestparams,ircoord
+      real :: sm_pk_velocity, sm_pk_acceleration
+      real :: time_mod, time
+
+      ! Get the simulation time
+      call Driver_getSimTime(time)
+
+      time_mod = time - sm_pk_timedelay
+#endif
 
       amp = 0.5
       omega = 0.1
@@ -96,9 +116,37 @@ subroutine ib_advect (blockCount,blockList,dt)
 
         facexData(VELB_FACE_VAR,:,:,:) =   0.0
 
+#ifdef IB_PRESCRIBED_MOTION
+
+
+        call sm_pk_getVelocity(time_mod, sm_pk_velocity, sm_pk_acceleration)
+!        body => sm_BodyInfo(lb)
+!        nfix_coord = Body%nrcoords
+!        if (nfix_coord .gt. 0) then
+!
+!           allocate( vc(nfix_coord), vcd(nfix_coord), vcdd(nfix_coord) )
+!           maxrestparams = body%maxrestparams
+!           allocate( paramcoord(maxrestparams) )
+!
+!           do ircoord=1,nfix_coord
+!
+!              paramcoord(1:maxrestparams) = body%restraints(ircoord)%param(1:maxrestparams)
+!
+!              call sm_pk_constvel_dof(time_mod,maxrestparams,paramcoord,vc(ircoord),vcd(ircoord),vcdd(ircoord))
+!           enddo
+!
+!           sm_pk_velocity = vcd(2)
+!           sm_pk_acceleration = vcdd(2)
+!
+!        endif
+!
+!        faceyData(VELB_FACE_VAR,:,:,:) = sm_pk_velocity
+!        print*,"ib_ad YVEL = ",sm_pk_velocity
+#else
         !faceyData(VELB_FACE_VAR,:,:,:) =  0.0
         faceyData(VELB_FACE_VAR,:,:,:) = -1.0
         !faceyData(VELB_FACE_VAR,:,:,:) =  2*pi*omega*amp*sin(2*pi*omega*dr_simTime);
+#endif
 
 #if NDIM == 2
         call ib_advectWENO3(solnData(LMDA_VAR,:,:,:), &

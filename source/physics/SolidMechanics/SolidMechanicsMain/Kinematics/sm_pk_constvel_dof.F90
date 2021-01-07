@@ -15,6 +15,8 @@ subroutine sm_pk_constvel_dof(time,maxrestparams,paramcoord,vc,vcd,vcdd)
   xo = paramcoord(1)
   vel= paramcoord(2) 
 
+  !print*,"body vel = ",vel
+
   vc  = xo + vel*time 
   vcd =           vel 
   vcdd=           0.0 
