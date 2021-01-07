@@ -79,6 +79,8 @@ subroutine Heat_AD_init(blockCount,blockList)
 
    ht_microFlg   = .TRUE.
 
+   ht_hflux_flag = .TRUE.
+
    if(dr_restart .eqv. .TRUE.) then
 
      if (ins_meshMe .eq. MASTER_PE) print *,"Entering heat restart 1"

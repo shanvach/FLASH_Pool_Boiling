@@ -1,0 +1,28 @@
+# Config file for Visco Elastic Unit
+
+# This file is used to declare field variables and run time parameters for constants declared in
+# ib_viscoElastic_data
+
+# To declare a cell centered variable
+VARIABLE lmda TYPE:GENERIC # viscoelastic solid distance function
+VARIABLE lmdx TYPE:GENERIC # x dynamic grid
+VARIABLE lmdy TYPE:GENERIC # y dynamic grid
+
+VARIABLE ddsn TYPE:GENERIC # directional derivative in normal direction
+
+VARIABLE nmlx TYPE:GENERIC # unit normal vector in x
+VARIABLE nmly TYPE:GENERIC # unit normal vector in y
+
+VARIABLE xmus TYPE:GENERIC # mus, varies from 0-1 in the diffused solid interface
+VARIABLE xmuf TYPE:GENERIC # muf, varies from mu_f-mu_s in the diffused solid interface
+VARIABLE xrho TYPE:GENERIC # rho, varies from rho_f-rho_s in the diffused solid interface
+
+# To declare a face centered variable
+
+# To declare a runtime parameter 
+#PARAMETER varp  REAL 1.0
+#PARAMETER ib_vis_rho1  REAL     1.0      # Density of fluid 1.
+#PARAMETER ib_vis_rho2  REAL     1.0      # Density of fluid 2.
+#PARAMETER ib_vis_xmu1  REAL     1.0      # viscosity of fluid 1.
+#PARAMETER ib_vis_xmu2  REAL     1.0      # viscosity of fluid 2.
+#PARAMETER ib_vis_xmus  REAL     1.0      # modulus of elasticity of solid.

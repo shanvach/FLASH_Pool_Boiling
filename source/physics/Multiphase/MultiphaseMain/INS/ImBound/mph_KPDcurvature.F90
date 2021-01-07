@@ -1,10 +1,7 @@
 ! Directives for three phase treatment
 
-!#define LEVEL_SET_UNION
-!#define THREE_PHASE_TREATMENT
-
-!#define FREE_SURFACE_TREATMENT
-!#define free_surface_loc -2.0
+#define THREE_PHASE_TREATMENT
+#define IB_JUMPS
 
         subroutine mph_KPDcurvature2DAB(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,visc,vis1,vis2,blockID)
@@ -73,15 +70,6 @@
 
          sunion = s
 
-#ifdef LEVEL_SET_UNION
-         do j=jy1-2,jy2+2
-            do i=ix1-2,ix2+2
-                !sunion(i,j,k) = min(s(i,j,k),-lambda(i,j,k))
-                sunion(i,j,k) = max(s(i,j,k),lambda(i,j,k))
-            end do
-         end do
-#endif
-
          pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = 0.0
          pf(ix1-1:ix2+1,jy1-1:jy2+1,k)   = (sign(1.0,sunion(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
@@ -143,19 +131,11 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then        
-                vis3 = vis1
-             else
-                vis3 = vis2         
-             endif
-#else
-                vis3 = visb
-#endif
+              vis3 = visb
 
-             visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
+              visc(i,j,k) = (1-pf(i,j,k))*(1-pfl(i,j,k))*(vis2/vis2) + &
                               (pf(i,j,k))*(1-pfl(i,j,k))*(vis1/vis2) + &
-                             (pfl(i,j,k))*(vis3/vis2)
+                              (pfl(i,j,k))*(vis3/vis2)
 
 
            end do
@@ -179,15 +159,7 @@
                       real(j - NGUARD - 1)*del(JAXIS)  +  &
                       0.5*del(JAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then        
-                rho3 = rho1
-             else
-                rho3 = rho2         
-             endif
-#else
-                rho3 = rhob
-#endif
+              rho3 = rhob
 
               a1 = (pf(i-1,j,k) + pf(i,j,k)) / 2.                       
               a2 = pf(i-1,j,k)  /abs(pf(i-1,j,k)  +eps) * &
@@ -218,15 +190,7 @@
               ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
                       real(j - NGUARD - 1)*del(JAXIS)
 
-#ifdef FREE_SURFACE_TREATMENT
-             if(ycell .gt. free_surface_loc) then        
-                rho3 = rho1
-             else
-                rho3 = rho2         
-             endif
-#else
-                rho3 = rhob
-#endif
+              rho3 = rhob
 
               a1 = (pf(i,j-1,k) + pf(i,j,k)) / 2.           
               a2 = pf(i,j-1,k)  /abs(pf(i,j-1,k)  +eps) * &
@@ -271,13 +235,15 @@
 !=========================================================================
 !=========================================================================
 
-        subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,w,sigx,sigy,dx,dy, &
+        subroutine mph_KPDcurvature2DC(s,lambda,crv,rho1x,rho2x,rho1y,rho2y,pf,pres,pgst,w,sigx,sigy,dx,dy, &
            rho1,rho2,xit,crmx,crmn,ix1,ix2,jy1,jy2,blockID)   
 
    
         use Multiphase_data, ONLY : mph_meshMe
 
         use Grid_interface, ONLY : Grid_getBlkBoundBox, Grid_getBlkCenterCoords, Grid_getDeltas
+
+        use IncompNS_data, only : ins_gravX, ins_gravY, ins_gravZ
 
         implicit none
 
@@ -292,8 +258,7 @@
         real, intent(out) :: crmx, crmn
 
         real, dimension(:,:,:), intent(inout):: s,crv,rho1x,rho2x,rho1y, &
-                                               rho2y,pf,w,sigx,sigy,lambda
-
+                                               rho2y,pf,w,sigx,sigy,lambda,pres,pgst
         integer, intent(in) :: blockID
 
         integer :: icrv(NXB+2*NGUARD,NYB+2*NGUARD,1)
@@ -314,7 +279,9 @@
 
         real :: xcell,ycell
 
-        real :: rhob
+        real :: rhob, bb
+        real :: p_solid, p_fluid
+
 !--------------------------------------------
 !----------------jump conditions ------------
 !--------------------------------------------
@@ -355,10 +322,10 @@
 
         rhob = rho1 !(rho1 + rho2)/2.
 
-#ifdef THREE_PHASE_TREATMENT
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = 0.0
         pfl(ix1-1:ix2+1,jy1-1:jy2+1,k)  = (sign(1.0,lambda(ix1-1:ix2+1,jy1-1:jy2+1,k))+1.0)/2.0
 
+#ifdef THREE_PHASE_TREATMENT
         do j = jy1-1,jy2
            do i = ix1-1,ix2
 
@@ -379,15 +346,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
-                        rho3 = rhob
-#endif
+                    rho3 = rhob
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -412,15 +371,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
-                        rho3 = rhob
-#endif
+                    rho3 = rhob
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -445,15 +396,7 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
-                        rho3 = rhob
-#endif
+                    rho3 = rhob
 
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
@@ -478,15 +421,8 @@
                         rhof = rho1
                     end if
 
-#ifdef FREE_SURFACE_TREATMENT
-                   if(ycell .gt. free_surface_loc) then
-                        rho3 = rho1
-                   else
-                        rho3 = rho2
-                   endif
-#else
-                        rho3 = rhob
-#endif
+                    rho3 = rhob
+
                     aa = th*(rho3/rho2) + (1-th)*(rhof/rho2)
 
                     rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho3/rho2)/aa
@@ -494,36 +430,6 @@
 
            end do
         end do
-
-#ifdef FREE_SURFACE_TREATMENT
-        do j = jy1-1,jy2
-           do i = ix1-1,ix2
-
-             if(lambda(i,j,k) .ge. 0.0) then
-
-                if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
-
-                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
-                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
-                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
-                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
-
-                end if
-
-                if(pf(i,j,k).eq.1..and.pf(i,j+1,k).eq.0.) then
-
-                  th = abs(s(i,j,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
-                  aa = th*(rho1/rho2) + (1.-th)*(rho2/rho2)
-                  rho1y(i,j+1,k) = rho1y(i,j+1,k)*(rho1/rho2)/aa
-                  rho2y(i,j+1,k) = rho2y(i,j+1,k)*(rho2/rho2)/aa 
-
-                end if
-
-             end if
-
-           end do
-        end do
-#endif
 #endif
 
         do j = jy1-1,jy2
@@ -560,7 +466,7 @@
                  w(i+1,j,k) = w(i+1,j,k) + xij/aa/dx**2 - xid*(1.-th)*(rho2/rho2)/aa/dx
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = - xij/aa/dx           !- kpd - sigma*K/rho/dx 
+                 sigx(i+1,j,k) = sigx(i+1,j,k) - xij/aa/dx           !- kpd - sigma*K/rho/dx 
          
                  else
 
@@ -603,7 +509,7 @@
                  w(i+1,j,k) = w(i+1,j,k) - xij/aa/dx**2 + xid*th*(rho1/rho2)/aa/dx
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigx(i+1,j,k) = xij/aa/dx
+                 sigx(i+1,j,k) = sigx(i+1,j,k) + xij/aa/dx
 
 !print*,"Jump X2",i,j,th,aa,rho1x(i+1,j,k)+rho2x(i+1,j,k),xij,"-->",w(i,j,k),w(i+1,j,k),sigx(i+1,j,k)
 
@@ -650,7 +556,7 @@
                  w(i,j+1,k) = w(i,j+1,k)   + yij/aa/dy**2 - yid*(1.-th)*(rho2/rho2)/aa/dy 
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = - yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) - yij/aa/dy
 
 !print*,"Jump Y1",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
 
@@ -695,7 +601,7 @@
                  w(i,j+1,k) = w(i,j+1,k) - yij/aa/dy**2 + yid*th*(rho1/rho2)/aa/dy  
                  !- kpd - "sig" is the source term in Momentum Equations. Only uses 
                  !           the jump in value, not the jump in derivative.
-                 sigy(i,j+1,k) = yij/aa/dy
+                 sigy(i,j+1,k) = sigy(i,j+1,k) + yij/aa/dy
 
 !print*,"Jump Y2",i,j,th,aa,rho1y(i,j+1,k)+rho2y(i,j+1,k),yij,"-->",w(i,j,k),w(i,j+1,k),sigy(i,j+1,k)
 
@@ -737,6 +643,90 @@
 !              print*,"Second Rho",i,j,rho1x(i,j,k)+rho2x(i,j,k),rho1y(i,j,k)+rho2y(i,j,k)
 !           end do
 !        end do
+
+
+#ifdef IB_JUMPS
+        do j = jy1-1,jy2
+           do i = ix1-1,ix2
+
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i+1,j,k) .eq. 1.0) then
+
+                    bb = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))              
+ 
+                    th = abs(lambda(i+1,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+                 
+                    p_fluid = pres(i,j,k)*th + pgst(i+1,j,k)*(1-th)
+                    p_solid = pgst(i,j,k)*th + pres(i+1,j,k)*(1-th)
+
+                    w(i,j,k)      = w(i,j,k)   + (p_solid - p_fluid)/bb/dx**2
+                    w(i+1,j,k)    = w(i+1,j,k) - (p_solid - p_fluid)/bb/dx**2
+                    sigx(i+1,j,k) = sigx(i+1,j,k) + (p_solid - p_fluid)/bb/dx 
+
+                    !w(i,j,k)      = w(i,j,k)   + (pres(i+1,j,k) - pres(i,j,k))/bb/dx**2 - ins_gravX/dx
+                    !w(i+1,j,k)    = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/bb/dx**2 + ins_gravX/dx
+                    !sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/bb/dx - ins_gravX
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i+1,j,k) .eq. 0.0) then
+
+                    bb = 1./(rho1x(i+1,j,k) + rho2x(i+1,j,k))
+
+                    th = abs(lambda(i,j,k))/(abs(lambda(i+1,j,k))+abs(lambda(i,j,k)))
+
+                    p_solid = pres(i,j,k)*(1-th) + pgst(i+1,j,k)*th
+                    p_fluid = pgst(i,j,k)*(1-th) + pres(i+1,j,k)*th
+
+                    w(i,j,k)      = w(i,j,k)   - (p_solid - p_fluid)/bb/dx**2
+                    w(i+1,j,k)    = w(i+1,j,k) + (p_solid - p_fluid)/bb/dx**2
+                    sigx(i+1,j,k) = sigx(i+1,j,k) - (p_solid - p_fluid)/bb/dx 
+
+                    !w(i,j,k)      = w(i,j,k)   + (pres(i+1,j,k) - pres(i,j,k))/bb/dx**2 - ins_gravX/dx
+                    !w(i+1,j,k)    = w(i+1,j,k) + (pres(i,j,k) - pres(i+1,j,k))/bb/dx**2 + ins_gravX/dx
+                    !sigx(i+1,j,k) = sigx(i+1,j,k) + (pres(i+1,j,k) - pres(i,j,k))/bb/dx - ins_gravX
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 0.0 .and. pfl(i,j+1,k) .eq. 1.0) then
+
+                    bb = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    th = abs(lambda(i,j+1,k))/(abs(lambda(i,j+1,k))+abs(lambda(i,j,k)))
+
+                    p_fluid = pres(i,j,k)*th + pgst(i,j+1,k)*(1-th)
+                    p_solid = pgst(i,j,k)*th + pres(i,j+1,k)*(1-th)
+
+                    w(i,j,k)      = w(i,j,k)   + (p_solid - p_fluid)/bb/dy**2
+                    w(i,j+1,k)    = w(i,j+1,k) - (p_solid - p_fluid)/bb/dy**2
+                    sigy(i,j+1,k) = sigy(i,j+1,k) + (p_solid - p_fluid)/bb/dy 
+
+                    !w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/bb/dy**2 - ins_gravY/dy
+                    !w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/bb/dy**2 + ins_gravY/dy
+                    !sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/bb/dy - ins_gravY
+                end if
+                !
+                !
+                if(pfl(i,j,k) .eq. 1.0 .and. pfl(i,j+1,k) .eq. 0.0) then
+
+                    bb = 1./(rho1y(i,j+1,k) + rho2y(i,j+1,k))
+
+                    th = abs(lambda(i,j,k))/(abs(lambda(i,j,k))+abs(lambda(i,j+1,k)))
+
+                    p_solid = pres(i,j,k)*(1-th) + pgst(i,j+1,k)*th
+                    p_fluid = pgst(i,j,k)*(1-th) + pres(i,j+1,k)*th
+
+                    w(i,j,k)      = w(i,j,k)   - (p_solid - p_fluid)/bb/dy**2
+                    w(i,j+1,k)    = w(i,j+1,k) + (p_solid - p_fluid)/bb/dy**2
+                    sigy(i,j+1,k) = sigy(i,j+1,k) - (p_solid - p_fluid)/bb/dy 
+
+                    !w(i,j,k)      = w(i,j,k)   + (pres(i,j+1,k) - pres(i,j,k))/bb/dy**2 - ins_gravY/dy
+                    !w(i,j+1,k)    = w(i,j+1,k) + (pres(i,j,k) - pres(i,j+1,k))/bb/dy**2 + ins_gravY/dy
+                    !sigy(i,j+1,k) = sigy(i,j+1,k) + (pres(i,j+1,k) - pres(i,j,k))/bb/dy - ins_gravY
+                end if
+
+          end do
+        end do
+#endif
 
 
       end subroutine mph_KPDcurvature2DC

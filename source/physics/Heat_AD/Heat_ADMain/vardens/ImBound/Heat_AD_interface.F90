@@ -43,16 +43,16 @@ module Heat_AD_interface
     end interface
 
     interface
-       subroutine Heat_RHS_weno3(T_rhs, T_o, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
-                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv,lambda)
+       subroutine Heat_RHS_weno3(T_rhs, T_o, T_g, u, v, dx, dy, dz, inRe, ix1, ix2, jy1, jy2,&
+                           rho1x,rho2x,rho1y,rho2y,alph,pf,s,mdot,nrmx,nrmy,smrh,curv,lambda,phip)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
-         real, dimension(:,:,:), intent(in) :: T_o
+         real, dimension(:,:,:), intent(in) :: T_o, T_g
          real, dimension(:,:,:), intent(in) :: u,v
          real, intent(in) :: dx, dy, dz, inRe
          integer, intent(in) :: ix1, ix2, jy1, jy2
          real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph
-         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv,lambda
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,smrh,curv,lambda,phip
        end subroutine Heat_RHS_weno3
     end interface
 
@@ -147,16 +147,16 @@ module Heat_AD_interface
    end interface
 
    interface
-       subroutine Heat_RHS_3D_weno3(T_rhs, T_o, u, v, w, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, kz1, kz2,&
-                              rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda)
+       subroutine Heat_RHS_3D_weno3(T_rhs, T_o, T_g, u, v, w, dx, dy, dz, inRe, ix1, ix2, jy1, jy2, kz1, kz2,&
+                              rho1x,rho2x,rho1y,rho2y,rho1z,rho2z,alph,pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda,phip)
          implicit none
          real, dimension(:,:,:), intent(inout) :: T_rhs
-         real, dimension(:,:,:), intent(in) :: T_o
+         real, dimension(:,:,:), intent(in) :: T_o, T_g
          real, dimension(:,:,:), intent(in) :: u,v,w
          real, intent(in) :: dx, dy, dz, inRe
          integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
          real, dimension(:,:,:),intent(in) :: rho1x,rho2x,rho1y,rho2y,alph,rho1z,rho2z
-         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda
+         real, dimension(:,:,:),intent(in) :: pf,s,mdot,nrmx,nrmy,nrmz,smrh,curv,lambda,phip
        end subroutine Heat_RHS_3D_weno3
    end interface
 
@@ -234,6 +234,24 @@ module Heat_AD_interface
         real,intent(inout) :: qin
         integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
         end subroutine Heat_getQin
+  end interface
+
+  interface
+        subroutine Heat_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+        integer, intent(in) :: sweepOrder
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+        end subroutine Heat_applyGFM
+  end interface
+
+  interface
+        subroutine Heat_getIBFlux(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+        integer, intent(in) :: sweepOrder
+        integer, INTENT(INOUT) :: blockCount
+        integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
+        real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+        end subroutine Heat_getIBFlux
   end interface
 
 end module Heat_AD_interface

@@ -1,0 +1,14 @@
+# Uniform Grid Binaries
+#--advanced --compile 4 --block_xyz 24 --dimension 2 --grid ug 
+#--advanced --compile 4 --block_xyz 32 --dimension 2 --grid ug 
+#--advanced --compile 4 --overwrite --block_xyz 50 --dimension 2 --grid ug 
+
+# Regular Grid Binaries
+# 2d simulations -- 32 16 8 4 2 1
+--advanced --compile 32 --block_x  64 --block_y  64 --dimension 2 --grid rg
+--advanced --compile 32 --block_x  64 --block_y 128 --dimension 2 --grid rg 
+--advanced --compile 32 --block_x 128 --block_y 128 --dimension 2 --grid rg 
+--advanced --compile 32 --block_x 128 --block_y 256 --dimension 2 --grid rg 
+--advanced --compile 32 --block_x 256 --block_y 256 --dimension 2 --grid rg 
+--advanced --compile 32 --block_x 512 --block_y 256 --dimension 2 --grid rg 
+

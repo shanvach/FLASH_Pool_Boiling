@@ -140,14 +140,14 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           solnData(DFUN_VAR,i,j,k) = -sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)+0.4
+           !solnData(DFUN_VAR,i,j,k) = -sqrt((xcell-xdrop)**2+(ycell-ydrop)**2+zcell**2)+0.4
 
            !solnData(DFUN_VAR,i,j,k) = min(solnData(DFUN_VAR,i,j,k),ycell)
 
            !dfunbub = 0.5-sqrt((xcell-xbubble)**2+(ycell-ybubble)**2+zcell**2)
            !solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),dfunbub)
 
-           !solnData(DFUN_VAR,i,j,k) = ycell
+           solnData(DFUN_VAR,i,j,k) = ycell - sim_yMax - 3.0*del(JAXIS)
  
            !solnData(DFUN_VAR,i,j,k) = -1.0
         enddo

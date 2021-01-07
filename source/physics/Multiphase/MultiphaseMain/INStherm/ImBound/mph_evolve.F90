@@ -35,7 +35,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_
                             mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
                             mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
                             mph_KPDadvectWENO3_3D,mph_KPDlsRedistance_3D,&
-                            mph_getSmearedProperties2D,mph_getSmearedProperties3D
+                            mph_getSmearedProperties2D,mph_getSmearedProperties3D,&
+                            mph_applyGFM
 
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
@@ -288,7 +289,7 @@ if(mph_flag == 1) then
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
- 
+
 !************************************************************************************************************
 !************************************************************************************************************
 
@@ -445,6 +446,8 @@ if(mph_flag == 1) then
 
 else if(mph_flag == 0) then
 
+    call mph_applyGFM(blockCount, blockList,timeEndAdv,dt,dtOld,sweepOrder)
+
     !-----------------------------------------------------
     !- kpd - Loop through current block for curvature 2dC
     !-----------------------------------------------------
@@ -479,6 +482,8 @@ else if(mph_flag == 0) then
                           faceyData(RH1F_FACE_VAR,:,:,:), &
                           faceyData(RH2F_FACE_VAR,:,:,:), &
                           solnData(PFUN_VAR,:,:,:), &
+                          solnData(PRES_VAR,:,:,:), &
+                          solnData(PGST_VAR,:,:,:), &
                           solnData(SIGP_VAR,:,:,:), &
                           facexData(SIGM_FACE_VAR,:,:,:), &
                           faceyData(SIGM_FACE_VAR,:,:,:), &
@@ -504,6 +509,8 @@ else if(mph_flag == 0) then
                            faceyData(RH1F_FACE_VAR,:,:,:)   , &
                            faceyData(RH2F_FACE_VAR,:,:,:)   , &
                            solnData(PFUN_VAR,:,:,:)         , &
+                           solnData(PRES_VAR,:,:,:)         , &
+                           solnData(PGST_VAR,:,:,:)         , &
                            solnData(SIGP_VAR,:,:,:)         , &
                            facexData(SIGM_FACE_VAR,:,:,:)   , &
                            faceyData(SIGM_FACE_VAR,:,:,:)   , &

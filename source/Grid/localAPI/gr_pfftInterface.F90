@@ -217,13 +217,50 @@ module gr_pfftinterface
   end interface
 
   interface
-     subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, &
-          localSize, globalSize, transformType, inArray, outArray)
+     subroutine gr_pfftPoissonDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
        integer, intent(in)    :: iDirection, solveflag, inSize  
        integer, dimension(MDIM),intent(in) :: localSize,globalSize,transformType
        real,  dimension(inSize),intent(in) :: inArray
        real,dimension(inSize), intent(out) :: outArray
      end subroutine gr_pfftPoissonDirect
+  end interface
+
+  interface
+     subroutine gr_pfftPoissonTrigDirect (iDirection, solveflag, inSize, localSize, globalSize, transformType, inArray, outArray)
+       integer, intent(in)    :: iDirection, solveflag, inSize  
+       integer, dimension(MDIM),intent(in) :: localSize,globalSize,transformType
+       real,  dimension(inSize),intent(in) :: inArray
+       real,dimension(inSize), intent(out) :: outArray
+     end subroutine gr_pfftPoissonTrigDirect
+  end interface
+
+  interface
+     subroutine gr_pfftPoissonHomBcTrig (iDirection, iSrc, inSize, bcTypes, bcValues, inArray, outArray)
+       integer, intent(in) :: iDirection, iSrc, inSize
+       integer, dimension(2*MDIM), intent(IN) :: bcTypes
+       real,    dimension(2*MDIM), intent(in) :: bcValues
+       real, dimension(inSize), intent(inout) :: inArray
+       real, dimension(inSize), intent(out)   :: outArray
+     end subroutine gr_pfftPoissonHomBcTrig
+  end interface
+
+  interface
+    subroutine gr_pfftTridiag (lower, main, upper, rhs, x, length, ierr)
+      real, dimension(length), intent(in)  :: lower, main, upper, rhs
+      real, dimension(length), intent(out) :: x
+      integer, intent(in) :: length
+      integer, intent(out) :: ierr
+    end subroutine gr_pfftTriDiag
+  end interface
+
+  interface
+    subroutine gr_pfftCyclicTridiag (lower, main, upper, alpha, beta, rhs, x, length, ierr)
+      real, dimension(length), intent(in)  :: lower, main, upper, rhs
+      real, dimension(length), intent(out) :: x
+      real, intent(in)    :: alpha, beta
+      integer, intent(in) :: length
+      integer, intent(out) :: ierr
+    end subroutine gr_pfftCyclicTriDiag
   end interface
 
   interface

@@ -54,6 +54,31 @@ implicit none
 
   select case (inputString)
      
+  case ("sg_tanh", "SG_TANH")
+#ifdef SG_TANH
+     constKey = SG_TANH
+#endif
+
+  case ("sg_user", "SG_USER")
+#ifdef SG_USER
+     constKey = SG_USER
+#endif
+
+  case ("auto", "AUTO")
+#ifdef AUTO 
+     constKey = AUTO
+#endif
+
+  case ("trig", "TRIG")
+#ifdef TRIG
+     constKey = TRIG
+#endif
+
+  case ("direct", "DIRECT", "matrix", "MATRIX")
+#ifdef MATRIX
+     constKey = MATRIX
+#endif
+
   case ("periodic", "PERIODIC")
 #ifdef PERIODIC
      constKey = PERIODIC
@@ -118,6 +143,22 @@ constKey = EQTSYMMETRIC
 #ifdef MOVLID_INS
      constKey = MOVLID_INS
 #endif
+
+  case("DIRICHLET_HT","Dirichlet_ht","dirichlet_ht")
+#ifdef DIRICHLET_HT
+     constKey = DIRICHLET_HT
+#endif
+
+  case("NEUMANN_HT","Neumann_ht","neumann_ht")
+#ifdef NEUMANN_HT
+     constKey = NEUMANN_HT
+#endif
+ 
+  case("PERIODIC_HT","Periodic_ht","periodic_ht")
+#ifdef PERIODIC_HT
+     constKey = PERIODIC_HT
+#endif
+ 
    case ("hydrostatic", "HYDROSTATIC")
 #ifdef HYDROSTATIC
      constKey = HYDROSTATIC

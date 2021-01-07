@@ -78,6 +78,10 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 #define MOVLID_INS -25
 #define OUTFLOW_INS -26
 
+#define DIRICHLET_HT -61
+#define NEUMANN_HT -62
+#define PERIODIC_HT -63
+
 #define DIODE -39
 #define GRIDBC_MG_EXTRAPOLATE -40
 #define HYDROSTATIC_NVDIODE -41
@@ -135,6 +139,27 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 #define KAXIS 3
 #define ALLDIR -1
 #define MDIM 3
+
+
+#if 0
+  This group has definitions related to grid stretching methods. The first 
+  method imports a user defined grid from an hdf5 file. The subsequent 
+  enties are names of the predefined methods available for implementing 
+  a stretched regular grid in the uniform grid package. 
+#endif
+
+#define SG_USER 1
+#define SG_TANH 2
+#define AUTO    0
+#define TRIG   -1
+#define MATRIX -2
+#define TRIG_TRIG 20
+#define TRIG_DRCT 21
+#define DRCT_DRCT 22
+#define TRIG_TRIG_TRIG 30
+#define TRIG_TRIG_DRCT 31
+#define TRIG_DRCT_DRCT 32
+#define DRCT_DRCT_DRCT 33
 
 
 #if 0

@@ -126,7 +126,7 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (45.0/180.0)*acos(-1.0)
+  ht_psi          = (60.0/180.0)*acos(-1.0)
 
 
   !open(unit = 3,file = "sim_thermalBL.dat")
@@ -158,7 +158,7 @@ subroutine Simulation_initBlock(blockId)
   !sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
   sim_nucSiteDens = 1
-  sim_nuc_radii   = 0.3
+  sim_nuc_radii   = 1.0
   sim_nuc_site_x  = 0.0 !- (yl - sim_nuc_radii*cos(ht_psi) - 4)*sin(rot_rect)
   sim_nuc_site_y  = -2.75+sim_nuc_radii*cos(ht_psi)  !(yl - sim_nuc_radii*cos(ht_psi) - 4)*cos(rot_rect) + 4.0
   sim_nuc_site_z  = 0.0
