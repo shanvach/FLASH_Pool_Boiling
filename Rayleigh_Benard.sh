@@ -9,7 +9,7 @@ opt="-opt"
 grd="+rg"
 dir="RBCAV"
 flg=""
-hpc="manwe"
+hpc="manwe.ddns.net"
 
 # Default Advanced Options
 advn=false
