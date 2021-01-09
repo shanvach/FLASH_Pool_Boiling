@@ -78,6 +78,7 @@ SCRATCHCENTERVAR divv
 FACEVAR velc     
 FACEVAR rhds
 FACEVAR velo
+FACEVAR vold
 
 # Number of guardcells at each boundary
 GUARDCELLS 1

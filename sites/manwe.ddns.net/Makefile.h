@@ -87,7 +87,7 @@ CFLAGS_DEBUG =  -ggdb -c -Wno-div-by-zero -Wundef  \
 -pedantic -Wall -Wextra -Winit-self -ftree-vrp -Wfloat-equal \
 -Wunsafe-loop-optimizations -Wpadded -fstack-check -fstack-protector-all
 
-CFLAGS_TEST = -c -O3 -Wuninitialized
+CFLAGS_TEST = -c -O0 -Wuninitialized
 
 # if we are using HDF5, we need to specify the path to the include files
 CFLAGS_HDF5 = -I${HDF5_PATH}/include -DH5_USE_16_API
