@@ -26,29 +26,26 @@ subroutine ins_computeDtLocal(blockID,   &
                               dtLocal, lminloc )
 
   use IncompNS_data, ONLY : ins_cflflg, ins_cfl, ins_sigma, ins_invsqrtRa_Pr, ins_dtspec
-
-  use Grid_interface, ONLY : Grid_getBlkCenterCoords
-  
+  use Heat_AD_data, ONLY  : ht_invsqrtRaPr 
   use Grid_data, ONLY : gr_meshMe
-
-  use Heat_AD_data, only: ht_invsqrtRaPr
 
   implicit none
 
 #include "Flash.h"
 #include "constants.h"
+
   integer, intent(IN) :: blockID
-  integer,dimension(2,MDIM), intent(IN) :: blkLimits,blkLimitsGC
-  integer, intent(IN) :: isize,jsize,ksize
-  real, dimension(:,:),      intent(IN) :: dx, dy, dz
-  real, pointer,dimension(:,:,:,:)  :: facexData,faceyData,facezData
+  integer,dimension(2,MDIM), intent(IN) :: blkLimits, blkLimitsGC
+  integer, intent(IN) :: isize, jsize, ksize
+  real, dimension(:,:), intent(IN) :: dx, dy, dz
+  real, pointer, dimension(:,:,:,:) :: facexData, faceyData, facezData
   real, intent(INOUT) :: dtLocal
   integer, intent(INOUT) :: lminloc(5)
 
-  ! Local variables:
   real, parameter :: eps = 1.e-12
-  real :: dtc,dtv,dtl,velcoeff
-  integer :: j,k
+  real :: dtl, velcoeff, nu
+  integer :: imin, imax, jmin, jmax, kmin, kmax
+  integer :: i, j, k
 
   if (ins_cflflg .eq. 0) then
      dtlocal    = ins_dtspec
@@ -56,61 +53,103 @@ subroutine ins_computeDtLocal(blockID,   &
      return
   endif
 
+  imin = blkLimits(LOW, IAXIS)
+  jmin = blkLimits(LOW, JAXIS)
+  kmin = blkLimits(LOW, KAXIS)
+  imax = blkLimits(HIGH, IAXIS)
+  jmax = blkLimits(HIGH, JAXIS)
+  kmax = blkLimits(HIGH, KAXIS)
 
+  nu = max(ins_invsqrtRa_Pr, ht_invsqrtRaPr) / ins_sigma
 
 #if NDIM == MDIM
   velcoeff = eps
 
-  do k = GRID_KLO, GRID_KHI
-    do j = GRID_JLO, GRID_JHI 
+  do k = kmin, kmax 
+    do j = jmin, jmax
+      do i = imin, imax
 
-      velcoeff = MAX(velcoeff,                                                                                     &
-                 MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,k))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)) + &
-                 MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dy(j,LEFT_EDGE))                   + &
-                 MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI  ,j,k))*dz(k,LEFT_EDGE)))
+        velcoeff = max(velcoeff,                                       &
+            abs(facexData(VELC_FACE_VAR,i+1,j,k)) * dx(i,RIGHT_EDGE) + &
+            abs(faceyData(VELC_FACE_VAR,i,j+1,k)) * dy(j,RIGHT_EDGE) + &
+            abs(facezData(VELC_FACE_VAR,i,j,k+1)) * dz(k,RIGHT_EDGE) + &
+            nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 + dz(k,CENTER)**2 ) )
+
+      end do
     end do
   end do
 
-  velcoeff = MAX(velcoeff,                                                                                                   &
-             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,GRID_KLO:GRID_KHI))*dy(GRID_JHI+1,LEFT_EDGE)) + &
-             MAXVAL(ABS(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KHI+1))*dz(GRID_KHI+1,LEFT_EDGE)))
+  do k = kmin, kmax
+    do j = jmin, jmax
+      i = imin
+      velcoeff = max(velcoeff,                                       &
+          abs(facexData(VELC_FACE_VAR,i  ,j,k)) * dx(i,LEFT_EDGE ) + &
+          abs(faceyData(VELC_FACE_VAR,i,j+1,k)) * dy(j,RIGHT_EDGE) + &
+          abs(facezData(VELC_FACE_VAR,i,j,k+1)) * dz(k,RIGHT_EDGE) + &
+          nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 + dz(k,CENTER)**2 ) )
+    end do
+  end do
 
-  if (velcoeff .gt. eps) then
-    dtc = ins_cfl / velcoeff
-  else
-    dtc = ins_cfl / eps
-  endif
+  do k = kmin, kmax
+    do i = imin, imax
+      j = jmin
+      velcoeff = max(velcoeff,                                       &
+          abs(facexData(VELC_FACE_VAR,i+1,j,k)) * dx(i,RIGHT_EDGE) + &
+          abs(faceyData(VELC_FACE_VAR,i,j  ,k)) * dy(j,LEFT_EDGE ) + &
+          abs(facezData(VELC_FACE_VAR,i,j,k+1)) * dz(k,RIGHT_EDGE) + &
+          nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 + dz(k,CENTER)**2 ) )
+    end do
+  end do
+
+  do j = jmin, jmax
+    do i = imin, imax
+      k = kmin
+      velcoeff = max(velcoeff,                                       &
+          abs(facexData(VELC_FACE_VAR,i+1,j,k)) * dx(i,RIGHT_EDGE) + &
+          abs(faceyData(VELC_FACE_VAR,i,j+1,k)) * dy(j,RIGHT_EDGE) + &
+          abs(facezData(VELC_FACE_VAR,i,j,k  )) * dz(k,LEFT_EDGE ) + &
+          nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 + dz(k,CENTER)**2 ) )
+    end do
+  end do
+
+  dtl = ins_cfl / velcoeff
   
-  dtv = ins_sigma / MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * (1 / MAXVAL(dx(:,CENTER))**2. + &
-                                                             1 / MAXVAL(dy(:,CENTER))**2. + &
-                                                             1 / MAXVAL(dz(:,CENTER))**2. )
-
 #else
   velcoeff = eps
 
-  do j = GRID_JLO, GRID_JHI
-    velcoeff = MAX(velcoeff,                                                                                     &
-               MAXVAL(ABS(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,j,1))*dx(GRID_ILO:GRID_IHI+1,LEFT_EDGE)) + &
-               MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,j,1))*dy(j,LEFT_EDGE)))
+  do j = jmin, jmax
+    do i = imin, imax
+
+      velcoeff = max(velcoeff,                                       &
+          abs(facexData(VELC_FACE_VAR,i+1,j,1)) * dx(i,RIGHT_EDGE) + &
+          abs(faceyData(VELC_FACE_VAR,i,j+1,1)) * dy(j,RIGHT_EDGE) + &  
+          nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 ) )
+
+    end do
   end do
 
-  velcoeff = MAX(velcoeff,                                                                                  &
-             MAXVAL(ABS(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JHI+1,1))*dy(GRID_JHI+1,LEFT_EDGE)))
-                  
-  if (velcoeff .gt. eps) then
-    dtc = ins_cfl / velcoeff
-  else
-    dtc = ins_cfl / eps  
-  endif
-  
-  dtv = ins_sigma / MAX(ht_invsqrtRaPr, ins_invsqrtRa_Pr) * (1 / MAXVAL(dx(:,CENTER))**2. + 1 / MAXVAL(dy(:,CENTER))**2. )
-#endif
+  do j = jmin, jmax
+    i = imin
+    velcoeff = max(velcoeff,                                       &
+        abs(facexData(VELC_FACE_VAR,i  ,j,1)) * dx(i,LEFT_EDGE ) + &
+        abs(faceyData(VELC_FACE_VAR,i,j+1,1)) * dy(j,RIGHT_EDGE) + &
+        nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 ) )
+  end do
 
-  dtl = 0.5 * MIN(dtc, dtv) 
+  do i = imin, imax
+    j = jmin
+    velcoeff = max(velcoeff,                                       &
+        abs(facexData(VELC_FACE_VAR,i+1,j,1)) * dx(i,RIGHT_EDGE) + &
+        abs(faceyData(VELC_FACE_VAR,i,j  ,1)) * dy(j,LEFT_EDGE ) + &
+        nu * ( dx(i,CENTER)**2 + dy(j,CENTER)**2 ) )
+  end do
+
+  dtl = ins_cfl / velcoeff
+  
+#endif
 
   if (dtl .lt. dtLocal) then
      dtLocal = dtl
-     ! Cell located at center of Block - Used to define block location. 
      lminloc(IAXIS) = NGUARD + NXB/2
      lminloc(JAXIS) = NGUARD + NYB/2
 #if NDIM == MDIM
