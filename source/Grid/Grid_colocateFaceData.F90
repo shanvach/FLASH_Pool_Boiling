@@ -35,5 +35,7 @@
 subroutine Grid_colocateFaceData(faceVar, axis, blockid, cellData)
 
   implicit none
+  integer, intent(IN)  :: faceVar, axis, blockid
+  real, intent(OUT), dimension(:,:,:) :: cellData
 
 end subroutine Grid_colocateFaceData
