@@ -131,7 +131,7 @@ module IO_data
   integer, parameter :: io_maxPlotGridVars = 12 !max scratch grid vars to output
   integer, parameter :: io_maxPlotFaceVars = 12 !max face vars to output - NOT YET IMPLEMENTED
 
-
+  logical, save :: io_plot_velocity
   integer, save :: io_plotVar(io_maxPlotVars), io_nPlotVars
   integer, save :: io_plotGridVar(io_maxPlotGridVars), io_nPlotGridVars
 
@@ -148,6 +148,7 @@ module IO_data
   character (len=4), save :: io_faceYVarLabels(NFACE_VARS)
   character (len=4), save :: io_faceZVarLabels(NFACE_VARS)
   character (len=4), save :: io_plotVarStr(io_maxPlotVars)
+  character (len=4), save :: io_plotVelStr(3)
   character (len=4), save :: io_plotGridVarStr(io_maxPlotGridVars)
   character (len=4), save :: io_plotFaceVarStr(io_maxPlotFaceVars) ! NOT YET IMPLEMENTED
 

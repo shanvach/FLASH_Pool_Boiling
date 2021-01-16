@@ -9,7 +9,7 @@ opt="-opt"
 grd="+rg"
 dir="RBCAV"
 flg=""
-hpc="manwe"
+hpc="manwe.ddns.net"
 
 # Default Advanced Options
 advn=false
@@ -17,6 +17,7 @@ comp=false
 ncmp=4
 over=false
 coll=false
+h5pp=false
 
 # Output Usage Information
 usage ()
@@ -70,6 +71,8 @@ while [ "$1" != '' ]; do
                                 ;;
         -over | --overwrite )   over=true
                                 ;;
+        -h5pp | --h5_parallel ) h5pp=true
+                                ;;
         -coll | --collection )  coll=true
                                 ;;
         -all  | --advn_coll  )  coll=true
@@ -95,13 +98,20 @@ elif [ "${grd}" == "+pg" ]; then
     dir="POISS"
 fi
 
+# Identify Parallel or Serial IO
+if ${h5pp}; then
+	h5f=" +parallelIO"
+else
+	h5f=""
+fi
+
 # Create Setup Command From User Options
 if [ "${dim}" == "-2d" ]; then
     objdir="${grd:1}${dir}_2D${nxb}-${nyb}"
-    setcom="./setup ${simdir} ${dim} -auto ${opt} -nxb=${nxb} -nyb=${nyb} ${grd} -objdir=${objdir}${flg} -site=${hpc}"
+    setcom="./setup ${simdir} ${dim} -auto ${opt}${h5f} -nxb=${nxb} -nyb=${nyb} ${grd} -objdir=${objdir}${flg} -site=${hpc}"
 else
     objdir="${grd:1}${dir}_3D${nxb}-${nyb}-${nzb}"  
-    setcom="./setup ${simdir} ${dim} -auto ${opt} -nxb=${nxb} -nyb=${nyb} -nzb=${nzb} ${grd} -objdir=${objdir}${flg} -site=${hpc}"
+    setcom="./setup ${simdir} ${dim} -auto ${opt}${h5f} -nxb=${nxb} -nyb=${nyb} -nzb=${nzb} ${grd} -objdir=${objdir}${flg} -site=${hpc}"
 fi
 
 # Run the Setup Script

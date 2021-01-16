@@ -3,28 +3,35 @@ module Heat_AD_interface
     implicit none
         
     interface
-       subroutine Heat_Solve3d(T_p, T_o, u, v, w, dt, dx, dy, dz, &
-                               ix1, ix2, jy1, jy2, kz1, kz2)
+       subroutine ht_rhs3d(T, Trhs, u, v, w, dx, dy, dz, ix1, ix2, jy1, jy2, kz1, kz2)
          implicit none
-         real, dimension(:,:,:), intent(inout) :: T_p
-         real, dimension(:,:,:), intent(in) :: T_o
-         real, dimension(:,:,:), intent(in) :: u,v,w
-         real, intent(in) :: dt
-         real, dimension(:,:),   intent(in) :: dx, dy, dz 
+         real, dimension(:,:,:), intent(in)  :: T
+         real, dimension(:,:,:), intent(out) :: Trhs
+         real, dimension(:,:,:), intent(in)  :: u, v, w
+         real, dimension(:,:),   intent(in)  :: dx, dy, dz 
          integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
-       end subroutine Heat_Solve3d
+       end subroutine ht_rhs3d
     end interface
 
     interface
-       subroutine Heat_Solve2d(T_p, T_o, u, v, dt, dx, dy, ix1, ix2, jy1, jy2)
+       subroutine ht_rhs2d(T, Trhs, u, v, dx, dy, ix1, ix2, jy1, jy2)
          implicit none
-         real, dimension(:,:,:), intent(inout) :: T_p
-         real, dimension(:,:,:), intent(in) :: T_o
-         real, dimension(:,:,:), intent(in) :: u,v
-         real, intent(in) :: dt
-         real, dimension(:,:),   intent(in) :: dx, dy 
+         real, dimension(:,:,:), intent(in)  :: T
+         real, dimension(:,:,:), intent(out) :: Trhs
+         real, dimension(:,:,:), intent(in)  :: u, v
+         real, dimension(:,:),   intent(in)  :: dx, dy 
          integer, intent(in) :: ix1, ix2, jy1, jy2
-       end subroutine Heat_Solve2d
+       end subroutine ht_rhs2d
+    end interface
+
+    interface
+       subroutine Heat_Solve(T, Trhs, Told, dt, ix1, ix2, jy1, jy2, kz1, kz2, gama, rho)
+         implicit none
+         real, dimension(:,:,:), intent(inout) :: T
+         real, dimension(:,:,:), intent(in)    :: Trhs, Told
+         real,    intent(in) :: dt, gama, rho
+         integer, intent(in) :: ix1, ix2, jy1, jy2, kz1, kz2
+       end subroutine Heat_Solve
     end interface
 
     interface

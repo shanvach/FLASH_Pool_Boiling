@@ -70,8 +70,6 @@ subroutine Driver_evolveFlash()
   dr_nstep = 0
   firstfileflag = 0
   call Grid_getListOfBlocks(LEAF,blockList,blockCount)
-  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                    0.0,blockList,blockCount,firstfileflag)
 
   call Heat_AD(blockCount, blockList, dr_simTime, dr_dt, dr_dtOld, sweepDummy)
 
@@ -80,8 +78,6 @@ subroutine Driver_evolveFlash()
   dr_nstep = 1
   firstfileflag = 0
   call Grid_getListOfBlocks(LEAF,blockList,blockCount)
-  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                    0.0,blockList,blockCount,firstfileflag)
   call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun,PLOTFILE_ONLY)
 
   call Timers_stop("evolution")

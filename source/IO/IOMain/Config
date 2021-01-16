@@ -159,6 +159,9 @@ PARAMETER plot_var_10 STRING "none"
 PARAMETER plot_var_11 STRING "none"
 PARAMETER plot_var_12 STRING "none"
 
+# !!! outputing velocity only supported with hdf5 unit
+D plot_velocity Output Cell Center Velocity in plot files
+PARAMETER plot_velocity BOOLEAN false
 
 
 D plot_grid_var_1	Allows user to output specific scratch grid vars

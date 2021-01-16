@@ -45,3 +45,4 @@ PARAMETER Tzr_boundary_value REAL 0.
 # THIS PART IS FOR PHYSICS CONFIG
 # Variables required by the ht module
 VARIABLE temp 			# Temperature 
+VARIABLE told 			# for ab2/rk3 

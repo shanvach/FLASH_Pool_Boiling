@@ -31,11 +31,11 @@ D   isgs   Subgrid scale model flag
 PARAMETER isgs          INTEGER  0
 
 PARAMETER cflflg           INTEGER     1      # if 1 run at constant CFL, if 0 constant timestep
-PARAMETER cfl              REAL     0.35      # CFL number (for AB2 ~ 0.3, for RK3 ~ 1.2)
-PARAMETER sigma            REAL     0.25      # viscous condition parameter
+PARAMETER cfl              REAL     1.20      # CFL number (for AB2 ~ 0.3, for RK3 ~ 1.2)
+PARAMETER sigma            REAL     0.50      # viscous condition parameter
 PARAMETER dtspec           REAL     0.001     # Specified constant timestep
 
-PARAMETER intschm          INTEGER     2      # if 2: 2nd order Adams-Bashforth (21 if variable), if 3: 3rd order Runge-Kutta method
+PARAMETER intschm          INTEGER     3      # if 2: 2nd order Adams-Bashforth (21 if variable), if 3: 3rd order Runge-Kutta method
 
 PARAMETER pressure_correct BOOLEAN  false     # if true does pressure correction time splitting scheme (solve Poisson for DP)
                                               # else fractional step method (solve Poisson for P).
@@ -66,6 +66,7 @@ VARIABLE dust                  	# divergence of ustar, poissons equation source 
 VARIABLE tvis               	# turbulent viscosity
 VARIABLE omgm                   # Vorticity module
 VARIABLE sdvc                   # divergence of corrected velocity field
+VARIABLE sdvo                   # divergence of corrected velocity field
 
 # Fluxes
 FLUX velc
@@ -77,6 +78,7 @@ SCRATCHCENTERVAR divv
 FACEVAR velc     
 FACEVAR rhds
 FACEVAR velo
+FACEVAR vold
 
 # Number of guardcells at each boundary
 GUARDCELLS 1
