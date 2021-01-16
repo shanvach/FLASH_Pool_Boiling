@@ -57,7 +57,8 @@ subroutine gr_createDomain()
        gr_iCoords, gr_jCoords, gr_kCoords, gr_domainBC, gr_iLoGC, &
        gr_jLoGC, gr_kLoGC, gr_iHiGC, gr_jHiGC, gr_kHiGC,&
        gr_ilo,gr_ihi,gr_jlo,gr_jhi,gr_klo,gr_khi,&
-       gr_iguard,gr_jguard,gr_kguard
+       gr_iguard,gr_jguard,gr_kguard,&
+       gr_iMetrics, gr_jMetrics, gr_kMetrics
 
   
   implicit none
@@ -124,6 +125,10 @@ subroutine gr_createDomain()
   allocate(gr_iCoords(3,gr_ihiGc-gr_iloGc+1,1))
   allocate(gr_jCoords(3,gr_jhiGc-gr_jloGc+1,1))
   allocate(gr_kCoords(3,gr_khiGc-gr_kloGc+1,1))
+  
+  allocate(gr_iMetrics(3,gr_ihiGc-gr_iloGc+1,1))
+  allocate(gr_jMetrics(3,gr_jhiGc-gr_jloGc+1,1))
+  allocate(gr_kMetrics(3,gr_khiGc-gr_kloGc+1,1))
 
 #ifndef FIXEDBLOCKSIZE
   
@@ -249,6 +254,9 @@ subroutine gr_createDomain()
      gr_kCoords(LEFT_EDGE:RIGHT_EDGE,1,1) = gr_kmin
      gr_delta(KAXIS)=0.0
   end if
-  
+ 
+  gr_iMetrics(:,:,1) = gr_delta(IAXIS)
+  gr_jMetrics(:,:,1) = gr_delta(JAXIS)
+  gr_kMetrics(:,:,1) = gr_delta(KAXIS)
   
 end subroutine gr_createDomain
