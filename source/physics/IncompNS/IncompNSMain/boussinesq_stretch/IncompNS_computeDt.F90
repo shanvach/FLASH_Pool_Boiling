@@ -41,9 +41,9 @@ subroutine IncompNS_computeDt(ins_mindt,ins_minloc)
   integer, dimension(MAXBLOCKS) :: blockList
   integer :: numLeafBlocks
 
-  real, dimension(GRID_IHI_GC,2,1) :: iMetrics
-  real, dimension(GRID_JHI_GC,2,1) :: jMetrics
-  real, dimension(GRID_KHI_GC,2,1) :: kMetrics
+  real, dimension(GRID_IHI_GC,3,1) :: iMetrics
+  real, dimension(GRID_JHI_GC,3,1) :: jMetrics
+  real, dimension(GRID_KHI_GC,3,1) :: kMetrics
 
 
   !!arrays which hold the starting and ending indices of a block
@@ -74,12 +74,16 @@ subroutine IncompNS_computeDt(ins_mindt,ins_minloc)
      blockID=blockList(i)
 
      call Grid_getCellMetrics(IAXIS,blockID,LEFT_EDGE, .true.,iMetrics(:,LEFT_EDGE,i), GRID_IHI_GC)
-     call Grid_getCellMetrics(IAXIS,blockID,CENTER,    .true.,iMetrics(:,CENTER,i),    GRID_IHI_GC)
      call Grid_getCellMetrics(JAXIS,blockID,LEFT_EDGE, .true.,jMetrics(:,LEFT_EDGE,i), GRID_JHI_GC)
-     call Grid_getCellMetrics(JAXIS,blockID,CENTER,    .true.,jMetrics(:,CENTER,i),    GRID_JHI_GC)
      call Grid_getCellMetrics(KAXIS,blockID,LEFT_EDGE, .true.,kMetrics(:,LEFT_EDGE,i), GRID_KHI_GC)
-     call Grid_getCellMetrics(KAXIS,blockID,CENTER,    .true.,kMetrics(:,CENTER,i),    GRID_KHI_GC)
 
+     call Grid_getCellMetrics(IAXIS,blockID,CENTER, .true.,iMetrics(:,CENTER,i), GRID_IHI_GC)
+     call Grid_getCellMetrics(JAXIS,blockID,CENTER, .true.,jMetrics(:,CENTER,i), GRID_JHI_GC)
+     call Grid_getCellMetrics(KAXIS,blockID,CENTER, .true.,kMetrics(:,CENTER,i), GRID_KHI_GC)
+
+     call Grid_getCellMetrics(IAXIS,blockID,RIGHT_EDGE, .true.,iMetrics(:,RIGHT_EDGE,i), GRID_IHI_GC)
+     call Grid_getCellMetrics(JAXIS,blockID,RIGHT_EDGE, .true.,jMetrics(:,RIGHT_EDGE,i), GRID_JHI_GC)
+     call Grid_getCellMetrics(KAXIS,blockID,RIGHT_EDGE, .true.,kMetrics(:,RIGHT_EDGE,i), GRID_KHI_GC)
 
      call Grid_getBlkPtr(blockID, facexData,FACEX)
      call Grid_getBlkPtr(blockID, faceyData,FACEY)

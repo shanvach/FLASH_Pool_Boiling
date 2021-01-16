@@ -262,6 +262,36 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
   ins_alf = ins_gam + ins_rho
   ins_tlevel = timeEndAdv - dt
 
+
+  ! Save last timestep velocity for energy energy equation
+  do lb = 1,blockCount
+     blockID = blockList(lb)
+
+     call Grid_getBlkPtr(blockID,facexData,FACEX)
+     call Grid_getBlkPtr(blockID,faceyData,FACEY)
+
+#if NDIM == 3
+     call Grid_getBlkPtr(blockID,facezData,FACEZ)
+     facezData(VOLD_FACE_VAR,:,:,:) = facezData(VELC_FACE_VAR,:,:,:)
+     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
+#endif
+
+     facexData(VOLD_FACE_VAR,:,:,:) = facexData(VELC_FACE_VAR,:,:,:)
+     faceyData(VOLD_FACE_VAR,:,:,:) = faceyData(VELC_FACE_VAR,:,:,:)
+     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
+     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
+
+  end do
+
+  gcMask = .FALSE.
+  gcMask(NUNK_VARS+VOLD_FACE_VAR) = .TRUE.                 ! u
+  gcMask(NUNK_VARS+1*NFACE_VARS+VOLD_FACE_VAR) = .TRUE.    ! v
+#if NDIM == 3
+  gcMask(NUNK_VARS+2*NFACE_VARS+VOLD_FACE_VAR) = .TRUE.    ! w
+#endif
+  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
+       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
+
   ! Timestep Loop:
   do ist = 1,itmx
 

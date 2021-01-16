@@ -53,7 +53,7 @@ subroutine Driver_initFlash()
   use Timers_interface, ONLY : Timers_init, Timers_start, Timers_stop
 
   use Grid_interface, ONLY : Grid_init, Grid_initDomain, &
-    Grid_getListOfBlocks
+    Grid_getListOfBlocks, Grid_writeDomain
   use Simulation_interface, ONLY : Simulation_init
   use IO_interface, ONLY :IO_init, IO_outputInitial
   use Profiler_interface, ONLY : Profiler_init
@@ -113,6 +113,7 @@ subroutine Driver_initFlash()
   call Grid_getListOfBlocks(LEAF,blockList,blockCount)
   call Heat_AD_init(blockCount,blockList)
 
+  call Grid_writeDomain()
   if(dr_globalMe==MASTER_PE)print*,'Driver init all done'
 
   !!Done with initialization.

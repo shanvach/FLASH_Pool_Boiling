@@ -247,6 +247,9 @@ subroutine IO_init()
      call Simulation_mapStrToInt(trim(io_plotVarStr(i)), io_plotVar(i), MAPBLOCK_UNK)
   end do  
 
+  ! get option to add cell centered velocity data to plot files
+  call RuntimeParameters_get('plot_velocity', io_plot_velocity)
+  io_plotVelStr(:) = (/ 'velx', 'vely', 'velz' /)  
 
   if(NFACE_VARS .GT. 0) then
     do i= 1, NFACE_VARS

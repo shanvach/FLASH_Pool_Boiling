@@ -8,4 +8,9 @@ module Heat_AD_data
      integer, save :: ht_Txl_type, ht_Txr_type, ht_Tyl_type, ht_Tyr_type
      integer, save :: ht_Tzl_type, ht_Tzr_type
 
+     integer, parameter :: rkstep = 3
+     real, save :: ht_gama_coeff(rkstep)
+     real, save :: ht_rho_coeff(rkstep)
+     real, save :: ht_gama, ht_rho
+
 end module Heat_AD_data
