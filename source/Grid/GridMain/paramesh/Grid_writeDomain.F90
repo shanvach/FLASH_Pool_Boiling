@@ -24,9 +24,10 @@
 !!
 !!***
  
-subroutine Grid_writeDomain()
+subroutine Grid_writeDomain(fileNumber)
 
   use Driver_interface, ONLY : Driver_abortFlash
+  use IO_data, ONLY : io_plotFileNumber
   use tree, ONLY : lrefine, lnblocks
   use Grid_data, ONLY : gr_meshMe, gr_meshComm, gr_globalNumBlocks,    &
                         gr_oneBlock, gr_delta, gr_globalNumProcs,      &
@@ -41,6 +42,8 @@ subroutine Grid_writeDomain()
 #include "Flash.h"
 #include "constants.h"
 #include "Flash_mpi.h"
+
+  integer, optional, intent(IN) :: fileNumber
 
   integer :: ierr, fc, lb, a, b, c, d, jproc, offset, localNumBlocks
   integer :: status(MPI_STATUS_SIZE)
@@ -66,7 +69,11 @@ subroutine Grid_writeDomain()
   ! Open an hdf5 file for writing grid information
   if(gr_meshMe == MASTER_PE) then
 
-    call io_getOutputName(0, "hdf5_", "grd_", filename, .false.)
+    if (present(filenumber)) then
+      call io_getOutputName(fileNumber, "hdf5_", "grd_", filename, .false.)
+    else
+      call io_getOutputName(max(io_plotFileNumber - 1, 0), "hdf5_", "grd_", filename, .false.)
+    endif
 
     call h5open_f(error)
 
@@ -114,9 +121,9 @@ subroutine Grid_writeDomain()
         gCoords(1:NZB,offset+1:offset+lnblocks,1:3,KAXIS) = reshape(kBuff, (/ NZB, lnblocks, 3 /))
         gDeltas(offset+1:offset+lnblocks,1:MDIM) = reshape(dBuff, (/ lnblocks, MDIM /))
         deallocate(iBuff, jBuff, kBuff, dBuff)
+        offset = offset + lnblocks 
       endif
 
-      offset = offset + localNumBlocks
     endif
 
 
@@ -134,9 +141,9 @@ subroutine Grid_writeDomain()
         gCoords(1:NZB,offset+1:offset+localNumBlocks,1:3,KAXIS) = reshape(kBuff, (/ NZB, localNumBlocks, 3 /))
         gDeltas(offset+1:offset+localNumBlocks,1:MDIM) = reshape(dBuff, (/ localNumBlocks, MDIM /))
         deallocate(iBuff, jBuff, kBuff, dBuff)
+        offset = offset + localNumBlocks
       endif
 
-      offset = offset + localNumBlocks
     endif
 
 

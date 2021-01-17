@@ -22,8 +22,9 @@
 !!
 !!***
  
-subroutine Grid_writeDomain()
+subroutine Grid_writeDomain(fileNumber)
 
   implicit none
+  integer, intent(IN) :: fileNumber
 
 end subroutine Grid_WriteDomain

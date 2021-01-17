@@ -24,10 +24,10 @@
 !!
 !!***
  
-subroutine Grid_writeDomain()
+subroutine Grid_writeDomain(fileNumber)
 
   use Driver_interface, ONLY : Driver_abortFlash
-
+  use IO_data, ONLY : io_plotFileNumber
   use Grid_data, ONLY : gr_meshMe, gr_meshComm, gr_globalNumBlocks,    &
                         gr_iCoords, gr_jCoords, gr_kCoords, gr_delta,  &
                         gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi
@@ -44,6 +44,8 @@ subroutine Grid_writeDomain()
 #include "Flash.h"
 #include "constants.h"
 #include "Flash_mpi.h"
+
+  integer, optional, intent(IN) :: fileNumber
 
   integer :: ierr, i, j, k, a, b, c, d, &
              realSize, newType, jproc
@@ -77,7 +79,11 @@ subroutine Grid_writeDomain()
   ! Open an hdf5 file for writing grid information
   if(gr_meshMe == MASTER_PE) then
 
-    call io_getOutputName(0, "hdf5_", "grd_", filename, .false.)
+    if (present(filenumber)) then
+      call io_getOutputName(fileNumber, "hdf5_", "grd_", filename, .false.)
+    else
+      call io_getOutputName(max(io_plotFileNumber - 1, 0), "hdf5_", "grd_", filename, .false.)
+    endif
 
     call h5open_f(error)
 
