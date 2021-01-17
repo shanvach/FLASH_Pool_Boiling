@@ -19,7 +19,7 @@ while [ "$1" != '' ]; do
 done
 
 if [ "${build}" == "pm" ]; then
-    setup="./setup INavierStokes/zoso/LidDrivenCavity/ -2d -auto -opt -nxb=16 -nyb=16 -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver -objdir=pmLIDCAV -site=${site}"
+    setup="./setup INavierStokes/zoso/LidDrivenCavity/ -2d -auto -opt +parallelIO -nxb=16 -nyb=16 -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver -objdir=pmLIDCAV -site=${site}"
 elif [ "${build}" == "ug" ]; then
     setup="./setup INavierStokes/zoso/LidDrivenCavity/ -2d -auto -opt -nxb=64 -nyb=64 +ug -objdir=ugLIDCAV -site=${site}"
 fi
