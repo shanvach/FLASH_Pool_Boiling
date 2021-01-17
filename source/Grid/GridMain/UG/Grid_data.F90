@@ -155,6 +155,4 @@ Module Grid_data
   real, save, dimension(LOW:HIGH,MDIM) :: gr_region
   integer, save, allocatable :: gr_globalNeghProc(:,:)
 
-  !data required for writeDomain to function
-  real, save,target, allocatable, dimension(:,:,:) ::  gr_iMetrics,    gr_jMetrics,    gr_kMetrics
 end Module Grid_data

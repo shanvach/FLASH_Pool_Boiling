@@ -62,12 +62,4 @@ subroutine Heat_Solve(T_p, T_o, u, v, dt, dx, dy, dz, inRe, ix1,ix2, jy1, jy2)
 
 #endif
 
-  do i = ix1,ix2
-     T_res = T_res + sum((T_o(i,:,1)-T_p(i,:,1))**2)
-  end do
-
-  T_res = sqrt(T_res/size(T_o))
-
-  print *,T_res
-
 end subroutine Heat_Solve
