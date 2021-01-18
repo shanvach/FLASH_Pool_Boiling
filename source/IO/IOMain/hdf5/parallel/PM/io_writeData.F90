@@ -619,7 +619,7 @@ subroutine io_writeData( fileID)
                                     NZB,              &
                                     spMin,            &
                                     spMax,            &
-                                    velBuf,           &
+                                    velt,             &
                                     io_plotVelStr(2), &
                                     localNumBlocks,   &
                                     io_splitNumBlks,  & 
@@ -640,7 +640,7 @@ subroutine io_writeData( fileID)
                                     NZB,              & 
                                     spMin,            &
                                     spMax,            &
-                                    velBuf,           &
+                                    velt,             &
                                     io_plotVelStr(3), &
                                     localNumBlocks,   &
                                     io_splitNumBlks,  & 
