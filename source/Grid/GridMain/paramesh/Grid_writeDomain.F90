@@ -1,4 +1,4 @@
-!!****if* source/Grid/GridMain/UG/Grid_writeDomain
+!!****if* source/Grid/GridMain/paramesh/Grid_writeDomain
 !!
 !! NAME
 !!
@@ -13,10 +13,12 @@
 !! DESCRIPTION
 !!
 !! This function writes the grid information to an hdf5 file to store the 
-!! Uniform Grid / Regular Grid cell coordinates (Left, Center, Right) and 
-!! the cell metrics for later use in post-processing FLASH simulations.
+!! Paramesh or Uniform Grid / Regular Grid cell coordinates (Left, Center, Right) 
+!! and the cell metrics for later use in post-processing FLASH simulations.
 !!
 !! Currently only supports hdf5 IO
+!!
+!! This fuction is intended to be called after a IO_output function
 !!
 !! ARGUMENTS
 !!
@@ -91,9 +93,9 @@ subroutine Grid_writeDomain(fileNumber)
     gCrdLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'xxxl', 'xxxc', 'xxxr', 'xxxf' /) 
     gCrdLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'yyyl', 'yyyc', 'yyyr', 'yyyf' /) 
     gCrdLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'zzzl', 'zzzc', 'zzzr', 'zzzf' /) 
-    gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddxl', 'ddxc', 'ddxr' /) 
-    gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddyl', 'ddyc', 'ddyr' /) 
-    gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddzl', 'ddzc', 'ddzr' /) 
+    gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dx', '  ' /) 
+    gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dy', '  ' /) 
+    gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dz', '  ' /) 
 
     allocate(gCoords(max(NXB, NYB, NZB), gr_globalNumBlocks, 3, MDIM))
     allocate(gDeltas(gr_globalNumBlocks, MDIM))

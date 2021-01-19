@@ -13,10 +13,12 @@
 !! DESCRIPTION
 !!
 !! This function writes the grid information to an hdf5 file to store the 
-!! Uniform Grid / Regular Grid cell coordinates (Left, Center, Right) and 
-!! the cell metrics for later use in post-processing FLASH simulations.
+!! Paramesh or Uniform Grid / Regular Grid cell coordinates (Left, Center, Right)
+!! and the cell metrics for later use in post-processing FLASH simulations.
 !!
 !! Currently only supports hdf5 IO
+!!
+!! This fuction is intended to be called after a IO_output function
 !!
 !! ARGUMENTS
 !!
@@ -62,7 +64,6 @@ subroutine Grid_writeDomain(fileNumber)
   real, allocatable, dimension(:,:) :: fCoord
   real, allocatable, dimension(:,:) :: iMetrics, jMetrics, kMetrics
   real, allocatable, dimension(:,:,:,:,:) :: gCoords, gMetrics
-  real, allocatable, dimension(:,:) :: gDeltas
 
   ! locals necessary to read hdf5 file
   integer :: error
@@ -101,9 +102,15 @@ subroutine Grid_writeDomain(fileNumber)
     gCrdLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'xxxl', 'xxxc', 'xxxr', 'xxxf' /) 
     gCrdLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'yyyl', 'yyyc', 'yyyr', 'yyyf' /) 
     gCrdLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'zzzl', 'zzzc', 'zzzr', 'zzzf' /) 
+#ifdef FLASH_GRID_REGULAR
     gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddxl', 'ddxc', 'ddxr' /) 
     gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddyl', 'ddyc', 'ddyr' /) 
     gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddzl', 'ddzc', 'ddzr' /) 
+#else
+    gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dx', '  ' /) 
+    gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dy', '  ' /) 
+    gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dz', '  ' /) 
+#endif
 
     ! Create mpi buffers and global grid storage array
     !   buffers shape are    (faces * blks, blk size)
@@ -118,8 +125,6 @@ subroutine Grid_writeDomain(fileNumber)
     allocate(jMetrics(3 * gr_globalNumBlocks, NYB))
     allocate(kMetrics(3 * gr_globalNumBlocks, NZB))
     allocate(gMetrics(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
-#else
-    allocate(gDeltas(gr_globalNumBlocks, MDIM))
 #endif
 
   endif  
@@ -167,13 +172,6 @@ subroutine Grid_writeDomain(fileNumber)
                      counts, displs, resizedType(JAXIS), 0, gr_meshComm, ierr)
     call MPI_Gatherv(gr_kMetrics(:,gr_klo:gr_khi,1), 3*NZB, FLASH_REAL, kMetrics, &
                      counts, displs, resizedType(KAXIS), 0, gr_meshComm, ierr)
-#else
-    call MPI_Gather(gr_delta(IAXIS), 1, FLASH_REAL, gDeltas(:, IAXIS), &
-                                     1, FLASH_REAL, 0, gr_meshComm, ierr)
-    call MPI_Gather(gr_delta(JAXIS), 1, FLASH_REAL, gDeltas(:, JAXIS), &
-                                     1, FLASH_REAL, 0, gr_meshComm, ierr)
-    call MPI_Gather(gr_delta(KAXIS), 1, FLASH_REAL, gDeltas(:, KAXIS), &
-                                     1, FLASH_REAL, 0, gr_meshComm, ierr)
 #endif
 
     deallocate(counts, displs)
@@ -195,10 +193,6 @@ subroutine Grid_writeDomain(fileNumber)
         iMetrics(3*jproc+1:3*jproc+3,:) = gr_iMetrics(:,gr_ilo:gr_ihi,1)
         jMetrics(3*jproc+1:3*jproc+3,:) = gr_jMetrics(:,gr_jlo:gr_jhi,1)
         kMetrics(3*jproc+1:3*jproc+3,:) = gr_kMetrics(:,gr_klo:gr_khi,1)
-#else
-        gDeltas(jproc, IAXIS) = gr_delta(IAXIS)
-        gDeltas(jproc, JAXIS) = gr_delta(JAXIS)
-        gDeltas(jproc, KAXIS) = gr_delta(KAXIS)
 #endif
       endif
 
@@ -219,10 +213,6 @@ subroutine Grid_writeDomain(fileNumber)
         iMetrics(3*jproc+1:3*jproc+3,:) = reshape(iBuff, (/ 3, NXB /))
         jMetrics(3*jproc+1:3*jproc+3,:) = reshape(jBuff, (/ 3, NYB /))
         kMetrics(3*jproc+1:3*jproc+3,:) = reshape(kBuff, (/ 3, NZB /))
-#else
-        call MPI_Recv(gDeltas(jproc, IAXIS), 1, FLASH_REAL, jproc, IAXIS+2, gr_meshComm, status, ierr)
-        call MPI_Recv(gDeltas(jproc, JAXIS), 1, FLASH_REAL, jproc, JAXIS+2, gr_meshComm, status, ierr)
-        call MPI_Recv(gDeltas(jproc, KAXIS), 1, FLASH_REAL, jproc, KAXIS+2, gr_meshComm, status, ierr)
 #endif
       endif
 
@@ -243,10 +233,6 @@ subroutine Grid_writeDomain(fileNumber)
         call MPI_Send(iBuff, 3*NXB, FLASH_REAL, MASTER_PE, IAXIS+2, gr_meshComm, ierr)
         call MPI_Send(jBuff, 3*NYB, FLASH_REAL, MASTER_PE, JAXIS+2, gr_meshComm, ierr)
         call MPI_Send(kBuff, 3*NZB, FLASH_REAL, MASTER_PE, KAXIS+2, gr_meshComm, ierr)
-#else
-        call MPI_Send(gr_delta(IAXIS), 1, FLASH_REAL, MASTER_PE, IAXIS+2, gr_meshComm, ierr)
-        call MPI_Send(gr_delta(JAXIS), 1, FLASH_REAL, MASTER_PE, JAXIS+2, gr_meshComm, ierr)
-        call MPI_Send(gr_delta(KAXIS), 1, FLASH_REAL, MASTER_PE, KAXIS+2, gr_meshComm, ierr)
 #endif
       endif
 
@@ -293,8 +279,8 @@ subroutine Grid_writeDomain(fileNumber)
         gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
         gMtrMin(a, b) = minval(gMetrics(a, b, :, 1:d, :)) 
 #else
-        gMtrMax(a, b) = maxval(gDeltas(:, a)) 
-        gMtrMin(a, b) = minval(gDeltas(:, a)) 
+        gMtrMax(a, b) = gr_delta(a) 
+        gMtrMin(a, b) = gr_delta(a) 
 #endif
 
         ! write dimensions
@@ -346,10 +332,10 @@ subroutine Grid_writeDomain(fileNumber)
 #else
         if (b == CENTER) then
           dsetname = gMtrLbs(a, b)
-          dset_sngl = (/ gr_globalNumBlocks/)
+          dset_sngl = (/ 1 /)
           call h5screate_simple_f(1, dset_sngl, dspc_id, error)
           call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
-          call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gDeltas(:, a), dset_dims, error)
+          call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gr_delta(a), dset_dims, error)
        
           attrname = "maximum"
           dset_sngl = (/ 1 /)
@@ -412,8 +398,6 @@ subroutine Grid_writeDomain(fileNumber)
     deallocate(gCoords)
 #ifdef FLASH_GRID_REGULAR
     deallocate(gMetrics)
-#else
-    deallocate(gDeltas)
 #endif
   endif
 

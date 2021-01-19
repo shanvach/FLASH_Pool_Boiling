@@ -26,9 +26,13 @@
 #endif
 
 subroutine Grid_getDeltas(blockId,del)
+  
   use Grid_data, ONLY : gr_delta
+  use Driver_interface, ONLY : Driver_abortFlash
+  
   implicit none
-#include "constants.h"
+
+  #include "constants.h"
 
   integer, intent(IN) :: blockId
   real, dimension(MDIM),intent(OUT) :: del

@@ -1,4 +1,4 @@
-!!****if* source/Grid/GridMain/UG/UGStretched/Grid_getCellMetrics
+!!****if* source/Grid/GridMain/UG/Grid_getCellMetrics
 !!
 !! NAME
 !!  Grid_getCellMetrics
@@ -101,7 +101,10 @@
 
 subroutine Grid_getCellMetrics(axis, blockId, edge, guardcell, metrics, size)
 
+  use Driver_interface, ONLY : Driver_abortFlash
+  
   implicit none
+  
   integer, intent(in) :: axis
   integer, intent(in) :: blockId, edge
   integer, intent(in) :: size
