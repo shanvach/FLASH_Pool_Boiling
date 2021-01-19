@@ -245,7 +245,9 @@ subroutine Driver_evolveFlash()
      
      call Timers_start("io")
      call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
+#ifdef FLASH_GRID_PARAMESH
      call Grid_writeDomain()
+#endif
      call Timers_stop("io")
 
      if(endRun) exit
