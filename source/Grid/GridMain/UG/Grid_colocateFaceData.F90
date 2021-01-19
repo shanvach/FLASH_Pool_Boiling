@@ -18,7 +18,7 @@
 !! the face data to the cell centers.
 !!
 !! Currently only used for colocated velocity data in plot files for hdf5 IO
-!!           and only for the uniform grid, and derived, grids
+!!           and only for the paramesh, uniform grid, and derived grids
 !!
 !! ARGUMENTS
 !!
