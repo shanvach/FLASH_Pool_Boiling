@@ -249,7 +249,7 @@ subroutine IO_init()
 
   ! get option to add cell centered velocity data to plot files
   call RuntimeParameters_get('plot_velocity', io_plot_velocity)
-  io_plotVelStr(:) = (/ 'velx', 'vely', 'velz' /)  
+  io_plotVelStr(:) = (/ 'cc_velx', 'cc_vely', 'cc_velz' /)  
 
   if(NFACE_VARS .GT. 0) then
     do i= 1, NFACE_VARS
