@@ -1,4 +1,4 @@
-!!****if* source/Grid/GridMain/UG/UGStretched/Grid_getCellMetrics
+!!****if* source/Grid/GridMain/UG/Grid_getCellMetrics
 !!
 !! NAME
 !!  Grid_getCellMetrics

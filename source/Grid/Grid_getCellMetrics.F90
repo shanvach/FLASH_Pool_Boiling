@@ -1,4 +1,4 @@
-!!****if* source/Grid/GridMain/UG/UGStretched/Grid_getCellMetrics
+!!****if* source/Grid/Grid_getCellMetrics
 !!
 !! NAME
 !!  Grid_getCellMetrics
@@ -107,7 +107,6 @@ subroutine Grid_getCellMetrics(axis, blockId, edge, guardcell, metrics, size)
   integer, intent(in) :: size
   logical, intent(in) :: guardcell
   real,    intent(out), dimension(size) :: metrics
-  metrics = 1.0
   return
 end subroutine Grid_getCellMetrics
 
