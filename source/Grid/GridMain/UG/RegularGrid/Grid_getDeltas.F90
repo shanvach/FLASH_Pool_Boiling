@@ -32,7 +32,7 @@ subroutine Grid_getDeltas(blockId,del)
   
   implicit none
 
-  #include "constants.h"
+#include "constants.h"
 
   integer, intent(IN) :: blockId
   real, dimension(MDIM),intent(OUT) :: del
