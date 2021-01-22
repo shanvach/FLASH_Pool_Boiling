@@ -1,4 +1,4 @@
-!!****if* source/Grid/Grid_getCellMetrics
+!!****if* source/Grid/GridMain/UG/Grid_getCellMetrics
 !!
 !! NAME
 !!  Grid_getCellMetrics
@@ -101,12 +101,19 @@
 
 subroutine Grid_getCellMetrics(axis, blockId, edge, guardcell, metrics, size)
 
+  use Driver_interface, ONLY : Driver_abortFlash
+  
   implicit none
+  
   integer, intent(in) :: axis
   integer, intent(in) :: blockId, edge
   integer, intent(in) :: size
   logical, intent(in) :: guardcell
   real,    intent(out), dimension(size) :: metrics
+
+  print*,"Get Cell Metrics : invalid operation for uniform grid "
+  call Driver_abortFlash("Get Cell Metrics : invalid operation for uniform grid ")  
+
   return
 end subroutine Grid_getCellMetrics
 

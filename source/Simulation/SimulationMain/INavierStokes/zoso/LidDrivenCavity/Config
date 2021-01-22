@@ -1,19 +1,10 @@
-#       Configuration file for Lid Driven Cavity Problem
-
-#	Config file for the INS module.
-#       Note: This is a staggered finite difference mesh algorithm.
-REQUIRES physics/IncompNS
+# Configuration file for Lid Driven Cavity Problem
 REQUIRES physics/IncompNS/IncompNSMain/constdens
-REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
-REQUIRES physics/Heat_AD
 REQUIRES physics/Heat_AD/Heat_ADMain/constdens
 
 USESETUPVARS Grid
 
 LIBRARY STDCXX
-
-# Tecplot routines:
-REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
 IF Grid == 'UG'
 #   REQUESTS Grid/GridSolvers/Pfft/DirectSolver/Generic_Direct

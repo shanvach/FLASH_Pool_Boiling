@@ -31,8 +31,9 @@ subroutine Grid_writeDomain(fileNumber)
   use Driver_interface, ONLY : Driver_abortFlash
   use IO_data, ONLY : io_plotFileNumber
   use Grid_data, ONLY : gr_meshMe, gr_meshComm, gr_globalNumBlocks,    &
-                        gr_iCoords, gr_jCoords, gr_kCoords, gr_delta,  &
-                        gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi 
+                        gr_iCoords, gr_jCoords, gr_kCoords,            &
+                        gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi,&
+                        gr_iMetrics, gr_jMetrics, gr_kMetrics
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use HDF5
@@ -98,9 +99,9 @@ subroutine Grid_writeDomain(fileNumber)
     gCrdLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'xxxl', 'xxxc', 'xxxr', 'xxxf' /) 
     gCrdLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'yyyl', 'yyyc', 'yyyr', 'yyyf' /) 
     gCrdLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE + 1) = (/ 'zzzl', 'zzzc', 'zzzr', 'zzzf' /) 
-    gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dx', '  ' /) 
-    gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dy', '  ' /) 
-    gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dz', '  ' /) 
+    gMtrLbs(IAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddxl', 'ddxc', 'ddxr' /) 
+    gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddyl', 'ddyc', 'ddyr' /) 
+    gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ 'ddzl', 'ddzc', 'ddzr' /) 
 
     ! Create mpi buffers and global grid storage array
     !   buffers shape are    (faces * blks, blk size)
@@ -109,6 +110,10 @@ subroutine Grid_writeDomain(fileNumber)
     allocate(jCoords(3 * gr_globalNumBlocks, NYB))
     allocate(kCoords(3 * gr_globalNumBlocks, NZB))
     allocate(gCoords(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
+    allocate(iMetrics(3 * gr_globalNumBlocks, NXB))
+    allocate(jMetrics(3 * gr_globalNumBlocks, NYB))
+    allocate(kMetrics(3 * gr_globalNumBlocks, NZB))
+    allocate(gMetrics(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
 
   endif  
 
@@ -147,6 +152,12 @@ subroutine Grid_writeDomain(fileNumber)
                      counts, displs, resizedType(JAXIS), 0, gr_meshComm, ierr)
     call MPI_Gatherv(gr_kCoords(:,gr_klo:gr_khi,1), 3*NZB, FLASH_REAL, kCoords, &
                      counts, displs, resizedType(KAXIS), 0, gr_meshComm, ierr)
+    call MPI_Gatherv(gr_iMetrics(:,gr_ilo:gr_ihi,1), 3*NXB, FLASH_REAL, iMetrics, &
+                     counts, displs, resizedType(IAXIS), 0, gr_meshComm, ierr)
+    call MPI_Gatherv(gr_jMetrics(:,gr_jlo:gr_jhi,1), 3*NYB, FLASH_REAL, jMetrics, &
+                     counts, displs, resizedType(JAXIS), 0, gr_meshComm, ierr)
+    call MPI_Gatherv(gr_kMetrics(:,gr_klo:gr_khi,1), 3*NZB, FLASH_REAL, kMetrics, &
+                     counts, displs, resizedType(KAXIS), 0, gr_meshComm, ierr)
     deallocate(counts, displs)
 
   ! fall back to point to point communications
@@ -161,6 +172,10 @@ subroutine Grid_writeDomain(fileNumber)
         iCoords(3*jproc+1:3*jproc+3,:) = gr_iCoords(:,gr_ilo:gr_ihi,1)
         jCoords(3*jproc+1:3*jproc+3,:) = gr_jCoords(:,gr_jlo:gr_jhi,1)
         kCoords(3*jproc+1:3*jproc+3,:) = gr_kCoords(:,gr_klo:gr_khi,1)
+      
+        iMetrics(3*jproc+1:3*jproc+3,:) = gr_iMetrics(:,gr_ilo:gr_ihi,1)
+        jMetrics(3*jproc+1:3*jproc+3,:) = gr_jMetrics(:,gr_jlo:gr_jhi,1)
+        kMetrics(3*jproc+1:3*jproc+3,:) = gr_kMetrics(:,gr_klo:gr_khi,1)
       endif
 
       if (gr_meshMe == MASTER_PE .and. jproc /= MASTER_PE) then
@@ -171,6 +186,14 @@ subroutine Grid_writeDomain(fileNumber)
         iCoords(3*jproc+1:3*jproc+3,:) = reshape(iBuff, (/ 3, NXB /))
         jCoords(3*jproc+1:3*jproc+3,:) = reshape(jBuff, (/ 3, NYB /))
         kCoords(3*jproc+1:3*jproc+3,:) = reshape(kBuff, (/ 3, NZB /))
+
+        call MPI_Recv(iBuff, 3*NXB, FLASH_REAL, jproc, IAXIS+2, gr_meshComm, status, ierr)
+        call MPI_Recv(jBuff, 3*NYB, FLASH_REAL, jproc, JAXIS+2, gr_meshComm, status, ierr)
+        call MPI_Recv(kBuff, 3*NZB, FLASH_REAL, jproc, KAXIS+2, gr_meshComm, status, ierr)
+       
+        iMetrics(3*jproc+1:3*jproc+3,:) = reshape(iBuff, (/ 3, NXB /))
+        jMetrics(3*jproc+1:3*jproc+3,:) = reshape(jBuff, (/ 3, NYB /))
+        kMetrics(3*jproc+1:3*jproc+3,:) = reshape(kBuff, (/ 3, NZB /))
       endif
 
       if (gr_meshMe /= MASTER_PE .and. jproc == gr_meshMe) then
@@ -181,6 +204,14 @@ subroutine Grid_writeDomain(fileNumber)
         call MPI_Send(iBuff, 3*NXB, FLASH_REAL, MASTER_PE, IAXIS+1, gr_meshComm, ierr)
         call MPI_Send(jBuff, 3*NYB, FLASH_REAL, MASTER_PE, JAXIS+1, gr_meshComm, ierr)
         call MPI_Send(kBuff, 3*NZB, FLASH_REAL, MASTER_PE, KAXIS+1, gr_meshComm, ierr)
+
+        iBuff = reshape(gr_iMetrics(1:3,gr_ilo:gr_ihi,1), (/ 3*NXB /))
+        jBuff = reshape(gr_jMetrics(1:3,gr_jlo:gr_jhi,1), (/ 3*NYB /))
+        kBuff = reshape(gr_kMetrics(1:3,gr_klo:gr_khi,1), (/ 3*NZB /))
+
+        call MPI_Send(iBuff, 3*NXB, FLASH_REAL, MASTER_PE, IAXIS+2, gr_meshComm, ierr)
+        call MPI_Send(jBuff, 3*NYB, FLASH_REAL, MASTER_PE, JAXIS+2, gr_meshComm, ierr)
+        call MPI_Send(kBuff, 3*NZB, FLASH_REAL, MASTER_PE, KAXIS+2, gr_meshComm, ierr)
       endif
 
       deallocate(iBuff, jBuff, kBuff)
@@ -196,6 +227,11 @@ subroutine Grid_writeDomain(fileNumber)
     gCoords(JAXIS,:,:,1:NYB,1) = reshape(jCoords, (/ 3, gr_globalNumBlocks, NYB /)) 
     gCoords(KAXIS,:,:,1:NZB,1) = reshape(kCoords, (/ 3, gr_globalNumBlocks, NZB /)) 
     deallocate(iCoords, jCoords, kCoords)
+    
+    gMetrics(IAXIS,:,:,1:NXB,1) = reshape(iMetrics, (/ 3, gr_globalNumBlocks, NXB /)) 
+    gMetrics(JAXIS,:,:,1:NYB,1) = reshape(jMetrics, (/ 3, gr_globalNumBlocks, NYB /)) 
+    gMetrics(KAXIS,:,:,1:NZB,1) = reshape(kMetrics, (/ 3, gr_globalNumBlocks, NZB /)) 
+    deallocate(iMetrics, jMetrics, kMetrics)
 
     ! Write coordinates to file
     do a=IAXIS, KAXIS 
@@ -216,8 +252,8 @@ subroutine Grid_writeDomain(fileNumber)
         ! find extreme values
         gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
         gCrdMin(a, b) = minval(gCoords(a, b, :, 1:d, :)) 
-        gMtrMax(a, b) = gr_delta(a) 
-        gMtrMin(a, b) = gr_delta(a) 
+        gMtrMax(a, b) = maxval(gMetrics(a, b, :, 1:d, :)) 
+        gMtrMin(a, b) = minval(gMetrics(a, b, :, 1:d, :)) 
 
         ! write dimensions
         dsetname = gCrdLbs(a, b)
@@ -243,29 +279,27 @@ subroutine Grid_writeDomain(fileNumber)
         call h5sclose_f(dspc_id, error)
 
         ! write metrics 
-        if (b == CENTER) then
-          dsetname = gMtrLbs(a, b)
-          dset_sngl = (/ 1 /)
-          call h5screate_simple_f(1, dset_sngl, dspc_id, error)
-          call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
-          call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gr_delta(a), dset_dims, error)
+        dsetname = gMtrLbs(a, b)
+        dset_dims = (/ d, gr_globalNumBlocks /)
+        call h5screate_simple_f(2, dset_dims, dspc_id, error)
+        call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
+        call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(gMetrics(a, b, :, 1:d, 1)), dset_dims, error)
        
-          attrname = "maximum"
-          dset_sngl = (/ 1 /)
-          call h5screate_simple_f(1, dset_sngl, aspc_id, error)
-          call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
-          call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMax(a, b), dset_sngl, error)
-          call h5aclose_f(attr_id, error)
+        attrname = "maximum"
+        dset_sngl = (/ 1 /)
+        call h5screate_simple_f(1, dset_sngl, aspc_id, error)
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMax(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
 
-          attrname = "minimum"
-          call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
-          call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMin(a, b), dset_sngl, error)
-          call h5aclose_f(attr_id, error)
-          call h5sclose_f(aspc_id, error)
+        attrname = "minimum"
+        call h5acreate_f(dset_id, attrname, H5T_NATIVE_DOUBLE, aspc_id, attr_id, error) 
+        call h5awrite_f(attr_id, H5T_NATIVE_DOUBLE, gMtrMin(a, b), dset_sngl, error)
+        call h5aclose_f(attr_id, error)
+        call h5sclose_f(aspc_id, error)
 
-          call h5dclose_f(dset_id, error)
-          call h5sclose_f(dspc_id, error)
-        endif
+        call h5dclose_f(dset_id, error)
+        call h5sclose_f(dspc_id, error)
 
       end do
 
@@ -308,6 +342,7 @@ subroutine Grid_writeDomain(fileNumber)
    
     ! release storage arrays
     deallocate(gCoords)
+    deallocate(gMetrics)
   endif
 
   ! clean up collective comms

@@ -311,7 +311,8 @@ Module Grid_interface
   end interface
 
   interface Grid_writeDomain
-     subroutine Grid_writeDomain()
+     subroutine Grid_writeDomain(fileNumber)
+       integer, optional, intent(IN) :: fileNumber
      end subroutine Grid_writeDomain
   end interface
 

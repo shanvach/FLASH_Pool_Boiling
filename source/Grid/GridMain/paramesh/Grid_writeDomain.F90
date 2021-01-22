@@ -1,4 +1,4 @@
-!!****if* source/Grid/GridMain/UG/Grid_writeDomain
+!!****if* source/Grid/GridMain/paramesh/Grid_writeDomain
 !!
 !! NAME
 !!
@@ -13,7 +13,7 @@
 !! DESCRIPTION
 !!
 !! This function writes the grid information to an hdf5 file to store the 
-!! Paramesh or Uniform Grid / Regular Grid cell coordinates (Left, Center, Right)
+!! Paramesh or Uniform Grid / Regular Grid cell coordinates (Left, Center, Right) 
 !! and the cell metrics for later use in post-processing FLASH simulations.
 !!
 !! Currently only supports hdf5 IO
@@ -30,9 +30,11 @@ subroutine Grid_writeDomain(fileNumber)
 
   use Driver_interface, ONLY : Driver_abortFlash
   use IO_data, ONLY : io_plotFileNumber
+  use tree, ONLY : lrefine, lnblocks
   use Grid_data, ONLY : gr_meshMe, gr_meshComm, gr_globalNumBlocks,    &
-                        gr_iCoords, gr_jCoords, gr_kCoords, gr_delta,  &
-                        gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi 
+                        gr_oneBlock, gr_delta, gr_globalNumProcs,      &
+                        gr_ilo, gr_ihi, gr_jlo, gr_jhi, gr_klo, gr_khi
+
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use HDF5
@@ -45,21 +47,14 @@ subroutine Grid_writeDomain(fileNumber)
 
   integer, optional, intent(IN) :: fileNumber
 
-  integer :: ierr, i, j, k, a, b, c, d, &
-             realSize, newType, jproc
-  integer(kind=MPI_ADDRESS_KIND) :: extent, begin
+  integer :: ierr, fc, lb, a, b, c, d, jproc, offset, localNumBlocks
   integer :: status(MPI_STATUS_SIZE)
-  integer, dimension(2) :: sizes, subSizes, starts
-  integer, dimension(MDIM) :: axes, resizedType
-  integer, allocatable, dimension(:) :: counts, displs
   character(len=5) :: gCrdLbs(MDIM, 4), gMtrLbs(MDIM, 3)
-  logical :: force_gatherv, used_gatherv
   real, dimension(MDIM, 4) :: gCrdMax, gCrdMin, gMtrMax, gMtrMin 
-  real, allocatable, dimension(:,:) :: iCoords, jCoords, kCoords
-  real, allocatable, dimension(:) :: iBuff, jBuff, kBuff 
+  real, allocatable, dimension(:) :: iBuff, jBuff, kBuff, dBuff 
   real, allocatable, dimension(:,:) :: fCoord
-  real, allocatable, dimension(:,:) :: iMetrics, jMetrics, kMetrics
-  real, allocatable, dimension(:,:,:,:,:) :: gCoords, gMetrics
+  real, allocatable, dimension(:,:,:,:) :: gCoords
+  real, allocatable, dimension(:,:) :: gDeltas
 
   ! locals necessary to read hdf5 file
   integer :: error
@@ -102,100 +97,85 @@ subroutine Grid_writeDomain(fileNumber)
     gMtrLbs(JAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dy', '  ' /) 
     gMtrLbs(KAXIS, LEFT_EDGE:RIGHT_EDGE) = (/ '  ', 'dz', '  ' /) 
 
-    ! Create mpi buffers and global grid storage array
-    !   buffers shape are    (faces * blks, blk size)
-    !   global grid shape is (axes, faces, blks, bsz, 1)
-    allocate(iCoords(3 * gr_globalNumBlocks, NXB))
-    allocate(jCoords(3 * gr_globalNumBlocks, NYB))
-    allocate(kCoords(3 * gr_globalNumBlocks, NZB))
-    allocate(gCoords(MDIM, 3, gr_globalNumBlocks, max(NXB, NYB, NZB), 1))
+    allocate(gCoords(max(NXB, NYB, NZB), gr_globalNumBlocks, 3, MDIM))
+    allocate(gDeltas(gr_globalNumBlocks, MDIM))
 
   endif  
 
-  ! Sometimes there is an issue if the gatherv buffer is too large
-  force_gatherv = .false.
-  if (NXB <= 256 .and. NYB <= 256 .and. NZB <= 256 .and. gr_globalNumBlocks <= 64 .or. force_gatherv) then
-    used_gatherv = .true.
+  offset = 0
+  do jproc = 0, gr_globalNumProcs - 1
 
-    ! Create mpi subdomain parameters (const across axes)
-    allocate(counts(gr_globalNumBlocks), displs(gr_globalNumBlocks))
-    begin = 0
-    counts = 1
-    starts = [0, 0]
-    call MPI_Type_size(FLASH_REAL, realSize, ierr)
-    extent = 3 * realSize
-    do k=1, gr_globalNumBlocks
-      displs(k) = (k-1) 
-    end do
 
-    ! Create MPI TYPE for comms for each axis
-    axes = (/ NXB, NYB, NZB /)
-    do k=IAXIS, KAXIS
-      sizes = [3*gr_globalNumBlocks, axes(k)] 
-      subSizes = [3, axes(k)] 
-      call MPI_Type_create_subarray(2, sizes, subSizes, starts,    &
-                                    MPI_ORDER_FORTRAN, FLASH_REAL, &
-                                    newType, ierr)
-      call MPI_Type_create_resized(newType, begin, extent, resizedType(k), ierr)
-      call MPI_Type_commit(resizedType(k), ierr)
-    end do
+    if (gr_meshMe == MASTER_PE .and. jproc == MASTER_PE) then
+      
+      if (lnblocks > 0) then
+        allocate(iBuff(NXB*lnblocks*3), jBuff(NYB*lnblocks*3), kBuff(NZB*lnblocks*3), dBuff(lnblocks*MDIM))
+        do fc = 1, 3
+          do lb = 1, lnblocks
+            iBuff(NXB*lnblocks*(fc-1)+NXB*(lb-1)+1:NXB*lnblocks*(fc-1)+NXB*lb) = gr_oneBlock(lb)%firstAxisCoords(fc,gr_ilo:gr_ihi)
+            jBuff(NYB*lnblocks*(fc-1)+NYB*(lb-1)+1:NYB*lnblocks*(fc-1)+NYB*lb) = gr_oneBlock(lb)%secondAxisCoords(fc,gr_jlo:gr_jhi)
+            kBuff(NZB*lnblocks*(fc-1)+NZB*(lb-1)+1:NZB*lnblocks*(fc-1)+NZB*lb) = gr_oneBlock(lb)%thirdAxisCoords(fc,gr_klo:gr_khi)
+            dBuff(lnblocks*(fc-1)+lb) = gr_delta(fc,lrefine(lb))
+          end do
+        end do
+        gCoords(1:NXB,offset+1:offset+lnblocks,1:3,IAXIS) = reshape(iBuff, (/ NXB, lnblocks, 3 /))
+        gCoords(1:NYB,offset+1:offset+lnblocks,1:3,JAXIS) = reshape(jBuff, (/ NYB, lnblocks, 3 /))
+        gCoords(1:NZB,offset+1:offset+lnblocks,1:3,KAXIS) = reshape(kBuff, (/ NZB, lnblocks, 3 /))
+        gDeltas(offset+1:offset+lnblocks,1:MDIM) = reshape(dBuff, (/ lnblocks, MDIM /))
+        deallocate(iBuff, jBuff, kBuff, dBuff)
+        offset = offset + lnblocks 
+      endif
+
+    endif
+
+
+    if (gr_meshMe == MASTER_PE .and. jproc /= MASTER_PE) then
     
-    ! Gather grid information from mpi from all processors
-    call MPI_Gatherv(gr_iCoords(:,gr_ilo:gr_ihi,1), 3*NXB, FLASH_REAL, iCoords, &
-                     counts, displs, resizedType(IAXIS), 0, gr_meshComm, ierr)
-    call MPI_Gatherv(gr_jCoords(:,gr_jlo:gr_jhi,1), 3*NYB, FLASH_REAL, jCoords, &
-                     counts, displs, resizedType(JAXIS), 0, gr_meshComm, ierr)
-    call MPI_Gatherv(gr_kCoords(:,gr_klo:gr_khi,1), 3*NZB, FLASH_REAL, kCoords, &
-                     counts, displs, resizedType(KAXIS), 0, gr_meshComm, ierr)
-    deallocate(counts, displs)
-
-  ! fall back to point to point communications
-  else
-    used_gatherv = .false.
-
-    do jproc = 0, gr_globalNumBlocks - 1
-
-      allocate(iBuff(3*NXB), jBuff(3*NYB), kBuff(3*NZB))
-
-      if (gr_meshMe == MASTER_PE .and. jproc == MASTER_PE) then
-        iCoords(3*jproc+1:3*jproc+3,:) = gr_iCoords(:,gr_ilo:gr_ihi,1)
-        jCoords(3*jproc+1:3*jproc+3,:) = gr_jCoords(:,gr_jlo:gr_jhi,1)
-        kCoords(3*jproc+1:3*jproc+3,:) = gr_kCoords(:,gr_klo:gr_khi,1)
+      call MPI_Recv(localNumBlocks, 1, FLASH_INTEGER, jproc, 1, gr_meshComm, status, ierr)
+      if (localNumBlocks > 0) then
+        allocate(iBuff(NXB*localNumBlocks*3), jBuff(NYB*localNumBlocks*3), kBuff(NZB*localNumBlocks*3), dBuff(localNumBlocks*MDIM))
+        call MPI_Recv(iBuff, NXB*localNumBlocks*3, FLASH_REAL, jproc, 1+IAXIS, gr_meshComm, status, ierr)  
+        call MPI_Recv(jBuff, NYB*localNumBlocks*3, FLASH_REAL, jproc, 1+JAXIS, gr_meshComm, status, ierr)  
+        call MPI_Recv(kBuff, NZB*localNumBlocks*3, FLASH_REAL, jproc, 1+KAXIS, gr_meshComm, status, ierr)  
+        call MPI_Recv(dBuff,     localNumBlocks*3, FLASH_REAL, jproc, 2+MDIM , gr_meshComm, status, ierr)
+        gCoords(1:NXB,offset+1:offset+localNumBlocks,1:3,IAXIS) = reshape(iBuff, (/ NXB, localNumBlocks, 3 /))
+        gCoords(1:NYB,offset+1:offset+localNumBlocks,1:3,JAXIS) = reshape(jBuff, (/ NYB, localNumBlocks, 3 /))
+        gCoords(1:NZB,offset+1:offset+localNumBlocks,1:3,KAXIS) = reshape(kBuff, (/ NZB, localNumBlocks, 3 /))
+        gDeltas(offset+1:offset+localNumBlocks,1:MDIM) = reshape(dBuff, (/ localNumBlocks, MDIM /))
+        deallocate(iBuff, jBuff, kBuff, dBuff)
+        offset = offset + localNumBlocks
       endif
 
-      if (gr_meshMe == MASTER_PE .and. jproc /= MASTER_PE) then
-        call MPI_Recv(iBuff, 3*NXB, FLASH_REAL, jproc, IAXIS+1, gr_meshComm, status, ierr)
-        call MPI_Recv(jBuff, 3*NYB, FLASH_REAL, jproc, JAXIS+1, gr_meshComm, status, ierr)
-        call MPI_Recv(kBuff, 3*NZB, FLASH_REAL, jproc, KAXIS+1, gr_meshComm, status, ierr)
-       
-        iCoords(3*jproc+1:3*jproc+3,:) = reshape(iBuff, (/ 3, NXB /))
-        jCoords(3*jproc+1:3*jproc+3,:) = reshape(jBuff, (/ 3, NYB /))
-        kCoords(3*jproc+1:3*jproc+3,:) = reshape(kBuff, (/ 3, NZB /))
+    endif
+
+
+    if (gr_meshMe /= MASTER_PE .and. jproc == gr_meshMe) then
+     
+      call MPI_Send(lnblocks, 1, FLASH_INTEGER, MASTER_PE, 1, gr_meshComm, ierr)
+      if (lnblocks > 0) then
+        allocate(iBuff(NXB*lnblocks*3), jBuff(NYB*lnblocks*3), kBuff(NZB*lnblocks*3), dBuff(lnblocks*MDIM))
+        do fc = 1, 3
+          do lb = 1, lnblocks
+            iBuff(NXB*lnblocks*(fc-1)+NXB*(lb-1)+1:NXB*lnblocks*(fc-1)+NXB*lb) = gr_oneBlock(lb)%firstAxisCoords(fc,gr_ilo:gr_ihi)
+            jBuff(NYB*lnblocks*(fc-1)+NYB*(lb-1)+1:NYB*lnblocks*(fc-1)+NYB*lb) = gr_oneBlock(lb)%secondAxisCoords(fc,gr_jlo:gr_jhi)
+            kBuff(NZB*lnblocks*(fc-1)+NZB*(lb-1)+1:NZB*lnblocks*(fc-1)+NZB*lb) = gr_oneBlock(lb)%thirdAxisCoords(fc,gr_klo:gr_khi)
+            dBuff(lnblocks*(fc-1)+lb) = gr_delta(fc,lrefine(lb))
+          end do
+        end do
+        call MPI_Send(iBuff, NXB*lnblocks*3, FLASH_REAL, MASTER_PE, 1+IAXIS, gr_meshComm, ierr)  
+        call MPI_Send(jBuff, NYB*lnblocks*3, FLASH_REAL, MASTER_PE, 1+JAXIS, gr_meshComm, ierr)  
+        call MPI_Send(kBuff, NZB*lnblocks*3, FLASH_REAL, MASTER_PE, 1+KAXIS, gr_meshComm, ierr)  
+        call MPI_Send(dBuff,     lnblocks*3, FLASH_REAL, MASTER_PE, 2+MDIM , gr_meshComm, ierr)
+        deallocate(iBuff, jBuff, kBuff, dBuff)
       endif
+    
+    endif
 
-      if (gr_meshMe /= MASTER_PE .and. jproc == gr_meshMe) then
-        iBuff = reshape(gr_iCoords(1:3,gr_ilo:gr_ihi,1), (/ 3*NXB /))
-        jBuff = reshape(gr_jCoords(1:3,gr_jlo:gr_jhi,1), (/ 3*NYB /))
-        kBuff = reshape(gr_kCoords(1:3,gr_klo:gr_khi,1), (/ 3*NZB /))
 
-        call MPI_Send(iBuff, 3*NXB, FLASH_REAL, MASTER_PE, IAXIS+1, gr_meshComm, ierr)
-        call MPI_Send(jBuff, 3*NYB, FLASH_REAL, MASTER_PE, JAXIS+1, gr_meshComm, ierr)
-        call MPI_Send(kBuff, 3*NZB, FLASH_REAL, MASTER_PE, KAXIS+1, gr_meshComm, ierr)
-      endif
+  end do
 
-      deallocate(iBuff, jBuff, kBuff)
-
-    end do
-
-  endif
 
   if(gr_meshMe == MASTER_PE) then
-
-    ! Copy mpi buffers to global grid storage array
-    gCoords(IAXIS,:,:,1:NXB,1) = reshape(iCoords, (/ 3, gr_globalNumBlocks, NXB /)) 
-    gCoords(JAXIS,:,:,1:NYB,1) = reshape(jCoords, (/ 3, gr_globalNumBlocks, NYB /)) 
-    gCoords(KAXIS,:,:,1:NZB,1) = reshape(kCoords, (/ 3, gr_globalNumBlocks, NZB /)) 
-    deallocate(iCoords, jCoords, kCoords)
 
     ! Write coordinates to file
     do a=IAXIS, KAXIS 
@@ -214,17 +194,17 @@ subroutine Grid_writeDomain(fileNumber)
       do b=LEFT_EDGE, RIGHT_EDGE
 
         ! find extreme values
-        gCrdMax(a, b) = maxval(gCoords(a, b, :, 1:d, :)) 
-        gCrdMin(a, b) = minval(gCoords(a, b, :, 1:d, :)) 
-        gMtrMax(a, b) = gr_delta(a) 
-        gMtrMin(a, b) = gr_delta(a) 
+        gCrdMax(a, b) = maxval(gCoords(1:d, :, b, a)) 
+        gCrdMin(a, b) = minval(gCoords(1:d, :, b, a)) 
+        gMtrMax(a, b) = maxval(gDeltas(:, a)) 
+        gMtrMin(a, b) = minval(gDeltas(:, a)) 
 
         ! write dimensions
         dsetname = gCrdLbs(a, b)
         dset_dims = (/ d, gr_globalNumBlocks /)
         call h5screate_simple_f(2, dset_dims, dspc_id, error)
         call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
-        call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(gCoords(a, b, :, 1:d, 1)), dset_dims, error)
+        call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gCoords(1:d, :, b, a), dset_dims, error)
        
         attrname = "maximum"
         dset_sngl = (/ 1 /)
@@ -245,10 +225,10 @@ subroutine Grid_writeDomain(fileNumber)
         ! write metrics 
         if (b == CENTER) then
           dsetname = gMtrLbs(a, b)
-          dset_sngl = (/ 1 /)
+          dset_sngl = (/ gr_globalNumBlocks/)
           call h5screate_simple_f(1, dset_sngl, dspc_id, error)
           call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
-          call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gr_delta(a), dset_dims, error)
+          call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, gDeltas(:, a), dset_dims, error)
        
           attrname = "maximum"
           dset_sngl = (/ 1 /)
@@ -270,10 +250,10 @@ subroutine Grid_writeDomain(fileNumber)
       end do
 
       ! Consolodate axis "face" points
-      allocate(fCoord(gr_globalNumBlocks, d + 1))
-      fCoord(:, 1) = gCoords(a, LEFT_EDGE, :, 1, 1)
-      fCoord(:, 2:d+1) = gCoords(a, RIGHT_EDGE, :, 1:d, 1) 
-      if (a == KAXIS .AND. d == 1) fCoord(:, 2) = fCoord(:, 1) + 0.000001
+      allocate(fCoord(d+1, gr_globalNumBlocks))
+      fCoord(1, :) = gCoords(1, :, LEFT_EDGE, a)
+      fCoord(2:d+1, :) = gCoords(1:d, :, RIGHT_EDGE, a) 
+      if (a == KAXIS .AND. d == 1) fCoord(2, :) = fCoord(1, :) + 0.000001
 
       ! find extreme values
       gCrdMax(a, 4) = maxval(fCoord) 
@@ -284,7 +264,7 @@ subroutine Grid_writeDomain(fileNumber)
       dset_dims = (/ d + 1, gr_globalNumBlocks /)
       call h5screate_simple_f(2, dset_dims, dspc_id, error)
       call h5dcreate_f(file_id, dsetname, H5T_NATIVE_DOUBLE, dspc_id, dset_id, error)  
-      call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, transpose(fCoord), dset_dims, error)
+      call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, fCoord, dset_dims, error)
        
       attrname = "maximum"
       dset_sngl = (/ 1 /)
@@ -308,14 +288,7 @@ subroutine Grid_writeDomain(fileNumber)
    
     ! release storage arrays
     deallocate(gCoords)
-  endif
-
-  ! clean up collective comms
-  if (used_gatherv) then
-    call MPI_Type_Free(newType, ierr)
-    do k=IAXIS, KAXIS
-      call MPI_Type_Free(resizedType(k), ierr)
-    end do
+    deallocate(gDeltas)
   endif
 
   ! Close the hdf5 file

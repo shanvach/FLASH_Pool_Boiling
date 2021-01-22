@@ -30,8 +30,6 @@
 #define DEBUG_DRIVER
 #endif
 
-#define WRITE_TO_TECPLOT 1
-
 subroutine Driver_evolveFlash()
 
   use Driver_data, ONLY: dr_globalMe, dr_nbegin,                    &
@@ -48,7 +46,8 @@ subroutine Driver_evolveFlash()
   use Particles_interface, ONLY : Particles_advance, Particles_dump
   use Grid_interface,    ONLY : Grid_getLocalNumBlks, &
                                 Grid_getListOfBlocks, &
-                                Grid_updateRefinement
+                                Grid_updateRefinement, &
+                                Grid_writeDomain
 
   use IO_interface,      ONLY : IO_output,IO_outputFinal
 
@@ -60,13 +59,12 @@ subroutine Driver_evolveFlash()
 
   use IncompNS_data, only : ins_cflflg
 
-  !use Multiphase_interface, only:Multiphase
   use Heat_AD_interface, only: Heat_AD
   implicit none
 
 #include "constants.h"
 #include "Flash.h"
- include "Flash_mpi.h"
+  include "Flash_mpi.h"
 
   integer   :: localNumBlocks
 
@@ -80,10 +78,7 @@ subroutine Driver_evolveFlash()
 
   logical :: endRun, gridChanged  
 
-
-  integer :: count, firstfileflag
-
-  logical :: tecplot_flg
+  integer :: count
 !-----------------------------------------------------------------------------------------
 
 !KPD
@@ -119,16 +114,6 @@ subroutine Driver_evolveFlash()
      count = 0
   end if
 
-  firstfileflag = 0
-  call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                    0.0,blockList,blockCount,firstfileflag)
-  ! Write to Bodies to Tecplot:
-  !call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
-  !call sm_outputBeam('beam_', count)
-  !call sm_ioWriteStates()
-
-
-  firstfileflag = 1
   do dr_nstep = dr_nBegin, dr_nend
      
      !!Step forward in time. See bottom of loop for time step calculation.
@@ -205,61 +190,6 @@ subroutine Driver_evolveFlash()
      if (dr_globalMe .eq. MASTER_PE) &
      write(*,*) '###############################################################################'
 
-     !--------------------------------------------------------------------
-     ! Output to Tecplot
-!     if (MOD(dr_nstep,IO_checkpointFileIntervalStep) .eq. 0) then
-!     count = count + 1
-!     call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-!                       0.0,blockList,blockCount,firstfileflag)
-!     ! Write to Bodies to Tecplot:
-!     call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
-
-!     if (count .gt. 0) firstfileflag = 1
-!     endif
-     !--------------------------------------------------------------------
-     if (ins_cflflg .eq. 1) then ! Constant cfl       
-       if (dr_nstep .gt. 1) then
-       tecplot_flg = (1/IO_plotFileIntervalTime*MOD(dr_simtime,IO_plotFileIntervalTime) .le. &
-                      dr_dt/IO_plotFileIntervalTime)
-       else
-       tecplot_flg = .false.
-       endif
-     else                        ! Constant timestep
-       tecplot_flg = (MOD(dr_nstep,IO_plotFileIntervalStep) .eq. 0)
-     endif
-
-     if (tecplot_flg) then
-        ! Write to Grid to Tecplot:
-        count = count + 1
-        call outtotecplot(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-                          0.0,blockList,blockCount,firstfileflag)
-
-!        call outtotecplot_uv(dr_globalMe,dr_simtime,dr_dt,dr_nstep,count, &
-!                          0.0,blockList,blockCount,firstfileflag)
-
-        ! Here call write out Solid Stuff
-        ! Write to Bodies to Tecplot:
-   !     call sm_iouttotecplot(dr_nstep,dr_simtime,dr_dt,count)
-
-    !    call sm_uvtecplot('uv_part', count)
-        !call sm_outputBeam('beam_', count)
-
-        ! Write to Snapshot
-!        call sm_get_NumBodies(NumBodies)
-!        do ibd = 1,NumBodies
-!           if (sm_meshMe .eq. sm_BodyInfo(ibd)%BodyMaster)then
-!              call sm_ioWriteSnapshot(ibd,count)
-              ! Here we write particles
-!              call sm_ioWriteParticles(ibd,count)
-!           endif
-!        end do
-
-     if (count .gt. 0) firstfileflag = 1
-     endif
-     !--------------------------------------------------------------------
-
-     
-
   !   call sm_ioWriteStates()
 
 
@@ -315,6 +245,9 @@ subroutine Driver_evolveFlash()
      
      call Timers_start("io")
      call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
+#ifdef FLASH_GRID_PARAMESH
+     call Grid_writeDomain()
+#endif
      call Timers_stop("io")
 
      if(endRun) exit
