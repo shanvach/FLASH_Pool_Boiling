@@ -30,6 +30,7 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
                              Grid_releaseBlkPtr
   use Grid_data, ONLY : gr_axisNumProcs, gr_axisMe
   use Heat_AD_data, ONLY : ht_invsqrtRaPr
+  use IncompNS_data, ONLY : ins_invsqrtRa_Pr
 
   implicit none
 
@@ -46,26 +47,34 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
   integer :: lb, blockCount, blockID
   integer :: blockList(MAXBLOCKS)
   integer :: blkLimits(HIGH, MDIM), blkLimitsGC(HIGH, MDIM)
-  integer, parameter ::  nGlobalSum = 6 ! Number of globally-summed quantities
-  integer, parameter ::  nScreenSum = 9 ! Number of screen output quantities
+  integer, parameter ::  nGlobalSum = 8  ! Number of globally-summed quantities
+  integer, parameter ::  nScreenSum = 10 ! Number of screen output quantities
   real :: gsum(nGlobalSum) ! Global summed quantities
   real :: lsum(nGlobalSum) ! Local  summed quantities
   real :: psum(nScreenSum) ! Screen output quantities
   integer :: i, j, k, nI, nJ, nK
-  real :: volume, area, thermal, kinetic, masserr, convect, conduct, Nu, qpp_lwr, qpp_upr, heatFlux
-  real :: energyTotal, energyError, energyErrorRel, heatTrans
-  real :: sqrtRaPr, invsqrtRaPr, bndBox(2,MDIM) 
+  real :: volume, area, thermal, kinetic, masserr, convect, conduct, Nu 
+  real :: qpp_lwr, qpp_upr, heatFlux, viscous, bodyWork
+  real :: thermalError, thermalErrorRel, kineticError, kineticErrorRel, heatTrans
+  real :: sqrtRaPr, invsqrtRaPr, invsqrtRa_Pr, bndBox(2,MDIM) 
   real, dimension(:,:,:,:), pointer :: solnData, facexData, faceyData, facezData
   real, dimension(GRID_IHI_GC,3) :: iMetrics
   real, dimension(GRID_JHI_GC,3) :: jMetrics
   real, dimension(GRID_KHI_GC,3) :: kMetrics
   integer :: ioStat
-  real, save :: intHeatTrans, oldHeatTrans, oldSimTime, energyInitial
+  real, save :: intHeatTrans, oldHeatTrans, intBodyWork, oldBodyWork, intViscous, oldViscous
+  real, save :: oldSimTime, thermalInitial, kineticInitial, thermalScale, kineticScale
 
   if (io_globalMe == MASTER_PE .and. isFirst == 1) then
     intHeatTrans = 0.0
-    oldSimTime = 0.0
+    intBodyWork  = 0.0
+    intViscous   = 0.0
+    oldSimTime   = 0.0
     oldHeatTrans = 0.0
+    oldBodyWork  = 0.0
+    oldViscous   = 0.0
+    thermalScale = 1.0
+    kineticScale = 1.0
   endif
 
   call Grid_getListOfBlocks(LEAF, blockList, blockCount)
@@ -107,6 +116,7 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
     ! Save non-dimentional quantities
     sqrtRaPr = 1.0 / ht_invsqrtRaPr
     invsqrtRaPr = ht_invsqrtRaPr
+    invsqrtRa_Pr = ins_invsqrtRa_Pr
 
     nI = gr_axisNumProcs(IAXIS) * (blkLimits(HIGH,IAXIS) - blkLimits(LOW,IAXIS) + 1)
     nJ = gr_axisNumProcs(JAXIS) * (blkLimits(HIGH,JAXIS) - blkLimits(LOW,JAXIS) + 1)
@@ -131,8 +141,8 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
           thermal = solnData(TEMP_VAR,i,j,k) * volume
 
           ! Kinetic Energy 
-          kinetic = ( 0.5 * (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) )**2
-          kinetic = ( 0.5 * (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) )**2 + kinetic
+          kinetic = ( 0.5 * (facexData(VELC_FACE_VAR,i+1,j,k)**2 + facexData(VELC_FACE_VAR,i,j,k)**2) )
+          kinetic = ( 0.5 * (faceyData(VELC_FACE_VAR,i,j+1,k)**2 + faceyData(VELC_FACE_VAR,i,j,k)**2) ) + kinetic
 #if NDIM == 3
           kinetic = ( 0.5 * (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) )**2 + kinetic
 #endif
@@ -169,22 +179,80 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
           endif
 #endif
 
+          ! Calculate Body Force Work (u dot g_hat T)
+#if NDIM == 3
+          bodyWork = 0.5 * (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) * solnData(TEMP_VAR,i,j,k)
+#else
+          bodyWork = 0.5 * (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * solnData(TEMP_VAR,i,j,k)
+#endif
+          bodyWork = bodyWork * volume
+
+          ! Calculate Viscous Dissipation Work in two or three dimensions
+          viscous = 0.25 * (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) * ( (                                                      &
+                           (facexData(VELC_FACE_VAR,i+2,j,k) + facexData(VELC_FACE_VAR,i+1,j,k)) * iMetrics(i,RIGHT_EDGE) -                               &
+                           (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) * (iMetrics(i,LEFT_EDGE) + iMetrics(i,RIGHT_EDGE)) + & 
+                           (facexData(VELC_FACE_VAR,i,j,k) + facexData(VELC_FACE_VAR,i-1,j,k)) * iMetrics(i,LEFT_EDGE) ) * iMetrics(i,CENTER) + (         &
+                           (facexData(VELC_FACE_VAR,i+1,j+1,k) + facexData(VELC_FACE_VAR,i,j+1,k)) * jMetrics(j,RIGHT_EDGE) -                             &
+                           (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) * (jMetrics(j,LEFT_EDGE) + jMetrics(j,RIGHT_EDGE)) + & 
+                           (facexData(VELC_FACE_VAR,i+1,j-1,k) + facexData(VELC_FACE_VAR,i,j-1,k)) * jMetrics(j,LEFT_EDGE) ) * jMetrics(j,CENTER) ) +     &
+                    0.25 * (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * ( (                                                      &
+                           (faceyData(VELC_FACE_VAR,i+1,j+1,k) + faceyData(VELC_FACE_VAR,i+1,j,k)) * iMetrics(i,RIGHT_EDGE) -                             &
+                           (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * (iMetrics(i,LEFT_EDGE) + iMetrics(i,RIGHT_EDGE)) + & 
+                           (faceyData(VELC_FACE_VAR,i-1,j+1,k) + faceyData(VELC_FACE_VAR,i-1,j,k)) * iMetrics(i,LEFT_EDGE) ) * iMetrics(i,CENTER) + (     &
+                           (faceyData(VELC_FACE_VAR,i,j+2,k) + faceyData(VELC_FACE_VAR,i,j+1,k)) * jMetrics(j,RIGHT_EDGE) -                               &
+                           (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * (jMetrics(j,LEFT_EDGE) + jMetrics(j,RIGHT_EDGE)) + & 
+                           (faceyData(VELC_FACE_VAR,i,j,k) + faceyData(VELC_FACE_VAR,i,j-1,k)) * jMetrics(j,LEFT_EDGE) ) * jMetrics(j,CENTER) )
+#if NDIM == 3
+          viscous = 0.25 * (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) * ( (                                                      &
+                           (facexData(VELC_FACE_VAR,i+1,j,k+1) + facexData(VELC_FACE_VAR,i,j,k+1)) * kMetrics(k,RIGHT_EDGE) -                             &
+                           (facexData(VELC_FACE_VAR,i+1,j,k) + facexData(VELC_FACE_VAR,i,j,k)) * (kMetrics(k,LEFT_EDGE) + kMetrics(k,RIGHT_EDGE)) + & 
+                           (facexData(VELC_FACE_VAR,i+1,j,k-1) + facexData(VELC_FACE_VAR,i,j,k-1)) * kMetrics(k,LEFT_EDGE) ) * kMetrics(k,CENTER) ) +     &
+                    0.25 * (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * ( (                                                      &
+                           (faceyData(VELC_FACE_VAR,i,j+1,k+1) + faceyData(VELC_FACE_VAR,i,j,k+1)) * kMetrics(k,RIGHT_EDGE) -                             &
+                           (faceyData(VELC_FACE_VAR,i,j+1,k) + faceyData(VELC_FACE_VAR,i,j,k)) * (kMetrics(k,LEFT_EDGE) + kMetrics(k,RIGHT_EDGE)) + & 
+                           (faceyData(VELC_FACE_VAR,i,j+1,k-1) + faceyData(VELC_FACE_VAR,i,j,k-1)) * kMetrics(k,LEFT_EDGE) ) * kMetrics(k,CENTER) ) +     &
+                    0.25 * (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) * ( (                                                      &
+                           (facezData(VELC_FACE_VAR,i+1,j,k+1) + facezData(VELC_FACE_VAR,i+1,j,k)) * iMetrics(i,RIGHT_EDGE) -                             &
+                           (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) * (iMetrics(i,LEFT_EDGE) + iMetrics(i,RIGHT_EDGE)) + & 
+                           (facezData(VELC_FACE_VAR,i-1,j,k+1) + facezData(VELC_FACE_VAR,i-1,j,k)) * iMetrics(i,LEFT_EDGE) ) * iMetrics(i,CENTER) + (     &
+                           (facezData(VELC_FACE_VAR,i,j+1,k+1) + facezData(VELC_FACE_VAR,i,j+1,k)) * jMetrics(j,RIGHT_EDGE) -                             &
+                           (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) * (jMetrics(j,LEFT_EDGE) + jMetrics(j,RIGHT_EDGE)) + & 
+                           (facezData(VELC_FACE_VAR,i,j-1,k+1) + facezData(VELC_FACE_VAR,i,j-1,k)) * jMetrics(j,LEFT_EDGE) ) * jMetrics(j,CENTER) + (     &
+                           (facezData(VELC_FACE_VAR,i,j,k+2) + facezData(VELC_FACE_VAR,i,j,k+1)) * kMetrics(k,RIGHT_EDGE) -                               &
+                           (facezData(VELC_FACE_VAR,i,j,k+1) + facezData(VELC_FACE_VAR,i,j,k)) * (kMetrics(k,LEFT_EDGE) + kMetrics(k,RIGHT_EDGE)) + & 
+                           (facezData(VELC_FACE_VAR,i,j,k) + facezData(VELC_FACE_VAR,i,j,k-1)) * kMetrics(k,LEFT_EDGE) ) * kMetrics(k,CENTER) ) + viscous
+#endif
+          viscous = invsqrtRa_Pr * viscous * volume
+
           ! Save quantities integrated over volume
           lsum(1) = lsum(1) + thermal
           lsum(2) = lsum(2) + kinetic
           lsum(3) = lsum(3) + masserr
           lsum(4) = lsum(4) + qpp_lwr
           lsum(5) = lsum(5) + qpp_upr
+          lsum(6) = lsum(6) + bodyWork
+          lsum(7) = lsum(7) + viscous
 
         end do
        
-        ! Average Planer Nusselt Number
+#if NDIM == 2
+        ! 2D Average Planer Nusselt Number
         Nu = (convect - conduct) / nJ
         convect = 0.0
         conduct = 0.0
-        lsum(6) = lsum(6) + Nu
+        lsum(8) = lsum(8) + Nu
+#endif
 
       end do
+
+#if NDIM == 3
+        ! 3D Average Planer Nusselt Number
+        Nu = (convect - conduct) / nJ
+        convect = 0.0
+        conduct = 0.0
+        lsum(8) = lsum(8) + Nu
+#endif
+
     end do
 
     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -200,7 +268,7 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
   
   if (io_globalMe  == MASTER_PE) then
     
-    ! Integral Geometric Quantities
+    ! Calculate Integral Geometric Quantities
     call Grid_getDomainBoundBox(bndBox)
     volume = (bndBox(HIGH,IAXIS) - bndBox(LOW,IAXIS)) * (bndBox(HIGH,JAXIS) - bndBox(LOW,JAXIS))
     area = bndBox(HIGH,IAXIS) - bndBox(LOW,IAXIS)
@@ -210,34 +278,57 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
 #endif
 
     ! Normalize desired quantities
-    gsum(1) = gsum(1) / volume  ! Thermal Energy
-    gsum(2) = gsum(2) / volume  ! Kinetic Energy
+    gsum(1) = gsum(1) / volume  ! Thermal Energy [energy / volume]
+    gsum(2) = gsum(2) / volume  ! Kinetic Energy [energy / volume]
     gsum(3) = gsum(3) / volume  ! Mass Error
-    gsum(4) = gsum(4) / area    ! Heat Flux
-    gsum(5) = gsum(5) / area    ! Heat Flux
+    gsum(4) = gsum(4) / area    ! Heat Flux [energy / area time]
+    gsum(5) = gsum(5) / area    ! Heat Flux [energy / area time]
+    gsum(6) = gsum(6) / volume  ! Body Work [energy / volume]
+    gsum(7) = gsum(7) / volume  ! viscous Work [energy / volume]
 
-    ! Save Integral Heat Transfer 
+    ! Calculate Integral Heat Transfer 
     heatTrans = (gsum(4) + gsum(5)) * area / volume
     intHeatTrans = intHeatTrans + (simTime - oldSimTime) * (heatTrans + oldHeatTrans) / 2.0
-    oldSimTime = simTime
     oldHeatTrans = heatTrans
 
-    ! Calculate Energy Error
-    energyTotal = gsum(1) + gsum(2) 
-    if (isFirst == 1) energyInitial = energyTotal
-    energyError = energyInitial - (energyTotal - intHeatTrans)
-    energyErrorRel = 100.0 * abs(energyError) / energyInitial 
+    ! Calculate Integral Body Work
+    intBodyWork = intBodyWork + (simTime - oldSimTime) * (gsum(6) + oldBodyWork) / 2.0
+    oldBodyWork = gsum(6)
+
+    ! Calculate Integral Viscous Work
+    intViscous = intViscous + (simTime - oldSimTime) * (gsum(7) + oldViscous) / 2.0
+    oldViscous = gsum(7)
+
+    ! Save Last Simulation Time for Next Integrals
+    oldSimTime = simTime
+
+    ! Calculate Relative Error in Thermal Energy
+    if (isFirst == 1) then
+            thermalInitial = gsum(1)
+            if (abs(thermalInitial) > 1E-4) thermalScale = thermalInitial
+    endif
+    thermalError = gsum(1) - intHeatTrans - thermalInitial
+    thermalErrorRel = 100.0 * abs(thermalError) / thermalScale 
+
+    ! Calculate Relative Error in Kinetic Energy
+    if (isFirst == 1) then
+            kineticInitial = gsum(2)
+            if (abs(kineticInitial) > 1E-4) kineticScale = kineticScale
+    endif
+    kineticError = gsum(2) - intBodyWork -intViscous - kineticInitial
+    kineticErrorRel = 100.0 * abs(kineticError) / kineticScale 
 
     ! Gather Quantities for Screen Output
-    psum(1) = simTime        ! Simulation Time
-    psum(2) = gsum(1)        ! Thermal Energy
-    psum(3) = gsum(2)        ! Kinetic Energy
-    psum(4) = energyTotal    ! Total Energy
-    psum(5) = heatTrans      ! Heat Transfer (net flux per vol)
-    psum(6) = gsum(6)        ! Nusselt Number
-    psum(7) = energyErrorRel ! Energy Error (Relative)
-    psum(8) = gsum(3)        ! Mass Error (Volume wt L1 Div U)
-    psum(9) = intHeatTrans   ! Integral Heat Transfer
+    psum(1)  = simTime         ! Simulation Time
+    psum(2)  = gsum(1)         ! Thermal Energy
+    psum(3)  = gsum(2)         ! Kinetic Energy
+    psum(4)  = gsum(8)         ! Nusselt Number
+    psum(5)  = thermalErrorRel ! Thermal Energy Error (Relative)
+    psum(6)  = kineticErrorRel ! kinetic Energy Error (Relative)
+    psum(7)  = gsum(3)         ! Mass Error (Volume wt L1 Div U)
+    psum(8)  = intHeatTrans    ! Integral Heat Transfer
+    psum(9)  = oldBodyWork     ! Integral Body Work
+    psum(10) = oldViscous      ! Integral viscous Work
 
     ! create the file from scratch if it is a not a restart simulation, 
     ! otherwise append to the end of the file
@@ -253,12 +344,13 @@ subroutine IO_writeIntegralQuantities ( isFirst, simTime)
         'Simulation time           ', &
         'Energy -- Thermal         ', &
         'Energy -- Kinetic         ', &
-        'Energy -- Total           ', &
-        'Net Heat Flux (per Vol)   ', &
         'Nusselt (Nu) Number       ', &
-        'Energy Error (Relative)   ', &
+        'Thermal Error (Rel) [%]   ', &
+        'Kinetic Error (Rel) [%]   ', &
         'Mass Error (Vwt L1 divU)  ', &
-        'Int Heat Trans (Int Q)    '
+        'Int Heat Trans (Int Q)    ', &
+        'Int Body Work (Int uT)    ', &
+        'Int Viscous Work          '
 10      format (2x,50(a25, :, 1X))
     else if(isFirst .EQ. 1) then
       write (funit, 11) 
