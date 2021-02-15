@@ -2,6 +2,8 @@
 #REQUIRES Grid/GridMain/UG
 #REQUIRES Grid/GridSolvers/Pfft/RegularGridSolver
 
+LIBRARY BLAS
+
 # add pre-processor symbol for use of Regular Grids 
 PPDEFINE FLASH_GRID_REGULAR
 
