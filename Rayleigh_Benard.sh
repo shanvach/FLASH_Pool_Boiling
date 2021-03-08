@@ -148,11 +148,12 @@ if $advn && ! $coll; then
         echo "-----------------------------------------------------"
         cd ${objdir}
          
-        screen -d -m -S makeFLASH bash -c "make -j ${ncmp} > out"
+        make -j ${ncmp} &> out &
+        PROC_ID=$!
         count=1
         visual="."
-        while screen -list | grep -q "makeFLASH"
-        do
+        echo
+        while kill -0 "$PROC_ID" >/dev/null 2>&1; do 
             overwrite "Compiling FLASH code ${visual}"
             count=$(($count + 1))
             visual="${visual} ."

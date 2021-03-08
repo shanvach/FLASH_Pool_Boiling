@@ -4,7 +4,6 @@
 # Set the HDF5/MPI library paths -- these need to be updated for your system
 #----------------------------------------------------------------------------
 
-HYPRE_PATH   =
 SUPERLU_PATH = 
 
 #----------------------------------------------------------------------------
@@ -38,8 +37,8 @@ CFLAGS_TEST = ${CFLAGS_OPT} -fp-model precise
 CFLAGS_HDF5 = -I${TACC_HDF5_INC} -DH5_USE_16_API
 FFLAGS_HDF5 = -I${TACC_HDF5_INC} -DH5_USE_16_API
 
-CFLAGS_HYPRE = -I${HYPRE_PATH}/include
-FFLAGS_HYPRE = -I${HYPRE_PATH}/include
+CFLAGS_HYPRE = -I${TACC_HYPRE_INC}
+FFLAGS_HYPRE = -I${TACC_HYPRE_INC}
 
 CFLAGS_SUPERLU = -I${SUPERLU_PATH}/include
 FFLAGS_SUPERLU = -I${SUPERLU_PATH}/include
@@ -63,7 +62,7 @@ LIB_TEST  =
 LIB_HDF5    = -Wl,-rpath,${TACC_HDF5_LIB} -L${TACC_HDF5_LIB} -lhdf5_fortran -lhdf5 -lz
 LIB_MPI     = 
 LIB_BLAS    = -mkl
-LIB_HYPRE   = -L${HYPRE_PATH}/lib -lHYPRE  
+LIB_HYPRE   = -L${TACC_HYPRE_LIB} -lHYPRE  
 LIB_SUPERLU = -L${SUPERLU_PATH}/lib -lsuperlu_4.3
 LIB_STDCXX  = -L/lib64 -lstdc++
 
