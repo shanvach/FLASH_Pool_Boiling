@@ -16,6 +16,7 @@ advn=false
 comp=false
 ncmp=4
 over=false
+make=false
 coll=false
 h5pp=false
 
@@ -70,6 +71,8 @@ while [ "$1" != '' ]; do
                                 ncmp=$1
                                 ;;
         -over | --overwrite )   over=true
+                                ;;
+        -make | --force_make )  make=true
                                 ;;
         -h5pp | --h5_parallel ) h5pp=true
                                 ;;
@@ -143,16 +146,17 @@ if $advn && ! $coll; then
     fi
 
     # Compile the setup directory
-    if $comp; then
+    if $comp && { $make || [ ! -f "${objdir}/flash4" ]; } then
         echo "Compile the FLASH setup directory w/ ${ncmp} cores:"
         echo "-----------------------------------------------------"
         cd ${objdir}
          
-        screen -d -m -S makeFLASH bash -c "make -j ${ncmp} > out"
+        make -j ${ncmp} &> out &
+        PROC_ID=$!
         count=1
         visual="."
-        while screen -list | grep -q "makeFLASH"
-        do
+        echo
+        while kill -0 "$PROC_ID" >/dev/null 2>&1; do 
             overwrite "Compiling FLASH code ${visual}"
             count=$(($count + 1))
             visual="${visual} ."

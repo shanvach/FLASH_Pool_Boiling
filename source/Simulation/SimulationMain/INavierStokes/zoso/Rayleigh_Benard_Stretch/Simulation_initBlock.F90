@@ -426,7 +426,7 @@ subroutine Simulation_initBlock(blockId)
       xCnt = (sim_xMax + sim_xMin) / 2.0
       yWth =  sim_yMax - sim_yMin
       yCnt = (sim_yMax + sim_yMin) / 2.0
-      call srand(seed)
+      !call srand(seed)
 
       solnData(PRES_VAR,:,:,:) = 0.0
       solnData(DELP_VAR,:,:,:) = 0.0
@@ -455,7 +455,8 @@ subroutine Simulation_initBlock(blockId)
                       (((-1)**xFSgn * (2.0 * (xcell(i) - xCnt) / xWth)**(2 * xFPwr) + xFSgn) * xFMag) * &
                       (((-1)**yFSgn * (2.0 * (ycell(j) - yCnt) / yWth)**(2 * yFPwr) + yFSgn) * yFMag)
             
-            solnData(TEMP_VAR,i,j,k) = min(1.0, max(0.0, (xSrcPol + xSrcSin) * (ySrcPol + ySrcSin) + rMag * (2.0 * rand() - 1)))
+            !solnData(TEMP_VAR,i,j,k) = min(1.0, max(0.0, (xSrcPol + xSrcSin) * (ySrcPol + ySrcSin) + rMag * (2.0 * rand() - 1)))
+            solnData(TEMP_VAR,i,j,k) = min(1.0, max(0.0, (xSrcPol + xSrcSin) * (ySrcPol + ySrcSin) + rMag * (2.0 * 0.5 - 1)))
           enddo
         enddo
       enddo
