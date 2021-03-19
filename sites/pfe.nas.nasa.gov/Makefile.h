@@ -182,7 +182,8 @@ LIB_STDCXX = -lstdc++
 
 #Specify TEC_PLOT=YES in order to link the tec plot library.
 TEC_PLOT=YES
-TEC_DIR=/home3/adhruv/TecioLib
+#TEC_DIR=/home3/adhruv/TecioLib
+TEC_DIR=/home3/syoussou/flash-distro/TecioLib
 ifeq ($(TEC_PLOT), YES)
   CONFIG_LIB = -I${TEC_DIR} -L${TEC_DIR}  -ltecio -lstdc++ 
 endif
