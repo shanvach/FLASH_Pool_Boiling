@@ -150,6 +150,7 @@ MAX_PROCS value is needed for some allocation, keeping it in a
 
 #define SG_USER 1
 #define SG_TANH 2
+#define SG_LINE 3
 #define AUTO    0
 #define TRIG   -1
 #define MATRIX -2

@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/ImpingingJetDirSolver_stretched_3D  -3d -auto  -nxb=40 -nyb=40 -nzb=40 -opt  -maxblocks=20 -gridinterpolation=native +rg  -objdir=ImpingingJetDirSolver_stretched_3D -site=splash.seas.gwu.edu Bittree=0

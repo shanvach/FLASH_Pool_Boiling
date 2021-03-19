@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/FallingDropletDirSolver_stretched_2D  -2d -auto  -nxb=80 -nyb=80 -opt  -maxblocks=10 -gridinterpolation=native +rg  -objdir=FallingDropletDirSolver_stretched_2D -site=splash.seas.gwu.edu Bittree=1

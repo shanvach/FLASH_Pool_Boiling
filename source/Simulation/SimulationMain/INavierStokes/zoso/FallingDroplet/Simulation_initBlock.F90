@@ -82,7 +82,7 @@ subroutine Simulation_initBlock(blockId)
   real, dimension(17) :: Nuc_radii,Nuc_sites_x,Nuc_sites_z,Nuc_sites_y
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
-  real :: th_radii
+  real :: th_radii,centerx,centery,radius
   real :: xl,xr,yl,yr,dxl,dxr,dyl,dyr
 
   !----------------------------------------------------------------------
@@ -115,6 +115,10 @@ subroutine Simulation_initBlock(blockId)
 
   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC,CENTER)
 
+  centerx = sim_xMin+(sim_xMax-sim_xMin)/2
+  centery = sim_yMax-(sim_yMax-sim_yMin)/4
+  radius = 0.5 
+
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
      do j=1,blkLimitsGC(HIGH,JAXIS)
@@ -130,7 +134,7 @@ subroutine Simulation_initBlock(blockId)
 
            zcell = 0.0
 
-           solnData(DFUN_VAR,i,j,k) = (sqrt(xcell**2+ycell**2+zcell**2)-0.5)!,ycell+23.0)
+           solnData(DFUN_VAR,i,j,k) = (sqrt((xcell-centerx)**2+(ycell-centery)**2+zcell**2)-radius)!,ycell+23.0)
 
         enddo
      enddo

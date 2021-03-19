@@ -59,6 +59,11 @@ implicit none
      constKey = SG_TANH
 #endif
 
+  case("sg_line", "SG_LINE")
+#ifdef SG_LINE
+    constKey = SG_LINE
+#endif
+
   case ("sg_user", "SG_USER")
 #ifdef SG_USER
      constKey = SG_USER

@@ -1,0 +1,116 @@
+# 	Runtime parameters for the Inflow-Outflow problem.
+
+gr_pmRpDivergenceFree = 1
+gr_pmRpNfieldDivf = 2
+gr_pmRpConsvFluxes = .TRUE.
+gr_pmRpConsvFluxDensities = .FALSE.
+
+# Particles
+pt_maxPerProc=3500
+
+# Inverse of Reynolds Number
+invRe = 0.03125
+
+iConvU = 2
+
+# Subgrid Scale model flag (0 no sgs model, 1 sgs model)
+isgs            = 0
+
+# Densities
+rho1 = 1.0
+rho2 = 10.0
+
+# Viscosities
+vis1 = 1.0
+vis2 = 10.0
+
+# Gravity in the +y direction
+gravX =  0.0
+gravY = -1.0
+gravZ =  0.0
+
+# sten is the inverse of the Weber number
+sten = 0.1
+
+# Number of level-set redistancing iterations
+inls = 2
+lsit = 2
+
+# Bodies
+#sm_NumBodies   =  1
+#gr_sbNumBodies =  1
+
+# # SolidMechanics
+#sm_solidinteg = 2
+#pcepsilon= 1.e-7
+
+#       Grid dimensionality and geometry
+geometry	= "cartesian"
+poisson_solver = "user"
+x_poisson_solve = "trig"
+y_poisson_solve = "direct"
+
+x_stretch = .false.
+x_stretch_type = "sg_line"
+x_stretch_value = 1.0
+x_stretch_loc = 0.0
+
+y_stretch = .false.
+y_stretch_type = "sg_line"
+y_stretch_value = 1.5
+y_stretch_loc = 1.0
+
+#       Size of computational volume
+xmin =   -1.0
+xmax =    1.0
+ymin =    0.0
+ymax =    4.0
+#zmin =   -30.0
+#zmax =    30.0
+
+#       Boundary conditions
+xl_boundary_type = "slip_ins"
+xr_boundary_type = "slip_ins"
+yl_boundary_type = "noslip_ins"
+yr_boundary_type = "noslip_ins"
+
+#       Simulation (grid, time, I/O) parameters
+run_comment	= "2D Inflow-Outflow Cylinder problem"
+log_file	= "INS_INOUT.log"
+basenm		= "INS_INOUT_"
+
+restart         = .false.
+#checkPointFileNumber=1
+
+nend = 100000000
+#nend = 1
+tmax            = 4.25
+cflflg          = 0
+cfl             = 0.005
+sigma		= 0.005
+dtspec          = 1.0d-4
+dtinit          = 1.0d-4
+tstep_change_factor=1.01
+
+
+#Integration Scheme:
+intschm            = 2
+
+iProcs = 2
+jProcs = 4
+
+#Plot Variables for Visit
+plot_var_1	= "pres"
+plot_var_2      = "velx"
+plot_var_3      = "vely"
+plot_var_4      = "omgz"
+plot_var_5      = "dust" #divergence
+  
+pfft_setupOnce  = .false.
+convertToConsvdInMeshInterp = .false.
+
+checkpointFileIntervalTime = 10.0
+#checkpointFileIntervalStep = 40000
+
+#plotFileIntervalTime = 2.5
+plotFileIntervalStep = 1000

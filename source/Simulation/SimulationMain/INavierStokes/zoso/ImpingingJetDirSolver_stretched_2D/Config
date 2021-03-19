@@ -1,0 +1,47 @@
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+
+#REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+REQUIRES Driver/DriverMain/RegularGrid
+
+REQUIRES physics/Multiphase
+REQUIRES physics/Multiphase/MultiphaseMain/INS
+REQUIRES physics/Multiphase/MultiphaseMain/INS/zConstCoef
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens
+REQUIRES physics/IncompNS/IncompNSMain/vardens/ConstCoef
+
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+USESETUPVARS Grid
+
+#  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+#  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+  REQUESTS Grid/GridSolvers/Pfft/RegularGridSolver
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+DATAFILES flash.par_2D flash.par_3D outtotecplot.F90_2D outtotecplot.F90_3D
+
+VARIABLE aaJunk  # kpd  for IfactorB
+
+#VARIABLE preo    # Shizhao for fsi
+#FACEVAR  velo
+
+VARIABLE dbuf
+VARIABLE pbuf
+
+PARAMETER quadrant       BOOLEAN  FALSE
+PARAMETER waveA          REAL  0.0
+
+# Number of guardcells at each boundary
+GUARDCELLS 3

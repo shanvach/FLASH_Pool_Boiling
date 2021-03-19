@@ -54,6 +54,12 @@
   real facevarxx(NXB+2*NGUARD+1,NYB+2*NGUARD), &
        facevaryy(NXB+2*NGUARD,NYB+2*NGUARD+1)
 
+  real facevarxn(NXB+2*NGUARD+1,NYB+2*NGUARD), &
+       facevaryn(NXB+2*NGUARD,NYB+2*NGUARD+1)
+
+  real forcvarxx(NXB+2*NGUARD+1,NYB+2*NGUARD), &
+       forcvaryy(NXB+2*NGUARD,NYB+2*NGUARD+1)
+
   real facevarxx2(NXB+2*NGUARD+1,NYB+2*NGUARD), &
        facevaryy2(NXB+2*NGUARD,NYB+2*NGUARD+1)
 
@@ -68,9 +74,10 @@
        facevara4(NXB+2*NGUARD,NYB+2*NGUARD+1)
 
   real, dimension(NXB+1,NYB+1) :: tpu,tpv,tpp, &
+           tpfu,tpfv,tpun,tpvn, &
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
-           vortz,divpp,tpdens,tpdensy,tpdfun,tpdbuf,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
+           vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
            tpuint, tpvint,tptes,tprds, tlamda, tnmlx, tnmly
 
   real, dimension(NXB,NYB) :: tptes_c
@@ -146,7 +153,9 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p denX denY dfun dbuf pfun visc curv vort div'//NULLCHR,   &
+  !denX denY dfun pfun visc curv vort sigp
+
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p forcu forcv un vn div'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -193,6 +202,10 @@
 
      tpu = 0.
      tpv = 0.
+     tpun = 0.
+     tpvn = 0.
+     tpfu = 0.
+     tpfv = 0. 
      tpp = 0.
      tpdens = 0.
      tpdensy = 0.
@@ -243,6 +256,10 @@
    
      facevarxx = facexData(VELC_FACE_VAR,:,:,1)
      facevaryy = faceyData(VELC_FACE_VAR,:,:,1)
+     forcvarxx = facexData(FORC_FACE_VAR,:,:,1)
+     forcvaryy = faceyData(FORC_FACE_VAR,:,:,1)
+     facevarxn = facexData(RHDS_FACE_VAR,:,:,1)
+     facevaryn = faceyData(RHDS_FACE_VAR,:,:,1)
  
      facevarr1 = facexData(RH1F_FACE_VAR,:,:,1)
      facevarr2 = faceyData(RH1F_FACE_VAR,:,:,1)
@@ -261,6 +278,32 @@
                 facevaryy(NGUARD+1:nxc,NGUARD+1:nyc) )                               
 
 
+     ! U velocity: u(nxb+1,nyb+1)
+     ! --------------------------
+     tpfu = 0.5*(forcvarxx(NGUARD+1:nxc,NGUARD:nyc-1)+  &
+                forcvarxx(NGUARD+1:nxc,NGUARD+1:nyc) )
+
+     ! U velocity: u(nxb+1,nyb+1)
+     ! --------------------------
+     tpun = 0.5*(facevarxn(NGUARD+1:nxc,NGUARD:nyc-1)+  &
+                facevarxn(NGUARD+1:nxc,NGUARD+1:nyc) )
+
+
+     ! V velocity: v(nxb+1,nyb+1)
+     ! --------------------------                           
+     tpvn = 0.5*(facevaryn(NGUARD:nxc-1,NGUARD+1:nyc) + &
+                facevaryn(NGUARD+1:nxc,NGUARD+1:nyc) )                               
+
+
+
+
+     ! V velocity: v(nxb+1,nyb+1)
+     ! --------------------------                           
+     tpfv = 0.5*(forcvaryy(NGUARD:nxc-1,NGUARD+1:nyc) + &
+                forcvaryy(NGUARD+1:nxc,NGUARD+1:nyc) )                               
+
+
+
      ! P pressure: p(nxb+1,nyb+1)
      ! -------------------------------
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
@@ -268,9 +311,6 @@
 
     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(DFUN_VAR,:,:,1),tpdfun)
-
-    call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
-                            solnData(DBUF_VAR,:,:,1),tpdbuf)
 
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                             solnData(PFUN_VAR,:,:,1),tppfun)
@@ -384,42 +424,57 @@
       arraylb(:,:,1) = sngl(tpp)
       i = TecDat(ijk,arraylb,0)
 
-      ! Write dens:
-      arraylb(:,:,1) = sngl(tpdens)
+      ! Write u force:
+      arraylb(:,:,1) = sngl(tpfu)
+      i = TecDat(ijk,arraylb,0)
+
+      ! Write v force:
+      arraylb(:,:,1) = sngl(tpfv)
+      i = TecDat(ijk,arraylb,0)
+
+      ! Write un:
+      arraylb(:,:,1) = sngl(tpun)
+      i = TecDat(ijk,arraylb,0)
+
+      ! Write vn:
+      arraylb(:,:,1) = sngl(tpvn)
       i = TecDat(ijk,arraylb,0)
 
       ! Write dens:
-      arraylb(:,:,1) = sngl(tpdensy)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdens)
+      !i = TecDat(ijk,arraylb,0)
+
+      ! Write dens:
+      !arraylb(:,:,1) = sngl(tpdensy)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write dfun:
-      arraylb(:,:,1) = sngl(tpdfun)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpdfun)
+      !i = TecDat(ijk,arraylb,0)
 
-      ! Write dfun:
-      arraylb(:,:,1) = sngl(tpdbuf)
-      i = TecDat(ijk,arraylb,0)
-
-
-      arraylb(:,:,1) = sngl(tppfun)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tppfun)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write visc:
-      arraylb(:,:,1) = sngl(tpvisc)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpvisc)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write visc:
-      arraylb(:,:,1) = sngl(tpcurv)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(tpcurv)
+      !i = TecDat(ijk,arraylb,0)
 
 
       ! Write omgZ:
-      arraylb(:,:,1) = sngl(vortz)
-      i = TecDat(ijk,arraylb,0)
+      !arraylb(:,:,1) = sngl(vortz)
+      !i = TecDat(ijk,arraylb,0)
 
       ! Write Div:
       arraylb(:,:,1) = sngl(divpp)
       i = TecDat(ijk,arraylb,0)
+
+      !arraylb(:,:,1) = sngl(tsigp)
+      !i = TecDat(ijk,arraylb,0)
+
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)
 !      i1 = TecDat(pqr,arraylb_c,0)
