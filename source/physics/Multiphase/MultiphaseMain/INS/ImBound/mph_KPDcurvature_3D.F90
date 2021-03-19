@@ -1,6 +1,6 @@
 ! Directives for three phase treatment
 
-#define THREE_PHASE_TREATMENT
+!#define THREE_PHASE_TREATMENT
 
         subroutine mph_KPDcurvature3DAB(s,lambda,crv,dx,dy,dz, &
            ix1,ix2,jy1,jy2,kz1,kz2, &

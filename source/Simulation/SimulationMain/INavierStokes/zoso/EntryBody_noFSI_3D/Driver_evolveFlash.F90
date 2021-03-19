@@ -48,7 +48,8 @@ subroutine Driver_evolveFlash()
   use Particles_interface, ONLY : Particles_advance, Particles_dump
   use Grid_interface,    ONLY : Grid_getLocalNumBlks, &
                                 Grid_getListOfBlocks, &
-                                Grid_updateRefinement
+                                Grid_updateRefinement, &
+                                Grid_writeDomain
 
   use IO_interface,      ONLY : IO_output,IO_outputFinal
 
@@ -235,6 +236,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
     
      call Timers_start("io")
      call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
+     call Grid_writeDomain()
      call Timers_stop("io")
 
      if(endRun) exit

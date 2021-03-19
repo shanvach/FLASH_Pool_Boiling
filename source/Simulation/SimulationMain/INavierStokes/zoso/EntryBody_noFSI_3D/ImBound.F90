@@ -28,7 +28,7 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
                              gr_sbSendPosn, gr_sbDistributedForces,  &
                              gr_sbFinalize
 
-  use ImBound_data, only : ib_vel_flg, ib_dfun_flg,ib_dt,ib_BlockMarker_flag
+  use ImBound_data, only : ib_dt,ib_BlockMarker_flag, ib_vel_flg
 
   use gr_sbData, only : gr_sbNumBodies,gr_sbBodyInfo,gr_sbFirstCall
 
@@ -52,6 +52,7 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
 
   ib_dt = dt
 
+
   select case (forcflag)
   case(FORCE_FLOW) 
 
@@ -61,7 +62,7 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
   call Logfile_stamp( 'Entering Forcing' , '[ImBound]')
 
   ! Flush Particles.
-  if(ib_vel_flg) call gr_sbFinalize()
+  call gr_sbFinalize()
 
   ! First, select Master:
   !call Timers_start("Grid_sbSelectMaster")
@@ -69,11 +70,11 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
   !call Timers_stop("Grid_sbSelectMaster")
 
   call Timers_start("gr_sbCreateParticles")
-  if(ib_vel_flg) call gr_sbCreateParticles()
+  call gr_sbCreateParticles()
   call Timers_stop("gr_sbCreateParticles")
 
   call Timers_start("gr_sbGetProcBlock")
-  if(ib_vel_flg) call gr_sbGetProcBlock()
+  call gr_sbGetProcBlock()
   call Timers_stop("gr_sbGetProcBlock")
 
   call Timers_start("gr_sbSendPosn")
@@ -84,12 +85,14 @@ subroutine ImBound(blockCount, blockList, dt, forcflag)
 
   call Logfile_stamp( 'After Forcing' , '[ImBound]')
 
+!  Commented out for the case of a moving body in which you also want to 
+!  compute the forces on the body, by Elizabeth Gregorio -- EG --
   case(COMPUTE_FORCES)
 
-  if(ib_vel_flg) call gr_sbDistributedForces()
+  call gr_sbDistributedForces()
 
 #ifdef FORCES_FROM_VOL_INTEGRALS
-  if(ib_vel_flg) call sm_assemble_FluidVolIntegrals()
+  call sm_assemble_FluidVolIntegrals()
 #endif  
   case default
 

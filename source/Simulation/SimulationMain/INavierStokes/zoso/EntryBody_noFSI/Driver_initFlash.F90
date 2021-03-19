@@ -57,7 +57,7 @@ subroutine Driver_initFlash()
   use Timers_interface, ONLY : Timers_init, Timers_start, Timers_stop
 
   use Grid_interface, ONLY : Grid_init, Grid_initDomain, &
-    Grid_getListOfBlocks
+    Grid_getListOfBlocks, Grid_writeDomain
   use Multispecies_interface, ONLY : Multispecies_init
   use Particles_interface, ONLY : Particles_init,  Particles_initData, &
        Particles_initForces
@@ -216,6 +216,7 @@ subroutine Driver_initFlash()
   end if
 
   !call IO_outputInitial(  dr_nbegin, dr_initialSimTime)
+  !call Grid_writeDomain(0)
   if(dr_globalMe==MASTER_PE)print*,'Initial plotfile written'
 
   if(dr_globalMe==MASTER_PE)print*,'Driver init all done'

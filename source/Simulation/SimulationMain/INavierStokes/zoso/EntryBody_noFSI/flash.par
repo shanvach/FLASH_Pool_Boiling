@@ -95,19 +95,20 @@ plot_var_2      = "velx"
 plot_var_3      = "vely"
 plot_var_4      = "omgz"
 plot_var_5      = "dust" #divergence
-  
+plot_velocity   = .true. 
+ 
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
 
-#checkpointFileIntervalTime = 10.0
-checkpointFileIntervalStep = 100000
+#checkpointFileIntervalTime = 0.0001
+#checkpointFileIntervalStep = 1
 
 #plotFileIntervalTime = 0.2
 plotFileIntervalStep = 10
 
 ##	AMR parameters
-nblockx	= 10
-nblocky	= 25
+nblockx	= 2
+nblocky	= 5
 
 lrefine_min	= 1
 lrefine_max     = 1

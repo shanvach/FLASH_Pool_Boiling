@@ -1,3 +1,4 @@
+
 !!****if* source/physics/IncompNS/IncompNSMain/vardens/ins_ab2rk3_VD
 !!
 !!
@@ -511,23 +512,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     !call ins_predictor_VD_IB(facexData(VELC_FACE_VAR,:,:,:),&
-     !                   faceyData(VELC_FACE_VAR,:,:,:),&
-     !                   facezData(VELC_FACE_VAR,:,:,:),&
-     !                   newu,newv,neww,                &
-     !                   facexData(RHDS_FACE_VAR,:,:,:),&
-     !                   faceyData(RHDS_FACE_VAR,:,:,:),&
-     !                   facezData(RHDS_FACE_VAR,:,:,:),&
-     !                   solnData(PRES_VAR,:,:,:),      &
-     !                   dt,del(DIR_X),del(DIR_Y),del(DIR_Z),      &
-     !       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-     !       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-     !       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-     !       ins_gama,ins_rhoa,ins_alfa ,&
-     !                   facexData(POLD_FACE_VAR,:,:,:),&
-     !                   faceyData(POLD_FACE_VAR,:,:,:),&
-     !                   facezData(POLD_FACE_VAR,:,:,:))
-
      call ins_predictor_VD(facexData(VELC_FACE_VAR,:,:,:),&
                         faceyData(VELC_FACE_VAR,:,:,:),&
                         facezData(VELC_FACE_VAR,:,:,:),&
@@ -612,62 +596,13 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   ETIB=REAL(TAIB(2)-TAIB(1),8)/count_rateIB
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
 
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
-  gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
-#endif
-  ins_predcorrflg = .false.
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-
-  !do lb = 1,blockCount
-  !   blockID = blockList(lb)
-  !
-  !   ! Get blocks dx, dy ,dz:
-  !   call Grid_getDeltas(blockID,del)
-  !
-  !   ! Get Blocks internal limits indexes:
-  !   call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC) 
-  !
-  !   ! Point to blocks center and face vars:
-  !   call Grid_getBlkPtr(blockID,solnData,CENTER)
-  !   call Grid_getBlkPtr(blockID,facexData,FACEX)
-  !   call Grid_getBlkPtr(blockID,faceyData,FACEY)
-  !   call Grid_getBlkPtr(blockID,facezData,FACEZ)
-  !
-  !   call ins_firstCorrector_VD_IB( facexData(VELC_FACE_VAR,:,:,:),&
-  !                       faceyData(VELC_FACE_VAR,:,:,:),&
-  !                       facezData(VELC_FACE_VAR,:,:,:),&
-  !                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-  !                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-  !                       blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-  !                       dt, &
-  !                       facexData(POLD_FACE_VAR,:,:,:),            &
-  !                       faceyData(POLD_FACE_VAR,:,:,:),            &
-  !                       facezData(POLD_FACE_VAR,:,:,:))
-  !
-  !   call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-  !   call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-  !   call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-  !   call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-  !end do
-
-  !gcMask = .FALSE.
-  !gcMask(NUNK_VARS+VELC_FACE_VAR) = .TRUE.                 ! ustar
-  !gcMask(NUNK_VARS+1*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! vstar
-!#if NDIM == 3
-!  gcMask(NUNK_VARS+2*NFACE_VARS+VELC_FACE_VAR) = .TRUE.    ! wstar
-!#endif
-  !ins_predcorrflg = .false.
-  !call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-  !     maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)           
-
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
   !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
 
+!*************************************************************************************************
+!*************************************************************************************************
+!*************************************************************************************************
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----
   do lb = 1,blockCount
@@ -979,6 +914,17 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)         
 
+!***********************************************************************************************
+!***********************************************************************************************
+!***********************************************************************************************
+
+  ! Compute forces on immersed bodies:
+  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
+
+!***********************************************************************************************
+!***********************************************************************************************
+!***********************************************************************************************
+
   call cpu_time(t_stopAll)
 
    if(ins_meshMe .eq. 0) print*,"Total INS Solver Time     ",t_stopAll-t_startAll
@@ -1118,6 +1064,29 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
   maxv = max(maxv,maxval(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI)))
   minv = min(minv,minval(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI)))
 
+  maxw = max(maxw,maxval(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI+1)))
+  minw = min(minw,minval(facezData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI+1)))
+
+  maxp = max(maxp,maxval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
+  minp = min(minp,minval(solnData(PRES_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
+
+
+#elif NDIM == 2
+
+     call ins_divergence_VD(facexData(VELC_FACE_VAR,:,:,:),&
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         facezData(VELC_FACE_VAR,:,:,:),&
+             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       new_div)
+
+  mxdivv = max( mxdivv,maxval(new_div))
+
+  mndivv = min( mndivv,minval(new_div))
+
+  maxu = max(maxu,maxval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minu = min(minu,minval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
 
   maxv = max(maxv,maxval(faceyData(VELC_FACE_VAR,GRID_ILO:GRID_IHI,GRID_JLO:GRID_JHI+1,GRID_KLO:GRID_KHI)))
