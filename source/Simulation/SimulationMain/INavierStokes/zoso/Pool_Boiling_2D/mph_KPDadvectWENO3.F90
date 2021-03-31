@@ -366,17 +366,17 @@
               !---------------------------------------------------------
 
 
-              !if(ycell .lt. Lb) then
+              if(ycell .lt. Lb) then
 
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy
-              !else
+              else
                 
-               !  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-               !                       - dt*(fry*vr - fly*vl)/dy &
-               !                       - dt*Cb*(ycell-Lb)/(Ly-Lb)
-               !                       !- dt*Cb*(ycell-Ly+Lb)/Lb
-              !end if
+                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+                                      - dt*(fry*vr - fly*vl)/dy &
+                                      - dt*Cb*(ycell-Lb)/(Ly-Lb)
+                                      !- dt*Cb*(ycell-Ly+Lb)/Lb
+              end if
 
            end do
         end do

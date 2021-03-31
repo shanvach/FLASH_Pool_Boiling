@@ -424,7 +424,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            + Mdens*(tyyp - tyym)*dy1                 &
                            + gravX                                   
 
-            !if(ycell .ge. Lb) ru(i,j,kz1) = ru(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1 
+            if(ycell .ge. Lb) ru(i,j,kz1) = ru(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(uyplus - uyminus)*dy1 
 
           enddo
        enddo
@@ -766,7 +766,7 @@ SUBROUTINE ins_rhs2d_weno3(uni,vni,ru1,ix1,ix2,jy1,jy2,dx,dy,ru,rv, &
                            + Mdens* (tyyp - tyym)*dy1                 &
                            + gravY                                    ! kpd - gravity term                         
  
-             !if(ycell .ge. Lb) rv(i,j,kz1) = rv(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
+             if(ycell .ge. Lb) rv(i,j,kz1) = rv(i,j,kz1) - ins_convvel(HIGH,JAXIS)*(vyplus - vyminus)*dy1
 
           enddo
        enddo

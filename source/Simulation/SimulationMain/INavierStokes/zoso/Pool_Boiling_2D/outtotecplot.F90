@@ -112,30 +112,30 @@
 !-----------------------------------------------------------------------
 
 
-#! -- filetime.XX --
-#  write(filename, '("./IOData/data_time.", i2.2)') mype
-#
-#  ! create/clear filetime.XX if time = 0
-#  if(firstfileflag .eq. 0) then
-#    ! open(unit=33, file=filename, status='replace')
-#
-##ifdef FLASH_GRID_UG
-#     write(33,*) 'NXB, NYB, NZB'
-#     write(33,'(3i4.1)') NXB, NYB, NZB    
-##else
-#     write(33,*) 'NXB, NYB, NZB, interp. order (prolong, restrict)'
-#     write(33,'(5i4.1)') NXB, NYB, NZB, interp_mask_unk(1), &
-#             interp_mask_unk_res(1)         
-##endif
-#
-#     write(33,'(a23,a43,a49,a12)') 'file number, time, dt, ',&
-#             'step number, ',&
-#             'total number of blocks, number of blocks output, ',&
-#             'elapsed time'
-#         
-#    close(33)
-# endif
-#
+!! -- filetime.XX --
+!  write(filename, '("./IOData/data_time.", i2.2)') mype
+!
+!  ! create/clear filetime.XX if time = 0
+!  if(firstfileflag .eq. 0) then
+!    ! open(unit=33, file=filename, status='replace')
+!
+!#ifdef FLASH_GRID_UG
+!     write(33,*) 'NXB, NYB, NZB'
+!     write(33,'(3i4.1)') NXB, NYB, NZB    
+!#else
+!     write(33,*) 'NXB, NYB, NZB, interp. order (prolong, restrict)'
+!     write(33,'(5i4.1)') NXB, NYB, NZB, interp_mask_unk(1), &
+!             interp_mask_unk_res(1)         
+!#endif
+!
+!     write(33,'(a23,a43,a49,a12)') 'file number, time, dt, ',&
+!             'step number, ',&
+!             'total number of blocks, number of blocks output, ',&
+!             'elapsed time'
+!         
+!    close(33)
+!# endif
+!
   ! write timestep data to filetime.XX on each processor
 !  open(unit=33, file=filename, status='old', position='append')
   write(33,66) count, time, dt, istep,blockcount,timer
