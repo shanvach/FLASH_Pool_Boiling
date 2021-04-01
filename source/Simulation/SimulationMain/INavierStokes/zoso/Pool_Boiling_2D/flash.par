@@ -59,11 +59,11 @@ fmic =  0.0
 
 # Temperatures
 tbulk =  0.0
-tsat  =  0.0
+tsat  =  0.1
 tnuc  =  0.0
 
 # Nucleation frequency
-twait =  0.3
+twait =  0.2
 
 # Additional nucleation sites
 ncDensPlus = 0
