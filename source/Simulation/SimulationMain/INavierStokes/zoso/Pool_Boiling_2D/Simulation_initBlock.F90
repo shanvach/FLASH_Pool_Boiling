@@ -216,7 +216,7 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+  sim_nuc_site_y(1:sim_nucSiteDens) = 0.1*cos(ht_psi)
 
 
 #if(0)
