@@ -113,7 +113,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
    !end if
 
-   do step = 1,1 ! RK-2 Loop
     do lb = 1,blockCount
 
      blockID = blockList(lb)
@@ -129,8 +128,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
      call Grid_getBlkPtr(blockID,facexData,FACEX)
      call Grid_getBlkPtr(blockID,faceyData,FACEY)
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-     if (step == 1) solnData(TOLD_VAR,:,:,:) = solnData(TEMP_VAR,:,:,:)
 
      ! Calculate RHS for advections diffusion
 #if NDIM == 2
@@ -170,43 +167,26 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                      solnData(SMRH_VAR,:,:,:),solnData(CURV_VAR,:,:,:))
 #endif
 
-     if (step == 1) then
-
      ! RK-1 dt/1.0
      ! RK-2 dt/2.0
 
      ! Calculate temperature at new time-step
 
-     call Heat_Solve(solnData(TEMP_VAR,:,:,:),solnData(TOLD_VAR,:,:,:),&
+     call Heat_Solve(solnData(TEMP_VAR,:,:,:),solnData(RHSO_VAR,:,:,:),&
                      solnData(RHST_VAR,:,:,:),&
                      dt,&
                      blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                      blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                      blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),T_res1)
 
-
-     else
-
-     call Heat_Solve(solnData(TEMP_VAR,:,:,:),solnData(TOLD_VAR,:,:,:),&
-                     solnData(RHST_VAR,:,:,:),&
-                     dt,&
-                     blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                     blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                     blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),T_res1)
-
-     ! uncomment for RK-2 
-     !T_resBlock = T_resBlock + T_res1
-
-     !solnData(TNLQ_VAR,:,:,:) = 0.0
-     !solnData(TNVP_VAR,:,:,:) = 0.0
-
-     end if
 
      ! uncomment for RK-1
      T_resBlock = T_resBlock + T_res1
 
      solnData(TNLQ_VAR,:,:,:) = 0.0
      solnData(TNVP_VAR,:,:,:) = 0.0
+
+     solnData(RHSO_VAR,:,:,:) = solnData(RHST_VAR,:,:,:)
 
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
      call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -220,8 +200,6 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
 
     call Grid_fillGuardCells(CENTER,ALLDIR,&
          maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-
-   end do !End RK-2
 
    if(blockCount .gt. 0) T_resBlock = T_resBlock/blockCount
 
