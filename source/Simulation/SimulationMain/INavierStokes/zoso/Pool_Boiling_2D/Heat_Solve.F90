@@ -15,7 +15,7 @@ subroutine Heat_Solve(T_p,T_rhs_old,T_rhs,dt,ix1,ix2,jy1,jy2,kz1,kz2,T_res)
   integer :: i,j,k
 
   T_p(ix1:ix2,jy1:jy2,kz1:kz2) = T_p(ix1:ix2,jy1:jy2,kz1:kz2) + dt*1.5*T_rhs(ix1:ix2,jy1:jy2,kz1:kz2) &
-                                                              - dt*T_rhs_old(ix1:ix2,jy1:jy2,kz1:kz2)
+                                                              - dt*0.5*T_rhs_old(ix1:ix2,jy1:jy2,kz1:kz2)
 
   T_res = sum(sum(sum((T_p(:,:,:)-T_p(:,:,:))**2,1),1))
 
