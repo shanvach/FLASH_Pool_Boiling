@@ -462,6 +462,9 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
 
+
+    SolnData(MDOT_VAR,:,:,:) = 0.0
+
     ! Release pointers
 
     max_flux = max(max_flux,maxval(solnData(MDOT_VAR,:,:,:)))

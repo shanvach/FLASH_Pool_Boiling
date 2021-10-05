@@ -17,4 +17,9 @@ PARAMETER Cb  REAL 0.0
 PARAMETER Ra  REAL 0.0
 
 #VARIABLE thco
-#VARIABLE cprs 
+#VARIABLE cprs
+
+## Added by Sara
+## Variables for plotting RHS of Poisson equation
+VARIABLE DIVU TYPE: GENERIC
+VARIABLE XI TYPE: GENERIC 

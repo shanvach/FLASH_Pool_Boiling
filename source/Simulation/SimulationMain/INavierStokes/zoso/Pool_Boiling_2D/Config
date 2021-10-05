@@ -97,6 +97,8 @@ VARIABLE RTES
 #VARIABLE dust                 	# divergence of ustar, poissons equation source term
 #VARIABLE tvis               	# turbulent viscosity
 
+VARIABLE DUPO TYPE: GENERIC
+VARIABLE XIPO TYPE: GENERIC
 ## Fluxes
 #FLUX velx
 #FLUX vely
