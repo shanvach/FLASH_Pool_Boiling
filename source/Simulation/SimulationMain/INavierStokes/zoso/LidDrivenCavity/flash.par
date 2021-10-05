@@ -33,6 +33,9 @@ xr_mg_boundary_type = "outflow"
 yl_mg_boundary_type = "outflow"
 yr_mg_boundary_type = "outflow"
 
+#     Temperature Wall Boundary Conditions
+Twall_high = 1.0
+Twall_low  = 0.0
 
 #       Simulation (grid, time, I/O) parameters
 run_comment	= "2D Lid Driven Cavity problem"
@@ -42,7 +45,7 @@ restart         = .false.
 #checkPointFileNumber=1
 #plotFileNumber  = 1
 nend            = 30000
-tmax            = 300. 
+tmax            = 25.
 cflflg          = 1
 cfl             = 0.3
 sigma		= 0.2
@@ -56,6 +59,7 @@ intschm            = 2
 
 plot_var_1	= "pres"
 plot_var_2      = "delp"
+plot_var_3      = "temp"
   
 pfft_setupOnce  = .false.
 convertToConsvdInMeshInterp = .false.
@@ -63,16 +67,14 @@ convertToConsvdInMeshInterp = .false.
 checkpointFileIntervalTime = 5.
 checkpointFileIntervalStep =20000 
 
-plotFileIntervalTime = 0.1
+plotFileIntervalTime = 1.
 plotFileIntervalStep = 2000
 
-
-
 ##	AMR parameters
-nblockx	= 1
-nblocky	= 1
-lrefine_min	= 2
-lrefine_max     = 3
+nblockx	= 2
+nblocky	= 2
+lrefine_min	= 1
+lrefine_max     = 1
 nrefs           = 0
 refine_var_1    = "pres"
 ##	Flux Conservation for AMR
@@ -101,28 +103,3 @@ bipcgs_print_norm = .true.
 ## Use Central Finite Difference discretization operator:
 gr_pfftDiffOpDiscretize = 2
 gr_mgDiffOpDiscretize   = 2
-
- 
-
-#-------WARNING: ONLY FOR UNIFORM GRID !!! ------------------------
-#	The parameters below are only necessary for the Uniform Grid
-#iGridSize	= 8	#defined as nxb * iprocs
-#jGridSize	= 8	#defined as nyb * jprocs
-#kGridSize	= 1	#defined as nzb * kprocs
-#iProcs		= 1	#number of procs in the i direction
-#jProcs		= 1	#number of procs in the j direction
-#kProcs		= 1	#number of procs in the k direction
-
-# When using UG, iProcs, jProcs and kProcs must be specified.
-# These are the processors along each of the dimensions
-# FIXEDBLOCKSIZE mode ::
-#	When using fixed blocksize, iGridSize etc are redundant in
-#	runtime parameters. These quantities are calculated as 
-#	iGridSize = NXB*iprocs
-#	jGridSize = NYB*jprocs
-#	kGridSize = NZB*kprocs
-# NONFIXEDBLOCKSIZE mode ::
-#	iGridSize etc must be specified. They constitute the global
-#	number of grid points in the physical domain without taking 
-#	the guard cell into account. The local blocksize is calculated
-#	as iGridSize/iprocs  etc.

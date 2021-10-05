@@ -37,4 +37,5 @@ module gr_pfftData
   integer, save :: gr_pfftDiffOpDiscretize
   logical, save :: pfft_isSimpleNonMappedAMR1D, pfft_inRegion
   real, dimension(LOW:HIGH,MDIM), save :: pfft_regionBndBox
+  integer, save :: pfft_solver
 end module gr_pfftData

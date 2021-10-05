@@ -55,6 +55,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 #endif    
 
   use Grid_interface, ONLY : GRID_PDE_BND_PERIODIC, GRID_PDE_BND_NEUMANN, &
+                             GRID_PDE_BND_DIRICHLET, &
                              Grid_getListOfBlocks, &
                              Grid_getDeltas,         &
                              Grid_getBlkBC,          &
@@ -88,6 +89,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
               ins_setInterpValsGcell,&
                            ins_rhs3d_VD,&
                            ins_rhs2d_VD,&
+                           ins_rhs2d_weno3,&
+                           ins_rhs3d_weno3,&
                        ins_predictor_VD,&
                       ins_divergence_VD,&
                        ins_corrector_VD
@@ -98,18 +101,17 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                             ins_restart, ins_nstep, ins_Qin, ins_Qout, ins_predcorrflg, &
                             ins_convvel, ins_alf, ins_gam, ins_rho, ins_gama, ins_alfa, &
                             ins_rhoa, AB2_SCHM, RK3_SCHM, ins_outflowgridChanged, ins_tlevel, &
-                            ins_gravX, ins_gravY, ins_gravZ
+                            ins_gravX, ins_gravY,ins_gravZ
 
   use Grid_Data, ONLY : gr_domainBC 
 
-  use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
-                             mph_vis1,mph_vis2,mph_lsit, mph_inls
+  !use Multiphase_data, only: mph_rho1,mph_rho2,mph_sten,mph_crmx,mph_crmn, &
+  !                           mph_vis1,mph_vis2,mph_lsit,mph_inls,mph_thco1, &
+  !                           mph_thco2,mph_cp1,mph_cp2
 
-  use mph_interface, only : mph_KPDcurvature2DAB, mph_KPDcurvature2DC, &
-                            mph_KPDadvectWENO3, mph_KPDlsRedistance,  &
-                            mph_KPDcurvature3DAB, mph_KPDcurvature3DC,&
-                            mph_KPDadvectWENO3_3D, mph_KPDlsRedistance_3D
-    
+  use Multiphase_data, only: mph_rho1, mph_rho2, mph_sten, mph_crmx, mph_crmn, &
+                             mph_vis1, mph_vis2, mph_lsit, mph_inls
+   
   use Timers_interface, ONLY : Timers_start, Timers_stop
 
   use ImBound_interface, ONLY : ImBound
@@ -120,6 +122,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
 
+  !use ImBound_data, ONLY: ib_temp_flg, ib_vel_flg, ib_dfun_flg
  
   implicit none
 
@@ -157,6 +160,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   real, dimension(NFLUXES,GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: flxint_u
   real, dimension(NFLUXES,GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: flxint_v
   real, dimension(NFLUXES,GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: flxint_w
+  real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: new_div
 
   integer :: sx,sy,sz,ex,ey,ez
 
@@ -214,6 +218,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   integer :: count
   integer :: intval,iOutPress 
 
+  integer :: mph_iteration
+
   real :: xcell,ycell,zcell,xcellX,ycellX,xcellY,ycellY
 
   character(28) :: filename
@@ -223,6 +229,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   integer, save :: mgrid_solveLevelKPD
   integer :: faces(2,MDIM),onBoundary(2,MDIM)
 
+  real :: totaldiv
+  real :: pi = 3.1415926535897932384d0
 ! --------------------------------------------------------------------------
 ! --------------------------------------------------------------------------
 ! --------------------------------------------------------------------------
@@ -235,6 +243,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   flxint_u = 0.
   flxint_v = 0.
   flxint_w = 0.
+  new_div = 0.
 
 
   nxc = NXB + NGUARD + 1
@@ -266,7 +275,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 #ifdef FLASH_GRID_UG
         bc_types(eachBoundary) = OUTFLOW
 #else
-        bc_types(eachBoundary) = GRID_PDE_BND_NEUMANN !MG_BND_NEUMANN
+        bc_types(eachBoundary) = GRID_PDE_BND_NEUMANN !MG_BND_NEUMANN !GRID_PDE_BND_DIRICHLET
 #endif
      case default
      if (ins_meshMe .eq. MASTER_PE) then
@@ -323,7 +332,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   call ins_setInterpValsGcell(.true.)
 
   ins_tlevel = timeEndAdv - dt
-
 !-----------------------------------------------------------------------------------------------
 !***********************************************************************************************
 !***********************************************************************************************
@@ -333,6 +341,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   !---------------
   ! Timestep Loop:
   !---------------
+  do mph_iteration = 1,1
   do ist = 1,itmx
 
   !kpd - Start Tital INS_AB2RK3 Timer...
@@ -351,11 +360,11 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   ! These two subroutine calls ar used in case of outflow BCs, only when NEUMANN_INS and
   ! OUTFLOW_INS are present.
   ! Compute inflow volume ratio: (Not computed on NOT_BOUNDARY, NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .true., ins_Qin)
+  !call ins_computeQinout( blockCount, blockList, .true., ins_Qin)
   
   ! For OUTFLOW_INS condition compute convective velocity
   call ins_convectVelout( blockCount, blockList, ins_convvel)
-  !if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)  
+  if(ins_meshMe .eq. MASTER_PE) write(*,*) 'After convect',ins_convvel(HIGH,:)  
 
 !***********************************************************************************************
 !***********************************************************************************************
@@ -371,6 +380,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   ! TURBULENT VISCOSITY COMPUTATION:
   ! --------- --------- -----------
+
 #if NDIM == 3
   if (ins_isgs .NE. 0) then
      do lb = 1,blockCount
@@ -424,734 +434,6 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   endif
 #endif
 
-!!***********************************************************************************************
-!!***********************************************************************************************
-!    !#############################################################################
-!    !-----------------------------------------------------------------------------
-!    !-kpd - Fill Guardcells for the distance function before curvature is computed 
-!    !       This is done for first iteration only (filled at end of time step) 
-!    !-----------------------------------------------------------------------------
-!    gcMask = .FALSE.
-!    gcMask(DFUN_VAR) = .TRUE.
-!#ifdef FLASH_GRID_PARAMESH
-!    !intval = 1
-!    intval = 2
-!    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-!    interp_mask_work= intval;
-!#endif
-!
-!    call Grid_fillGuardCells(CENTER,ALLDIR,&
-!       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-!      !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
-!    !-----------------------------------------------------------------------------
-!    !#############################################################################
-!!***********************************************************************************************
-!!***********************************************************************************************
-!!***********************************************************************************************
-
-!kpd - Level Set Initialization...
-  if (dr_nstep .eq. 1) then
-
-    !#############################################################################
-    !-----------------------------------------------------------------------------
-    !-kpd - Fill Guardcells for the distance function before curvature is computed 
-    !       This is done for first iteration only (filled at end of time step) 
-    !-----------------------------------------------------------------------------
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-    interp_mask_work= intval;
-#endif
-
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-      !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
-    !-----------------------------------------------------------------------------
-    !#############################################################################
-
-
-   !*********************************************************************************************************
-   !- kpd - Level Set Distance Function Initialization (if needed) ******************************************
-   !*********************************************************************************************************
-   do ii = 1,mph_inls
-
-     !------------------------------
-     !- kpd - Level set redistancing 
-     !------------------------------
-
-     t = dt
-     lsT  = 0.0
-
-     do lb = 1,blockCount
-        blockID = blockList(lb)
-
-        ! Get blocks dx, dy ,dz:
-        call Grid_getDeltas(blockID,del)
-
-        ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-#if NDIM == 3
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-        !--------------------------------------------
-        ! Call DFUN re-initialization routine for 3D:
-        !--------------------------------------------
-        lsDT = MIN(10.0*dt,0.001)
-        !minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.+del(DIR_Z)**2.)
-        minCellDiag = SQRT((SQRT(del(DIR_X)**2.+del(DIR_Y)**2.))**2.+del(DIR_Z)**2.)
-        if (lb .eq. 1 .AND. ins_meshMe .eq. 0) then
-           print*,"Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
-        end if
-
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-
-        call mph_KPDlsRedistance_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
-                          del(DIR_X),del(DIR_Y),del(DIR_Z),  &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS), &
-                          solnData(AAJUNK_VAR,:,:,:), lsDT, minCellDiag )
-
-#elif NDIM == 2
-
-
-        !--------------------------------------------
-        ! Call DFUN re-initialization routine for 2D:
-        !--------------------------------------------
-        lsDT = MIN(10.0*dt,0.001)
-        minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.)
-        if (lb .eq. 1 .AND. ins_meshMe .eq. 0) then
-           print*,"Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
-        end if
-
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-
-        call mph_KPDlsRedistance(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:),  &
-                          faceyData(VELC_FACE_VAR,:,:,:),  &
-                          del(DIR_X),del(DIR_Y),  &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          solnData(AAJUNK_VAR,:,:,:), lsDT, blockID, minCellDiag)
-
-#endif
-
-        ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-#if NDIM ==3
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
-     enddo    !do lb = 1,blockCount
-
-    !*********************************************************************************************************
-    !-kpd - Fill distance function guard cells after each re-initialization to communicate updates
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-    interp_mask_work= intval;
-#endif
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-    !*********************************************************************************************************
-
-      lsT = lsT + lsDT
-
-   end do  ! End do: ii=1,inls
-           !==================
-
-   end if  ! End if: dr_nstep = 1
-           !=====================
-
-!************************************************************************************************************
-!************************************************************************************************************
-!************************************************************************************************************
-!************************************************************************************************************
-!************************************************************************************************************
-!************************************************************************************************************
-
-    !-----------------------------------------------------
-    !- kpd - Loop through current block for curvature 2dA
-    !-----------------------------------------------------
-
-    do lb = 1,blockCount
-     blockID = blockList(lb)
-!    do lb = 1,count
-!     blockID = listofBlocks(lb)
-
-     !----------------------------------------------------------
-     !- kpd - Get Block Information...
-     !----------------------------------------------------------
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     call Grid_getBlkBoundBox(blockId,boundBox)
-     bsize(:) = boundBox(2,:) - boundBox(1,:)
-     call Grid_getBlkCenterCoords(blockId,coord)
-
-     ! Get block's dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get block's internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to block's center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-     !----------------------------------------------------------
-
-     !----------------------------------------------------------
-     !!- kpd - Screen output for AMR testing
-     !if (ins_nstep .eq. 1)print*,"KPD ins_ab2rk3 bID=",blockID,"blockCount=",blockCount,coord(1),coord(2),coord(3)
-     if (ins_nstep .eq. 1)print*,"KPD ins_ab2rk3 bID=",blockID,coord(1),coord(2),coord(3)
-     !----------------------------------------------------------
-
-#if NDIM == 2
-
-     !----------------------------------------------------------
-     !- kpd - Call 2-D curvature Routine:
-     !----------------------------------------------------------
-     call mph_KPDcurvature2DAB(solnData(DFUN_VAR,:,:,:),               &
-                           solnData(CURV_VAR,:,:,:),                   &
-                           facexData(RH1F_FACE_VAR,:,:,:),             &
-                           facexData(RH2F_FACE_VAR,:,:,:),             &
-                           faceyData(RH1F_FACE_VAR,:,:,:),             &
-                           faceyData(RH2F_FACE_VAR,:,:,:),             &
-                           solnData(PFUN_VAR,:,:,:),                   &
-                           solnData(SIGP_VAR,:,:,:),                   &
-                           facexData(SIGM_FACE_VAR,:,:,:),             &
-                           faceyData(SIGM_FACE_VAR,:,:,:),             &
-                           del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2,    &
-                           mph_sten,mph_crmx,mph_crmn,                 &
-                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                           solnData(VISC_VAR,:,:,:), mph_vis1,mph_vis2)!,blockID )
-     !------------------------------------------------------------------
-
-#elif NDIM ==3
-
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-        !----------------------------------------------------------
-        !- kpd - Call curvature3DAB Routine to compute curvature,
-        !           phase function, and face densities:
-        !----------------------------------------------------------
-        call mph_KPDcurvature3DAB(solnData(DFUN_VAR,:,:,:),            &
-                           solnData(CURV_VAR,:,:,:),                   &
-                           del(DIR_X),del(DIR_Y), del(DIR_Z),          &
-                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS), &
-                           facexData(RH1F_FACE_VAR,:,:,:),             &
-                           facexData(RH2F_FACE_VAR,:,:,:),             &
-                           faceyData(RH1F_FACE_VAR,:,:,:),             &
-                           faceyData(RH2F_FACE_VAR,:,:,:),             &
-                           facezData(RH1F_FACE_VAR,:,:,:),             &
-                           facezData(RH2F_FACE_VAR,:,:,:),             &
-                           solnData(PFUN_VAR,:,:,:),                   &
-                           mph_rho1,mph_rho2,                          &
-                           solnData(VISC_VAR,:,:,:), mph_vis1,mph_vis2 )
-        !----------------------------------------------------------
-
-#endif
-
-     !-----------------------------------------------
-     ! Release pointers:
-     !-----------------------------------------------
-     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-#if NDIM ==3
-     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
-     !-----------------------------------------------
-
-    enddo
-
-  !--------------------------------------------------------------------------
-  !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.
-  ! -------------------------------------------------------------------------
-  gcMask = .FALSE.
-  gcMask(PFUN_VAR) = .TRUE.                                ! Phase Function
-  gcMask(CURV_VAR) = .TRUE.                                ! Curvature
-  gcMask(VISC_VAR) = .TRUE.                                ! Viscosity
-  gcMask(NUNK_VARS+RH1F_FACE_VAR) = .TRUE.                 ! rho1x
-  gcMask(NUNK_VARS+1*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1y
-  gcMask(NUNK_VARS+RH2F_FACE_VAR) = .TRUE.                 ! rho2x
-  gcMask(NUNK_VARS+1*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2y
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
-  gcMask(NUNK_VARS+2*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2z
-#endif
-#ifdef FLASH_GRID_PARAMESH
-  intval = 1
-  !intval = 2
-  interp_mask_unk = intval;   interp_mask_unk_res = intval;
-  interp_mask_work= intval;
-  interp_mask_facex = intval; interp_mask_facex_res = intval;
-  interp_mask_facey = intval; interp_mask_facey_res = intval;
-  interp_mask_facez = intval; interp_mask_facez_res = intval;
-#endif
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-       !maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-    !-----------------------------------------------------
-    !- kpd - Loop through current block for curvature 2dC
-    !-----------------------------------------------------
-    do lb = 1,blockCount
-     blockID = blockList(lb)
-!    do lb = 1,count
-!     blockID = listofBlocks(lb)
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-     call Grid_getBlkPtr(blockID,solnData,CENTER)
-     call Grid_getBlkPtr(blockID,facexData,FACEX)
-     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-
-#if NDIM == 2
-
-     !----------------------------------------------------------
-     !- kpd - Call 2-D curvature Routine:
-     !----------------------------------------------------------
-     call mph_KPDcurvature2DC(solnData(DFUN_VAR,:,:,:), &
-                          solnData(CURV_VAR,:,:,:), &
-                          facexData(RH1F_FACE_VAR,:,:,:), &
-                          facexData(RH2F_FACE_VAR,:,:,:), &
-                          faceyData(RH1F_FACE_VAR,:,:,:), &
-                          faceyData(RH2F_FACE_VAR,:,:,:), &
-                          solnData(PFUN_VAR,:,:,:), &
-                          solnData(SIGP_VAR,:,:,:), &
-                          facexData(SIGM_FACE_VAR,:,:,:), &
-                          faceyData(SIGM_FACE_VAR,:,:,:), &
-                          del(DIR_X),del(DIR_Y),mph_rho1,mph_rho2, &
-                          mph_sten,mph_crmx,mph_crmn, &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS))!,blockID)
-
-#elif NDIM == 3 
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-        !----------------------------------------------------------
-        !- kpd - Call curvature3DC Routine to compute interfacial
-        !           densities, and momentum/poisson jumps:
-        !----------------------------------------------------------
-        call mph_KPDcurvature3DC( solnData(DFUN_VAR,:,:,:)  , &
-                           solnData(CURV_VAR,:,:,:)         , &
-                           facexData(RH1F_FACE_VAR,:,:,:)   , &
-                           facexData(RH2F_FACE_VAR,:,:,:)   , &
-                           faceyData(RH1F_FACE_VAR,:,:,:)   , &
-                           faceyData(RH2F_FACE_VAR,:,:,:)   , &
-                           solnData(PFUN_VAR,:,:,:)         , &
-                           solnData(SIGP_VAR,:,:,:)         , &
-                           facexData(SIGM_FACE_VAR,:,:,:)   , &
-                           faceyData(SIGM_FACE_VAR,:,:,:)   , &
-                           del(DIR_X),del(DIR_Y)            , &
-                           mph_rho1,mph_rho2                , &
-                           mph_sten                         , &
-                           blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                           blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
-                           del(DIR_Z)                       , &
-                           blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
-                           facezData(RH1F_FACE_VAR,:,:,:)   , &
-                           facezData(RH2F_FACE_VAR,:,:,:)   , &
-                           facezData(SIGM_FACE_VAR,:,:,:)  )
-
-#endif
-     !-----------------------------------------------
-     ! Release pointers:
-     !-----------------------------------------------
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-#if NDIM ==3
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
-     !-----------------------------------------------
-
-    enddo
-
-  !--------------------------------------------------------------------------
-  !- kpd - Implemented for variable density. Fill multiphase Guard Cell data.
-  ! -------------------------------------------------------------------------
-  gcMask = .FALSE.
-  gcMask(NUNK_VARS+RH1F_FACE_VAR) = .TRUE.                 ! rho1x
-  gcMask(NUNK_VARS+1*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1y
-  gcMask(NUNK_VARS+RH2F_FACE_VAR) = .TRUE.                 ! rho2x
-  gcMask(NUNK_VARS+1*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2y
-  gcMask(SIGP_VAR) = .TRUE.                                ! Poisson Jump
-  gcMask(NUNK_VARS+SIGM_FACE_VAR) = .TRUE.                 ! Momentum Jump X
-  gcMask(NUNK_VARS+1*NFACE_VARS+SIGM_FACE_VAR) = .TRUE.    ! Momentum Jump Y
-#if NDIM == 3
-  gcMask(NUNK_VARS+2*NFACE_VARS+RH1F_FACE_VAR) = .TRUE.    ! rho1z
-  gcMask(NUNK_VARS+2*NFACE_VARS+RH2F_FACE_VAR) = .TRUE.    ! rho2z
-  gcMask(NUNK_VARS+2*NFACE_VARS+SIGM_FACE_VAR) = .TRUE.    ! Momentum Jump Z
-#endif
-#ifdef FLASH_GRID_PARAMESH
-  intval = 1
-  !intval = 2
-  interp_mask_unk = intval;   interp_mask_unk_res = intval;
-  interp_mask_work= intval;
-  interp_mask_facex = intval; interp_mask_facex_res = intval;
-  interp_mask_facey = intval; interp_mask_facey_res = intval;
-  interp_mask_facez = intval; interp_mask_facez_res = intval;
-#endif
-
-  !print*,"KPD - Filling Density Guard Cells."
-  call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
-  !----------------------------------------------------------------------
-
-!!***********************************************************************************************
-!!***********************************************************************************************
-!!***********************************************************************************************
-
-!***********************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
-  ! FIX FLUXES FOR RH1F: (Only for AMR grids)
-  ! --- ------ --- -----
-#ifdef FLASH_GRID_PARAMESH
-  ! Fix fluxes at block boundaries
-  call ins_fluxfixRho1(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
-                   blockCount,blockList)
-#endif
-!*************************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
-
-!***********************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
-  ! FIX FLUXES FOR RH2F: (Only for AMR grids)
-  ! --- ------ --- -----
-#ifdef FLASH_GRID_PARAMESH
-  ! Fix fluxes at block boundaries
-  call ins_fluxfixRho2(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
-                   blockCount,blockList)
-#endif
-!*************************************************************************************************
-!*************************************************************************************************
-!*************************************************************************************************
-
-!!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-!
-!    !KPD Density Clipping for Unbounded Interpolations... 
-!    !====================================================
-!    do lb = 1,count
-!     blockID = listofBlocks(lb)
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!
-!              if ((facexData(RH1F_FACE_VAR,i,j,k)+facexData(RH2F_FACE_VAR,i,j,k)) .lt. 1.) then 
-!                 facexData(RH1F_FACE_VAR,i,j,k) = 0. 
-!                 facexData(RH2F_FACE_VAR,i,j,k) = 1.
-!              else if((facexData(RH1F_FACE_VAR,i,j,k)+facexData(RH2F_FACE_VAR,i,j,k)) .gt. 1000.) then
-!                 facexData(RH1F_FACE_VAR,i,j,k) = 1000.
-!                 facexData(RH2F_FACE_VAR,i,j,k) = 0.
-!              end if
-!
-!              if ((faceyData(RH1F_FACE_VAR,i,j,k)+faceyData(RH2F_FACE_VAR,i,j,k)) .lt. 1.) then 
-!                   faceyData(RH1F_FACE_VAR,i,j,k) = 0. 
-!                   faceyData(RH2F_FACE_VAR,i,j,k) = 1.
-!              else if((faceyData(RH1F_FACE_VAR,i,j,k)+faceyData(RH2F_FACE_VAR,i,j,k)) .gt. 1000.) then
-!                   faceyData(RH1F_FACE_VAR,i,j,k) = 1000.
-!                   faceyData(RH2F_FACE_VAR,i,j,k) = 0.
-!              end if
-!
-!#if NDIM==3
-!              if ((facezData(RH1F_FACE_VAR,i,j,k)+facezData(RH2F_FACE_VAR,i,j,k)) .lt. 1.) then 
-!                   facezData(RH1F_FACE_VAR,i,j,k) = 0. 
-!                   facezData(RH2F_FACE_VAR,i,j,k) = 1.
-!              else if((facezData(RH1F_FACE_VAR,i,j,k)+facezData(RH2F_FACE_VAR,i,j,k)) .gt. 1000.) then
-!                   facezData(RH1F_FACE_VAR,i,j,k) = 1000.
-!                   facezData(RH2F_FACE_VAR,i,j,k) = 0.
-!              end if
-!#endif
-!
-!              if      (solnData(VISC_VAR,i,j,k) .lt. 0. ) then
-!                 solnData(VISC_VAR,i,j,k) = 0.
-!              else if (solnData(VISC_VAR,i,j,k) .gt. 1. ) then
-!                 solnData(VISC_VAR,i,j,k) = 1.
-!              end if
-!
-!           end do
-!        end do
-!     end do
-!
-!
-!     !************************************************************************************
-!     !KPD - DENSITY INTERFACE MATCHING SETUP FOR LOW GC's...
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC/2
-!              facexData(MGW8_FACE_VAR,i,j,k) = facexData(RH1F_FACE_VAR,GRID_ILO,j,k) + &
-!                                               facexData(RH2F_FACE_VAR,GRID_ILO,j,k) 
-!           end do
-!        end do
-!     end do
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC/2
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!              faceyData(MGW8_FACE_VAR,i,j,k) = faceyData(RH1F_FACE_VAR,i,GRID_JLO,k) + &
-!                                               faceyData(RH2F_FACE_VAR,i,GRID_JLO,k) 
-!           end do
-!        end do
-!     end do
-!#if NDIM==3
-!     do k=GRID_KLO_GC,GRID_KHI_GC/2
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!              facezData(MGW8_FACE_VAR,i,j,k) = facezData(RH1F_FACE_VAR,i,j,GRID_KLO) + &
-!                                               facezData(RH2F_FACE_VAR,i,j,GRID_KLO)
-!           end do
-!        end do
-!     end do
-!#endif
-!
-!     !KPD - DENSITY INTERFACE MATCHING SETUP FOR HIGH GC's...
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_IHI_GC/2+1,GRID_IHI_GC
-!              facexData(MGW8_FACE_VAR,i,j,k) = facexData(RH1F_FACE_VAR,GRID_IHI+1,j,k) + &
-!                                               facexData(RH2F_FACE_VAR,GRID_IHI+1,j,k) 
-!           end do
-!        end do
-!     end do
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JHI_GC/2+1,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!              faceyData(MGW8_FACE_VAR,i,j,k) = faceyData(RH1F_FACE_VAR,i,GRID_JHI+1,k) + &
-!                                               faceyData(RH2F_FACE_VAR,i,GRID_JHI+1,k) 
-!           end do
-!        end do
-!     end do
-!#if NDIM==3
-!     do k=GRID_KHI_GC/2+1,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!              facezData(MGW8_FACE_VAR,i,j,k) = facezData(RH1F_FACE_VAR,i,j,GRID_KHI+1) + &
-!                                               facezData(RH2F_FACE_VAR,i,j,GRID_KHI+1)
-!           end do
-!        end do
-!     end do
-!#endif
-!
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!   end do
-!
-!!################################################+++++++++++++++++++++++++++++
-!  !***********************************************************************************************
-!    call RuntimeParameters_get('mgrid_solveLevelKPD', mgrid_solveLevelKPD)
-!
-!    nodetype_perm(:) = nodetype(:)
-!
-!    do lb = 1,count
-!     blockID = listofBlocks(lb)
-!
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!
-!     if (lrefine(lb) == mgrid_solveLevelKPD) then
-!        nodetype(lb) = 1
-!     else
-!        nodetype(lb) = 2
-!     end if
-!
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!
-!   end do
-!   !***********************************************************************************************
-!
-!   !***********************************************************************************************
-!   gcMask = .FALSE.
-!   gcMask(NUNK_VARS+MGW8_FACE_VAR) = .TRUE.                 ! X-dens
-!   gcMask(NUNK_VARS+1*NFACE_VARS+MGW8_FACE_VAR) = .TRUE.    ! Y-dens
-!#if NDIM == 3
-!   gcMask(NUNK_VARS+2*NFACE_VARS+MGW8_FACE_VAR) = .TRUE.    ! Z-dens
-!#endif
-!   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
-!        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=LEAF)
-!   !***********************************************************************************************
-!
-!   !***********************************************************************************************
-!   do lb = 1,count
-!     blockID = listofBlocks(lb)
-!
-!     if (lrefine(lb) == mgrid_solveLevelKPD) then
-!
-!     ! Get blocks BCs:
-!     call Grid_getBlkBC(blockID,faces,onBoundary)
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_getBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!
-!     !KPD - X-Dir Sweep for Density Mismatch
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!
-!           !KPD - Low-Side
-!           if ( (ABS(facexData(MGW8_FACE_VAR,1,j,k) - facexData(MGW8_FACE_VAR,NGUARD+2,j,k)) .GT. 1e-8 ) .AND. &
-!                (onBoundary(LOW,IAXIS) .eq. NOT_BOUNDARY) ) then
-!!if (blockID .eq. 2 .AND. j.eq.12) then
-!!              facexData(RH1F_FACE_VAR,NGUARD+1,j,k) = 0.0
-!!              facexData(RH2F_FACE_VAR,NGUARD+1,j,k) = (facexData(MGW8_FACE_VAR,1,j,k) + &
-!!                                                       facexData(MGW8_FACE_VAR,NGUARD+2,j,k))/2.
-!!   print*,"INS X MisMatch Low 2, 4",facexData(MGW8_FACE_VAR,1,j,k),facexData(MGW8_FACE_VAR,NGUARD+2,j,k)
-!!else
-!              facexData(RH1F_FACE_VAR,NGUARD+1,j,k) = 0.0
-!              facexData(RH2F_FACE_VAR,NGUARD+1,j,k) = (facexData(MGW8_FACE_VAR,1,j,k) + &
-!                                                       facexData(MGW8_FACE_VAR,NGUARD+2,j,k))/2.
-!              !print*,"INS X MisMatch Low ",blockID,NGUARD+1,j,k,facexData(MGW8_FACE_VAR,1,j,k),facexData(MGW8_FACE_VAR,NGUARD+2,j,k)
-!!end if
-!           end if
-!
-!           !KPD - High-Side
-!           if ((ABS(facexData(MGW8_FACE_VAR,GRID_IHI_GC,j,k) - facexData(MGW8_FACE_VAR,GRID_IHI-2,j,k)) .GT. 1e-8 ) .AND. &
-!              (onBoundary(HIGH,IAXIS) .eq. NOT_BOUNDARY) ) then
-!!if (blockID .eq. 1 .AND. j.eq.12) then
-!!              facexData(RH1F_FACE_VAR,GRID_IHI+1,j,k) = 0.0
-!!              facexData(RH2F_FACE_VAR,GRID_IHI+1,j,k) = (facexData(MGW8_FACE_VAR,GRID_IHI_GC,j,k) + &
-!!                                                         facexData(MGW8_FACE_VAR,GRID_IHI-2 ,j,k))/2.
-!!  print*,"INS X MisMatch High 1,20",facexData(MGW8_FACE_VAR,GRID_IHI_GC,j,k),facexData(MGW8_FACE_VAR,GRID_IHI-2,j,k)
-!!else
-!              facexData(RH1F_FACE_VAR,GRID_IHI+1,j,k) = 0.0
-!              facexData(RH2F_FACE_VAR,GRID_IHI+1,j,k) = (facexData(MGW8_FACE_VAR,GRID_IHI_GC,j,k) + &
-!                                                         facexData(MGW8_FACE_VAR,GRID_IHI-2 ,j,k))/2.
-!              !print*,"INS X MisMatch High",blockID,GRID_IHI+1,j,k,facexData(MGW8_FACE_VAR,GRID_IHI_GC,j,k),facexData(MGW8_FACE_VAR,GRID_IHI-2,j,k)
-!!end if
-!           end if
-!        end do
-!     end do
-!
-!
-!     !KPD - Y-Dir Sweep for Density Mismatch
-!     do k=GRID_KLO_GC,GRID_KHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!
-!           !KPD - Low-Side
-!           if ((ABS(faceyData(MGW8_FACE_VAR,i,1,k) - faceyData(MGW8_FACE_VAR,i,NGUARD+2,k)) .GT. 1e-8) .AND. &
-!               (onBoundary(LOW,JAXIS) .eq. NOT_BOUNDARY) ) then
-!              faceyData(RH1F_FACE_VAR,i,NGUARD+1,k) = 0.0
-!              faceyData(RH2F_FACE_VAR,i,NGUARD+1,k) = (faceyData(MGW8_FACE_VAR,i,1,k) + &
-!                                                       faceyData(MGW8_FACE_VAR,i,NGUARD+2,k))/2.
-!              !print*,"INS Y MisMatch Low ",blockID,i,NGUARD+1,k,faceyData(MGW8_FACE_VAR,i,1,k),faceyData(MGW8_FACE_VAR,i,NGUARD+2,k)
-!           end if
-!
-!           !KPD - High-Side
-!           if ((ABS(faceyData(MGW8_FACE_VAR,i,GRID_JHI_GC,k) - faceyData(MGW8_FACE_VAR,i,GRID_JHI-2,k)) .GT. 1e-8 ) .AND. &
-!               (onBoundary(HIGH,JAXIS) .eq. NOT_BOUNDARY) ) then
-!              faceyData(RH1F_FACE_VAR,i,GRID_JHI+1,k) = 0.0
-!              faceyData(RH2F_FACE_VAR,i,GRID_JHI+1,k) = (faceyData(MGW8_FACE_VAR,i,GRID_JHI_GC,k) + &
-!                                                         faceyData(MGW8_FACE_VAR,i,GRID_JHI-2 ,k))/2.
-!              !print*,"INS Y MisMatch High",blockID,i,GRID_JHI+1,k,faceyData(MGW8_FACE_VAR,i,GRID_JHI_GC,k),faceyData(MGW8_FACE_VAR,i,GRID_JHI-2,k)
-!           end if
-!           end do
-!     end do
-!
-!#if NDIM == 3
-!     !KPD - Z-Dir Sweep for Density Mismatch
-!        do j=GRID_JLO_GC,GRID_JHI_GC
-!           do i=GRID_ILO_GC,GRID_IHI_GC
-!
-!           !KPD - Low-Side
-!           if ((ABS(facezData(MGW8_FACE_VAR,i,j,1) - facezData(MGW8_FACE_VAR,i,j,NGUARD+2)) .GT. 1e-8) .AND. &
-!               (onBoundary(LOW,KAXIS) .eq. NOT_BOUNDARY) ) then
-!              facezData(RH1F_FACE_VAR,i,j,NGUARD+1) = 0. 
-!              facezData(RH2F_FACE_VAR,i,j,NGUARD+1) = (facezData(MGW8_FACE_VAR,i,j,1) + &
-!                                                       facezData(MGW8_FACE_VAR,i,j,NGUARD+2))/2.
-!              print*,"INS Z MisMatch Low ",blockID,i,j,NGUARD+1,facezData(MGW8_FACE_VAR,i,j,1),facezData(MGW8_FACE_VAR,i,j,NGUARD+2)
-!           end if
-!
-!           !KPD - High-Side
-!           if ((ABS(facezData(MGW8_FACE_VAR,i,j,GRID_KHI_GC) - facezData(MGW8_FACE_VAR,i,j,GRID_KHI-2)) .GT. 1e-8 ) .AND. &
-!               (onBoundary(HIGH,KAXIS) .eq. NOT_BOUNDARY) ) then
-!              facezData(RH1F_FACE_VAR,i,j,GRID_KHI+1) = 0. 
-!              facezData(RH2F_FACE_VAR,i,j,GRID_KHI+1) = (facezData(MGW8_FACE_VAR,i,j,GRID_KHI_GC) + &
-!                                                         facezData(MGW8_FACE_VAR,i,j,GRID_KHI-2 ))/2.
-!              !print*,"INS Z MisMatch High",blockID,i,j,GRID_KHI+1,facezData(MGW8_FACE_VAR,i,j,GRID_KHI_GC),facezData(MGW8_FACE_VAR,i,j,GRID_KHI-2)
-!           end if
-!           end do
-!        end do
-!#endif
-!     !**********************************************************************************************************
-!
-!     end if
-!
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!#if NDIM==3
-!     call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-!#endif
-!
-!  end do
-!
-!  !***********************************************************************************************
-!   nodetype(:) = nodetype_perm(:)
-!  !***********************************************************************************************
-!
-!!################################################+++++++++++++++++++++++++++++
-!
-!!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-!!***********************************************************************************************
-!!***********************************************************************************************
-!!***********************************************************************************************
-
-
-!!$  CALL SYSTEM_CLOCK(TA(1),count_rate)  
-
   ! COMPUTE RIGHT HAND SIDE AND PREDICTOR STEP:
   ! ------- ----- ---- ---- --- --------- ----
   do lb = 1,blockCount
@@ -1171,8 +453,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-     !- kpd - For Predictor Step (newu, newv & neww are RHS)
-     call ins_rhs3d_VD (  facexData(VELC_FACE_VAR,:,:,:),            &
+     !- avd - For Predictor Step (newu, newv & neww are RHS)
+     call ins_rhs3d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
                        faceyData(VELC_FACE_VAR,:,:,:),            &
                        facezData(VELC_FACE_VAR,:,:,:),            &
                        solnData(TVIS_VAR,:,:,:),                  &
@@ -1188,7 +470,7 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
                        faceyData(RH2F_FACE_VAR,:,:,:),            &
                        facezData(RH1F_FACE_VAR,:,:,:),            &
                        facezData(RH2F_FACE_VAR,:,:,:),            &
-                       ins_gravX, ins_gravY, ins_gravZ )
+                       ins_gravX, ins_gravY, ins_gravZ)
 
      !- kpd - I added this, still a ???
      call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
@@ -1207,18 +489,19 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
         call Driver_abortFlash('Cell Spacing Not Equal in X,Y,Z... ins_ab2rk3.f90')
      end if
 
-     call ins_rhs2d_VD(  facexData(VELC_FACE_VAR,:,:,:),            &
+     ! ML - GFM for velocity jump condition
+     call ins_rhs2d_weno3(  facexData(VELC_FACE_VAR,:,:,:),            &
                       faceyData(VELC_FACE_VAR,:,:,:),            &
                       ins_invRe,                                 &
                       blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
                       blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
                       del(DIR_X),del(DIR_Y),newu,newv, &
-                      solnData(VISC_VAR,:,:,:), &
+                     solnData(VISC_VAR,:,:,:), &
                       facexData(RH1F_FACE_VAR,:,:,:),            &
                       facexData(RH2F_FACE_VAR,:,:,:),            &
                       faceyData(RH1F_FACE_VAR,:,:,:),            &
                       faceyData(RH2F_FACE_VAR,:,:,:),            &
-                      ins_gravX, ins_gravY )
+                      ins_gravX, ins_gravY)
      
 #endif
 
@@ -1292,11 +575,15 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 !*************************************************************************************************
 
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
+  !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout before ref=',ins_Qout
 
   ! Rescale Velocities at outflows for overall conservation: 
-  call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout)
+  !call ins_rescaleVelout(  blockCount, blockList, ins_Qin, ins_Qout) !- ML: commented out due to error with neumann_ins bc?
+
+  !ib_temp_flg = .false.
+  !ib_vel_flg  = .true.
+  !ib_dfun_flg = .false.
 
   CALL SYSTEM_CLOCK(TAIB(1),count_rateIB)
   ! Force Immersed Boundaries:
@@ -1306,13 +593,12 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
   if (ins_meshMe .eq. MASTER_PE)  write(*,*) 'Total IB Time =',ETIB
  
   ! Compute outflow mass volume ratio: (computed on NEUMANN_INS, OUTFLOW_INS)
-  call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
+  !call ins_computeQinout( blockCount, blockList, .false., ins_Qout)
   !if (ins_meshMe .eq. 0) write(*,*) 'Qout after ref=',ins_Qout
 
 !*************************************************************************************************
 !*************************************************************************************************
 !*************************************************************************************************
-
   ! DIVERGENCE OF USTAR:
   ! ---------- -- -----
   do lb = 1,blockCount
@@ -1334,6 +620,8 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 #endif
      call Grid_getBlkPtr(blockID,facezData,FACEZ)    !kpd - I moved this
      ! compute divergence of intermediate velocities
+
+     !-avd-compute divergence for phase problems
      call ins_divergence_VD(facexData(VELC_FACE_VAR,:,:,:),&
                          faceyData(VELC_FACE_VAR,:,:,:),&
                          facezData(VELC_FACE_VAR,:,:,:),&
@@ -1341,10 +629,9 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
              blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
              blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
                        del(DIR_X),del(DIR_Y),del(DIR_Z),&
-                       solnData(DUST_VAR,:,:,:) )
-
-
+                       solnData(DUST_VAR,:,:,:))
      ! Poisson RHS source vector
+
      solnData(DUST_VAR,                                   &
           blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
           blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
@@ -1370,90 +657,12 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
 
   enddo
 
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-!KPD File Output for Testing ONLY
-!*********************************************************************************************
-!
-!    open(unit=123, file='densityWrite.txt',ACTION="write",STATUS="unknown")
-!
-!    do lb = 1,count
-!     blockID = listofBlocks(lb)
-!
-!     ! Point to blocks center and face vars:
-!     call Grid_getBlkPtr(blockID,solnData,CENTER)
-!     call Grid_getBlkPtr(blockID,facexData,FACEX)
-!     call Grid_getBlkPtr(blockID,faceyData,FACEY)
-!
-!     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!     call Grid_getBlkBoundBox(blockId,boundBox)
-!     bsize(:) = boundBox(2,:) - boundBox(1,:)
-!     call Grid_getBlkCenterCoords(blockId,coord)
-!     call Grid_getDeltas(blockID,del)
-!#if NDIM ==3
-!     do k=4,20
-!#else
-!     do k=1,1
-!#endif
-!     do j=4,20
-!        do i=4,20
-!
-!           xcell = coord(IAXIS) - bsize(IAXIS)/2.0 +   &
-!                   real(i - NGUARD - 1)*del(IAXIS) +   &
-!                   0.5*del(IAXIS)
-!
-!           ycell  = coord(JAXIS) - bsize(JAXIS)/2.0 +  &
-!                   real(j - NGUARD - 1)*del(JAXIS)  +  &
-!                   0.5*del(JAXIS)
-!#if NDIM ==3
-!           zcell  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
-!                   real(k - NGUARD - 1)*del(KAXIS)  +  &
-!                   0.5*del(KAXIS)
-!#else
-!           zcell = 0.0
-!#endif
-!           xcellX = xcell - 0.5*del(IAXIS)
-!           ycellX = ycell
-!           xcellY = xcell
-!           ycellY = ycell - 0.5*del(JAXIS)
-!
-!           if (lrefine(lb) .eq. 1) then
-!           !if (lrefine(lb) .eq. 2) then
-!           !if (lrefine(lb) .eq. 3) then
-!           write(123,"(4I5,6F15.6)") lb,i,j,k,xcell,ycell,zcell, &
-!                                     facexData(RH1F_FACE_VAR,i,j,1)+facexData(RH2F_FACE_VAR,i,j,1), &
-!                                     faceyData(RH1F_FACE_VAR,i,j,1)+faceyData(RH2F_FACE_VAR,i,j,1), &
-!                                     solnData(DUST_VAR,i,j,1)
-!           end if
-!
-!        end do
-!     end do
-!     end do
-!     !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-!
-!
-!     ! Release pointers:
-!     call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-!     call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-!     call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-!
-!   end do
-!
-!*********************************************************************************************
-!*********************************************************************************************
-!*********************************************************************************************
-!*********************************************************************************************
-
-!  call gr_findMean(DUST_VAR,2,.false.,meanPres)
-!  if (ins_meshMe .eq. MASTER_PE) write(*,*) 'Mean Div Ustar A=',meanPres*(dt*ins_alfa)
-
-
   ! SOLUTION OF POISSON EQUATION FOR PRESSURE:
   ! -------- -- ------- -------- --- --------
   call cpu_time(t_startP)
   poisfact = 1.0 
-  call Grid_solvePoisson (DELP_VAR, DUST_VAR, bc_types, bc_values, poisfact) 
+  call Grid_solvePoisson (DELP_VAR, DUST_VAR, bc_types, bc_values, poisfact)
+
   call cpu_time(t_stopP)
 if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
 
@@ -1509,6 +718,7 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
      ! Get Index Limits:
      call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
 
+      
      datasize(1:MDIM)=blkLimitsGC(HIGH,1:MDIM)-blkLimitsGC(LOW,1:MDIM)+1   
 
      ! Positions in face arrays where flux vars have been stored
@@ -1662,9 +872,6 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
      !- kpd - The final pressure update (For pressure correction ONLY!)
      !        When pressure correction method is not used ins_prescoeff should
      !           be =0.0 and PRES_VAR = DELP_VAR
-     solnData(PRES_VAR,:,:,:) = ins_prescoeff*solnData(PRES_VAR,:,:,:) + &
-                                solnData(DELP_VAR,:,:,:) 
-
 
      ! Release pointers:
      call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -1693,342 +900,10 @@ if (ins_meshMe .eq. 0) print*,"Total Poisson Solve Time: :",t_stopP-t_startP
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)         
 
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-!!$  ! FIX FLUXES FOR UFINAL: (Only for AMR grids, needed when using 
-!!$  ! boundary restriction of order > 1, and force_consistency_at_srl_interfaces=True)
-!!$  ! --- ------ --- -----
-!!$#ifdef FLASH_GRID_PARAMESH
-!!$  if (force_consistency) then
-!!$  ! Fix fluxes at block boundaries
-!!$  call ins_fluxfix(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
-!!$                   blockCount,blockList)
-!!$  endif
-!!$#endif
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-    call cpu_time(t_startMP2)
-
-    !------------------------------------------------------------------
-    !- kpd - Advect the multiphase distance function using WENO3 scheme
-    !------------------------------------------------------------------
-
-    volSum = 0.0
-    volSumAll = 0.0
-
- !do ii=1,2
-  do ii=1,1
-
-    do lb = 1,blockCount
-     blockID = blockList(lb)
-    !do lb = 1,blockList(blockCount)
-    ! blockID = lb
-
-     ! Get blocks dx, dy ,dz:
-     call Grid_getDeltas(blockID,del)
-
-     ! Get Blocks internal limits indexes:
-     call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-     ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-#if NDIM == 3
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-  
-        !-----------------------------------------------------------------
-        !Store Phi at previous time step for RK2
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-        !-----------------------------------------------------------------
-
-        !------------------------------------
-        !! Call DFUN advection routine for 3D:
-        !------------------------------------
-        call mph_KPDadvectWENO3_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
-                          ins_alfa*dt, &
-                          del(DIR_X), &
-                          del(DIR_Y), &
-                          del(DIR_Z), &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),blockID)
-
-        !KPD - Compute the Bubble Volume
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
-                 if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
-                   volSum = volSum + (del(DIR_X) * del(DIR_Y) * del(DIR_Z))
-                 end if
-              end do
-           end do
-        end do
-
-#elif NDIM == 2
-
-        !-----------------------------------------------------------------
-        !Store Phi at previous time step for RK2
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-        !-----------------------------------------------------------------
-
-        !------------------------------------
-        ! Call DFUN advection routine for 2D:
-        !------------------------------------
-        call mph_KPDadvectWENO3(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          ins_alfa*dt, &
-                          del(DIR_X), &
-                          del(DIR_Y), &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),blockID)
-
-        !KPD - Compute the Bubble Volume
-        do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
-           do j=blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS)
-              if (solnData(DFUN_VAR,i,j,1) .gt. 0) then
-                volSum = volSum + (del(DIR_X) * del(DIR_Y)) 
-              end if
-           end do
-        end do
-
-#endif
-
-     ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-#if NDIM ==3
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
-    enddo
-
-    call MPI_Allreduce(volSum, volSumAll, 1, FLASH_REAL,&
-                       MPI_SUM, MPI_COMM_WORLD, ierr)
-    if (ins_meshMe .eq. 0) print*,"----------------------------------------"
-    if (ins_meshMe .eq. 0) print*,"Total Liquid Volume: ",volSumAll
-    if (ins_meshMe .eq. 0) print*,"----------------------------------------"
-
-    !********************************************************************************************************
-    !-kpd - Fill distance function guard cells before re-initialization to communicate updates
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-    gcMask(AAJUNK_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-    interp_mask_work = intval;
-#endif
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-    !********************************************************************************************************
-
-    if (ii.eq.2) then
-       ! Point to blocks center and face vars:
-       call Grid_getBlkPtr(blockID,solnData,CENTER)
-
-       solnData(DFUN_VAR,:,:,:) = 0.5* (solnData(AAJUNK_VAR,:,:,:) + solnData(DFUN_VAR,:,:,:))       
-
-
-       ! Release pointers:
-       call Grid_releaseBlkPtr(blockID,solnData,CENTER)        
-    end if
-
-  end do   !End ii RK loop
-
-
-    !********************************************************************************************************
-    !-kpd - Fill distance function guard cells before re-initialization to communicate updates
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-    interp_mask_work = intval;
-#endif
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-    !********************************************************************************************************
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-!if (ins_meshMe .eq. 0) print*,"Not filling DFUN GCs, usinf FluxFix"
-!
-!   ! FIX FLUXES FOR d(DFUN)/dxi :
-!#ifdef FLASH_GRID_UG
-!  ! ---------------------------------------------------------------------
-!#else
-!  ! fix fluxes at block boundaries
-!  ! fix dp gradient fluxes at block boundaries
-!  call ins_fluxfix_phi(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
-!                       DFUN_VAR,blockCount,blockList)
-!#endif
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-
-!************************************************************************************************************
-!************************************************************************************************************
-!************************************************************************************************************
-
-    call cpu_time(t_startMP2a)
-
-   do ii = 1,mph_lsit
-
-     !------------------------------
-     !- kpd - Level set redistancing 
-     !------------------------------
-
-     !lsDT = dt
-     lsT  = 0.0
-
-     do lb = 1,blockCount
-        blockID = blockList(lb)
-
-        ! Get blocks dx, dy ,dz:
-        call Grid_getDeltas(blockID,del)
-
-        ! Get Blocks internal limits indexes:
-        call Grid_getBlkIndexLimits(blockID,blkLimits,blkLimitsGC)
-
-        ! Point to blocks center and face vars:
-        call Grid_getBlkPtr(blockID,solnData,CENTER)
-        call Grid_getBlkPtr(blockID,facexData,FACEX)
-        call Grid_getBlkPtr(blockID,faceyData,FACEY)
-#if NDIM == 3
-        call Grid_getBlkPtr(blockID,facezData,FACEZ)
-
-        !--------------------------------------------
-        ! Call DFUN re-initialization routine for 3D:
-        !--------------------------------------------
-        lsDT = MIN(10.0*dt,0.001)
-        !minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.+del(DIR_Z)**2.)
-        minCellDiag = SQRT((SQRT(del(DIR_X)**2.+del(DIR_Y)**2.))**2.+del(DIR_Z)**2.)
-        if ( lb .eq. 1 .AND. ins_meshMe .eq. 0) then
-           print*,"Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
-        end if
-
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-
-        call mph_KPDlsRedistance_3D(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:), &
-                          faceyData(VELC_FACE_VAR,:,:,:), &
-                          facezData(VELC_FACE_VAR,:,:,:), &
-                          del(DIR_X),del(DIR_Y),del(DIR_Z),  &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS), &
-                          solnData(AAJUNK_VAR,:,:,:), lsDT, minCellDiag )
-
-#elif NDIM == 2
-
-        !--------------------------------------------
-        ! Call DFUN re-initialization routine for 2D:
-        !--------------------------------------------
-        lsDT = MIN(10.0*dt,0.005)
-        minCellDiag = SQRT(del(DIR_X)**2.+del(DIR_Y)**2.)
-        if ( lb .eq. 1 .AND. ins_meshMe .eq. 0) then
-           print*,"Level Set Initialization Iteration # ",ii,minCellDiag,lsDT
-        end if
-
-        if (ii.eq.1) solnData(AAJUNK_VAR,:,:,:) = solnData(DFUN_VAR,:,:,:)
-
-        call mph_KPDlsRedistance(solnData(DFUN_VAR,:,:,:), &
-                          facexData(VELC_FACE_VAR,:,:,:),  &
-                          faceyData(VELC_FACE_VAR,:,:,:),  &
-                          del(DIR_X),del(DIR_Y),  &
-                          blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS), &
-                          blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS), &
-                          solnData(AAJUNK_VAR,:,:,:), lsDT, blockID, minCellDiag)
-
-#endif
-
-        ! Release pointers:
-        call Grid_releaseBlkPtr(blockID,solnData,CENTER)
-        call Grid_releaseBlkPtr(blockID,facexData,FACEX)
-        call Grid_releaseBlkPtr(blockID,faceyData,FACEY)
-#if NDIM ==3
-        call Grid_releaseBlkPtr(blockID,facezData,FACEZ)
-#endif
-     enddo
-
-    !*********************************************************************************************************
-    !-kpd - Fill distance function guard cells after each re-initialization to communicate updates
-    gcMask = .FALSE.
-    gcMask(DFUN_VAR) = .TRUE.
-#ifdef FLASH_GRID_PARAMESH
-    !intval = 1
-    intval = 2
-    interp_mask_unk = intval;   interp_mask_unk_res = intval;
-#endif
-    call Grid_fillGuardCells(CENTER,ALLDIR,&
-       maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask)
-    !*********************************************************************************************************
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-!   ! FIX FLUXES FOR d(DFUN)/dxi :
-!#ifdef FLASH_GRID_UG
-!  ! ---------------------------------------------------------------------
-!#else
-!  ! fix fluxes at block boundaries
-!  ! fix dp gradient fluxes at block boundaries
-!  call ins_fluxfix_phi(NGUARD,nxc,nyc,nzc,nxc-1,nyc-1,nzc-1,&
-!                       DFUN_VAR,blockCount,blockList)
-!#endif
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-      lsT = lsT + lsDT
-
-   end do  ! End do: ii=1,lsit
-
-   call cpu_time(t_stopMP2)
-   if (ins_meshMe .eq. 0) print*,"Total Multiphase Time: ",t_stopMP2-t_startMP2,t_stopMP2-t_startMP2a
-
-   !print*,"Multiphase 2 Solver Time  ",t_stopMP2-t_startMP2
-
-
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-  ! Compute forces on immersed bodies:
-  call ImBound( blockCount, blockList, ins_alfa*dt,COMPUTE_FORCES)
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-
-   call cpu_time(t_stopAll)
+  call cpu_time(t_stopAll)
 
    if(ins_meshMe .eq. 0) print*,"Total INS Solver Time     ",t_stopAll-t_startAll
 
-!*********************************************************************************************
-!*********************************************************************************************
-!*********************************************************************************************
-
-!***********************************************************************************************
-!***********************************************************************************************
-!***********************************************************************************************
-!KPD File Output for Testing ONLY
 !*********************************************************************************************
 
 iOutPress = 0
@@ -2089,7 +964,7 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 
            !if (ins_nstep .eq. 1) then
               !write(123,"(4I5,4F15.6)") lb,i,j,k,xcell,ycell,zcell, &
-              !                          solnData(PRES_VAR,i,j,1)
+              !                          solnData(PRES_VAR,i,j,k)
               write(123,"(3I5,9F16.11)") lb,i,j,xcell,ycell, &
                                         solnData(PRES_VAR,i,j,1), &
                                         xcellX,ycellX,facexData(VELC_FACE_VAR,i,j,1), &
@@ -2118,7 +993,7 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 !*********************************************************************************************
 
   enddo ! End  of time substeps loop
-
+  enddo
 
   ! Restore Interpolation values for guardcell-filling:
   call ins_setInterpValsGcell(.false.)
@@ -2145,20 +1020,18 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 #if NDIM == 3
      call Grid_getBlkPtr(blockID,facezData,FACEZ)
 
-  mxdivv = max( mxdivv,maxval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,NGUARD+1:nzc-1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,NGUARD+1:nzc-1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Y) + &
-                   (facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+2:nzc) - &
-                    facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Z) ))
+     call ins_divergence_VD(facexData(VELC_FACE_VAR,:,:,:),&
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         facezData(VELC_FACE_VAR,:,:,:),&
+             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       new_div)
 
-  mndivv = min( mndivv,minval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,NGUARD+1:nzc-1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,NGUARD+1:nzc-1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Y) + &
-                   (facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+2:nzc) - &
-                    facezData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,NGUARD+1:nzc-1))/del(DIR_Z) ))
+  mxdivv = max( mxdivv,maxval(new_div))
 
+  mndivv = min( mndivv,minval(new_div))
 
   maxu = max(maxu,maxval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minu = min(minu,minval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
@@ -2175,16 +1048,18 @@ if ((mod(ins_nstep,100) .eq. 0) .AND. (iOutPress .eq. 1)) then
 
 #elif NDIM == 2
 
-  mxdivv = max( mxdivv,maxval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_Y) ))
+     call ins_divergence_VD(facexData(VELC_FACE_VAR,:,:,:),&
+                         faceyData(VELC_FACE_VAR,:,:,:),&
+                         facezData(VELC_FACE_VAR,:,:,:),&
+             blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS),&
+             blkLimits(LOW,JAXIS),blkLimits(HIGH,JAXIS),&
+             blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS),&
+                       del(DIR_X),del(DIR_Y),del(DIR_Z),&
+                       new_div)
 
-  mndivv = min( mndivv,minval( (facexData(VELC_FACE_VAR,NGUARD+2:nxc,NGUARD+1:nyc-1,1) - &
-                    facexData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_X) + &
-                   (faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+2:nyc,1) - &
-                    faceyData(VELC_FACE_VAR,NGUARD+1:nxc-1,NGUARD+1:nyc-1,1))/del(DIR_Y) ))
+  mxdivv = max( mxdivv,maxval(new_div))
 
+  mndivv = min( mndivv,minval(new_div))
 
   maxu = max(maxu,maxval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))
   minu = min(minu,minval(facexData(VELC_FACE_VAR,GRID_ILO:GRID_IHI+1,GRID_JLO:GRID_JHI,GRID_KLO:GRID_KHI)))

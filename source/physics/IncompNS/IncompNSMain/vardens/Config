@@ -60,5 +60,8 @@ SCRATCHVAR divv
 FACEVAR velc
 FACEVAR rhds
 
+# For IB treatment
+#FACEVAR POLD
+
 # Number of guardcells at each boundary
 GUARDCELLS 3

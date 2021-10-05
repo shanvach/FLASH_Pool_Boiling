@@ -371,7 +371,7 @@
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy
               else
-
+                
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
                                       - dt*Cb*(ycell-Lb)/(Ly-Lb)

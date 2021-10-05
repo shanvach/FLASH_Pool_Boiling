@@ -77,6 +77,7 @@ subroutine io_writeData(fileID)
        io_fileCreationTime, io_buildDate, io_buildMachine, io_cflags, io_fflags, &
        io_setupTimeStamp, io_buildTimeStamp, io_doublePrecision, &
        io_unklabelsGlobal, io_plotVarStr, io_nPlotVars, io_outputSplitNum, &
+       io_plot_velocity, io_plotVelStr, &
        io_ilo, io_ihi, io_jlo, io_jhi, io_klo, io_khi, io_plotGridVarStr,&
        io_faceXVarLabels, io_faceYVarLabels, io_faceZVarLabels, &
        io_plotfileMetadataDP, io_plotfileGridQuantityDP, io_fileFormatVersion, &
@@ -84,7 +85,7 @@ subroutine io_writeData(fileID)
   
   use Grid_interface, ONLY : Grid_getLocalNumBlks, &
     Grid_getBlkBoundBox, Grid_getBlkCenterCoords, &
-    Grid_getBlkPhysicalSize
+    Grid_getBlkPhysicalSize, Grid_colocateFaceData
 
   use Grid_data, ONLY : gr_gid,scratch,scratch_ctr,scratch_facevarx,&
        scratch_facevary,scratch_facevarz
@@ -112,6 +113,7 @@ subroutine io_writeData(fileID)
   integer, parameter :: single = SELECTED_REAL_KIND(p=6)
   !real (kind=single) :: unkt_crn(1,NXB+1,NYB+K2D,NZB+K3D,1)
   real (kind=single), allocatable :: unkt(:,:,:,:,:)
+  real (kind=single), allocatable :: velt(:,:,:)
   integer :: blkLimits(HIGH,MDIM), blkLimitsGC(HIGH,MDIM)
   
   ! allocate storage to hold the coordinate information and bounding box
@@ -124,6 +126,7 @@ subroutine io_writeData(fileID)
   real :: boundBox(2, MDIM)
   real :: blockCenterCoords(MDIM)
   real,allocatable :: unkBuf(:,:,:,:,:)
+  real,allocatable :: velBuf(:,:,:)
   real,allocatable :: faceXBuf(:,:,:,:,:)
   real,allocatable :: faceYBuf(:,:,:,:,:)
   real,allocatable :: faceZBuf(:,:,:,:,:)
@@ -432,6 +435,127 @@ subroutine io_writeData(fileID)
 
 #if (NFACE_VARS>0)
 
+#ifdef FLASH_GRID_UG
+    ! Output cell centered velocity data to plot and chk files
+    if (io_plot_velocity) then
+      allocate(velBuf(NXB,NYB,NZB))
+      allocate(velt(NXB,NYB,NZB))
+      dowrite = 1
+
+      if(io_doublePrecision .or. io_plotfileGridQuantityDP) then
+
+        call Grid_colocateFaceData(VELC_FACE_VAR, IAXIS, 1, velBuf)
+        call io_h5write_unknowns(io_globalMe,       &
+                                 fileID,            & 
+                                 NXB,               & 
+                                 NYB,               & 
+                                 NZB,               & 
+                                 velBuf,            & 
+                                 faceXVarMin(2), &
+                                 faceXVarMax(2), &
+                                 io_plotVelStr(1),  &
+                                 localNumBlocks,    &
+                                 globalNumBlocks,   & 
+                                 globalOffset,      &
+                                 dowrite)
+        if(NDIM .gt. 1) then
+          call Grid_colocateFaceData(VELC_FACE_VAR, JAXIS, 1, velBuf)
+          call io_h5write_unknowns(io_globalMe,       &
+                                   fileID,            & 
+                                   NXB,               & 
+                                   NYB,               & 
+                                   NZB,               & 
+                                   velBuf,            &
+                                   faceYVarMin(2), &
+                                   faceYVarMax(2), &
+                                   io_plotVelStr(2),  &
+                                   localNumBlocks,    &
+                                   globalNumBlocks,   & 
+                                   globalOffset,      &
+                                   dowrite)
+        end if
+        if(NDIM .gt. 2) then
+          call Grid_colocateFaceData(VELC_FACE_VAR, KAXIS, 1, velBuf)
+          call io_h5write_unknowns(io_globalMe,       &
+                                   fileID,            & 
+                                   NXB,               & 
+                                   NYB,               & 
+                                   NZB,               & 
+                                   velBuf,            &
+                                   faceZVarMin(2), &
+                                   faceZVarMax(2), &
+                                   io_plotVelStr(3),  &
+                                   localNumBlocks,    &
+                                   globalNumBlocks,   & 
+                                   globalOffset,      &
+                                   dowrite)
+        end if
+
+      else
+
+        call Grid_colocateFaceData(VELC_FACE_VAR, IAXIS, 1, velBuf)
+        velt(:,:,:) = real(velbuf(:,:,:), kind = single) 
+        spMin = real(faceXVarMin(2), kind = single)
+        spMax = real(faceXVarMax(2), kind = single)
+        call io_h5write_unknowns_sp(io_globalMe,      &
+                                    fileID,           & 
+                                    NXB,              & 
+                                    NYB,              & 
+                                    NZB,              &
+                                    spMin,            &
+                                    spMax,            &
+                                    velt,             & 
+                                    io_plotVelStr(1), & 
+                                    localNumBlocks,   & 
+                                    globalNumBlocks,  & 
+                                    globalOffset,     &
+                                    dowrite)
+        if(NDIM .gt. 1) then
+          call Grid_colocateFaceData(VELC_FACE_VAR, JAXIS, 1, velBuf)
+          velt(:,:,:) = real(velbuf(:,:,:), kind = single) 
+          spMin = real(faceYVarMin(2), kind = single)
+          spMax = real(faceYVarMax(2), kind = single)
+          call io_h5write_unknowns_sp(io_globalMe,      &
+                                      fileID,           & 
+                                      NXB,              & 
+                                      NYB,              & 
+                                      NZB,              &
+                                      spMin,            &
+                                      spMax,            &
+                                      velt,             & 
+                                      io_plotVelStr(2), & 
+                                      localNumBlocks,   & 
+                                      globalNumBlocks,  & 
+                                      globalOffset,     &
+                                      dowrite)
+        end if
+        if(NDIM .gt. 2) then
+          call Grid_colocateFaceData(VELC_FACE_VAR, KAXIS, 1, velBuf)
+          velt(:,:,:) = real(velbuf(:,:,:), kind = single) 
+          spMin = real(faceZVarMin(2), kind = single)
+          spMax = real(faceZVarMax(2), kind = single)
+          call io_h5write_unknowns_sp(io_globalMe,      &
+                                      fileID,           & 
+                                      NXB,              & 
+                                      NYB,              & 
+                                      NZB,              &
+                                      spMin,            &
+                                      spMax,            &
+                                      velt,             & 
+                                      io_plotVelStr(3), & 
+                                      localNumBlocks,   & 
+                                      globalNumBlocks,  & 
+                                      globalOffset,     &
+                                      dowrite)
+        end if
+
+      end if
+      deallocate(velBuf)
+      deallocate(velt)
+    end if
+#endif
+
+    ! Output face centered data if checkpoint file
     if (io_doublePrecision) then
       allocate(faceXBuf(1,NXB+1,NYB,NZB,1))
       if(NDIM .gt. 1) allocate(faceYBuf(1,NXB,NYB+1,NZB,1))

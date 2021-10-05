@@ -23,10 +23,10 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-BLAS_PATH    = 
+BLAS_PATH    = /home3/adhruv/openblas
 LAPACK_PATH  = 
 HYPRE_PATH = /home3/adhruv/hypre-2.11.2_NEW/src/hypre
-SUPERLU_PATH = 
+SUPERLU_PATH = /home3/adhruv/SuperLU_4.3
 
 # Current directory:
 export cur-dir := $(shell pwd)
@@ -114,8 +114,8 @@ FFLAGS_BLAS = -I${BLAS_PATH}/include
 CFLAGS_LAPACK = -I${LAPACK_PATH}/include
 FFLAGS_LAPACK = -I${LAPACK_PATH}/include
 
-CFLAGS_SUPERLU = -I${SUPERLU_PATH}/include
-FFLAGS_SUPERLU = -I${SUPERLU_PATH}/include
+CFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
+FFLAGS_SUPERLU = -I${SUPERLU_PATH}/SRC
 
 CFLAGS_HYPRE = -I${HYPRE_PATH}/include
 FFLAGS_HYPRE = -I${HYPRE_PATH}/include

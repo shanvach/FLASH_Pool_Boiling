@@ -1,0 +1,29 @@
+# Lid driven cavity problem on a 2D, 2 level AMR grid.
+# The problem is integrated for 3000 time steps.
+
+# Setup line:
+./setup INavierStokes/2D/LidDrivenCavity/  -2d -auto -opt -nxb=16 -nyb=16 -maxblocks=3000 -gridinterpolation=native +pm4dev PfftSolver=HomBcTrigSolver  -objdir=LIDCAV_BI -site=(Your SITE)
+
+# Make directory IOData within the object directory.
+
+# Timestep and total integration time at step 3000:
+ ###############################################################################
+ Mean DivUstar, DeltaMass=  3.43183339513960291E-018 -3.43183339513960291E-018
+ [gr_hgPfftInitGrid]: Able to retain PFFT grid from last time.
+cycle    1 res norm =  8.71E-07 new to old ratio =  7.97E-04
+cycle    2 res norm =  1.38E-09 new to old ratio =  1.59E-03
+cyc1/2   3 res norm =  5.62E-11 new to old ratio =  4.06E-02
+ Elapsed Time in Preconditioner =  3.50000000000000033E-002
+  
+          Min , Max  U = -0.331965      0.879595    
+          Min , Max  V = -0.635701      0.310073    
+          Min , Max  P = -0.654007E-01  0.622331    
+ Min , Max  Divergence = -0.629358E-14  0.652256E-14
+ Total AB Step Time =  9.80000000000000038E-002
+  
+  3000, TimeStep=   0.53183825E-02, SimTime=    16.169754    
+ ###############################################################################
+ *** Wrote checkpoint file to INS_LidDr_Cavity_hdf5_chk_0004 ****
+ *** Wrote plotfile to INS_LidDr_Cavity_forced_hdf5_plt_cnt_0000 ****
+ gr_pfftFinalize: pfft_setupOnce is F
+

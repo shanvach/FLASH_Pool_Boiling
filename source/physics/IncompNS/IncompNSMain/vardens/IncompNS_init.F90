@@ -25,7 +25,6 @@ subroutine IncompNS_init(restart)
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
   use Driver_interface, ONLY : Driver_getMype, Driver_getNumProcs, &
                                Driver_getComm, Driver_getNstep
-
   use Multiphase_interface, ONLY : Multiphase_init 
 
   implicit none
@@ -85,7 +84,7 @@ subroutine IncompNS_init(restart)
   endif
 
   ! Call multiphase variables initialization routine:
-  !call Multiphase_init()	
+  call Multiphase_init()
 
   if(ins_meshMe==MASTER_PE)print*,'Incmp_Navier_Stokes initialized'
 

@@ -1,0 +1,9 @@
+# Poisson Binaries
+# 2d simulations
+--advanced --compile 32 --overwrite --block_xyz 12  --dimension 2  
+--advanced --compile 32 --overwrite --block_xyz 32  --dimension 2  
+--advanced --compile 32 --overwrite --block_xyz 48  --dimension 2  
+--advanced --compile 32 --overwrite --block_xyz 128 --dimension 2  
+--advanced --compile 32 --overwrite --block_xyz 192 --dimension 2  
+
+# 3d simulations

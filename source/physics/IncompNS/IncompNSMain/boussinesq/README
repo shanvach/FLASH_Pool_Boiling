@@ -1,0 +1,24 @@
+Please observe at least the following cautions when using the under-development 
+Rayleigh_Benard and Rayleigh_Benard_Stretch Subpackages
+
+
+UG or AMR Grid:
+  1) constmass option not tested but supported
+  2) turbulant viscosity modeling not tested but should be supported
+  3) inflow / outflow boundary conditions not tested but should be supported
+
+Regular Grid:
+  1) NONFIXED BLOCK SIZE mode not tested but supported
+  2) constmass option not supported
+    a) ins_getBulkVelocity needs modification
+    b) ins_pressgradients needs modification
+  3) turbulant viscosity model not currently supported
+    a) ins_vt needs modification
+    b) ins_velgradtensor needs modification
+  4) inflow / outflow / neumann boundary conditions not currently supported
+    a) ins_computeQinout needs modification
+    b) ins_convectVelout needs modification
+    c) ins_rescaleVelout needs modification
+  5) Some Grid Package support functions are not currently supported 
+    a) Grid_getSingleCellVol needs modifications
+    b) ??

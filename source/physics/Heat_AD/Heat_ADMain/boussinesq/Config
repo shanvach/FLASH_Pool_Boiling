@@ -1,0 +1,48 @@
+#     Config file for the Heat Advective Diffusive solver
+PPDEFINE HT_BOUSSINESQ 1
+
+# Runtime parameters
+#D ht_invsqrtRaPr        1/SQRT(RaPr) 
+
+# --------------------------------------
+# THIS PART IS FOR PROBLEM DEPENDANT CONFIG FILE
+D Txl_boundary_type lower (left) boundary condition in x dir
+PARAMETER Txl_boundary_type STRING "dirichlet_ht"
+
+D Txr_boundary_type upper (right) boundary condition in x dir
+PARAMETER Txr_boundary_type STRING "dirichlet_ht"
+
+D Tyl_boundary_type lower boundary condition in y dir
+PARAMETER Tyl_boundary_type STRING "dirichlet_ht"
+
+D Tyr_boundary_type upper boundary condition in y dir
+PARAMETER Tyr_boundary_type STRING "dirichlet_ht"
+
+D Tzl_boundary_type lower boundary condition in z dir
+PARAMETER Tzl_boundary_type STRING "dirichlet_ht"
+
+D Tzr_boundary_type upper boundary condition in z dir
+PARAMETER Tzr_boundary_type STRING "dirichlet_ht"
+
+D Txl_boundary_value lower (left) boundary condition in x dir
+PARAMETER Txl_boundary_value REAL 0. 
+
+D Txr_boundary_value upper (right) boundary condition in x dir
+PARAMETER Txr_boundary_value REAL 0. 
+
+D Tyl_boundary_value lower boundary condition in y dir
+PARAMETER Tyl_boundary_value REAL 0.
+
+D Tyr_boundary_value upper boundary condition in y dir
+PARAMETER Tyr_boundary_value REAL 0.
+
+D Tzl_boundary_value lower boundary condition in z dir
+PARAMETER Tzl_boundary_value REAL 0.
+
+D Tzr_boundary_value upper boundary condition in z dir
+PARAMETER Tzr_boundary_value REAL 0.
+
+# THIS PART IS FOR PHYSICS CONFIG
+# Variables required by the ht module
+VARIABLE temp 			# Temperature 
+VARIABLE told 			# for ab2/rk3 

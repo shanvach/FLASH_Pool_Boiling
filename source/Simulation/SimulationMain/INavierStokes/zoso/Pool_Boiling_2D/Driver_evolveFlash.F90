@@ -312,6 +312,7 @@ if (dr_nstep .eq. 1) grid_changed = 1
      !print *,"dr_dt: ",dr_dt 
      call Timers_start("io")
      call IO_output(dr_simTime,dr_dt,dr_nstep+1,dr_nbegin,endRun)
+     call Grid_writeDomain()
      call Timers_stop("io")
 
      if(endRun) exit

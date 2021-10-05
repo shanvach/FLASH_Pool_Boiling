@@ -1,4 +1,4 @@
-subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder) 
+subroutine mph_evolve(blockCount, blockList, timeEndAdv,dt,dtOld,sweepOrder,mph_flag) 
 
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
@@ -49,6 +49,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer, INTENT(INOUT) :: blockCount
   integer, INTENT(INOUT), dimension(MAXBLOCKS) :: blockList
   real,    INTENT(IN) :: timeEndAdv,dt,dtOld
+  integer, intent(in) :: mph_flag
 
   integer, dimension(2,MDIM) :: blkLimits, blkLimitsGC
 
@@ -77,6 +78,7 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   integer :: count
   integer :: intval
 
+  if(mph_flag == 1) then
 !kpd - Level Set Initialization...
   if (dr_nstep .eq. 1) then
 
@@ -352,6 +354,8 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 !***********************************************************************************************
 !***********************************************************************************************
 
+
+  else if(mph_flag == 0) then
     !-----------------------------------------------------
     !- kpd - Loop through current block for curvature 2dC
     !-----------------------------------------------------
@@ -464,4 +468,5 @@ subroutine mph_evolve(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   call Grid_fillGuardCells(CENTER_FACES,ALLDIR,&
        maskSize=NUNK_VARS+NDIM*NFACE_VARS,mask=gcMask,selectBlockType=ACTIVE_BLKS)
 
+  end if
 end subroutine

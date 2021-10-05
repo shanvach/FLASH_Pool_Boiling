@@ -154,4 +154,5 @@ Module Grid_data
 
   real, save, dimension(LOW:HIGH,MDIM) :: gr_region
   integer, save, allocatable :: gr_globalNeghProc(:,:)
+
 end Module Grid_data

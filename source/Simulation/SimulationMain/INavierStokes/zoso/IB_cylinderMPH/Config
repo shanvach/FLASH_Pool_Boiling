@@ -1,0 +1,59 @@
+#       cubic domain.
+
+
+#	Config file for the INS module.
+#       Note: This is a staggered finite difference mesh algorithm.
+
+
+REQUIRES Simulation/SimulationMain/INavierStokes/paramesh_routines/vardens_MG
+
+REQUIRES Grid/GridMain
+REQUIRES Driver
+
+REQUIRES physics/Multiphase
+REQUIRES physics/Multiphase/MultiphaseMain/INS
+REQUIRES physics/Multiphase/MultiphaseMain/INS/ImBound
+
+REQUIRES physics/IncompNS
+REQUIRES physics/IncompNS/IncompNSMain/vardens
+REQUIRES physics/IncompNS/IncompNSMain/extras
+
+USESETUPVARS Grid
+
+  REQUESTS Grid/GridSolvers/HYPRE_KPD/paramesh
+  REQUESTS Grid/GridSolvers/MultigridMC_VarDens_HYPRE/poisson
+
+# Immersed boundary unit:
+REQUIRES physics/ImBound
+REQUIRES physics/ImBound/ImBoundMain/LagForce/parallel/forceInBody_analytical
+
+# Solid Mechanics:
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/Assembly/rigid
+REQUIRES physics/SolidMechanics/SolidMechanicsMain/IO/rigid
+
+DATAFILES kinematics.input.h5 sm_body.00001.h5
+
+# Tecplot routines:
+REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+
+VARIABLE aaJunk  # kpd  for IfactorB
+
+VARIABLE preo    # Shizhao for fsi
+FACEVAR  velo
+
+PARAMETER quadrant       BOOLEAN  FALSE
+
+PARAMETER waveA          REAL  0.0
+
+VARIABLE dfrc TYPE: GENERIC
+
+PARTICLEPROP dfun REAL
+PARTICLEPROP difp REAL
+PARTICLEPROP fdf REAL
+PARTICLEPROP df REAL
+PARTICLEPROP ftp REAL
+PARTICLEPROP tl REAL
+
+# Number of guardcells at each boundary
+GUARDCELLS 3

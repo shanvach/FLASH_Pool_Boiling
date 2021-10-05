@@ -215,13 +215,13 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      select case (gr_domainBC(ibound,idimn))
      case (PERIODIC)
 #ifdef FLASH_GRID_UG
-        bc_types(eachBoundary) = PERIODIC
+        bc_types(eachBoundary) = GRID_PDE_BND_PERIODIC 
 #else
         bc_types(eachBoundary) = GRID_PDE_BND_PERIODIC !MG_BND_PERIODIC
 #endif
      case (SLIP_INS,NOSLIP_INS,INFLOW_INS,NEUMANN_INS,MOVLID_INS,OUTFLOW_INS)
 #ifdef FLASH_GRID_UG
-        bc_types(eachBoundary) = OUTFLOW
+        bc_types(eachBoundary) = GRID_PDE_BND_NEUMANN 
 #else
         bc_types(eachBoundary) = GRID_PDE_BND_NEUMANN !MG_BND_NEUMANN
 #endif
@@ -235,6 +235,13 @@ subroutine ins_ab2rk3( blockCount, blockList, timeEndAdv, dt)
      end select
   enddo
   enddo
+
+#ifdef FLASH_GRID_UG
+#ifdef NDIM==2
+  bc_types(5) = bc_types(3)
+  bc_types(6) = bc_types(4)
+#endif
+#endif
 
   ! shift timesteps
   do i = -rkstep,-1

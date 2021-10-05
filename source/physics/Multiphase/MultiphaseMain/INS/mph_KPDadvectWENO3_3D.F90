@@ -576,31 +576,31 @@
               !                        - dt*(frz*wr - flz*wl)/dz 
               !end if
               !!*********************************************************
-              if (xcell .gt. xdP .AND. ins_gravZ .gt. 0.0001) then
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz &
-                                      - ins_dampC*AA*(s(i,j,k)-zcell)
-              else if (xcell .gt. xdP .AND. ins_gravY .gt. 0.0001) then
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz &
-                                      - ins_dampC*AA*(s(i,j,k)-ycell)
-              else if (xcell .lt. xdM .AND. ins_gravZ .gt. 0.0001) then
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz &
-                                      - ins_dampC*AA*(s(i,j,k)-zcell)
-              else if (xcell .lt. xdM .AND. ins_gravY .gt. 0.0001) then
-                 s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
-                                      - dt*(fry*vr - fly*vl)/dy &
-                                      - dt*(frz*wr - flz*wl)/dz &
-                                      - ins_dampC*AA*(s(i,j,k)-ycell)
-              else
+              !if (xcell .gt. xdP .AND. ins_gravZ .gt. 0.0001) then
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*(frz*wr - flz*wl)/dz &
+              !                        - ins_dampC*AA*(s(i,j,k)-zcell)
+              !else if (xcell .gt. xdP .AND. ins_gravY .gt. 0.0001) then
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*(frz*wr - flz*wl)/dz &
+              !                        - ins_dampC*AA*(s(i,j,k)-ycell)
+              !else if (xcell .lt. xdM .AND. ins_gravZ .gt. 0.0001) then
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*(frz*wr - flz*wl)/dz &
+              !                        - ins_dampC*AA*(s(i,j,k)-zcell)
+              !else if (xcell .lt. xdM .AND. ins_gravY .gt. 0.0001) then
+              !   s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
+              !                        - dt*(fry*vr - fly*vl)/dy &
+              !                        - dt*(frz*wr - flz*wl)/dz &
+              !                        - ins_dampC*AA*(s(i,j,k)-ycell)
+              !else
                  s(i,j,k) = so(i,j,k) - dt*(frx*ur - flx*ul)/dx &
                                       - dt*(fry*vr - fly*vl)/dy &
                                       - dt*(frz*wr - flz*wl)/dz 
-              end if
+              !end if
               !---------------------------------------------------------------
               !---------------------------------------------------------------
 

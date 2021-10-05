@@ -353,6 +353,7 @@
               !--------------------------------------------------------------
               !- kpd - pf=0 (water) in current cell and pf=1 (air) in cell to right
               !--------------------------------------------------------------
+           
               if(pf(i,j,k).eq.0..and.pf(i+1,j,k).eq.1.) then
 
                  !          = (+)            = (+)           = (-)
@@ -395,16 +396,6 @@
 
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
-
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) - (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
-
 
               end if
 
@@ -453,20 +444,13 @@
                  icrv(i,j,k) = 1
                  icrv(i+1,j,k) = 1
 
-                 if(abs(ycell-0.5*del(JAXIS)) .le. eps) then
-
-                        tmic(i+1,j,k) = 1.0
-                        w(i,j,k)      = w(i,j,k)      + (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        w(i+1,j,k)    = w(i+1,j,k)    - (ht_fmic*xit/(2.0*dx*dx))/aa/dx**2
-                        sigx(i+1,j,k) = sigx(i+1,j,k) + (ht_fmic*xit/(2.0*dx*dx))/aa/dx
-
-                 end if
-
               end if
 
               !--------------------------------------------------------------
               !- kpd - pf=0 in current cell and pf=1 in cell above
               !--------------------------------------------------------------
+              !if(.not.(abs(ycell+0.5*del(JAXIS)) .le. eps)) then
+ 
               if(pf(i,j,k).eq.0..and.pf(i,j+1,k).eq.1.) then
 
                  th = abs(s(i,j+1,k))/(abs(s(i,j+1,k))+abs(s(i,j,k)))
@@ -557,6 +541,8 @@
                  icrv(i,j+1,k) = 1
 
               end if
+
+              !end if
 
            end do
         end do

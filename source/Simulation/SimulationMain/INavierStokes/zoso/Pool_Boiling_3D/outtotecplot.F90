@@ -173,7 +173,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p wx wy wz Q div Phi T mdot Tnl Tnv nx ny nz Hflux'//NULLCHR,  &
+             'x y z u v w p Phi T mdot Hflux'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -513,18 +513,18 @@
      i = TecDat(ijk,arraylb,0)
 
      ! Write omgX:
-     arraylb = sngl(vortx)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(vortx)
+     !i = TecDat(ijk,arraylb,0)
 
 
      ! Write omgY:
-     arraylb = sngl(vorty)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(vorty)
+     !i = TecDat(ijk,arraylb,0)
 
 
      ! Write omgZ:
-     arraylb = sngl(vortz)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(vortz)
+     !i = TecDat(ijk,arraylb,0)
 
      ! Write omg:
 !!$     do k=1,NZB+1
@@ -536,12 +536,12 @@
 !!$     enddo
 
      ! Write Q:
-     arraylb = sngl(Qcr)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(Qcr)
+     !i = TecDat(ijk,arraylb,0)
 
      ! Write Div:
-     arraylb = sngl(divpp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(divpp)
+     !i = TecDat(ijk,arraylb,0)
 
      ! Write TV:
      arraylb = sngl(TVtpp)
@@ -554,20 +554,20 @@
      arraylb = sngl(mdotp)
      i = TecDat(ijk,arraylb,0)
 
-     arraylb = sngl(tnlp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(tnlp)
+     !i = TecDat(ijk,arraylb,0)
 
-     arraylb = sngl(tnvp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(tnvp)
+     !i = TecDat(ijk,arraylb,0)
 
-     arraylb = sngl(nxp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(nxp)
+     !i = TecDat(ijk,arraylb,0)
 
-     arraylb = sngl(nyp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(nyp)
+     !i = TecDat(ijk,arraylb,0)
 
-     arraylb = sngl(nzp)
-     i = TecDat(ijk,arraylb,0)
+     !arraylb = sngl(nzp)
+     !i = TecDat(ijk,arraylb,0)
 
      arraylb = sngl(tprds)
      i = TecDat(ijk,arraylb,0)

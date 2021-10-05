@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/IBstationaryCylinderDirSolver_2D  -2d -auto  -nxb=40 -nyb=40 -opt  -maxblocks=10 -gridinterpolation=native +rg  -objdir=IBstationaryCylinderDirSolver_2D -site=splash.seas.gwu.edu Bittree=0

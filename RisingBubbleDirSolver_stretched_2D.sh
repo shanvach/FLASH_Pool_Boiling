@@ -1,0 +1,1 @@
+./setup INavierStokes/zoso/RisingBubbleDirSolver_stretched_2D  -2d -auto  -nxb=40 -nyb=40 -opt  -maxblocks=10 -gridinterpolation=native +rg  -objdir=RisingBubbleDirSolver_stretched_2D -site=splash.seas.gwu.edu Bittree=0

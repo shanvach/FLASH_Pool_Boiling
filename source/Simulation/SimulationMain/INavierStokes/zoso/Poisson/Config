@@ -1,0 +1,15 @@
+# Configuration file for Rayleigh Benard 2D Cavity Problem
+REQUIRES Driver
+REQUIRES physics/Heat_AD/Heat_ADMain/boussinesq_stretch
+
+USESETUPVARS Grid
+
+LIBRARY STDCXX
+
+VARIABLE nsrc
+VARIABLE nfld
+VARIABLE nsln
+VARIABLE nerr
+
+# Number of guardcells at each boundary
+GUARDCELLS 1

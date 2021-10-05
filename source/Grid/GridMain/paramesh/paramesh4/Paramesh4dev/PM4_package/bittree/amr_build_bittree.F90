@@ -22,7 +22,7 @@ subroutine amr_build_bittree()
   use tree, only: lnblocks, coord, bsize, lrefine, nodetype, &
                   grid_xmin, grid_ymin, grid_zmin, &
                   grid_xmax, grid_ymax, grid_zmax
-  use iso_c_binding, only: c_bool, c_int
+  use, intrinsic :: iso_c_binding, only: c_bool, c_int
   implicit none
 #include "mpif.h"
   

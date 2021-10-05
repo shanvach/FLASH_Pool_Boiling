@@ -1,0 +1,60 @@
+!===============================================================================
+!!
+!! subroutine ib_levelset_constantprojection 
+!!
+!! extrapolating level set in direction normal to the interface using 1st order upwind
+!!
+!! args inout:: s       - levelset funtion to be projected
+!! args in   :: so      - levelset function s at time n-1
+!!           :: u,v     - normal vectors nx,ny
+!!           :: dx,dy   - spacing in x and y directions
+!!           :: ix1,ix2 - low,high block x indeces
+!!           :: jy1,jy2 - low,high block y indeces 
+!===============================================================================
+#include "constants.h"
+#include "Flash.h"
+
+        subroutine ib_levelset_constantprojection(lmda,s,u,v,ix1,ix2,jy1,jy2,kz1,kz2,dx,dy,dz)
+        implicit none
+        real, dimension(:,:,:), intent(inout) :: s
+        real, dimension(:,:,:), intent(in)    :: u,v,lmda
+        real, intent(in)    :: dx,dy,dz
+        integer, intent(in) :: ix1,ix2,jy1,jy2,kz1,kz2
+
+        real, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: so
+        integer, dimension(GRID_IHI_GC,GRID_JHI_GC,GRID_KHI_GC) :: pfl
+
+        integer :: i,j,k
+        real :: up, vp
+        real :: sxplus, sxmins, syplus, symins
+        real :: delta_t
+
+        pfl = (int(sign(1.0,lmda)) + 1)/2
+
+        so = s
+
+        delta_t = dx/2.0d0
+        
+        k = 1
+        do j = jy1,jy2
+          do i = ix1,ix2
+
+          !normal vectors
+          up = u(i,j,k)
+          vp = v(i,j,k)
+
+          !gradients
+          sxplus = (so(i+1,j,k) - so(i,j,k)) / dx
+          sxmins = (so(i,j,k) - so(i-1,j,k)) / dx
+          syplus = (so(i,j+1,k) - so(i,j,k)) / dy
+          symins = (so(i,j,k) - so(i,j-1,k)) / dy
+
+          ! use dx/2 as dt to advect level set
+          s(i,j,k) = so(i,j,k) + pfl(i,j,k)*delta_t*&
+                             ( - max(up,0.0d0)*sxmins - min(up,0.0d0)*sxplus &
+                               - max(vp,0.0d0)*symins - min(vp,0.0d0)*syplus )
+
+          end do
+        end do
+            
+      end subroutine ib_levelset_constantprojection

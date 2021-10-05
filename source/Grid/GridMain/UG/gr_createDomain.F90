@@ -124,7 +124,7 @@ subroutine gr_createDomain()
   allocate(gr_iCoords(3,gr_ihiGc-gr_iloGc+1,1))
   allocate(gr_jCoords(3,gr_jhiGc-gr_jloGc+1,1))
   allocate(gr_kCoords(3,gr_khiGc-gr_kloGc+1,1))
-
+  
 #ifndef FIXEDBLOCKSIZE
   
   allocate(unk(UNK_VARS_BEGIN:UNK_VARS_END,&
@@ -249,6 +249,5 @@ subroutine gr_createDomain()
      gr_kCoords(LEFT_EDGE:RIGHT_EDGE,1,1) = gr_kmin
      gr_delta(KAXIS)=0.0
   end if
-  
-  
+ 
 end subroutine gr_createDomain

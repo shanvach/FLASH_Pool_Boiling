@@ -125,7 +125,8 @@
              interp_mask_unk_res(1)         
 #endif
 
-     write(33,'(a23,a43,a49,a12)') 'file number, time, dt, ',&
+     write(33,'(a23,a43,a49,a12)') 'file number, time,',&
+             'radius, dt, ',&
              'step number, ',&
              'total number of blocks, number of blocks output, ',&
              'elapsed time'
@@ -135,9 +136,9 @@
 
   ! write timestep data to filetime.XX on each processor
   open(unit=33, file=filename, status='old', position='append')
-  write(33,66) count, time, dt, istep,blockcount,timer
+  write(33,66) count, time, mph_radius, dt, istep,blockcount,timer
   close(33)
-66    format(i4.4,g23.15,g23.15,i8.1,i5.1,g23.15)
+66    format(i4.4,g23.15,g23.15,g23.15,i8.1,i5.1,g23.15)
 
 
   ! -- data.XXXX.XX --

@@ -57,6 +57,7 @@ subroutine io_writeData (fileID)
        io_strScalarNames, io_strScalarValues, io_numStrScalars, &
        io_logToIntScalarValues, io_logToIntParmValues, io_unklabels, &
        io_ilo, io_ihi, io_jlo, io_jhi, io_klo, io_khi, io_geometry, &
+       io_plot_velocity, io_plotVelStr, &
        io_setupCall, io_buildDir, io_flashRelease, &
        io_fileCreationTime, io_buildDate, io_buildMachine, io_cflags, io_fflags, &
        io_setupTimeStamp, io_buildTimeStamp, io_doublePrecision, &
@@ -67,7 +68,7 @@ subroutine io_writeData (fileID)
  use Driver_interface, ONLY : Driver_abortFlash
  use Grid_interface, ONLY : Grid_getLocalNumBlks, &
    Grid_getBlkBoundBox, Grid_getBlkCenterCoords, &
-   Grid_getBlkPhysicalSize
+   Grid_getBlkPhysicalSize, Grid_colocateFaceData
   
   
   use Grid_data, ONLY : gr_gid, scratch
@@ -112,6 +113,7 @@ subroutine io_writeData (fileID)
   real, allocatable :: faceyt(:,:,:,:)
   real, allocatable :: facezt(:,:,:,:)
 
+  real, allocatable, dimension(:,:,:) :: velBufx, velBufy, velBufz
 
   real  :: globalVarMin(NUNK_VARS), globalVarMax(NUNK_VARS)
   real  :: globalVarMinScratch(NSCRATCH_GRID_VARS), globalVarMaxScratch(NSCRATCH_GRID_VARS)
@@ -145,6 +147,7 @@ subroutine io_writeData (fileID)
   real (kind=single) :: singleUnk(NXB,NYB,NZB,1)
   real (kind=single) :: singleScratch(NXB,NYB,NZB,MAXBLOCKS)
 
+  real (kind=single), allocatable, dimension(:,:,:) :: velBufxt, velBufyt, velBufzt
 
   ! allocate storage to hold the coordinate information and bounding box
   ! information
@@ -561,164 +564,236 @@ subroutine io_writeData (fileID)
   !!Face Centered Variables: MASTERPE side of things:
   !!******************************************************************************        
 #if(NFACE_VARS > 0)
-  
-  allocate(facext(NXB+1,NYB,NZB,localNumBlocks))
-  if(NDIM .gt. 1) allocate(faceyt(NXB,NYB+1,NZB,localNumBlocks))
-  if(NDIM .gt. 2) allocate(facezt(NXB,NYB,NZB+1,localNumBlocks))
-  
-  do i = 1, NFACE_VARS
 
-     offset = 0
-     facext(:,:,:,:) = facevarx(i, io_ilo:io_ihi+1, io_jlo:io_jhi, io_klo:io_khi, :)
-     if(NDIM .gt. 1) faceyt(:,:,:,:) = facevary(i, io_ilo:io_ihi, io_jlo:io_jhi+1, io_klo:io_khi, :)
-     if(NDIM .gt. 2) facezt(:,:,:,:) = facevarz(i, io_ilo:io_ihi, io_jlo:io_jhi, io_klo:io_khi+1, :)
-                                
+#ifdef FLASH_GRID_UG
+  ! Output cell centered velocity data to plot and chk files
+  if(io_plot_velocity) then
 
-     do jproc = 0, io_globalNumProcs-1
+    offset = 0      
+    allocate(velBufx(NXB,NYB,NZB))
+    if(NDIM .gt. 1) allocate(velBufy(NXB,NYB,NZB))
+    if(NDIM .gt. 2) allocate(velBufz(NXB,NYB,NZB))
+
+    call Grid_colocateFaceData(VELC_FACE_VAR, IAXIS, 1, velBufx)
+    if(NDIM .gt. 1) call Grid_colocateFaceData(VELC_FACE_VAR, JAXIS, 1, velBufy)
+    if(NDIM .gt. 2) call Grid_colocateFaceData(VELC_FACE_VAR, KAXIS, 1, velBufz)
+
+    if(io_doublePrecision .or. io_plotfileGridQuantityDP) then
+
+      do jproc = 0, io_globalNumProcs-1
+
+        if(io_globalMe == MASTER_PE .AND. jproc /= MASTER_PE) then
+          call MPI_RECV(velBufx, NXB*NYB*NZB, FLASH_REAL, jproc,           &
+                        9+2+NUNK_VARS+NSCRATCH_GRID_VARS,                  &
+                        io_globalComm, status, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_RECV(velBufy, NXB*NYB*NZB, FLASH_REAL, jproc,         &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,     &
+                          io_globalComm, status, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_RECV(velBufz, NXB*NYB*NZB, FLASH_REAL, jproc,         &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2), &
+                          io_globalComm, status, ierr)
+          end if
+        end if
+
+        if (jproc == io_globalMe .and. jproc /= MASTER_PE) then
+          call MPI_SEND(velBufx, NXB*NYB*NZB, FLASH_REAL, MASTER_PE,       &
+                        9+2+NUNK_VARS+NSCRATCH_GRID_VARS,                  &
+                        io_globalComm, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_SEND(velBufy, NXB*NYB*NZB, FLASH_REAL, MASTER_PE,     &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,     &
+                          io_globalComm, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_SEND(velBufz, NXB*NYB*NZB, FLASH_REAL, MASTER_PE,     &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2), &
+                          io_globalComm, ierr)
+          end if
+        end if
+
+        if(io_globalMe == MASTER_PE) then
+          call io_h5write_unknowns(io_globalMe, fileID, NXB, NYB, NZB, velBufx,              & 
+                                   globalFaceXMin(2), globalFaceXMax(2), io_plotVelStr(1),   &
+                                   localNumBlocks, globalNumBlocks, offset)
+          if(NDIM .gt. 1) then
+            call io_h5write_unknowns(io_globalMe, fileID, NXB, NYB, NZB, velBufy,            &
+                                     globalFaceYMin(2), globalFaceYMax(2), io_plotVelStr(2), &
+                                     localNumBlocks, globalNumBlocks, offset)
+          end if
+          if(NDIM .gt. 2) then
+            call io_h5write_unknowns(io_globalMe, fileID, NXB, NYB, NZB, velBufz,            &
+                                     globalFaceZMin(2), globalFaceZMax(2), io_plotVelStr(3), &
+                                     localNumBlocks, globalNumBlocks, offset)
+          end if
+        end if
+
+        offset = offset + 1   
+      end do
+
+    else
+
+      allocate(velBufxt(NXB,NYB,NZB))
+      if(NDIM .gt. 1) allocate(velBufyt(NXB,NYB,NZB))
+      if(NDIM .gt. 2) allocate(velBufzt(NXB,NYB,NZB))
+
+      velBufxt(:,:,:) = real(velBufx(:,:,:), kind = single)
+      if(NDIM .gt. 1) velBufyt(:,:,:) = real(velBufy(:,:,:), kind = single)
+      if(NDIM .gt. 2) velBufzt(:,:,:) = real(velBufz(:,:,:), kind = single)
+
+      do jproc = 0, io_globalNumProcs-1
+
+        if(io_globalMe == MASTER_PE .AND. jproc /= MASTER_PE) then
+          call MPI_RECV(velBufxt, NXB*NYB*NZB, MPI_REAL, jproc,            &
+                        9+2+NUNK_VARS+NSCRATCH_GRID_VARS,                  &
+                        io_globalComm, status, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_RECV(velBufyt, NXB*NYB*NZB, MPI_REAL, jproc,          &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,     &
+                          io_globalComm, status, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_RECV(velBufzt, NXB*NYB*NZB, MPI_REAL, jproc,          &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2), &
+                          io_globalComm, status, ierr)
+          end if
+        end if
+
+        if (jproc == io_globalMe .and. jproc /= MASTER_PE) then
+          call MPI_SEND(velBufxt, NXB*NYB*NZB, MPI_REAL, MASTER_PE,        &
+                        9+2+NUNK_VARS+NSCRATCH_GRID_VARS,                  &
+                        io_globalComm, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_SEND(velBufyt, NXB*NYB*NZB, MPI_REAL, MASTER_PE,      &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,     &
+                          io_globalComm, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_SEND(velBufzt, NXB*NYB*NZB, MPI_REAL, MASTER_PE,      &
+                          9+2+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2), &
+                          io_globalComm, ierr)
+          end if
+        end if
+
+        if(io_globalMe == MASTER_PE) then
+          spMin = real(globalFaceXMin(2), kind = single)
+          spMax = real(globalFaceXMax(2), kind = single)
+          call io_h5write_unknowns_sp(io_globalMe, fileID, NXB, NYB, NZB,         &
+                                      spMin, spMax,velBufxt, io_plotVelStr(1),    &
+                                      localNumBlocks, globalNumBlocks, offset)
+          if(NDIM .gt. 1) then
+            spMin = real(globalFaceYMin(2), kind = single)
+            spMax = real(globalFaceYMax(2), kind = single)
+            call io_h5write_unknowns_sp(io_globalMe, fileID, NXB, NYB, NZB,       &
+                                        spMin, spMax, velBufyt, io_plotVelStr(2), &
+                                        localNumBlocks, globalNumBlocks, offset)
+          end if
+          if(NDIM .gt. 2) then
+            spMin = real(globalFaceZMin(2), kind = single)
+            spMax = real(globalFaceZMax(2), kind = single)
+            call io_h5write_unknowns_sp(io_globalMe, fileID, NXB, NYB, NZB,       &
+                                        spMin, spMax, velBufzt, io_plotVelStr(3), &
+                                        localNumBlocks, globalNumBlocks, offset)
+          end if
+        end if
+
+        offset = offset + 1   
+      end do
+
+      deallocate(velBufxt)
+      if(NDIM .gt. 1) deallocate(velBufyt)
+      if(NDIM .gt. 2) deallocate(velBufzt)
+
+    end if
+
+    deallocate(velBufx)
+    if(NDIM .gt. 1) deallocate(velBufy)
+    if(NDIM .gt. 2) deallocate(velBufz)
+
+  end if        
+#endif 
+
+
+  if(io_doublePrecision) then
+  
+    allocate(facext(NXB+1,NYB,NZB,localNumBlocks))
+    if(NDIM .gt. 1) allocate(faceyt(NXB,NYB+1,NZB,localNumBlocks))
+    if(NDIM .gt. 2) allocate(facezt(NXB,NYB,NZB+1,localNumBlocks))
+  
+    do i = 1, NFACE_VARS
+      
+      offset = 0
+      facext(:,:,:,:) = facevarx(i, io_ilo:io_ihi+1, io_jlo:io_jhi, io_klo:io_khi, :)
+      if(NDIM .gt. 1) faceyt(:,:,:,:) = facevary(i, io_ilo:io_ihi, io_jlo:io_jhi+1, io_klo:io_khi, :)
+      if(NDIM .gt. 2) facezt(:,:,:,:) = facevarz(i, io_ilo:io_ihi, io_jlo:io_jhi, io_klo:io_khi+1, :)
+
+      do jproc = 0, io_globalNumProcs-1
         
         if(io_globalMe == MASTER_PE .AND. jproc /= MASTER_PE) then
-           
-           call MPI_RECV(facext(1,1,1,1), &
-                (NXB+1)*NYB*NZB, &
-                FLASH_REAL, &
-                jproc, 9+i+NUNK_VARS+NSCRATCH_GRID_VARS,&
-                io_globalComm, &
-                status, ierr)
-           
-           
-           
-           if(NDIM .gt. 1) then
-              
-              call MPI_RECV(faceyt(1,1,1,1), &
-                   NXB*(NYB+1)*NZB, &
-                   FLASH_REAL, &
-                   jproc, 9+i+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS, &
-                   io_globalComm, &
-                   status, ierr)
-              
-              
-           end if !end NDIM .gt. 1
-           if(NDIM .gt. 2) then
-              
-              call MPI_RECV(facezt(1,1,1,1), &
-                   NXB*NYB*(NZB+1), &
-                   FLASH_REAL, &
-                   jproc, 9+i+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2),&
-                   io_globalComm, &
-                   status, ierr)
-              
-              
-           end if  !end NDIM .gt. 2
+          call MPI_RECV(facext(1,1,1,1), (NXB+1)*NYB*NZB, FLASH_REAL, jproc,   &
+                        9+i+NUNK_VARS+NSCRATCH_GRID_VARS,                      &
+                        io_globalComm, status, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_RECV(faceyt(1,1,1,1), NXB*(NYB+1)*NZB, FLASH_REAL, jproc, &
+                          9+i+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,         &
+                          io_globalComm, status, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_RECV(facezt(1,1,1,1), NXB*NYB*(NZB+1), FLASH_REAL, jproc, &
+                          9+i+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2),     &
+                          io_globalComm, status, ierr)
+          end if
         end if
+
         if (jproc == io_globalMe .and. jproc /= MASTER_PE) then
-              
-              
-!!!POST FACEVAR SENDS
-#if(NFACE_VARS > 0)
-              
-           call MPI_SEND( &
-                facext(1, 1, 1, 1), &
-                (NXB+1)*NYB*NZB, &
-                FLASH_REAL, &
-                MASTER_PE, &
-                9+i+NUNK_VARS+NSCRATCH_GRID_VARS, &
-                io_globalComm, &
-                ierr)
-           
-              if(NDIM .gt. 1) then
-                 call MPI_SEND( faceyt(1,1,1,1),&
-                      NXB*(NYB+1)*NZB, &
-                      FLASH_REAL, &
-                      MASTER_PE, &
-                      9+i+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS, &
-                      io_globalComm, &
-                      ierr)
-              end if
-              if(NDIM .gt. 2) then
-                 call MPI_SEND(facezt(1,1,1,1), &
-                      NXB*NYB*(NZB+1), &
-                      FLASH_REAL, &
-                      MASTER_PE, &
-                      9+i+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2), &
-                      io_globalComm, &
-                      ierr)
-              end if
-              
-#endif
-           end if
-           
+          call MPI_SEND(facext(1,1,1,1), (NXB+1)*NYB*NZB, FLASH_REAL, MASTER_PE,   &
+                        9+i+NUNK_VARS+NSCRATCH_GRID_VARS,                          &
+                        io_globalComm, ierr)
+          if(NDIM .gt. 1) then
+            call MPI_SEND(faceyt(1,1,1,1), NXB*(NYB+1)*NZB, FLASH_REAL, MASTER_PE, &
+                          9+i+NUNK_VARS+NSCRATCH_GRID_VARS+NFACE_VARS,             &
+                          io_globalComm, ierr)
+          end if
+          if(NDIM .gt. 2) then
+            call MPI_SEND(facezt(1,1,1,1), NXB*NYB*(NZB+1), FLASH_REAL, MASTER_PE, &
+                          9+i+NUNK_VARS+NSCRATCH_GRID_VARS+(NFACE_VARS*2),         &
+                          io_globalComm, ierr)
+          end if
+        end if
                            
         if(io_globalMe == MASTER_PE) then
-           !write data
-#if(NFACE_VARS > 0) 
-
-           
-           if(io_doublePrecision) then
-              
-              call io_h5write_unknowns(io_globalMe, &
-                   fileID, &
-                   NXB + 1, &
-                   NYB, &
-                   NZB, &
-                   facext(:,:,:,:), &
-                   globalFaceXMin(i), &
-                   globalFaceXMax(i), &
-                   io_faceXVarLabels(i), &
-                   localNumBlocks, &
-                   globalNumBlocks, &
-                   offset)
-              
-              if(NDIM .gt. 1) then
-                 
-                 call io_h5write_unknowns(io_globalMe, &
-                      fileID, &
-                      NXB, &
-                      NYB + 1, &
-                      NZB, &
-                      faceyt(:,:,:,:), &
-                      globalFaceYMin(i), &
-                      globalFaceYMax(i), &
-                      io_faceYVarLabels(i), &
-                      localNumBlocks, &
-                      globalNumBlocks, &
-                      offset)
-                 
-              end if
-              if(NDIM .gt. 2) then
-                 
-                 call io_h5write_unknowns(io_globalMe, &
-                      fileID, &
-                      NXB, &
-                      NYB, &
-                      NZB + 1, &
-                      facezt(:,:,:,:), &
-                      globalFaceZMin(i), &
-                      globalFaceZMax(i), &
-                      io_faceZVarLabels(i), &
-                      localNumBlocks, &
-                      globalNumBlocks, &
-                      offset)
-                 
-              end if
-              
-           end if !end io_doublePrecision
-#endif
-           
-        end if !end io_globalMe == MASTER_PE
+          call io_h5write_unknowns(io_globalMe, fileID, NXB+1, NYB, NZB, facext(:,:,:,:),        & 
+                                   globalFaceXMin(i), globalFaceXMax(i), io_faceXVarLabels(i),   &
+                                   localNumBlocks, globalNumBlocks, offset)
+          if(NDIM .gt. 1) then
+            call io_h5write_unknowns(io_globalMe, fileID, NXB, NYB+1, NZB, faceyt(:,:,:,:),      &
+                                     globalFaceYMin(i), globalFaceYMax(i), io_faceYVarLabels(i), &
+                                     localNumBlocks, globalNumBlocks, offset)
+          end if
+          if(NDIM .gt. 2) then
+            call io_h5write_unknowns(io_globalMe, fileID, NXB, NYB, NZB+1, facezt(:,:,:,:),      &
+                                     globalFaceZMin(i), globalFaceZMax(i), io_faceZVarLabels(i), &
+                                     localNumBlocks, globalNumBlocks, offset)
+          end if
+        end if
            
         offset = offset + 1   
-     end do
-  end do
+      end do
+      
+    end do
   
-  deallocate(facext)
-  if(NDIM .gt. 1) deallocate(faceyt)
-  if(NDIM .gt. 2) deallocate(facezt)
-  
-#endif  !! end NFACE_VARS > 0
+    deallocate(facext)
+    if(NDIM .gt. 1) deallocate(faceyt)
+    if(NDIM .gt. 2) deallocate(facezt)
+ 
+  end if 
+#endif
   
   
   deallocate(gidt)
-call MPI_BARRIER (io_globalComm, ierr)
+  call MPI_BARRIER (io_globalComm, ierr)
 
   return
 end subroutine io_writeData

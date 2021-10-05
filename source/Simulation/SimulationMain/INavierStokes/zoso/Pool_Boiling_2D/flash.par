@@ -38,9 +38,9 @@ cp1   = 1.0
 cp2   = 1.36
 
 # Gravity in the +y direction
-gravX =  0.0
-gravY = -1.0
-gravZ =  0.0
+gravX =   0.0
+gravY =  -1.0
+gravZ =   0.0
 
 # sten is the inverse of the Weber number
 sten = 1.0
@@ -54,8 +54,8 @@ Bb = 5.7d-7
 Cb = 2.4d-7
 
 # Constant microlayer heat flux and curvature
-qmic = -0.0026
-fmic = -7.2d-6
+qmic =  0.0
+fmic =  0.0
 
 # Temperatures
 tbulk =  0.0
@@ -69,7 +69,7 @@ twait =  0.4
 ncDensPlus = 0
 
 # Level set sink strength
-sinkB = 1.0
+sinkB = 1.5
 
 # Natural convection parameter
 Ra = 0.00
@@ -81,12 +81,15 @@ lsit = 2
 #       Grid dimensionality and geometry
 geometry	= "cartesian"
 
+# Bodies:
+#sm_NumBodies   =  1
+#gr_sbNumBodies =  1
 
 #       Size of computational volume
 xmin =    0.00
 xmax =    8.00
 ymin =    0.00
-ymax =    8.00
+ymax =    5.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"

@@ -44,6 +44,14 @@ Module Grid_interface
      end subroutine Grid_applyBCEdgeAllUnkVars
   end interface
 
+  interface 
+     subroutine Grid_colocateFaceData (faceVar, axis, blockid, cellData)
+       implicit none
+       integer, intent(IN)  :: faceVar, axis, blockid
+       real, intent(OUT), dimension(:,:,:) :: cellData
+     end subroutine Grid_colocateFaceData
+  end interface
+
   interface Grid_computeUserVars
      subroutine Grid_computeUserVars()
      end subroutine Grid_computeUserVars
@@ -182,6 +190,15 @@ Module Grid_interface
      end subroutine Grid_getCellCoords
   end interface
 
+  interface
+     subroutine Grid_getCellMetrics(axis, blockID, edge, guardcell, metrics, size)
+       integer, intent(in) :: axis, blockID, edge
+       integer, intent(in) :: size
+       logical, intent(in) :: guardcell
+       real,intent(out), dimension(size) :: metrics
+     end subroutine Grid_getCellMetrics
+  end interface
+
   interface 
      subroutine Grid_getDeltas(blockId, del)
        integer, intent(in) :: blockId
@@ -291,6 +308,12 @@ Module Grid_interface
        logical, intent(IN) :: restart
        logical,intent(INOUT) :: particlesInitialized
      end subroutine Grid_initDomain
+  end interface
+
+  interface Grid_writeDomain
+     subroutine Grid_writeDomain(fileNumber)
+       integer, optional, intent(IN) :: fileNumber
+     end subroutine Grid_writeDomain
   end interface
 
   interface Grid_markBlkDerefine

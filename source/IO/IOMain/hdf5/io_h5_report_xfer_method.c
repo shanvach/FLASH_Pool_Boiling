@@ -86,15 +86,19 @@ int io_h5_report_xfer_method(const int myPE, const hid_t hXferList,
       if (global_cause & H5D_MPIO_DATA_TRANSFORMS) {
 	ADD_CAUSE_TO_STR("H5D_MPIO_DATA_TRANSFORMS ");
       }
+# if (H5_VERSION_LE(1,8,12))
       if (global_cause & H5D_MPIO_SET_MPIPOSIX) {
 	ADD_CAUSE_TO_STR("H5D_MPIO_SET_MPIPOSIX ");
       }
+# endif
       if (global_cause & H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
 	ADD_CAUSE_TO_STR("H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES ");
       }
+# if (H5_VERSION_LE(1,8,12))
       if (global_cause & H5D_MPIO_POINT_SELECTIONS) {
 	ADD_CAUSE_TO_STR("H5D_MPIO_POINT_SELECTIONS ");
       }
+# endif
       if (global_cause & H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
 	ADD_CAUSE_TO_STR("H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET ");
       }
