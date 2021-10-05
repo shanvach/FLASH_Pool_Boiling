@@ -38,8 +38,11 @@ USESETUPVARS Grid
 
 #DATAFILES kinematics.input.h5 sm_body.00001.h5
 
+DATAFILES sim_thermalBL.dat sim_nucSites.dat
+
+
 # Tecplot routines:
-REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
+#REQUIRES Simulation/SimulationMain/INavierStokes/2D/Tecplot2D
 
 ## kpd - This is for the HYPRE implementation
   VARIABLE aaJunk  #kpd  for IfactorB

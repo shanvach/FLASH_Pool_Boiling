@@ -35,7 +35,7 @@ thco1 = 1.0
 thco2 = 7.0
 
 cp1   = 1.0
-cp2   = 1.36
+cp2   = 277
 
 # Gravity in the +y direction
 gravX =   0.0
@@ -89,7 +89,7 @@ geometry	= "cartesian"
 xmin =    0.00
 xmax =    8.00
 ymin =    0.00
-ymax =    5.00
+ymax =    8.00
 
 #       Boundary conditions
 xl_boundary_type = "neumann_ins"

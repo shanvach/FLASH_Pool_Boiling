@@ -75,6 +75,8 @@ GUARDCELLS 3
 VARIABLE PTES
 VARIABLE RTES
 
+DATAFILES sim_thermalBL.dat sim_nucSites.dat
+
 #/Generic_Direct
 
 #DATAFILES libtecio.a
