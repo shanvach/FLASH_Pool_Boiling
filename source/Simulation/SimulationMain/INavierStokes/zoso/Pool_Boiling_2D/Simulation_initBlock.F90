@@ -129,7 +129,6 @@ subroutine Simulation_initBlock(blockId)
      read(3,*)fn(bli)
 
   end do
-
   close(3)
 
   open(unit = 2,file = "sim_nucSites.dat")
@@ -145,6 +144,9 @@ subroutine Simulation_initBlock(blockId)
   end do
 
   10 continue
+
+  print*, sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
+  print*, blockId
 
   close(2)
 
