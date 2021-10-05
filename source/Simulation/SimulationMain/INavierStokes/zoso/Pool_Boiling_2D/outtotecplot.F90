@@ -75,7 +75,7 @@
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes,tprds
+           tpuint, tpvint,tptes,tprds,tpdupo,tpxipo,tprhs
 
   real, dimension(NXB,NYB) :: tptes_c
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
@@ -168,7 +168,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam dupo xipo'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -387,6 +387,15 @@
      call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
                              solnData(DUST_VAR,:,:,1),divpp)
 
+     ! RHS of Pressure Poisson equation:
+     ! ----------
+     ! First term of RHS Poisson
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(DUPO_VAR,:,:,1),tpdupo)
+     ! Second term of RHS Poisson
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(XIPO_VAR,:,:,1),tpxipo)
+
 
             ! Velocity derivatives:
             ! -------- -----------            
@@ -529,6 +538,16 @@
 
       arraylb(:,:,1) = sngl(tprds)
       i = TecDat(ijk,arraylb,0)
+
+!--------------Added by Sara to plot RHS pressure poisson equation---------
+      ! write divu:
+      arraylb(:,:,1) = sngl(tpdupo)
+      i = TecDat(ijk,arraylb,0)
+
+      ! write xi:
+      arraylb(:,:,1) = sngl(tpxipo)
+      i = TecDat(ijk,arraylb,0)
+!---------------------------------------------------------------------------      
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)
 !      i1 = TecDat(pqr,arraylb_c,0)

@@ -123,29 +123,18 @@ subroutine Simulation_initBlock(blockId)
 
 
   open(unit = 3,file = "sim_thermalBL.dat")
-
   do bli=1,10
-
      read(3,*)fn(bli)
-
   end do
-
   close(3)
 
   open(unit = 2,file = "sim_nucSites.dat")
-
   do
- 
      nuc_index = sim_nucSiteDens + 1
-
      read(2,*,END=10)sim_nuc_radii(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
-
      sim_nucSiteDens = nuc_index
-
   end do
-
   10 continue
-
   close(2)
 
   sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)

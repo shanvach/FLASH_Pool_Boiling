@@ -721,7 +721,28 @@ subroutine ins_ab2rk3_VD( blockCount, blockList, timeEndAdv, dt)
           blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
      !print *, "dust2",ist,solnData(DUST_VAR,:,:,:)
+     
+     ! Plotting terms for Poisson RHS source vector
 
+     ! Divergence of the predicted velocity (first term of Poisson equation RHS)
+     solnData(DUPO_VAR,                                   &
+          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
+          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
+          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) =   &
+     solnData(DUST_VAR,                                   &
+          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
+          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
+          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))/(dt*ins_alfa) 
+     
+     ! Jump term for multiphase (second term of Poisson equation RHS)
+     solnData(XIPO_VAR,                                   &
+          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
+          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
+          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS)) =   &
+     solnData(SIGP_VAR,                                   &
+          blkLimits(LOW,IAXIS):blkLimits(HIGH,IAXIS),     &
+          blkLimits(LOW,JAXIS):blkLimits(HIGH,JAXIS),     &
+          blkLimits(LOW,KAXIS):blkLimits(HIGH,KAXIS))
 
      !-- Storing density values for velocity correction in next time step -- AD!
 
