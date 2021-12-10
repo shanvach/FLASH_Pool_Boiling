@@ -464,7 +464,7 @@ subroutine Heat_AD( blockCount,blockList,timeEndAdv,dt,dtOld,sweepOrder)
                        blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS))
 
 
-    SolnData(MDOT_VAR,:,:,:) = 0.0
+    !SolnData(MDOT_VAR,:,:,:) = 0.0
 
     ! Release pointers
 
