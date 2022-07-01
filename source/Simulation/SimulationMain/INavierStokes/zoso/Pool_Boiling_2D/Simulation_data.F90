@@ -39,5 +39,7 @@ module Simulation_data
   real, save :: sim_Tbulk
 
   real, save :: sim_sinkB
- 
+!-------------------------------------------------------------------Shantanu
+  real, save :: sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia, sim_start_point, sim_end_point 
+!--------------------------------------------------------------------
 end module Simulation_data

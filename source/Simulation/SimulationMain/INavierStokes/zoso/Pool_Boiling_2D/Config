@@ -54,9 +54,11 @@ PARAMETER waveA          REAL  0.0
 PARAMETER tbulk		 REAL  0.0
 
 PARAMETER tsat	 	 REAL  0.0
+#------------------------------------------------------------------------Shantanu
+PARAMETER twait_hydrophilic		 REAL  0.3
 
-PARAMETER twait		 REAL  0.3
-
+PARAMETER twait_hydrophobic              REAL  0.3
+#--------------------------------------------------------------------------
 PARAMETER sinkB	         REAL  1.0
 
 PARAMETER tnuc		 REAL  0.0
@@ -66,6 +68,19 @@ PARAMETER ncDensPlus	 INTEGER  0
 PARAMETER qmic		 REAL 0.0
 
 PARAMETER fmic		 REAL 0.0
+#----------------------------------------------------------------------Shantanu
+PARAMETER theta_hydrophobic      REAL  0.00
+
+PARAMETER theta_hydrophilic      REAL  0.00
+
+PARAMETER pitch		REAL 0.00
+
+PARAMETER dia           REAL 0.00
+
+PARAMETER start_point   REAL 0.00
+
+PARAMETER end_point     REAL 0.00
+#----------------------------------------------------------------------------
 # Number of guardcells at each boundary
 GUARDCELLS 3
 

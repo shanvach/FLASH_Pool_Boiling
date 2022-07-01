@@ -31,7 +31,11 @@ subroutine Simulation_init()
 
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
-                              sim_sinkB
+                              sim_sinkB,sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia, &
+				sim_start_point,sim_end_point
+!-----------------------------------------------------------------------------Shantanu
+! use Simulation_data, ONLY : sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia,sim_start_point,sim_end_point
+!------------------------------------------------------------------------------
 
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
@@ -72,6 +76,16 @@ subroutine Simulation_init()
   call RuntimeParameters_get('tsat',    ht_Tsat)
 
   call RuntimeParameters_get('sinkB',   sim_sinkB)
+
+!-------------------------------------------------------------Shantanu
+call RuntimeParameters_get("theta_hydrophobic",   sim_theta_hydrophobic)
+call RuntimeParameters_get("theta_hydrophilic",   sim_theta_hydrophilic)
+call RuntimeParameters_get("pitch",   sim_pitch)
+call RuntimeParameters_get("dia",   sim_dia)
+call RuntimeParameters_get("start_point", sim_start_point)
+call RuntimeParameters_get("end_point", sim_end_point)
+ print*,"theta_hydrophobic, theta_hydrophilic, pitch, dia", sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia,sim_start_point,sim_end_point
+!------------------------------------------------------------------
 
 
   sim_gCell = .true.

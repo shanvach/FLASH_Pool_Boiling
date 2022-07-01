@@ -21,9 +21,9 @@ module Heat_AD_data
      real, save    :: ht_dxmin
 
      real, save    :: ht_Ab, ht_Bb, ht_Cb
-
-     real, save    :: ht_tWait
-
+!------------------------------------------------------------------------Shantanu
+     real, save    :: ht_tWait_hydrophobic,ht_twait_hydrophilic
+!---------------------------------------------------------------------------
      real, save    :: ht_psi
 
      real, save    :: ht_Nu_l, ht_Nu_t

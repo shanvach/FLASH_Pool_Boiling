@@ -54,7 +54,10 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("Bb",ht_Bb)
    call RuntimeParameters_get("tsat",ht_Tsat)
    call RuntimeParameters_get("Ra",ht_Ra)
-   call RuntimeParameters_get("twait",ht_tWait)
+!---------------------------------------------------------------------------------------------Shantanu
+   call RuntimeParameters_get("twait_hydrophobic",ht_tWait_hydrophobic)
+   call RuntimeParameters_get("twait_hydrophilic",ht_tWait_hydrophilic)
+!-------------------------------------------------------
    call RuntimeParameters_get("tnuc",ht_Tnuc)
    call RuntimeParameters_get("qmic",ht_qmic)
    call RuntimeParameters_get("fmic",ht_fmic)
@@ -68,7 +71,10 @@ subroutine Heat_AD_init(blockCount,blockList)
      write(*,*) 'ht_Cb     =',ht_Cb
      write(*,*) 'ht_Tsat   =',ht_Tsat
      write(*,*) 'ht_Ra     =',ht_Ra
-     write(*,*) 'ht_tWait  =',ht_tWait
+!--------------------------------------------------------------------------------Shantanu
+     write(*,*) 'ht_tWait_hydrophilic  =',ht_tWait_hydrophilic
+     write(*,*) 'ht_tWait_hydrophobic  =',ht_tWait_hydrophobic
+!---------------------------------------------------------------------------------
      write(*,*) 'sim_sinkB =',sim_sinkB
      write(*,*) 'ht_Tnuc   =',ht_Tnuc
    end if

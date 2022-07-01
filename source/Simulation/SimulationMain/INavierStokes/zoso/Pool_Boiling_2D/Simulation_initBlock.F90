@@ -37,7 +37,9 @@ subroutine Simulation_initBlock(blockId)
                               sim_nuc_site_x, sim_nuc_site_y,&
                               sim_nuc_site_z, sim_nuc_radii,&
                               sim_nucSiteDens, sim_Tbulk
-
+!-------------------------------------------------------------------------Shantanu
+ use Simulation_data, ONLY : sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia,sim_start_point,sim_end_point
+!-----------------------------------------------------------------------------
   use Grid_interface, ONLY : Grid_getDeltas,         &
                              Grid_getBlkIndexLimits, &
                              Grid_getCellCoords,     &
@@ -85,6 +87,30 @@ subroutine Simulation_initBlock(blockId)
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
 
+!-------------------------------------------------------------------------------Shantanu
+ ! real    :: theta_hydrophobic = (165.0/180.0)*acos(-1.0)
+ ! real    :: theta_hydrophilic = (20.0/180.0)*acos(-1.0)
+ ! real    :: pitch  = 0.25
+ ! real    :: dia    = 0.75
+ ! real    :: start_point      = -8
+  real    :: com_dif,x_position
+  integer :: nspots,counter
+  real,dimension(:,:),allocatable :: x_left,x_right
+
+  com_dif  = sim_pitch + sim_dia
+  nspots    = int((sim_end_point - sim_start_point)/com_dif)
+  allocate(x_left(1,nspots))
+  allocate(x_right(1,nspots))
+
+  do i = 1,nspots
+        x_left(1,i) = sim_start_point + (i-1)*com_dif
+        x_right(1,i) = x_left(1,i) + sim_dia
+  end do
+!write(*,*) x_left(1,:)
+!write(*,*) x_right(1,:)
+
+!--------------------------------------------------------------------------------
+
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -119,8 +145,10 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (45.0/180.0)*acos(-1.0)
-
+!--------------------------------------------------------------------------------Shantanu
+!  ht_psi          = (45.0/180.0)*acos(-1.0)
+ ht_psi          = sim_theta_hydrophilic
+!---------------------------------------------------------------------------------
 
   open(unit = 3,file = "sim_thermalBL.dat")
   do bli=1,10
@@ -136,8 +164,20 @@ subroutine Simulation_initBlock(blockId)
   end do
   10 continue
   close(2)
+!-----------------------------------------------------------------------------------------Shantanu
+ sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)          
 
-  sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
+            do nuc_index = 1,sim_nucSiteDens
+		do counter = 1,nspots
+                	if( sim_nuc_site_x(nuc_index) .ge. x_left(1,counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(1,counter)) then
+                        	sim_nuc_site_y(nuc_index) = (sim_nuc_radii(nuc_index))*(cos(sim_theta_hydrophobic))
+                	else
+                	end if
+		end do
+            end do
+
+!-----------------------------------------------------------------------------------------------
+
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -157,6 +197,7 @@ subroutine Simulation_initBlock(blockId)
            !        0.5*del(KAXIS)
 
            zcell = 0.0
+
 
            do nuc_index=1,sim_nucSiteDens
 
@@ -188,17 +229,33 @@ subroutine Simulation_initBlock(blockId)
 
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
+              xcell .ge. sim_start_point .and. xcell .le. sim_end_point .and. &
+              zcell .ge. sim_start_point .and. zcell .le. sim_end_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
         enddo
      enddo
   enddo
-
+!--------------------------------------------------------------------------------Shantanu
   sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
+!-----------------------------------------------------------------------------------------Shantanu
+! sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
+
+            do nuc_index = 1,sim_nucSiteDens
+                do counter = 1,nspots
+                        if( sim_nuc_site_x(nuc_index) .ge. x_left(1,counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(1,counter)) then
+                                sim_nuc_site_y(nuc_index) = (0.05)*(cos(sim_theta_hydrophobic))
+                        else
+                        end if
+                end do
+            end do
+
+!-----------------------------------------------------------------------------------------------
+
+
+!----------------------------------------------------------------------------------
 
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
