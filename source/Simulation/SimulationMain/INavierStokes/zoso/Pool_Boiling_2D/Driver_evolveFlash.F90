@@ -61,6 +61,11 @@ subroutine Driver_evolveFlash()
   use Heat_AD_interface, only: Heat_AD
   !use mph_interface, only : mph_advect
 
+!-------------------------------------------------------------------------------------------------Shantanu
+  use Simulation_data, ONLY : sim_nuc_site_x, sim_nuc_site_y,&
+                              sim_nuc_site_z, sim_nuc_radii,&
+                              sim_nucSiteDens
+!----------------------------------------------------------------------------------------------
   implicit none
 
 #include "constants.h"
@@ -80,7 +85,7 @@ subroutine Driver_evolveFlash()
   logical :: endRun, gridChanged  
 
 
-  integer :: count, firstfileflag
+  integer :: count, firstfileflag,var_counter
 
   logical :: tecplot_flg
 !-----------------------------------------------------------------------------------------
@@ -115,7 +120,21 @@ if (dr_nstep .eq. 1) grid_changed = 1
   if (dr_restart .eqv. .TRUE.) then
      !count = io_plotFileNumber
      count = io_plotFileNumber -1 ! Shizhao
-  else
+ !--------------------------------------------------------------------------------------------------------Shantanu
+
+
+   sim_nucSiteDens = 0
+   open(unit = 2,file = "sim_nucSites.dat")
+  do
+     var_counter = sim_nucSiteDens + 1
+     read(2,*,END=10)sim_nuc_radii(var_counter),sim_nuc_site_x(var_counter),sim_nuc_site_z(var_counter)
+     sim_nucSiteDens = var_counter
+  end do
+  10 continue
+  close(2)
+
+!--------------------------------------------------------------------------------------------------
+     else
      count = 0
   end if
 
