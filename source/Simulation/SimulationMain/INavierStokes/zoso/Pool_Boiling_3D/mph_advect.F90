@@ -44,10 +44,15 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
 
   use Driver_data, ONLY : dr_nstep, dr_simTime
 
-  use Heat_AD_data, ONLY: ht_psi, ht_tWait, ht_Tnuc
+!  use Heat_AD_data, ONLY: ht_psi, ht_tWait, ht_Tnuc
 
   use Simulation_data, ONLY: sim_nuc_site_x, sim_nuc_site_y, sim_nuc_radii, sim_nuc_site_z, sim_nucSiteDens
+!------------------------------------------------------------------------------------------------------------------Shantanu
+  use Heat_AD_data, ONLY: ht_psi, ht_tWait_hydrophilic, ht_tWait_hydrophobic, ht_Tnuc 
 
+ use Simulation_data, ONLY : sim_theta_hydrophobic, sim_theta_hydrophilic,hydrophobicity_ratio,sim_x_start_point,sim_x_end_point,sim_z_start_point,sim_z_end_point
+
+!-------------------------------------------------------------------------------------------------------------------
   ! Following routine is written by Akash
   ! Actual calls written by Shizao and Keegan
   ! This subroutine decouples Multiphase calls from ins_ab2rk3_VD 
@@ -105,7 +110,55 @@ subroutine mph_advect(blockCount, blockList, timeEndAdv, dt,dtOld,sweepOrder)
   real    :: tol=1E-13
 
   real    :: veli
+!--------------------------------------------------------------------------------------------------Shantanu
 
+ ! real    :: theta_hydrophobic = (165.0/180.0)*acos(-1.0)
+ ! real    :: theta_hydrophilic = (20.0/180.0)*acos(-1.0)
+ ! real    :: pitch  = 0.25
+ ! real    :: dia    = 0.75
+ ! real    :: start_point      = -8
+  real    :: x_position,z_position
+  integer :: counter,nspots,count_x,count_z
+  real,dimension(:),allocatable :: x_left,x_right,z_bottom,z_top
+ real, dimension(sim_nucSiteDens) :: waittime
+
+  waittime(:) =  ht_tWait_hydrophilic
+
+!  com_dif  = sim_pitch + sim_dia
+  nspots    = int((sim_x_end_point - sim_x_start_point))
+  allocate(x_left(nspots**2))
+  allocate(x_right(nspots**2))
+  allocate(z_top(nspots**2))
+  allocate(z_bottom(nspots**2))
+
+  x_left(1)  = sim_x_start_point + 0.5*(1-sqrt(hydrophobicity_ratio))
+ ! x_right(1) = x_left(1) + sqrt(hydrophobicity_ratio)
+  z_bottom(1)  = sim_z_start_point +  0.5*(1-sqrt(hydrophobicity_ratio))
+ ! z_top(1) =  z_bottom(1) +  sqrt(hydrophobicity_ratio)
+ do count_z = 1,nspots
+        x_left((count_z -1)*nspots+1) = x_left(1)
+        z_bottom((count_z -1)*nspots+1) = z_bottom(1) + (count_z-1)
+        do count_x = 1,nspots
+                x_left((count_z -1)*nspots + count_x)  =  x_left((count_z -1)*nspots+1) + (count_x-1)
+                z_bottom((count_z -1)*nspots + count_x)  = z_bottom((count_z -1)*nspots+1)
+        end do
+  end do
+  x_right(:)  = x_left(:) + sqrt(hydrophobicity_ratio)
+  z_top(:)  = z_bottom(:) + sqrt(hydrophobicity_ratio)
+
+
+            do nuc_index = 1,sim_nucSiteDens
+                do counter = 1,nspots**2
+                        if( sim_nuc_site_x(nuc_index) .ge. x_left(counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(counter) .and. &
+                                sim_nuc_site_z(nuc_index) .ge. z_bottom(counter) .and. sim_nuc_site_z(nuc_index) .le. z_top(counter)) then
+                                waittime(nuc_index) = ht_tWait_hydrophobic
+                       else
+                        end if
+                end do
+            end do
+
+
+!--------------------------------------------------------------------------------------------------
   do lb = 1,blockCount
 
          blockID = blockList(lb)
@@ -223,42 +276,61 @@ do lb = 1,blockCount
 #if NDIM == 3
         call Grid_getBlkPtr(blockID,facezData,FACEZ)
 #endif
-
-         mph_psi(:,:,blockID)     = ht_psi
+!----------------------------------------------------------------------------------------Shantanu
+        ! mph_psi(:,:,blockID)     = ht_psi
+          mph_psi(:,:,blockID)     = sim_theta_hydrophilic
+!-----------------------------------------------------------------------------------
          mph_psi_adv              = (90.0/180.0)*acos(-1.0)
          mph_vlim                 = 0.2
-
+!-----------------------------------------------------------------------------------------------------------Shantanu
          do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-            if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
-               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0 .or. &
-               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k+1) .le. 0 .or. &
-               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k-1) .le. 0) then
+   !         if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
+   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0 .or. &
+   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k+1) .le. 0 .or. &
+   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k-1) .le. 0) then
+   !
+   !              veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
+   !                                solnData(NRMX_VAR,i,NGUARD+1,k) + &
+   !                     (facezData(VELI_FACE_VAR,i,NGUARD+1,k)+facezData(VELI_FACE_VAR,i,NGUARD+1,k+1))*0.5*&
+   !                                solnData(NRMZ_VAR,i,NGUARD+1,k)
+   !             
+   !              if(veli .ge. 0.0) then
+   !              if(abs(veli) .le. mph_vlim) then
+   !
+   !                   mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
+   !                                           (mph_psi_adv + ht_psi)/2.0d0
+   !
+   !              else
+   !
+   !                   mph_psi(i,k,blockID) = mph_psi_adv
+   !
+   !              end if
+   !              end if
+   !
+   !         end if
 
-                 veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
-                                   solnData(NRMX_VAR,i,NGUARD+1,k) + &
-                        (facezData(VELI_FACE_VAR,i,NGUARD+1,k)+facezData(VELI_FACE_VAR,i,NGUARD+1,k+1))*0.5*&
-                                   solnData(NRMZ_VAR,i,NGUARD+1,k)
-                
-                 if(veli .ge. 0.0) then
-                 if(abs(veli) .le. mph_vlim) then
+                    x_position  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
+                     		  real(i - NGUARD - 1)*del(IAXIS)  +  &
+                    	          0.5*del(IAXIS)
+        		    z_position  = coord(KAXIS) - bsize(KAXIS)/2.0 +  &
+                                  real(k - NGUARD - 1)*del(KAXIS)  +  &
+                                  0.5*del(KAXIS)
+		    do nuc_index = 1,sim_nucSiteDens
+                    	do counter = 1,nspots**2
+                        	if( x_position .ge. x_left(counter) .and. x_position .le. x_right(counter) .and. &
+                                    z_position .ge. z_bottom(counter) .and. z_position .le. z_top(counter)) then
+                                   	 mph_psi(i,k,blockID) = sim_theta_hydrophobic
+                        	else
+                        	end if
+                	end do
+            	   end do
 
-                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-                                              (mph_psi_adv + ht_psi)/2.0d0
-
-                 else
-
-                      mph_psi(i,k,blockID) = mph_psi_adv
-
-                 end if
-                 end if
-
-            end if
 
          end do
          end do
-
+!---------------------------------------------------------------------------------------------------------------------------------
      ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
         call Grid_releaseBlkPtr(blockID,facexData,FACEX)
@@ -559,11 +631,15 @@ do nuc_index =1,sim_nucSiteDens
   end if
 
   mph_isAttachedOld(nuc_index) = mph_isAttachedAll(nuc_index)
-
+!-----------------------------------------------------------------------------------------Shantanu
   if( (mph_isAttachedAll(nuc_index) .eqv. .false.) .and. &
-      (mph_timeStampAll(nuc_index) + ht_tWait .le. dr_simTime) .and. &
+      (mph_timeStampAll(nuc_index) + waittime(nuc_index) .le. dr_simTime) .and. &
       (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
+!  if( (mph_isAttachedAll(nuc_index) .eqv. .false.) .and. &
+!      (mph_timeStampAll(nuc_index) +  0.2 .le. dr_simTime) .and. &
+!      (mph_nucSiteTemp(nuc_index) .ge. ht_Tnuc) )then
 
+!-----------------------------------------------------------------------------------------------------
   do lb = 1,blockCount
 
      blockID = blockList(lb)

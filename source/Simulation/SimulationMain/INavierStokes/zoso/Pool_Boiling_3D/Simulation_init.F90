@@ -28,11 +28,12 @@ subroutine Simulation_init()
   use Driver_data, ONLY: dr_simTime
 
   use Driver_interface, ONLY : Driver_abortFlash
-
+!-------------------------------------------------------------------------------------------------------------------Shantanu
   use Simulation_data, ONLY : sim_xMin, sim_yMin, &
                               sim_xMax, sim_yMax, sim_gCell, sim_waveA, sim_Tbulk, &
-                              sim_sinkB
-
+                              sim_sinkB,sim_theta_hydrophobic, sim_theta_hydrophilic,hydrophobicity_ratio, &
+                                sim_x_start_point,sim_x_end_point,sim_z_start_point,sim_z_end_point
+!-------------------------------------------------------------------------------------------------------------------
   use RuntimeParameters_interface, ONLY : RuntimeParameters_get
  
   use Heat_AD_data, ONLY: ht_fmic, ht_qmic, ht_Tsat
@@ -73,6 +74,18 @@ subroutine Simulation_init()
 
   call RuntimeParameters_get('sinkB',   sim_sinkB)
 
+!-------------------------------------------------------------Shantanu
+call RuntimeParameters_get("theta_hydrophobic",   sim_theta_hydrophobic)
+call RuntimeParameters_get("theta_hydrophilic",   sim_theta_hydrophilic)
+call RuntimeParameters_get("hydrophobicity_ratio",   hydrophobicity_ratio)
+call RuntimeParameters_get("x_start_point", sim_x_start_point)
+call RuntimeParameters_get("x_end_point", sim_x_end_point)
+call RuntimeParameters_get("z_start_point", sim_z_start_point)
+call RuntimeParameters_get("z_end_point", sim_z_end_point)
+
+ print*,"theta_hydrophobic, theta_hydrophilic, hydrophobicity_ratio", sim_theta_hydrophobic, sim_theta_hydrophilic,&
+                    hydrophobicity_ratio,sim_x_start_point,sim_x_end_point,sim_z_start_point,sim_z_end_point
+!------------------------------------------------------------------
 
   sim_gCell = .true.
 

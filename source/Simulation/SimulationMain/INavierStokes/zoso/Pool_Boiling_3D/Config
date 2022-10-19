@@ -69,6 +69,30 @@ PARAMETER ncDensPlus	 INTEGER  0
 PARAMETER qmic		 REAL 0.0
 
 PARAMETER fmic		 REAL 0.0
+
+
+#------------------------------------------------------------------------Shantanu
+PARAMETER twait_hydrophilic              REAL  0.3
+
+PARAMETER twait_hydrophobic              REAL  0.3
+#----------------------------------------------------------------------Shantanu
+PARAMETER theta_hydrophobic      REAL  0.00
+
+PARAMETER theta_hydrophilic      REAL  0.00
+
+PARAMETER hydrophobicity_ratio         REAL 0.00
+
+PARAMETER z_start_point           REAL 0.00
+
+PARAMETER z_end_point           REAL 0.00
+
+PARAMETER x_start_point   REAL 0.00
+
+PARAMETER x_end_point     REAL 0.00
+#----------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+
 # Number of guardcells at each boundary
 GUARDCELLS 3
 

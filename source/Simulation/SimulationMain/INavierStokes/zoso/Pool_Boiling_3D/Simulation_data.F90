@@ -37,6 +37,9 @@ module Simulation_data
   integer, save :: sim_nucSiteDens
 
   real, save :: sim_Tbulk
+!-------------------------------------------------------------------Shantanu
+  real, save :: sim_theta_hydrophobic, sim_theta_hydrophilic, hydrophobicity_ratio, sim_x_start_point, sim_x_end_point, sim_z_start_point, sim_z_end_point
+!--------------------------------------------------------------------
 
   real, save :: sim_sinkB
 

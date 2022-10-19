@@ -38,6 +38,11 @@ subroutine Simulation_initBlock(blockId)
                               sim_nuc_site_z, sim_nuc_radii,&
                               sim_nucSiteDens, sim_Tbulk
 
+!-------------------------------------------------------------------------Shantanu
+  use Simulation_data, ONLY : sim_theta_hydrophobic, sim_theta_hydrophilic,hydrophobicity_ratio,sim_x_start_point,sim_x_end_point,sim_z_start_point,sim_z_end_point
+!-----------------------------------------------------------------------------
+
+
   use Grid_interface, ONLY : Grid_getDeltas,         &
                              Grid_getBlkIndexLimits, &
                              Grid_getCellCoords,     &
@@ -85,6 +90,47 @@ subroutine Simulation_initBlock(blockId)
   real :: Nuc_dfun
   integer :: Nuc_Index, bli
 
+!-------------------------------------------------------------------------------Shantanu
+ ! real    :: theta_hydrophobic = (165.0/180.0)*acos(-1.0)
+ ! real    :: theta_hydrophilic = (20.0/180.0)*acos(-1.0)
+ ! real    :: pitch  = 0.25
+ ! real    :: dia    = 0.75
+ ! real    :: start_point      = -8
+  real    :: com_dif,x_position
+  integer :: counter,nspots,count_x,count_z,n_total
+  real,dimension(:),allocatable :: x_left,x_right,z_bottom,z_top
+
+!  com_dif  = sim_pitch + sim_dia
+  nspots    = int((sim_x_end_point - sim_x_start_point))
+  n_total = nspots**2
+  allocate(x_left(n_total))
+  allocate(x_right(n_total))
+  allocate(z_top(n_total))
+  allocate(z_bottom(n_total))
+
+  x_left(1)  = sim_x_start_point + 0.5*(1-sqrt(hydrophobicity_ratio))
+ ! x_right(1) = x_left(1) + sqrt(hydrophobicity_ratio)
+  z_bottom(1)  = sim_z_start_point +  0.5*(1-sqrt(hydrophobicity_ratio))
+ ! z_top(1) =  z_bottom(1) +  sqrt(hydrophobicity_ratio)
+ do count_z = 1,nspots
+        x_left((count_z -1)*nspots+1) = x_left(1)
+        z_bottom((count_z -1)*nspots+1) = z_bottom(1) + (count_z-1)
+        do count_x = 1,nspots
+                x_left((count_z -1)*nspots + count_x)  =  x_left((count_z -1)*nspots+1) + (count_x-1)
+                z_bottom((count_z -1)*nspots + count_x)  = z_bottom((count_z -1)*nspots+1)
+        end do
+  end do
+  x_right(:)  = x_left(:) + sqrt(hydrophobicity_ratio)
+  z_top(:)  = z_bottom(:) + sqrt(hydrophobicity_ratio)
+
+!  write(*,*) x_left(:)
+
+do counter=1,n_total
+	write(*,*) x_left(counter),x_right(counter),z_bottom(counter),z_top(counter)
+end do
+!--------------------------------------------------------------------------------
+
+
   !----------------------------------------------------------------------
   
   !if (myPE .eq. MASTER_PE) write(*,*) 'InitBlockTime =',dr_simTime
@@ -119,8 +165,10 @@ subroutine Simulation_initBlock(blockId)
   solnX = 0.50007326145904204295640899471226
 
   sim_nucSiteDens = 0
-  ht_psi          = (45.0/180.0)*acos(-1.0)
-
+!--------------------------------------------------------------------------------Shantanu
+!  ht_psi          = (45.0/180.0)*acos(-1.0)
+  ht_psi = sim_theta_hydrophilic 
+!-------------------------------------------------------------------------------
 
   open(unit = 3,file = "sim_thermalBL.dat")
 
@@ -147,8 +195,19 @@ subroutine Simulation_initBlock(blockId)
   10 continue
 
   close(2)
-
+!-------------------------------------------------------------------------------------------Shantanu
   sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
+            do nuc_index = 1,sim_nucSiteDens
+                do counter = 1,nspots**2
+                        if( sim_nuc_site_x(nuc_index) .ge. x_left(counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(counter) .and. & 
+				sim_nuc_site_z(nuc_index) .ge. z_bottom(counter) .and. sim_nuc_site_z(nuc_index) .le. z_top(counter)) then
+                                sim_nuc_site_y(nuc_index) = (sim_nuc_radii(nuc_index))*(cos(sim_theta_hydrophobic))
+                        else
+                        end if
+                end do
+            end do
+
+!-------------------------------------------------------------------------------------------------
 
   !- kpd - Initialize the distance function in the 1st quadrant 
   do k=1,blkLimitsGC(HIGH,KAXIS)
@@ -194,19 +253,30 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
-
+!----------------------------------------------------------------------------------------Shantanu
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-              zcell .ge. -5.0 .and. zcell .le. 5.0) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
+              xcell .ge. sim_x_start_point .and. xcell .le. sim_x_end_point .and. &
+              zcell .ge. sim_z_start_point .and. zcell .le. sim_x_start_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
-
+!-------------------------------------------------------------------------------------
         enddo
      enddo
   enddo
-
+!--------------------------------------------------------------------------------------Shantanu
   sim_nuc_site_y(1:sim_nucSiteDens) = 0.1*cos(ht_psi)
-
+            do nuc_index = 1,sim_nucSiteDens
+                do counter = 1,nspots**2
+                        if( sim_nuc_site_x(nuc_index) .ge. x_left(counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(counter) .and. &
+                                sim_nuc_site_z(nuc_index) .ge. z_bottom(counter) .and. sim_nuc_site_z(nuc_index) .le. z_top(counter)) then
+                                sim_nuc_site_y(nuc_index) = (0.1)*(cos(sim_theta_hydrophobic))
+                        else
+                        end if
+                end do
+            end do
+	
+	
+!--------------------------------------------------------------------------------------
 #if(0)
   !- wsz - Initialize the velocity in the 1st quadrant 
   do k=1,1

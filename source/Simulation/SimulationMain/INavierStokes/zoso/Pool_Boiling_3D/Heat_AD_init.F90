@@ -58,6 +58,10 @@ subroutine Heat_AD_init(blockCount,blockList)
    call RuntimeParameters_get("tnuc",ht_Tnuc)
    call RuntimeParameters_get("qmic",ht_qmic)
    call RuntimeParameters_get("fmic",ht_fmic)
+!---------------------------------------------------------------------------------------------Shantanu
+   call RuntimeParameters_get("twait_hydrophobic",ht_tWait_hydrophobic)
+   call RuntimeParameters_get("twait_hydrophilic",ht_tWait_hydrophilic)
+!-------------------------------------------------------
 
    if (ins_meshMe .eq. MASTER_PE) then
      write(*,*) 'ht_Pr     =',ht_Pr
