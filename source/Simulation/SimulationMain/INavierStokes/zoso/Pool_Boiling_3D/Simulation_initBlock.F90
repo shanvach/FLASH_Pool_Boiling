@@ -257,7 +257,7 @@ end do
            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
               xcell .ge. sim_x_start_point .and. xcell .le. sim_x_end_point .and. &
-              zcell .ge. sim_z_start_point .and. zcell .le. sim_x_start_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
+              zcell .ge. sim_z_start_point .and. zcell .le. sim_z_end_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 !-------------------------------------------------------------------------------------
         enddo
@@ -303,7 +303,9 @@ end do
   solnData(DELP_VAR,:,:,:) = 0.0
   solnData(DUST_VAR,:,:,:) = 0.0
   solnData(TVIS_VAR,:,:,:) = 0.0
-
+!---------------------------------------------------Shantanu
+  solnData(CON_ANGLE_VAR,:,:,:) = 0.0
+!-----------------------------------------------
   solnData(CURV_VAR,:,:,:) = 0.0
   solnData(SIGP_VAR,:,:,:) = 0.0
   solnData(VISC_VAR,:,:,:) = 0.0

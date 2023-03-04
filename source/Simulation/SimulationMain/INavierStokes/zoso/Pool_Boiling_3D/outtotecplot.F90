@@ -56,7 +56,7 @@
             tpdwdxcorn, tpdwdycorn, tpdwdzcorn,&
             vortx,vorty,vortz,omg,             &
             Sxy,Syz,Sxz,Oxy,Oyz,Oxz,Qcr,divpp,TVtpp,&
-            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp,tprds
+            tempp,mdotp,tnlp,tnvp,nxp,nyp,nzp,tprds,tpconangle
 
 
   real*4 arraylb(NXB+1,NYB+1,NZB+1)
@@ -173,7 +173,7 @@
 
 
   i = TecIni('AMR3D'//NULLCHR,                            &
-             'x y z u v w p Phi T mdot Hflux'//NULLCHR,  &
+             'x y z u v w p Phi T mdot Hflux contact_angle'//NULLCHR,  &
              filename//NULLCHR,                           &
              './IOData/'//NULLCHR,                  &
              Debug,VIsdouble)
@@ -414,7 +414,12 @@
 
      call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
                              solnData(RTES_VAR,:,:,:),tprds)
-         
+ !------------------------------------------------------------------------Shantanu
+
+     call centervals2corners(NGUARD,NXB,NYB,NZB,nxc,nyc,nzc,&
+                             solnData(CON_ANGLE_VAR,:,:,:),tpconangle)
+
+!------------------------------------------------------------------------------
      ! VORTICITY:
      ! ---------
      ! Corner values of vorticity:
@@ -571,7 +576,11 @@
 
      arraylb = sngl(tprds)
      i = TecDat(ijk,arraylb,0)
+!--------------------------------------------Shantanu
+     arraylb = sngl(tpconangle)
+     i = TecDat(ijk,arraylb,0)
 
+!----------------------------------------
      ! Write Div Ustar:
 !!$     do k=1,NZB+1
 !!$        do j=1,NYB+1

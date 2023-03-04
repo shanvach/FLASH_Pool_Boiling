@@ -282,34 +282,36 @@ do lb = 1,blockCount
 !-----------------------------------------------------------------------------------
          mph_psi_adv              = (90.0/180.0)*acos(-1.0)
          mph_vlim                 = 0.2
+         ht_psi                   = sim_theta_hydrophilic
+	!solnData(CON_ANGLE_VAR,:,:,:)  = sim_theta_hydrophilic
 !-----------------------------------------------------------------------------------------------------------Shantanu
          do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
-   !         if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
-   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0 .or. &
-   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k+1) .le. 0 .or. &
-   !            solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k-1) .le. 0) then
-   !
-   !              veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
-   !                                solnData(NRMX_VAR,i,NGUARD+1,k) + &
-   !                     (facezData(VELI_FACE_VAR,i,NGUARD+1,k)+facezData(VELI_FACE_VAR,i,NGUARD+1,k+1))*0.5*&
-   !                                solnData(NRMZ_VAR,i,NGUARD+1,k)
-   !             
-   !              if(veli .ge. 0.0) then
-   !              if(abs(veli) .le. mph_vlim) then
-   !
-   !                   mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-   !                                           (mph_psi_adv + ht_psi)/2.0d0
-   !
-   !              else
-   !
-   !                   mph_psi(i,k,blockID) = mph_psi_adv
-   !
-   !              end if
-   !              end if
-   !
-   !         end if
+            if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
+               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0 .or. &
+               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k+1) .le. 0 .or. &
+               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i,NGUARD+1,k-1) .le. 0) then
+   
+                 veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
+                                   solnData(NRMX_VAR,i,NGUARD+1,k) + &
+                        (facezData(VELI_FACE_VAR,i,NGUARD+1,k)+facezData(VELI_FACE_VAR,i,NGUARD+1,k+1))*0.5*&
+                                   solnData(NRMZ_VAR,i,NGUARD+1,k)
+                
+                 if(veli .ge. 0.0) then
+                 if(abs(veli) .le. mph_vlim) then
+   
+                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(mph_vlim))*abs(veli) + &
+                                              (ht_psi)
+   
+                 else
+   
+                      mph_psi(i,k,blockID) = mph_psi_adv
+   
+                 end if
+                 end if
+   
+            end if
 
                     x_position  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
                      		  real(i - NGUARD - 1)*del(IAXIS)  +  &
@@ -326,10 +328,13 @@ do lb = 1,blockCount
                         	end if
                 	end do
             	   end do
-
+!--------------------------------------------------------------------------Shantanu
+             solnData(CON_ANGLE_VAR,i,:,k) = (180.0/acos(-1.0))*mph_psi(i,k,blockID)
+!---------------------------------------------------------------------------
 
          end do
          end do
+
 !---------------------------------------------------------------------------------------------------------------------------------
      ! Release pointers:
         call Grid_releaseBlkPtr(blockID,solnData,CENTER)
@@ -478,6 +483,9 @@ enddo
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
     gcMask(AAJUNK_VAR) = .TRUE.
+!------------------------------------------------------------------------------Shantanu
+    gcMask(CON_ANGLE_VAR) = .TRUE.
+!------------------------------------------------------------------------------
 #ifdef FLASH_GRID_PARAMESH
     intval = 1
     !intval = 2

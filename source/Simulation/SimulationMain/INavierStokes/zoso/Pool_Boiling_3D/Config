@@ -102,6 +102,10 @@ GUARDCELLS 3
 VARIABLE PTES
 VARIABLE RTES
 
+#---------------------------------------Shantanu
+VARIABLE CON_ANGLE
+#--------------------------------
+
 #/Generic_Direct
 
 #DATAFILES libtecio.a

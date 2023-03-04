@@ -14,7 +14,7 @@ MPI_PATH   = /nasa/sgi/mpt/2.15r20
 
 HDF4_PATH  =
 
-HDF5_PATH  = /home3/adhruv/hdf5-1.8.20_NEW/hdf5
+HDF5_PATH  = /home3/svachhan/hdf5-1.8.20_NEW/hdf5
 ZLIB_PATH  = 
 
 PAPI_PATH  =
@@ -23,10 +23,10 @@ PAPI_FLAGS =
 NCMPI_PATH = 
 MPE_PATH   =
 
-BLAS_PATH    = /home3/adhruv/openblas
+BLAS_PATH    = /home3/svachhan/openblas
 LAPACK_PATH  = 
-HYPRE_PATH = /home3/adhruv/hypre-2.11.2_NEW/src/hypre
-SUPERLU_PATH = /home3/adhruv/SuperLU_4.3
+HYPRE_PATH = /home3/svachhan/hypre-2.11.2_NEW/src/hypre
+SUPERLU_PATH = /home3/svachhan/SuperLU_4.3
 
 # Current directory:
 export cur-dir := $(shell pwd)
