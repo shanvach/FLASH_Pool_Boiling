@@ -1,1 +1,0 @@
-../source/physics/sourceTerms/Stir/Stir.F90
