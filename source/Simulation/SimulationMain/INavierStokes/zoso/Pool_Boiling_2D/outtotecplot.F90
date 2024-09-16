@@ -75,7 +75,7 @@
            tpdudxcorn, tpdudycorn, &
            tpdvdxcorn, tpdvdycorn, &
            vortz,divpp,tpdens,tpdensy,tpdfun,tpvisc,tpcurv,tpt,tppfun,tnx,tny,tmdot,txl,tyl,txv,tyv,tpth,tsigp, &
-           tpuint, tpvint,tptes,tprds,tpdupo,tpxipo,tprhs
+           tpuint, tpvint,tptes,tprds,tpdupo,tpxipo,tprhs,tpconangle
 
   real, dimension(NXB,NYB) :: tptes_c
   real, dimension(NXB+2*NGUARD,NYB+2*NGUARD) :: tptes_d
@@ -168,7 +168,7 @@
   ! write solution data to data.XXXX.XX
   write(filename,'("./IOData/data.",i4.4,".",i6.6,".plt")') count, mype
 
-  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam dupo xipo'//NULLCHR,   &
+  i = TecIni('AMR2D'//NULLCHR,'x y u v p t denX denY dfun pfun visc curv vort div nx ny mdot Tnl Tnv smrh sigp uint vint alph diam dupo xipo Contact_angle'//NULLCHR,   &
            filename//NULLCHR,'./IOData/'//NULLCHR, &
            Debug,VIsdouble)
 
@@ -234,7 +234,8 @@
      tptes_c = 0.
      tptes_d = 0.
      tprds = 0.
-
+     
+     tpconangle = 0.
      xedge = coord(IAXIS) - bsize(IAXIS)/2.0 + dx*intsx;
      xcell = xedge(:) + dx/2.0;
      !xe_c = xcell(1:NXB); 
@@ -352,6 +353,12 @@
      tprds   = 2*mph_radius
      !tprds = ins_convvel(HIGH,JAXIS)
 
+!---------------------------------------------------------------------Shantanu
+
+     call centervals2corners(NGUARD,NXB,NYB,nxc,nyc, &
+                            solnData(CON_ANGLE_VAR,:,:,1),tpconangle)
+
+!----------------------------------------------------------------------------------
      ! Density: dens(nxb+1,nyb+1)
      ! -------------------------------
 
@@ -547,6 +554,12 @@
       ! write xi:
       arraylb(:,:,1) = sngl(tpxipo)
       i = TecDat(ijk,arraylb,0)
+
+      ! write contant angle:
+      arraylb(:,:,1) = sngl(tpconangle)
+      i = TecDat(ijk,arraylb,0)
+
+
 !---------------------------------------------------------------------------      
 
 !      arraylb_c(:,:,1) = sngl(tptes_c)

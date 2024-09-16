@@ -545,7 +545,7 @@ enddo
 if(ins_meshMe .eq. MASTER_PE) then
         print *,"Nucleation site, truth value, temperature and time stamp"
         do nuc_index = 1,sim_nucSiteDens
-              print *,mph_isAttachedAll(nuc_index),mph_nucSiteTemp(nuc_index),mph_timeStampAll(nuc_index)
+              print *,mph_isAttachedAll(nuc_index),mph_nucSiteTemp(nuc_index),mph_timeStampAll(nuc_index),waittime(nuc_index),sim_nuc_site_x(nuc_index),sim_nuc_site_z(nuc_index)
         end do
 end if
 

@@ -249,6 +249,9 @@ subroutine gr_hypreSetupGrid (blockCount, blockList)
     end if
 #if NDIM == 2
    if (gr_meshMe .eq. 0) print*,"PERIODICITY X,Y: ",iXper,iYper
+!----------------------------------------------------------------Shantanu
+!  print*,"TEST"
+!--------------------------------------------------------------------
    call HYPRE_SStructGridSetPeriodic(gr_hypreGrid, part, [iYper,iXper,0], ierr)
    !print*,"Set Periodic error?", ierr
 #endif

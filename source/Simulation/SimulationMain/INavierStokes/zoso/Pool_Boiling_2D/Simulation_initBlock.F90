@@ -226,11 +226,12 @@ subroutine Simulation_initBlock(blockId)
            !if(solnData(TEMP_VAR,i,j,k) .lt. sim_Tbulk) solnData(TEMP_VAR,i,j,k) = sim_Tbulk
            !if(solnData(TEMP_VAR,i,j,k) .gt. 1.0) solnData(TEMP_VAR,i,j,k) = 1.0
    
-
-           solnData(TEMP_VAR,i,j,k) = sim_Tbulk
-           if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
-              xcell .ge. sim_start_point .and. xcell .le. sim_end_point .and. &
-              zcell .ge. sim_start_point .and. zcell .le. sim_end_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
+!------------------------------------------------------------------------
+            !print *,sim_start_point,sim_end_point
+            solnData(TEMP_VAR,i,j,k) = sim_Tbulk
+            if(ycell .le. 0.2  .and. & !solnData(DFUN_VAR,i,j,k) .lt. 0.0 .and. &
+               xcell .ge. sim_start_point .and. xcell .le. sim_end_point .and. &
+               zcell .ge. sim_start_point .and. zcell .le. sim_end_point) solnData(TEMP_VAR,i,j,k) = (0.2 - ycell)/0.2  
 
            !if(solnData(DFUN_VAR,i,j,k) .ge. 0.0) solnData(TEMP_VAR,i,j,k) = ht_Tsat
 
@@ -238,19 +239,19 @@ subroutine Simulation_initBlock(blockId)
      enddo
   enddo
 !--------------------------------------------------------------------------------Shantanu
-  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
+!  sim_nuc_site_y(1:sim_nucSiteDens) = 0.05*cos(ht_psi)
 
 !-----------------------------------------------------------------------------------------Shantanu
 ! sim_nuc_site_y(1:sim_nucSiteDens) = sim_nuc_radii(1:sim_nucSiteDens)*cos(ht_psi)
 
-            do nuc_index = 1,sim_nucSiteDens
-                do counter = 1,nspots
-                        if( sim_nuc_site_x(nuc_index) .ge. x_left(1,counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(1,counter)) then
-                                sim_nuc_site_y(nuc_index) = (0.05)*(cos(sim_theta_hydrophobic))
-                        else
-                        end if
-                end do
-            end do
+!            do nuc_index = 1,sim_nucSiteDens
+!                do counter = 1,nspots
+!                        if( sim_nuc_site_x(nuc_index) .ge. x_left(1,counter) .and. sim_nuc_site_x(nuc_index) .le. x_right(1,counter)) then
+!                                sim_nuc_site_y(nuc_index) = (0.05)*(cos(sim_theta_hydrophobic))
+!                        else
+!                        end if
+!                end do
+!            end do
 
 !-----------------------------------------------------------------------------------------------
 
@@ -283,7 +284,9 @@ subroutine Simulation_initBlock(blockId)
   solnData(DELP_VAR,:,:,:) = 0.0
   solnData(DUST_VAR,:,:,:) = 0.0
   solnData(TVIS_VAR,:,:,:) = 0.0
-
+!-------------------------------------------------Shantanu
+ solnData(CON_ANGLE_VAR,:,:,:) = 0.0
+!----------------------------------------------
   solnData(CURV_VAR,:,:,:) = 0.0
   solnData(SIGP_VAR,:,:,:) = 0.0
   solnData(VISC_VAR,:,:,:) = 0.0

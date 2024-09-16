@@ -1,0 +1,1 @@
+../source/physics/materialProperties/MagneticResistivity/MagneticResistivity_fullState.F90

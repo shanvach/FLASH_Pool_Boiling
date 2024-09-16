@@ -381,7 +381,7 @@
                   
             !presvar(i,j) = solnData(DUST_VAR,i,j,1)
             presvar(i,j) = solnData(PRES_VAR,i,j,1)
-            phivar(i,j) = solnData(LMDA_VAR,i,j,1)
+        !    phivar(i,j) = solnData(LMDA_VAR,i,j,1)
 
          enddo
       enddo

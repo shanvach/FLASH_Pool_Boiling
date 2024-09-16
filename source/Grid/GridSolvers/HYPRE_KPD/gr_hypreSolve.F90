@@ -59,7 +59,9 @@ subroutine gr_hypreSolve()
   call Timers_start("gr_hypreSolve")     
   
   call HYPRE_SStructVectorAssemble(gr_hypreVecB, ierr)  
-  
+ !------------------------------------------------------------Shantanu
+!	print*,"TEST"
+!-------------------------------------------------------------------- 
   num_iterations   = 0  
   final_res_norm   = 0.0
   

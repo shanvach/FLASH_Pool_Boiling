@@ -199,6 +199,7 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
                              Grid_getBlkPtr,         &
                              Grid_releaseBlkPtr
 
+  use Simulation_data, ONLY : sim_theta_hydrophobic, sim_theta_hydrophilic, sim_pitch, sim_dia,sim_start_point,sim_end_point
 
   use Driver_data, ONLY : dr_simTime, dr_dt
 
@@ -368,8 +369,8 @@ subroutine Grid_bcApplyToRegionSpecialized(bcType,gridDataStruct,&
 
                      zcell = 0.0
 
-                     if(xcell .ge. -5.0 .and. xcell .le. 5.0 .and. &
-                        zcell .ge. -5.0 .and. zcell .le. 5.0) then
+                     if(xcell .ge. sim_start_point .and. xcell .le. sim_end_point .and. &
+                        zcell .ge. sim_start_point .and. zcell .le. sim_end_point) then
 
                         regionData(i,jjj,kkk,ivar) = 2*ht_Twall_low - regionData(k-i,jjj,kkk,ivar)
 

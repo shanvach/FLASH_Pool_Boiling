@@ -262,43 +262,49 @@ do lb = 1,blockCount
 #endif
 !-----------------------------------------------------------------------Shantanu
          mph_psi(:,:,blockID)     = sim_theta_hydrophilic
+	 !mph_psi_adv = (90.0/180.0)*acos(-1.0)
+	 mph_psi_adv = (45.0/180.0)*acos(-1.0)
+         ht_psi = sim_theta_hydrophilic
+	 mph_vlim = 0.2
 !-------------------------------------------------------------------------
          do k=blkLimits(LOW,KAXIS),blkLimits(HIGH,KAXIS)
          do i=blkLimits(LOW,IAXIS),blkLimits(HIGH,IAXIS)
 
 !---------------------------------------------------------------------------Shantanu
 
-!            if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
-!               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0) then
-!             
-!                 veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
-!                                   solnData(NRMX_VAR,i,NGUARD+1,k)
-!
-!                 if(veli .ge. 0.0) then
-!                 if(abs(veli) .le. mph_vlim) then
-!
-!                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(2*mph_vlim))*abs(veli) + &
-!                                              (mph_psi_adv + ht_psi)/2.0d0
-!
-!                 else
-!        
-!                      mph_psi(i,k,blockID) = (30.0/180.0)*acos(-1.0)
-!                        
-!                 end if
-!                 end if
-!
-!            end if
+            if(solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i+1,NGUARD+1,k) .le. 0 .or. &
+               solnData(DFUN_VAR,i,NGUARD+1,k)*solnData(DFUN_VAR,i-1,NGUARD+1,k) .le. 0) then
+             
+                 veli = (facexData(VELI_FACE_VAR,i,NGUARD+1,k)+facexData(VELI_FACE_VAR,i+1,NGUARD+1,k))*0.5*&
+                                   solnData(NRMX_VAR,i,NGUARD+1,k)
+
+                 if(veli .ge. 0.0) then
+                 if(abs(veli) .le. mph_vlim) then
+
+                      mph_psi(i,k,blockID) = ((mph_psi_adv - ht_psi)/(mph_vlim))*abs(veli) + &
+                                              (ht_psi)
+       
+                 else
+       
+                      mph_psi(i,k,blockID) = mph_psi_adv
+                        
+                 end if
+                 end if
+
+           end if
 
               x_position  = coord(IAXIS) - bsize(IAXIS)/2.0 +  &
                     real(i - NGUARD - 1)*del(IAXIS)  +  &
                     0.5*del(IAXIS)
 
-            do counter = 1,nspots
+           do counter = 1,nspots
 		if( x_position .ge. x1(1,counter) .and. x_position .le. x2(1,counter)) then
 			mph_psi(i,k,blockID) = sim_theta_hydrophobic
 		else
 		end if
 	    end do
+
+	solnData(CON_ANGLE_VAR,i,:,1) = (180.0/acos(-1.0))*mph_psi(i,k,blockID)
 !------------------------------------------------------------------------------------
          end do
          end do
@@ -456,6 +462,11 @@ enddo
     gcMask = .FALSE.
     gcMask(DFUN_VAR) = .TRUE.
     gcMask(AAJUNK_VAR) = .TRUE.
+
+!----------------------------------------------------------------------------Shantanu
+
+    gcMask(CON_ANGLE_VAR) = .TRUE.
+!----------------------------------------------------------------------------------
 #ifdef FLASH_GRID_PARAMESH
     intval = 1
     !intval = 2
@@ -644,7 +655,8 @@ do nuc_index =1,sim_nucSiteDens
 
          zcell = 0.0
 
-         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
+!         nuc_dfun  = 0.05 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
+         nuc_dfun  = 0.2 - sqrt((xcell-sim_nuc_site_x(nuc_index))**2+(ycell-sim_nuc_site_y(nuc_index))**2+(zcell-sim_nuc_site_z(nuc_index))**2)
 
          solnData(DFUN_VAR,i,j,k) = max(solnData(DFUN_VAR,i,j,k),nuc_dfun)
 

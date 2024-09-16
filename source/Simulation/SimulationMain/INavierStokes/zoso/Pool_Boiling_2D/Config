@@ -89,7 +89,11 @@ GUARDCELLS 3
 
 VARIABLE PTES
 VARIABLE RTES
+#---------------------------------------Shantanu
 
+VARIABLE CON_ANGLE
+
+#---------------------------------------
 DATAFILES sim_thermalBL.dat sim_nucSites.dat
 
 #/Generic_Direct

@@ -13,7 +13,8 @@
 
         use IncompNS_data, ONLY : ins_gravX, ins_gravY, ins_gravZ, &
                                   ins_dampC, ins_xDampL, ins_xDampR, ins_yDampL, ins_zDampL
- 
+	use IncompNS_data, ONLY : ins_meshMe
+	use Multiphase_data, only: mph_meshMe 
         use Driver_data, ONLY : dr_nstep
 
         implicit none
@@ -67,8 +68,9 @@
 
         Cb  = sim_sinkB
         Ly  = sim_yMax-sim_yMin
-        Lb  = sim_yMax-sim_yMin-2.0
-
+        Lb  = sim_yMax-sim_yMin-4.0
+	if (mph_meshMe .eq. 0) print*,"Start of sink",Lb
+	
         !- kpd - Froude base damping distance...
         !xd  = sim_xMax - (2.*pi*(Fn**2.))
         !xd  = sim_xMax - 3.0 
