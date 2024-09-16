@@ -1,1 +1,0 @@
-../source/physics/sourceTerms/Polytrope/Polytrope.F90
