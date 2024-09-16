@@ -1,1 +1,0 @@
-../source/Simulation/SimulationMain/INavierStokes/zoso/Bubble_Vap/Heat_AD_init.F90

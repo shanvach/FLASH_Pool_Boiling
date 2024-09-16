@@ -1,1 +1,0 @@
-../source/physics/materialProperties/MagneticResistivity/MagneticResistivity_finalize.F90
